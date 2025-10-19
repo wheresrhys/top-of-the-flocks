@@ -122,18 +122,35 @@ The workflow configuration is in `.github/workflows/ci.yml`.
 
 ```
 ├── app/                    # Next.js app directory
+│   ├── components/        # React components
 │   ├── layout.tsx         # Root layout
 │   └── page.tsx           # Home page
 ├── lib/                   # Shared utilities
 │   ├── supabase.ts        # Supabase client configuration
-│   └── hasura.ts          # Hasura configuration
+│   ├── hasura.ts          # Hasura configuration
+│   └── graphql-client.ts  # GraphQL client for Hasura
 ├── scripts/               # Utility scripts
 │   └── import-csv.ts      # CSV import script
+├── data/                  # CSV files for import
+│   ├── README.md          # Data import documentation
+│   └── sample.csv         # Sample CSV file
 ├── .github/
 │   └── workflows/
 │       └── ci.yml         # GitHub Actions CI workflow
 └── .env.example           # Example environment variables
 ```
+
+## Using Supabase and Hasura
+
+### Example Component
+
+See `app/components/ExampleComponent.tsx` for a complete example of how to:
+- Fetch data from Supabase using the Supabase client
+- Fetch data from Hasura using GraphQL queries
+- Handle loading and error states
+- Display data in your components
+
+To use the example component, uncomment the relevant sections and modify the queries to match your database schema.
 
 ## Setting up Supabase
 
