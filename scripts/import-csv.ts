@@ -11,11 +11,7 @@ import { createClient } from '@supabase/supabase-js';
 import fs from 'fs';
 import path from 'path';
 import csvParser from 'csv-parser';
-import dotenv from 'dotenv';
-
-// Load environment variables
-dotenv.config({ path: '.env.local' });
-dotenv.config();
+// Environment variables are loaded via 1Password CLI when running with npm run import
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
