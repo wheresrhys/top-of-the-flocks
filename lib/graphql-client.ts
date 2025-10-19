@@ -18,6 +18,10 @@ export async function graphqlRequest<T = unknown>(
   query: string,
   variables?: Record<string, unknown>
 ): Promise<GraphQLResponse<T>> {
+  if (!hasuraConfig.endpoint) {
+    throw new Error('Hasura endpoint is not configured. Please set NEXT_PUBLIC_HASURA_ENDPOINT in your environment variables.');
+  }
+
   try {
     const response = await fetch(hasuraConfig.endpoint, {
       method: 'POST',

@@ -1,21 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { supabase } from '@/lib/supabase';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { graphqlRequest } from '@/lib/graphql-client';
+/**
+ * Example Component showing how to use Supabase and Hasura
+ * 
+ * This is a template/example file. To use it:
+ * 1. Copy this file to create your own component
+ * 2. Uncomment the imports and code sections you need
+ * 3. Modify the queries to match your database schema
+ */
 
-interface Example {
-  id: number;
-  name: string;
-}
+import { useState, useEffect } from 'react';
 
 export default function ExampleComponent() {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [supabaseData, setSupabaseData] = useState<Example[] | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [hasuraData, setHasuraData] = useState<Example[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,8 +22,10 @@ export default function ExampleComponent() {
         setError(null);
 
         // Example: Fetch from Supabase
-        // Uncomment and modify based on your actual table structure
+        // Uncomment the following to use:
         /*
+        import { supabase } from '@/lib/supabase';
+        
         const { data: supabaseResult, error: supabaseError } = await supabase
           .from('your_table_name')
           .select('*')
@@ -36,12 +34,14 @@ export default function ExampleComponent() {
         if (supabaseError) {
           throw supabaseError;
         }
-        setSupabaseData(supabaseResult);
+        console.log('Supabase data:', supabaseResult);
         */
 
         // Example: Fetch from Hasura via GraphQL
-        // Uncomment and modify based on your actual schema
+        // Uncomment the following to use:
         /*
+        import { graphqlRequest } from '@/lib/graphql-client';
+        
         const hasuraResult = await graphqlRequest<{ your_table: Example[] }>(`
           query {
             your_table(limit: 10) {
@@ -54,7 +54,7 @@ export default function ExampleComponent() {
         if (hasuraResult.errors) {
           throw new Error(hasuraResult.errors[0].message);
         }
-        setHasuraData(hasuraResult.data?.your_table || null);
+        console.log('Hasura data:', hasuraResult.data?.your_table);
         */
 
       } catch (err) {
@@ -77,28 +77,20 @@ export default function ExampleComponent() {
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Example Data Display</h2>
+      <h2 className="text-xl font-bold mb-4">Example Component</h2>
+      <p className="mb-4 text-gray-700">
+        This is an example component showing how to integrate Supabase and Hasura.
+        See the source code for usage examples.
+      </p>
       
-      <div className="mb-8">
-        <h3 className="text-lg font-semibold mb-2">Supabase Data</h3>
-        {supabaseData ? (
-          <pre className="bg-gray-100 p-4 rounded overflow-auto">
-            {JSON.stringify(supabaseData, null, 2)}
-          </pre>
-        ) : (
-          <p className="text-gray-600">No Supabase data to display (configure your query above)</p>
-        )}
-      </div>
-
-      <div>
-        <h3 className="text-lg font-semibold mb-2">Hasura GraphQL Data</h3>
-        {hasuraData ? (
-          <pre className="bg-gray-100 p-4 rounded overflow-auto">
-            {JSON.stringify(hasuraData, null, 2)}
-          </pre>
-        ) : (
-          <p className="text-gray-600">No Hasura data to display (configure your query above)</p>
-        )}
+      <div className="bg-blue-50 border border-blue-200 rounded p-4">
+        <h3 className="font-semibold mb-2">To use this component:</h3>
+        <ol className="list-decimal list-inside space-y-1 text-sm">
+          <li>Copy this file to create your own component</li>
+          <li>Uncomment the imports and code sections you need</li>
+          <li>Modify the queries to match your database schema</li>
+          <li>Remove this instructional UI</li>
+        </ol>
       </div>
     </div>
   );
