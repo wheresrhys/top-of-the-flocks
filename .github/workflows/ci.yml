@@ -14,7 +14,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-
+    - uses: 1password/load-secrets-action/configure@v2
+      with:
+        service-account-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
@@ -26,9 +28,11 @@ jobs:
 
     - name: Run linter
       run: npm run lint
-    - name: Install and sign in 1Password CLI using Connect token
-      uses: 1Password/op-action@v2
-      with:
-        op-connect-token: ${{ secrets.OP_CONNECT_TOKEN }}
+    # - name: Install and sign in 1Password CLI using Connect token
+    #   uses: 1password/load-secrets-action@v3
+    #     env:
+    #       OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+    #       SECRET: op://app-cicd/hello-world/secret
+    #       OP_ENV_FILE: "./.env.1password" # see tests/.env.tpl for example
     - name: Build project
       run: npm run build
