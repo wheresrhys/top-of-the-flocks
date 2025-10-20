@@ -67,6 +67,16 @@ npm run import -- data/sample.csv table_name
 npm run env:load -- your-command-here
 ```
 
+### CI/CD Integration
+
+The `load-env.sh` script automatically detects CI environments by checking for the `CI` environment variable. When running in CI:
+
+- The script skips 1Password CLI operations
+- Commands run directly using environment variables provided by the 1Password GitHub Action
+- No authentication or CLI installation checks are performed
+
+This allows the same npm scripts to work seamlessly in both local development and CI environments.
+
 ## Manual Environment Loading
 
 If you need to run commands manually with the environment loaded:

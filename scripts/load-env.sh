@@ -2,6 +2,14 @@
 
 # Load environment variables from 1Password vault
 # This script uses op run to inject secrets from 1Password into the environment
+# In CI environments, it skips 1Password CLI and runs commands directly
+
+# Check if running in CI environment
+if [ -n "$CI" ]; then
+    echo "Running in CI environment - skipping 1Password CLI, using GitHub Action secrets..."
+    exec "$@"
+    exit 0
+fi
 
 echo "Loading environment variables from 1Password vault TOTF..."
 
