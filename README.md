@@ -34,21 +34,14 @@ npm install
 
 ### 3. Configure environment variables
 
-Copy the example environment file and fill in your credentials:
+This project uses 1Password CLI for secure environment variable management. See [1Password Setup Guide](docs/1PASSWORD_SETUP.md) for detailed instructions.
 
-```bash
-cp .env.example .env.local
-```
+**Quick setup:**
 
-Edit `.env.local` and add your Supabase and Hasura credentials:
-
-```env
-NEXT_PUBLIC_SUPABASE_URL=your-project-url.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-NEXT_PUBLIC_HASURA_ENDPOINT=https://your-project.hasura.app/v1/graphql
-HASURA_ADMIN_SECRET=your-hasura-admin-secret
-```
+1. Install 1Password CLI: `brew install --cask 1password-cli`
+2. Sign in: `op signin`
+3. Verify setup: `npm run env:check`
+4. Create the required items in your **TOTF** vault (see setup guide for details)
 
 ### 4. Run the development server
 

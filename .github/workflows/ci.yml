@@ -14,7 +14,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-
+    - uses: 1password/load-secrets-action/configure@v2
+      with:
+        service-account-token: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
@@ -26,11 +28,16 @@ jobs:
 
     - name: Run linter
       run: npm run lint
-
+    - name: Load secret
+      id: load_secrets
+      uses: 1password/load-secrets-action@v3
+      env:
+        OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+        NEXT_PUBLIC_SUPABASE_URL: op://TOTF/Supabase/url
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: op://TOTF/Supabase/anon_key
+        SUPABASE_SERVICE_ROLE_KEY: op://TOTF/Supabase/service_role_key
+        NEXT_PUBLIC_HASURA_ENDPOINT: op://TOTF/Hasura/endpoint
+        HASURA_ADMIN_SECRET: op://TOTF/Hasura/admin_secret
+        # OP_ENV_FILE: ".env.1password" # see tests/.env.tpl for example "./.env.1password" # see tests/.env.tpl for example
     - name: Build project
       run: npm run build
-      env:
-        # Dummy environment variables for build
-        NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
-        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key' }}
-        NEXT_PUBLIC_HASURA_ENDPOINT: ${{ secrets.NEXT_PUBLIC_HASURA_ENDPOINT || 'https://placeholder.hasura.app/v1/graphql' }}
