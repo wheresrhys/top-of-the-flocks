@@ -26,11 +26,9 @@ jobs:
 
     - name: Run linter
       run: npm run lint
-
+    - name: Install and sign in 1Password CLI using Connect token
+      uses: 1Password/op-action@v2
+      with:
+        op-connect-token: ${{ secrets.OP_CONNECT_TOKEN }}
     - name: Build project
       run: npm run build
-      env:
-        # Dummy environment variables for build
-        NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co' }}
-        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key' }}
-        NEXT_PUBLIC_HASURA_ENDPOINT: ${{ secrets.NEXT_PUBLIC_HASURA_ENDPOINT || 'https://placeholder.hasura.app/v1/graphql' }}
