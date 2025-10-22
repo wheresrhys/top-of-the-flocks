@@ -1,0 +1,865 @@
+---
+kind: ScalarType
+version: v1
+definition:
+  name: String_1
+  graphql:
+    typeName: String1
+
+---
+kind: BooleanExpressionType
+version: v1
+definition:
+  name: TextBoolExp
+  operand:
+    scalar:
+      type: String_1
+      comparisonOperators:
+        - name: _eq
+          argumentType: String_1!
+        - name: _gt
+          argumentType: String_1!
+        - name: _gte
+          argumentType: String_1!
+        - name: _ilike
+          argumentType: String_1!
+        - name: _in
+          argumentType: "[String_1!]!"
+        - name: _iregex
+          argumentType: String_1!
+        - name: _like
+          argumentType: String_1!
+        - name: _lt
+          argumentType: String_1!
+        - name: _lte
+          argumentType: String_1!
+        - name: _neq
+          argumentType: String_1!
+        - name: _nilike
+          argumentType: String_1!
+        - name: _niregex
+          argumentType: String_1!
+        - name: _nlike
+          argumentType: String_1!
+        - name: _nregex
+          argumentType: String_1!
+        - name: _regex
+          argumentType: String_1!
+        - name: starts_with
+          argumentType: String_1!
+        - name: ts_match_tt
+          argumentType: String_1!
+      dataConnectorOperatorMapping:
+        - dataConnectorName: TOTF
+          dataConnectorScalarType: text
+          operatorMapping: {}
+  logicalOperators:
+    enable: true
+  isNull:
+    enable: true
+  graphql:
+    typeName: TextBoolExp
+
+---
+kind: DataConnectorScalarRepresentation
+version: v1
+definition:
+  dataConnectorName: TOTF
+  dataConnectorScalarType: text
+  representation: String_1
+  graphql:
+    comparisonExpressionTypeName: String1ComparisonExp
+
+---
+kind: ScalarType
+version: v1
+definition:
+  name: Int64
+  graphql:
+    typeName: Int64
+
+---
+kind: BooleanExpressionType
+version: v1
+definition:
+  name: Int8BoolExp
+  operand:
+    scalar:
+      type: Int64
+      comparisonOperators:
+        - name: _eq
+          argumentType: Int64!
+        - name: _gt
+          argumentType: Int64!
+        - name: _gte
+          argumentType: Int64!
+        - name: _in
+          argumentType: "[Int64!]!"
+        - name: _lt
+          argumentType: Int64!
+        - name: _lte
+          argumentType: Int64!
+        - name: _neq
+          argumentType: Int64!
+      dataConnectorOperatorMapping:
+        - dataConnectorName: TOTF
+          dataConnectorScalarType: int8
+          operatorMapping: {}
+  logicalOperators:
+    enable: true
+  isNull:
+    enable: true
+  graphql:
+    typeName: Int8BoolExp
+
+---
+kind: DataConnectorScalarRepresentation
+version: v1
+definition:
+  dataConnectorName: TOTF
+  dataConnectorScalarType: int8
+  representation: Int64
+  graphql:
+    comparisonExpressionTypeName: Int64ComparisonExp
+
+---
+kind: AggregateExpression
+version: v1
+definition:
+  name: TextAggExp
+  operand:
+    scalar:
+      aggregatedType: String_1
+      aggregationFunctions:
+        - name: max
+          returnType: String_1
+        - name: min
+          returnType: String_1
+      dataConnectorAggregationFunctionMapping:
+        - dataConnectorName: TOTF
+          dataConnectorScalarType: text
+          functionMapping:
+            max:
+              name: max
+            min:
+              name: min
+  count:
+    enable: true
+    returnType: Int64
+  countDistinct:
+    enable: true
+    returnType: Int64
+  graphql:
+    selectTypeName: TextAggExp
+
+---
+kind: OrderByExpression
+version: v1
+definition:
+  name: String1OrderByExp
+  operand:
+    scalar:
+      orderedType: String_1
+      enableOrderByDirections:
+        enableAll: true
+  graphql:
+    expressionTypeName: String1OrderByExp
+
+---
+kind: ScalarType
+version: v1
+definition:
+  name: Int16
+  graphql:
+    typeName: Int16
+
+---
+kind: BooleanExpressionType
+version: v1
+definition:
+  name: Int2BoolExp
+  operand:
+    scalar:
+      type: Int16
+      comparisonOperators:
+        - name: _eq
+          argumentType: Int16!
+        - name: _gt
+          argumentType: Int16!
+        - name: _gte
+          argumentType: Int16!
+        - name: _in
+          argumentType: "[Int16!]!"
+        - name: _lt
+          argumentType: Int16!
+        - name: _lte
+          argumentType: Int16!
+        - name: _neq
+          argumentType: Int16!
+      dataConnectorOperatorMapping:
+        - dataConnectorName: TOTF
+          dataConnectorScalarType: int2
+          operatorMapping: {}
+  logicalOperators:
+    enable: true
+  isNull:
+    enable: true
+  graphql:
+    typeName: Int2BoolExp
+
+---
+kind: DataConnectorScalarRepresentation
+version: v1
+definition:
+  dataConnectorName: TOTF
+  dataConnectorScalarType: int2
+  representation: Int16
+  graphql:
+    comparisonExpressionTypeName: Int16ComparisonExp
+
+---
+kind: BooleanExpressionType
+version: v1
+definition:
+  name: TimeBoolExp
+  operand:
+    scalar:
+      type: String_1
+      comparisonOperators:
+        - name: _eq
+          argumentType: String_1!
+        - name: _gt
+          argumentType: String_1!
+        - name: _gte
+          argumentType: String_1!
+        - name: _in
+          argumentType: "[String_1!]!"
+        - name: _lt
+          argumentType: String_1!
+        - name: _lte
+          argumentType: String_1!
+        - name: _neq
+          argumentType: String_1!
+      dataConnectorOperatorMapping:
+        - dataConnectorName: TOTF
+          dataConnectorScalarType: time
+          operatorMapping: {}
+  logicalOperators:
+    enable: true
+  isNull:
+    enable: true
+  graphql:
+    typeName: TimeBoolExp
+
+---
+kind: DataConnectorScalarRepresentation
+version: v1
+definition:
+  dataConnectorName: TOTF
+  dataConnectorScalarType: time
+  representation: String_1
+  graphql:
+    comparisonExpressionTypeName: String1ComparisonExp_1
+
+---
+kind: ScalarType
+version: v1
+definition:
+  name: Boolean_1
+  graphql:
+    typeName: Boolean1
+
+---
+kind: BooleanExpressionType
+version: v1
+definition:
+  name: BoolBoolExp
+  operand:
+    scalar:
+      type: Boolean_1
+      comparisonOperators:
+        - name: _eq
+          argumentType: Boolean_1!
+        - name: _gt
+          argumentType: Boolean_1!
+        - name: _gte
+          argumentType: Boolean_1!
+        - name: _in
+          argumentType: "[Boolean_1!]!"
+        - name: _lt
+          argumentType: Boolean_1!
+        - name: _lte
+          argumentType: Boolean_1!
+        - name: _neq
+          argumentType: Boolean_1!
+      dataConnectorOperatorMapping:
+        - dataConnectorName: TOTF
+          dataConnectorScalarType: bool
+          operatorMapping: {}
+  logicalOperators:
+    enable: true
+  isNull:
+    enable: true
+  graphql:
+    typeName: BoolBoolExp
+
+---
+kind: DataConnectorScalarRepresentation
+version: v1
+definition:
+  dataConnectorName: TOTF
+  dataConnectorScalarType: bool
+  representation: Boolean_1
+  graphql:
+    comparisonExpressionTypeName: Boolean1ComparisonExp
+
+---
+kind: ScalarType
+version: v1
+definition:
+  name: Date
+  graphql:
+    typeName: Date
+
+---
+kind: BooleanExpressionType
+version: v1
+definition:
+  name: DateBoolExp
+  operand:
+    scalar:
+      type: Date
+      comparisonOperators:
+        - name: _eq
+          argumentType: Date!
+        - name: _gt
+          argumentType: Date!
+        - name: _gte
+          argumentType: Date!
+        - name: _in
+          argumentType: "[Date!]!"
+        - name: _lt
+          argumentType: Date!
+        - name: _lte
+          argumentType: Date!
+        - name: _neq
+          argumentType: Date!
+      dataConnectorOperatorMapping:
+        - dataConnectorName: TOTF
+          dataConnectorScalarType: date
+          operatorMapping: {}
+  logicalOperators:
+    enable: true
+  isNull:
+    enable: true
+  graphql:
+    typeName: DateBoolExp
+
+---
+kind: DataConnectorScalarRepresentation
+version: v1
+definition:
+  dataConnectorName: TOTF
+  dataConnectorScalarType: date
+  representation: Date
+  graphql:
+    comparisonExpressionTypeName: DateComparisonExp
+
+---
+kind: ScalarType
+version: v1
+definition:
+  name: Float32
+  graphql:
+    typeName: Float32
+
+---
+kind: BooleanExpressionType
+version: v1
+definition:
+  name: Float4BoolExp
+  operand:
+    scalar:
+      type: Float32
+      comparisonOperators:
+        - name: _eq
+          argumentType: Float32!
+        - name: _gt
+          argumentType: Float32!
+        - name: _gte
+          argumentType: Float32!
+        - name: _in
+          argumentType: "[Float32!]!"
+        - name: _lt
+          argumentType: Float32!
+        - name: _lte
+          argumentType: Float32!
+        - name: _neq
+          argumentType: Float32!
+      dataConnectorOperatorMapping:
+        - dataConnectorName: TOTF
+          dataConnectorScalarType: float4
+          operatorMapping: {}
+  logicalOperators:
+    enable: true
+  isNull:
+    enable: true
+  graphql:
+    typeName: Float4BoolExp
+
+---
+kind: DataConnectorScalarRepresentation
+version: v1
+definition:
+  dataConnectorName: TOTF
+  dataConnectorScalarType: float4
+  representation: Float32
+  graphql:
+    comparisonExpressionTypeName: Float32ComparisonExp
+
+---
+kind: ScalarType
+version: v1
+definition:
+  name: Bigdecimal
+  graphql:
+    typeName: Bigdecimal
+
+---
+kind: BooleanExpressionType
+version: v1
+definition:
+  name: NumericBoolExp
+  operand:
+    scalar:
+      type: Bigdecimal
+      comparisonOperators:
+        - name: _eq
+          argumentType: Bigdecimal!
+        - name: _gt
+          argumentType: Bigdecimal!
+        - name: _gte
+          argumentType: Bigdecimal!
+        - name: _in
+          argumentType: "[Bigdecimal!]!"
+        - name: _lt
+          argumentType: Bigdecimal!
+        - name: _lte
+          argumentType: Bigdecimal!
+        - name: _neq
+          argumentType: Bigdecimal!
+      dataConnectorOperatorMapping:
+        - dataConnectorName: TOTF
+          dataConnectorScalarType: numeric
+          operatorMapping: {}
+  logicalOperators:
+    enable: true
+  isNull:
+    enable: true
+  graphql:
+    typeName: NumericBoolExp
+
+---
+kind: DataConnectorScalarRepresentation
+version: v1
+definition:
+  dataConnectorName: TOTF
+  dataConnectorScalarType: numeric
+  representation: Bigdecimal
+  graphql:
+    comparisonExpressionTypeName: BigdecimalComparisonExp
+
+---
+kind: AggregateExpression
+version: v1
+definition:
+  name: Int2AggExp
+  operand:
+    scalar:
+      aggregatedType: Int16
+      aggregationFunctions:
+        - name: avg
+          returnType: Bigdecimal
+        - name: bit_and
+          returnType: Int16
+        - name: bit_or
+          returnType: Int16
+        - name: bit_xor
+          returnType: Int16
+        - name: max
+          returnType: Int16
+        - name: min
+          returnType: Int16
+        - name: stddev
+          returnType: Bigdecimal
+        - name: stddev_pop
+          returnType: Bigdecimal
+        - name: stddev_samp
+          returnType: Bigdecimal
+        - name: sum
+          returnType: Int64
+        - name: var_pop
+          returnType: Bigdecimal
+        - name: var_samp
+          returnType: Bigdecimal
+        - name: variance
+          returnType: Bigdecimal
+      dataConnectorAggregationFunctionMapping:
+        - dataConnectorName: TOTF
+          dataConnectorScalarType: int2
+          functionMapping:
+            avg:
+              name: avg
+            bit_and:
+              name: bit_and
+            bit_or:
+              name: bit_or
+            bit_xor:
+              name: bit_xor
+            max:
+              name: max
+            min:
+              name: min
+            stddev:
+              name: stddev
+            stddev_pop:
+              name: stddev_pop
+            stddev_samp:
+              name: stddev_samp
+            sum:
+              name: sum
+            var_pop:
+              name: var_pop
+            var_samp:
+              name: var_samp
+            variance:
+              name: variance
+  count:
+    enable: true
+    returnType: Int64
+  countDistinct:
+    enable: true
+    returnType: Int64
+  graphql:
+    selectTypeName: Int2AggExp
+
+---
+kind: ScalarType
+version: v1
+definition:
+  name: Json
+  graphql:
+    typeName: Json
+
+---
+kind: BooleanExpressionType
+version: v1
+definition:
+  name: IntervalBoolExp
+  operand:
+    scalar:
+      type: Json
+      comparisonOperators:
+        - name: _eq
+          argumentType: Json!
+        - name: _gt
+          argumentType: Json!
+        - name: _gte
+          argumentType: Json!
+        - name: _in
+          argumentType: "[Json!]!"
+        - name: _lt
+          argumentType: Json!
+        - name: _lte
+          argumentType: Json!
+        - name: _neq
+          argumentType: Json!
+      dataConnectorOperatorMapping:
+        - dataConnectorName: TOTF
+          dataConnectorScalarType: interval
+          operatorMapping: {}
+  logicalOperators:
+    enable: true
+  isNull:
+    enable: true
+  graphql:
+    typeName: IntervalBoolExp
+
+---
+kind: DataConnectorScalarRepresentation
+version: v1
+definition:
+  dataConnectorName: TOTF
+  dataConnectorScalarType: interval
+  representation: Json
+  graphql:
+    comparisonExpressionTypeName: JsonComparisonExp
+
+---
+kind: AggregateExpression
+version: v1
+definition:
+  name: TimeAggExp
+  operand:
+    scalar:
+      aggregatedType: String_1
+      aggregationFunctions:
+        - name: avg
+          returnType: Json
+        - name: max
+          returnType: String_1
+        - name: min
+          returnType: String_1
+        - name: sum
+          returnType: Json
+      dataConnectorAggregationFunctionMapping:
+        - dataConnectorName: TOTF
+          dataConnectorScalarType: time
+          functionMapping:
+            avg:
+              name: avg
+            max:
+              name: max
+            min:
+              name: min
+            sum:
+              name: sum
+  count:
+    enable: true
+    returnType: Int64
+  countDistinct:
+    enable: true
+    returnType: Int64
+  graphql:
+    selectTypeName: TimeAggExp
+
+---
+kind: AggregateExpression
+version: v1
+definition:
+  name: BoolAggExp
+  operand:
+    scalar:
+      aggregatedType: Boolean_1
+      aggregationFunctions:
+        - name: bool_and
+          returnType: Boolean_1
+        - name: bool_or
+          returnType: Boolean_1
+        - name: every
+          returnType: Boolean_1
+      dataConnectorAggregationFunctionMapping:
+        - dataConnectorName: TOTF
+          dataConnectorScalarType: bool
+          functionMapping:
+            bool_and:
+              name: bool_and
+            bool_or:
+              name: bool_or
+            every:
+              name: every
+  count:
+    enable: true
+    returnType: Int64
+  countDistinct:
+    enable: true
+    returnType: Int64
+  graphql:
+    selectTypeName: BoolAggExp
+
+---
+kind: AggregateExpression
+version: v1
+definition:
+  name: DateAggExp
+  operand:
+    scalar:
+      aggregatedType: Date
+      aggregationFunctions:
+        - name: max
+          returnType: Date
+        - name: min
+          returnType: Date
+      dataConnectorAggregationFunctionMapping:
+        - dataConnectorName: TOTF
+          dataConnectorScalarType: date
+          functionMapping:
+            max:
+              name: max
+            min:
+              name: min
+  count:
+    enable: true
+    returnType: Int64
+  countDistinct:
+    enable: true
+    returnType: Int64
+  graphql:
+    selectTypeName: DateAggExp
+
+---
+kind: ScalarType
+version: v1
+definition:
+  name: Float64
+  graphql:
+    typeName: Float64
+
+---
+kind: BooleanExpressionType
+version: v1
+definition:
+  name: Float8BoolExp
+  operand:
+    scalar:
+      type: Float64
+      comparisonOperators:
+        - name: _eq
+          argumentType: Float64!
+        - name: _gt
+          argumentType: Float64!
+        - name: _gte
+          argumentType: Float64!
+        - name: _in
+          argumentType: "[Float64!]!"
+        - name: _lt
+          argumentType: Float64!
+        - name: _lte
+          argumentType: Float64!
+        - name: _neq
+          argumentType: Float64!
+      dataConnectorOperatorMapping:
+        - dataConnectorName: TOTF
+          dataConnectorScalarType: float8
+          operatorMapping: {}
+  logicalOperators:
+    enable: true
+  isNull:
+    enable: true
+  graphql:
+    typeName: Float8BoolExp
+
+---
+kind: DataConnectorScalarRepresentation
+version: v1
+definition:
+  dataConnectorName: TOTF
+  dataConnectorScalarType: float8
+  representation: Float64
+  graphql:
+    comparisonExpressionTypeName: Float64ComparisonExp
+
+---
+kind: AggregateExpression
+version: v1
+definition:
+  name: Float4AggExp
+  operand:
+    scalar:
+      aggregatedType: Float32
+      aggregationFunctions:
+        - name: avg
+          returnType: Float64
+        - name: max
+          returnType: Float32
+        - name: min
+          returnType: Float32
+        - name: stddev
+          returnType: Float64
+        - name: stddev_pop
+          returnType: Float64
+        - name: stddev_samp
+          returnType: Float64
+        - name: sum
+          returnType: Float32
+        - name: var_pop
+          returnType: Float64
+        - name: var_samp
+          returnType: Float64
+        - name: variance
+          returnType: Float64
+      dataConnectorAggregationFunctionMapping:
+        - dataConnectorName: TOTF
+          dataConnectorScalarType: float4
+          functionMapping:
+            avg:
+              name: avg
+            max:
+              name: max
+            min:
+              name: min
+            stddev:
+              name: stddev
+            stddev_pop:
+              name: stddev_pop
+            stddev_samp:
+              name: stddev_samp
+            sum:
+              name: sum
+            var_pop:
+              name: var_pop
+            var_samp:
+              name: var_samp
+            variance:
+              name: variance
+  count:
+    enable: true
+    returnType: Int64
+  countDistinct:
+    enable: true
+    returnType: Int64
+  graphql:
+    selectTypeName: Float4AggExp
+
+---
+kind: OrderByExpression
+version: v1
+definition:
+  name: Int16OrderByExp
+  operand:
+    scalar:
+      orderedType: Int16
+      enableOrderByDirections:
+        enableAll: true
+  graphql:
+    expressionTypeName: Int16OrderByExp
+
+---
+kind: OrderByExpression
+version: v1
+definition:
+  name: Boolean1OrderByExp
+  operand:
+    scalar:
+      orderedType: Boolean_1
+      enableOrderByDirections:
+        enableAll: true
+  graphql:
+    expressionTypeName: Boolean1OrderByExp
+
+---
+kind: OrderByExpression
+version: v1
+definition:
+  name: DateOrderByExp
+  operand:
+    scalar:
+      orderedType: Date
+      enableOrderByDirections:
+        enableAll: true
+  graphql:
+    expressionTypeName: DateOrderByExp
+
+---
+kind: OrderByExpression
+version: v1
+definition:
+  name: Float32OrderByExp
+  operand:
+    scalar:
+      orderedType: Float32
+      enableOrderByDirections:
+        enableAll: true
+  graphql:
+    expressionTypeName: Float32OrderByExp
+
