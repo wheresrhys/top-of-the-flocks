@@ -153,10 +153,8 @@ To use the example component, uncomment the relevant sections and modify the que
 
 ## Setting up Hasura
 
-1. Create a new project at [hasura.io](https://hasura.io) or deploy self-hosted
-2. Connect Hasura to your Supabase PostgreSQL database
-3. Track your tables and set up permissions
-4. Get your GraphQL endpoint and admin secret
+ddn console --local && npm run hasura:dev
+
 
 ## Learn More
 
