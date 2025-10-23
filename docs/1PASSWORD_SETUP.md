@@ -8,7 +8,7 @@ This project uses 1Password CLI for secure environment variable management.
    ```bash
    # macOS with Homebrew
    brew install --cask 1password-cli
-   
+
    # Or download from: https://developer.1password.com/docs/cli/get-started/#install
    ```
 
