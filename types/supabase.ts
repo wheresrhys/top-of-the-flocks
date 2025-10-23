@@ -70,7 +70,6 @@ export type Database = {
           extra_text: string | null
           is_juv: boolean
           moult_code: string | null
-          "new/subsequent": string
           old_greater_coverts: number | null
           record_type: string
           ring_no: string
@@ -88,7 +87,6 @@ export type Database = {
           extra_text?: string | null
           is_juv?: boolean
           moult_code?: string | null
-          "new/subsequent": string
           old_greater_coverts?: number | null
           record_type: string
           ring_no: string
@@ -106,7 +104,6 @@ export type Database = {
           extra_text?: string | null
           is_juv?: boolean
           moult_code?: string | null
-          "new/subsequent"?: string
           old_greater_coverts?: number | null
           record_type?: string
           ring_no?: string

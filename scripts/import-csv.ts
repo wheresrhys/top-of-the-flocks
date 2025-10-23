@@ -170,7 +170,6 @@ async function importCSV(options: ImportOptions): Promise<void> {
         extra_text: row.extra_text as string | null,
         is_juv: String(row.age).endsWith('J') as boolean,
         moult_code: row.moult_code as string | null,
-        "new/subsequent": row["new/subsequent"] as string,
         old_greater_coverts: row.old_greater_coverts as number | null,
         record_type: row.record_type as string,
         ring_no: row.ring_no as string,
