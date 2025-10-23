@@ -80,7 +80,7 @@ const limit = pRateLimit({
 // const limit = (fn => fn()) as <T>(fn: () => Promise<T>) => Promise<T>;
 
 // Helper function to transform empty strings to null
-function transformEmptyStringsToNull(obj: Record<string, any>): Record<string, any> {
+function transformEmptyStringsToNull(obj: Record<string, unknown>): Record<string, unknown> {
   return Object.fromEntries(
     Object.entries(obj).map(([key, value]) => {
       // Handle string values
@@ -130,9 +130,6 @@ async function importCSV(options: ImportOptions): Promise<void> {
           console.log(err)
           failedRecords++
         }).then(() => {
-          if ((rowIndex / 100) === parseInt(rowIndex /100)) {
-            console.log(rowIndex)
-          }
           pendingRows[rowIndex] = null
         }));
         pendingRows[rowIndex] = promise
