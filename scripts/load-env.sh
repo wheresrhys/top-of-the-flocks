@@ -29,4 +29,4 @@ fi
 
 # Export the environment variables using op run
 echo "Injecting secrets from vault TOTF..."
-exec op run --no-masking --env-file=".env.1password" -- "$@"
+exec op run --env-file=".env.1password" -- "$@"
