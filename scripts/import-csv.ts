@@ -11,7 +11,7 @@ import { createClient } from '@supabase/supabase-js';
 import fs from 'fs';
 import path from 'path';
 import csvParser from 'csv-parser';
-import { Database, Tables } from '../types/supabase';
+import { Database, Tables } from '../types/supabase.types';
 
 type SpeciesInsert = Database['public']['Tables']['Species']['Insert'];
 type BirdsInsert = Database['public']['Tables']['Birds']['Insert'];
