@@ -7,6 +7,7 @@
     "build": "./scripts/load-env.sh next build --turbopack",
     "start": "next start",
     "lint": "eslint",
+    "supabase:types": "./scripts/load-env.sh echo 'beginning type generation' && npx supabase gen types typescript --project-id $(op run --no-masking --env-file=\".env.1password\" -- printenv SUPABASE_PROJECT_ID) --schema public > ./types/supabase.types.ts  && echo 'types regenerated ok' || echo 'run `npx supabase login` to sign in to supabase first'",
     "hasura:dev": "./scripts/load-env.sh ddn run docker-start",
     "import": "./scripts/load-env.sh tsx scripts/import-csv.ts",
     "env:load": "./scripts/load-env.sh",
@@ -28,6 +29,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.5.6",
+    "supabase": "^2.53.6",
     "tailwindcss": "^4",
     "tsx": "^4.20.6",
     "typescript": "^5"

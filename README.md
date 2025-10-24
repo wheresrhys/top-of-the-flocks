@@ -151,6 +151,8 @@ To use the example component, uncomment the relevant sections and modify the que
 2. Get your project URL and anon key from Settings > API
 3. Create your database tables in the SQL Editor or Table Editor
 
+UPdate types locally using `npm run supabase:types`
+
 ## Setting up Hasura
 
 ddn console --local && npm run hasura:dev
