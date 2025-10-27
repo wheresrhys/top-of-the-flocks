@@ -1,12 +1,12 @@
 import Image from "next/image";
-import { 
-  Container, 
-  Box, 
-  Typography, 
-  Button, 
-  Stack, 
-  List, 
-  ListItem, 
+import {
+  Container,
+  Box,
+  Typography,
+  Button,
+  Stack,
+  List,
+  ListItem,
   ListItemText,
   Link as MuiLink,
   useTheme
@@ -38,16 +38,16 @@ export default function Home() {
               filter: 'var(--logo-filter, none)',
             }}
           />
-          
+
           <List sx={{ textAlign: { xs: 'center', sm: 'left' } }}>
             <ListItem sx={{ flexDirection: 'column', alignItems: { xs: 'center', sm: 'flex-start' } }}>
               <ListItemText
                 primary={
                   <Typography variant="body1" component="span">
                     Get started by editing{" "}
-                    <Typography 
-                      component="code" 
-                      sx={{ 
+                    <Typography
+                      component="code"
+                      sx={{
                         bgcolor: 'rgba(0, 0, 0, 0.05)',
                         px: 1,
                         py: 0.5,
@@ -83,7 +83,7 @@ export default function Home() {
               rel="noopener noreferrer"
               component="a"
               size="large"
-              sx={{ 
+              sx={{
                 borderRadius: '50px',
                 px: 3,
                 py: 1.5,
@@ -92,7 +92,7 @@ export default function Home() {
             >
               Deploy now
             </Button>
-            
+
             <Button
               variant="outlined"
               href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
@@ -100,7 +100,7 @@ export default function Home() {
               rel="noopener noreferrer"
               component="a"
               size="large"
-              sx={{ 
+              sx={{
                 borderRadius: '50px',
                 px: 3,
                 py: 1.5,
@@ -111,7 +111,7 @@ export default function Home() {
             </Button>
           </Stack>
         </Box>
-        
+
         <Box component="footer" sx={{ mt: 'auto' }}>
           <Stack direction="row" spacing={3} flexWrap="wrap" justifyContent="center" alignItems="center">
             <MuiLink
@@ -130,7 +130,7 @@ export default function Home() {
               />
               Learn
             </MuiLink>
-            
+
             <MuiLink
               href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
               target="_blank"
@@ -147,7 +147,7 @@ export default function Home() {
               />
               Examples
             </MuiLink>
-            
+
             <MuiLink
               href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
               target="_blank"

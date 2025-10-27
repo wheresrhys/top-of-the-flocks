@@ -2,7 +2,7 @@
 
 /**
  * Example Component showing how to use Supabase and Hasura
- * 
+ *
  * This is a template/example file. To use it:
  * 1. Copy this file to create your own component
  * 2. Uncomment the imports and code sections you need
@@ -10,12 +10,12 @@
  */
 
 import { useState, useEffect } from 'react';
-import { 
-  Box, 
-  Typography, 
-  CircularProgress, 
-  Alert, 
-  Card, 
+import {
+  Box,
+  Typography,
+  CircularProgress,
+  Alert,
+  Card,
   CardContent,
   List,
   ListItem,
@@ -36,7 +36,7 @@ export default function ExampleComponent() {
         // Uncomment the following to use:
         /*
         import { supabase } from '@/lib/supabase';
-        
+
         const { data: supabaseResult, error: supabaseError } = await supabase
           .from('your_table_name')
           .select('*')
@@ -52,7 +52,7 @@ export default function ExampleComponent() {
         // Uncomment the following to use:
         /*
         import { graphqlRequest } from '@/lib/graphql-client';
-        
+
         const hasuraResult = await graphqlRequest<{ your_table: Example[] }>(`
           query {
             your_table(limit: 10) {
@@ -103,7 +103,7 @@ export default function ExampleComponent() {
         This is an example component showing how to integrate Supabase and Hasura.
         See the source code for usage examples.
       </Typography>
-      
+
       <Card sx={{ bgcolor: 'primary.50', border: 1, borderColor: 'primary.200' }}>
         <CardContent>
           <Typography variant="h6" gutterBottom>
