@@ -1,7 +1,7 @@
 kind: DataConnectorLink
 version: v1
 definition:
-  name: TOTF
+  name: totf
   url:
     readWriteUrls:
       read:
@@ -20,7 +20,7 @@ definition:
             count_scalar_type: int8
       collections:
         - arguments: {}
-          description: Individual ringed birds
+          description: '@graphql({"aggregate": {"enabled": true}})'
           name: Birds
           type: Birds
           uniqueness_constraints:
@@ -28,7 +28,7 @@ definition:
               unique_columns:
                 - ring_no
         - arguments: {}
-          description: Encounters with ringed birds
+          description: Encounters with individual birds
           name: Encounters
           type: Encounters
           uniqueness_constraints:
@@ -36,6 +36,14 @@ definition:
               unique_columns:
                 - ring_no
                 - visit_date
+        - arguments: {}
+          description: Bird Species
+          name: Species
+          type: Species
+          uniqueness_constraints:
+            Species_pkey:
+              unique_columns:
+                - species_name
         - arguments: {}
           description: 'Auth: Audit trail for user actions.'
           name: auth_audit_log_entries
@@ -288,6 +296,20 @@ definition:
               unique_columns:
                 - id
         - arguments: {}
+          name: supabase_migrations_schema_migrations
+          type: supabase_migrations_schema_migrations
+          uniqueness_constraints:
+            schema_migrations_pkey:
+              unique_columns:
+                - version
+        - arguments: {}
+          name: supabase_migrations_seed_files
+          type: supabase_migrations_seed_files
+          uniqueness_constraints:
+            seed_files_pkey:
+              unique_columns:
+                - path
+        - arguments: {}
           name: vault_decrypted_secrets
           type: vault_decrypted_secrets
           uniqueness_constraints: {}
@@ -302,7 +324,7 @@ definition:
       functions: []
       object_types:
         Birds:
-          description: Individual ringed birds
+          description: '@graphql({"aggregate": {"enabled": true}})'
           fields:
             ring_no:
               type:
@@ -312,9 +334,14 @@ definition:
               type:
                 name: text
                 type: named
-          foreign_keys: {}
+          foreign_keys:
+            Birds_species_name_fkey:
+              column_mapping:
+                species_name:
+                  - species_name
+              foreign_collection: Species
         Encounters:
-          description: Encounters with ringed birds
+          description: Encounters with individual birds
           fields:
             age:
               type:
@@ -346,10 +373,6 @@ definition:
                 underlying_type:
                   name: text
                   type: named
-            new/subsequent:
-              type:
-                name: text
-                type: named
             old_greater_coverts:
               type:
                 type: nullable
@@ -400,6 +423,14 @@ definition:
                 ring_no:
                   - ring_no
               foreign_collection: Birds
+        Species:
+          description: Bird Species
+          fields:
+            species_name:
+              type:
+                name: text
+                type: named
+          foreign_keys: {}
         auth_audit_log_entries:
           description: 'Auth: Audit trail for user actions.'
           fields:
@@ -1518,6 +1549,22 @@ definition:
                   type: named
                 type: array
           foreign_keys: {}
+        delete_Species_by_species_name_response:
+          description: Responses from the 'delete_Species_by_species_name' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: Species
+                  type: named
+                type: array
+          foreign_keys: {}
         delete_auth_audit_log_entries_by_id_response:
           description: Responses from the 'delete_auth_audit_log_entries_by_id' procedure
           fields:
@@ -2126,6 +2173,38 @@ definition:
                   type: named
                 type: array
           foreign_keys: {}
+        delete_supabase_migrations_schema_migrations_by_version_response:
+          description: Responses from the 'delete_supabase_migrations_schema_migrations_by_version' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: supabase_migrations_schema_migrations
+                  type: named
+                type: array
+          foreign_keys: {}
+        delete_supabase_migrations_seed_files_by_path_response:
+          description: Responses from the 'delete_supabase_migrations_seed_files_by_path' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: supabase_migrations_seed_files
+                  type: named
+                type: array
+          foreign_keys: {}
         delete_vault_secrets_by_id_response:
           description: Responses from the 'delete_vault_secrets_by_id' procedure
           fields:
@@ -2218,10 +2297,6 @@ definition:
                 underlying_type:
                   name: text
                   type: named
-            new/subsequent:
-              type:
-                name: text
-                type: named
             old_greater_coverts:
               type:
                 type: nullable
@@ -2280,6 +2355,29 @@ definition:
               type:
                 element_type:
                   name: Encounters
+                  type: named
+                type: array
+          foreign_keys: {}
+        insert_Species_object:
+          fields:
+            species_name:
+              type:
+                name: text
+                type: named
+          foreign_keys: {}
+        insert_Species_response:
+          description: Responses from the 'insert_Species' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: Species
                   type: named
                 type: array
           foreign_keys: {}
@@ -4149,6 +4247,72 @@ definition:
                   type: named
                 type: array
           foreign_keys: {}
+        insert_supabase_migrations_schema_migrations_object:
+          fields:
+            name:
+              type:
+                type: nullable
+                underlying_type:
+                  name: text
+                  type: named
+            statements:
+              type:
+                type: nullable
+                underlying_type:
+                  element_type:
+                    type: nullable
+                    underlying_type:
+                      name: text
+                      type: named
+                  type: array
+            version:
+              type:
+                name: text
+                type: named
+          foreign_keys: {}
+        insert_supabase_migrations_schema_migrations_response:
+          description: Responses from the 'insert_supabase_migrations_schema_migrations' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: supabase_migrations_schema_migrations
+                  type: named
+                type: array
+          foreign_keys: {}
+        insert_supabase_migrations_seed_files_object:
+          fields:
+            hash:
+              type:
+                name: text
+                type: named
+            path:
+              type:
+                name: text
+                type: named
+          foreign_keys: {}
+        insert_supabase_migrations_seed_files_response:
+          description: Responses from the 'insert_supabase_migrations_seed_files' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: supabase_migrations_seed_files
+                  type: named
+                type: array
+          foreign_keys: {}
         insert_vault_decrypted_secrets_object:
           fields:
             created_at:
@@ -4698,6 +4862,40 @@ definition:
                 upload_id:
                   - id
               foreign_collection: storage_s3_multipart_uploads
+        supabase_migrations_schema_migrations:
+          fields:
+            name:
+              type:
+                type: nullable
+                underlying_type:
+                  name: text
+                  type: named
+            statements:
+              type:
+                type: nullable
+                underlying_type:
+                  element_type:
+                    type: nullable
+                    underlying_type:
+                      name: text
+                      type: named
+                  type: array
+            version:
+              type:
+                name: text
+                type: named
+          foreign_keys: {}
+        supabase_migrations_seed_files:
+          fields:
+            hash:
+              type:
+                name: text
+                type: named
+            path:
+              type:
+                name: text
+                type: named
+          foreign_keys: {}
         update_Birds_by_ring_no_response:
           description: Responses from the 'update_Birds_by_ring_no' procedure
           fields:
@@ -4793,13 +4991,6 @@ definition:
                 underlying_type:
                   name: update_column_Encounters_moult_code
                   type: named
-            new/subsequent:
-              description: Update the 'new/subsequent' column in the 'Encounters' collection.
-              type:
-                type: nullable
-                underlying_type:
-                  name: update_column_Encounters_new/subsequent
-                  type: named
             old_greater_coverts:
               description: Update the 'old_greater_coverts' column in the 'Encounters' collection.
               type:
@@ -4862,6 +5053,33 @@ definition:
                 type: nullable
                 underlying_type:
                   name: update_column_Encounters_wing_length
+                  type: named
+          foreign_keys: {}
+        update_Species_by_species_name_response:
+          description: Responses from the 'update_Species_by_species_name' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: Species
+                  type: named
+                type: array
+          foreign_keys: {}
+        update_Species_by_species_name_update_columns:
+          description: Update the columns of the 'Species' collection
+          fields:
+            species_name:
+              description: Update the 'species_name' column in the 'Species' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_Species_species_name
                   type: named
           foreign_keys: {}
         update_auth_audit_log_entries_by_id_response:
@@ -7553,15 +7771,6 @@ definition:
                   name: text
                   type: named
           foreign_keys: {}
-        update_column_Encounters_new/subsequent:
-          description: Update the 'new/subsequent' column in the 'Encounters' collection
-          fields:
-            _set:
-              description: Set the column to this value
-              type:
-                name: text
-                type: named
-          foreign_keys: {}
         update_column_Encounters_old_greater_coverts:
           description: Update the 'old_greater_coverts' column in the 'Encounters' collection
           fields:
@@ -7650,6 +7859,15 @@ definition:
                 underlying_type:
                   name: int2
                   type: named
+          foreign_keys: {}
+        update_column_Species_species_name:
+          description: Update the 'species_name' column in the 'Species' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: text
+                type: named
           foreign_keys: {}
         update_column_auth_audit_log_entries_created_at:
           description: Update the 'created_at' column in the 'auth_audit_log_entries' collection
@@ -10106,6 +10324,59 @@ definition:
                 name: text
                 type: named
           foreign_keys: {}
+        update_column_supabase_migrations_schema_migrations_name:
+          description: Update the 'name' column in the 'supabase_migrations_schema_migrations' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                type: nullable
+                underlying_type:
+                  name: text
+                  type: named
+          foreign_keys: {}
+        update_column_supabase_migrations_schema_migrations_statements:
+          description: Update the 'statements' column in the 'supabase_migrations_schema_migrations' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                type: nullable
+                underlying_type:
+                  element_type:
+                    type: nullable
+                    underlying_type:
+                      name: text
+                      type: named
+                  type: array
+          foreign_keys: {}
+        update_column_supabase_migrations_schema_migrations_version:
+          description: Update the 'version' column in the 'supabase_migrations_schema_migrations' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: text
+                type: named
+          foreign_keys: {}
+        update_column_supabase_migrations_seed_files_hash:
+          description: Update the 'hash' column in the 'supabase_migrations_seed_files' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: text
+                type: named
+          foreign_keys: {}
+        update_column_supabase_migrations_seed_files_path:
+          description: Update the 'path' column in the 'supabase_migrations_seed_files' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: text
+                type: named
+          foreign_keys: {}
         update_column_vault_secrets_created_at:
           description: Update the 'created_at' column in the 'vault_secrets' collection
           fields:
@@ -10867,6 +11138,81 @@ definition:
                   name: update_column_storage_s3_multipart_uploads_parts_version
                   type: named
           foreign_keys: {}
+        update_supabase_migrations_schema_migrations_by_version_response:
+          description: Responses from the 'update_supabase_migrations_schema_migrations_by_version' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: supabase_migrations_schema_migrations
+                  type: named
+                type: array
+          foreign_keys: {}
+        update_supabase_migrations_schema_migrations_by_version_update_columns:
+          description: Update the columns of the 'supabase_migrations_schema_migrations' collection
+          fields:
+            name:
+              description: Update the 'name' column in the 'supabase_migrations_schema_migrations' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_supabase_migrations_schema_migrations_name
+                  type: named
+            statements:
+              description: Update the 'statements' column in the 'supabase_migrations_schema_migrations' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_supabase_migrations_schema_migrations_statements
+                  type: named
+            version:
+              description: Update the 'version' column in the 'supabase_migrations_schema_migrations' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_supabase_migrations_schema_migrations_version
+                  type: named
+          foreign_keys: {}
+        update_supabase_migrations_seed_files_by_path_response:
+          description: Responses from the 'update_supabase_migrations_seed_files_by_path' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: supabase_migrations_seed_files
+                  type: named
+                type: array
+          foreign_keys: {}
+        update_supabase_migrations_seed_files_by_path_update_columns:
+          description: Update the columns of the 'supabase_migrations_seed_files' collection
+          fields:
+            hash:
+              description: Update the 'hash' column in the 'supabase_migrations_seed_files' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_supabase_migrations_seed_files_hash
+                  type: named
+            path:
+              description: Update the 'path' column in the 'supabase_migrations_seed_files' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_supabase_migrations_seed_files_path
+                  type: named
+          foreign_keys: {}
         update_vault_secrets_by_id_response:
           description: Responses from the 'update_vault_secrets_by_id' procedure
           fields:
@@ -11080,6 +11426,23 @@ definition:
           name: delete_Encounters_by_ring_no_and_visit_date
           result_type:
             name: delete_Encounters_by_ring_no_and_visit_date_response
+            type: named
+        - arguments:
+            key_species_name:
+              type:
+                name: text
+                type: named
+            pre_check:
+              description: Delete permission predicate over the 'Species' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: Species
+                  type: predicate
+          description: Delete any row on the 'Species' collection using the 'species_name' key
+          name: delete_Species_by_species_name
+          result_type:
+            name: delete_Species_by_species_name_response
             type: named
         - arguments:
             key_id:
@@ -11760,6 +12123,40 @@ definition:
             name: delete_storage_s3_multipart_uploads_parts_by_id_response
             type: named
         - arguments:
+            key_version:
+              type:
+                name: text
+                type: named
+            pre_check:
+              description: Delete permission predicate over the 'supabase_migrations_schema_migrations' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: supabase_migrations_schema_migrations
+                  type: predicate
+          description: Delete any row on the 'supabase_migrations_schema_migrations' collection using the 'version' key
+          name: delete_supabase_migrations_schema_migrations_by_version
+          result_type:
+            name: delete_supabase_migrations_schema_migrations_by_version_response
+            type: named
+        - arguments:
+            key_path:
+              type:
+                name: text
+                type: named
+            pre_check:
+              description: Delete permission predicate over the 'supabase_migrations_seed_files' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: supabase_migrations_seed_files
+                  type: predicate
+          description: Delete any row on the 'supabase_migrations_seed_files' collection using the 'path' key
+          name: delete_supabase_migrations_seed_files_by_path
+          result_type:
+            name: delete_supabase_migrations_seed_files_by_path_response
+            type: named
+        - arguments:
             key_id:
               type:
                 name: uuid
@@ -11813,6 +12210,25 @@ definition:
           name: insert_Encounters
           result_type:
             name: insert_Encounters_response
+            type: named
+        - arguments:
+            objects:
+              type:
+                element_type:
+                  name: insert_Species_object
+                  type: named
+                type: array
+            post_check:
+              description: Insert permission predicate over the 'Species' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: Species
+                  type: predicate
+          description: Insert into the Species table
+          name: insert_Species
+          result_type:
+            name: insert_Species_response
             type: named
         - arguments:
             objects:
@@ -12369,6 +12785,44 @@ definition:
             objects:
               type:
                 element_type:
+                  name: insert_supabase_migrations_schema_migrations_object
+                  type: named
+                type: array
+            post_check:
+              description: Insert permission predicate over the 'supabase_migrations_schema_migrations' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: supabase_migrations_schema_migrations
+                  type: predicate
+          description: Insert into the supabase_migrations_schema_migrations table
+          name: insert_supabase_migrations_schema_migrations
+          result_type:
+            name: insert_supabase_migrations_schema_migrations_response
+            type: named
+        - arguments:
+            objects:
+              type:
+                element_type:
+                  name: insert_supabase_migrations_seed_files_object
+                  type: named
+                type: array
+            post_check:
+              description: Insert permission predicate over the 'supabase_migrations_seed_files' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: supabase_migrations_seed_files
+                  type: predicate
+          description: Insert into the supabase_migrations_seed_files table
+          name: insert_supabase_migrations_seed_files
+          result_type:
+            name: insert_supabase_migrations_seed_files_response
+            type: named
+        - arguments:
+            objects:
+              type:
+                element_type:
                   name: insert_vault_decrypted_secrets_object
                   type: named
                 type: array
@@ -12462,6 +12916,34 @@ definition:
           name: update_Encounters_by_ring_no_and_visit_date
           result_type:
             name: update_Encounters_by_ring_no_and_visit_date_response
+            type: named
+        - arguments:
+            key_species_name:
+              type:
+                name: text
+                type: named
+            post_check:
+              description: Update permission post-condition predicate over the 'Species' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: Species
+                  type: predicate
+            pre_check:
+              description: Update permission pre-condition predicate over the 'Species' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: Species
+                  type: predicate
+            update_columns:
+              type:
+                name: update_Species_by_species_name_update_columns
+                type: named
+          description: Update any row on the 'Species' collection using the 'species_name' key
+          name: update_Species_by_species_name
+          result_type:
+            name: update_Species_by_species_name_response
             type: named
         - arguments:
             key_id:
@@ -13558,6 +14040,62 @@ definition:
           name: update_storage_s3_multipart_uploads_parts_by_id
           result_type:
             name: update_storage_s3_multipart_uploads_parts_by_id_response
+            type: named
+        - arguments:
+            key_version:
+              type:
+                name: text
+                type: named
+            post_check:
+              description: Update permission post-condition predicate over the 'supabase_migrations_schema_migrations' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: supabase_migrations_schema_migrations
+                  type: predicate
+            pre_check:
+              description: Update permission pre-condition predicate over the 'supabase_migrations_schema_migrations' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: supabase_migrations_schema_migrations
+                  type: predicate
+            update_columns:
+              type:
+                name: update_supabase_migrations_schema_migrations_by_version_update_columns
+                type: named
+          description: Update any row on the 'supabase_migrations_schema_migrations' collection using the 'version' key
+          name: update_supabase_migrations_schema_migrations_by_version
+          result_type:
+            name: update_supabase_migrations_schema_migrations_by_version_response
+            type: named
+        - arguments:
+            key_path:
+              type:
+                name: text
+                type: named
+            post_check:
+              description: Update permission post-condition predicate over the 'supabase_migrations_seed_files' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: supabase_migrations_seed_files
+                  type: predicate
+            pre_check:
+              description: Update permission pre-condition predicate over the 'supabase_migrations_seed_files' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: supabase_migrations_seed_files
+                  type: predicate
+            update_columns:
+              type:
+                name: update_supabase_migrations_seed_files_by_path_update_columns
+                type: named
+          description: Update any row on the 'supabase_migrations_seed_files' collection using the 'path' key
+          name: update_supabase_migrations_seed_files_by_path
+          result_type:
+            name: update_supabase_migrations_seed_files_by_path_response
             type: named
         - arguments:
             key_id:

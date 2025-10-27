@@ -3,7 +3,7 @@ kind: ObjectType
 version: v1
 definition:
   name: Encounters
-  description: Encounters with ringed birds
+  description: Encounters with individual birds
   fields:
     - name: age
       type: Int16!
@@ -17,8 +17,6 @@ definition:
       type: Boolean_1!
     - name: moultCode
       type: String_1
-    - name: newSubsequent
-      type: String_1!
     - name: oldGreaterCoverts
       type: Int16
     - name: recordType
@@ -41,7 +39,7 @@ definition:
     typeName: Encounters
     inputTypeName: EncountersInput
   dataConnectorTypeMapping:
-    - dataConnectorName: TOTF
+    - dataConnectorName: totf
       dataConnectorObjectType: Encounters
       fieldMapping:
         age:
@@ -62,9 +60,6 @@ definition:
         moultCode:
           column:
             name: moult_code
-        newSubsequent:
-          column:
-            name: new/subsequent
         oldGreaterCoverts:
           column:
             name: old_greater_coverts
@@ -108,7 +103,6 @@ definition:
           - extraText
           - isJuv
           - moultCode
-          - newSubsequent
           - oldGreaterCoverts
           - recordType
           - ringNo
@@ -140,8 +134,6 @@ definition:
           booleanExpressionType: BoolBoolExp
         - fieldName: moultCode
           booleanExpressionType: TextBoolExp
-        - fieldName: newSubsequent
-          booleanExpressionType: TextBoolExp
         - fieldName: oldGreaterCoverts
           booleanExpressionType: Int2BoolExp
         - fieldName: recordType
@@ -160,7 +152,8 @@ definition:
           booleanExpressionType: Float4BoolExp
         - fieldName: wingLength
           booleanExpressionType: Int2BoolExp
-      comparableRelationships: []
+      comparableRelationships:
+        - relationshipName: bird
   logicalOperators:
     enable: true
   isNull:
@@ -188,8 +181,6 @@ definition:
         - fieldName: isJuv
           aggregateExpression: BoolAggExp
         - fieldName: moultCode
-          aggregateExpression: TextAggExp
-        - fieldName: newSubsequent
           aggregateExpression: TextAggExp
         - fieldName: oldGreaterCoverts
           aggregateExpression: Int2AggExp
@@ -236,8 +227,6 @@ definition:
           orderByExpression: Boolean1OrderByExp
         - fieldName: moultCode
           orderByExpression: String1OrderByExp
-        - fieldName: newSubsequent
-          orderByExpression: String1OrderByExp
         - fieldName: oldGreaterCoverts
           orderByExpression: Int16OrderByExp
         - fieldName: recordType
@@ -256,7 +245,8 @@ definition:
           orderByExpression: Float32OrderByExp
         - fieldName: wingLength
           orderByExpression: Int16OrderByExp
-      orderableRelationships: []
+      orderableRelationships:
+        - relationshipName: bird
   graphql:
     expressionTypeName: EncountersOrderByExp
 
@@ -267,7 +257,7 @@ definition:
   name: Encounters
   objectType: Encounters
   source:
-    dataConnectorName: TOTF
+    dataConnectorName: totf
     collection: Encounters
   filterExpressionType: EncountersBoolExp
   aggregateExpression: EncountersAggExp
@@ -289,7 +279,7 @@ definition:
       queryRootField: encountersAggregate
       subscription:
         rootField: encountersAggregate
-  description: Encounters with ringed birds
+  description: Encounters with individual birds
 
 ---
 kind: ModelPermissions
@@ -301,4 +291,22 @@ definition:
       select:
         filter: null
         allowSubscriptions: true
+
+---
+kind: Relationship
+version: v1
+definition:
+  name: bird
+  sourceType: Encounters
+  target:
+    model:
+      name: Birds
+      relationshipType: Object
+  mapping:
+    - source:
+        fieldPath:
+          - fieldName: ringNo
+      target:
+        modelField:
+          - fieldName: ringNo
 

@@ -1,5 +1,5 @@
 include:
-  - path: app/connector/TOTF/compose.yaml
+  - path: app/connector/totf/compose.yaml
 services:
   engine:
     build:
@@ -30,17 +30,3 @@ services:
       - 4318:4318
     volumes:
       - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
-#   ipv6-forwarder:
-#     image: alpine/socat
-#     container_name: ipv6-forwarder
-#     restart: unless-stopped
-#     command: >
-#       -d -d TCP-LISTEN:5432,fork,reuseaddr TCP6:db.lejgyavxajiwmudrnzwp.supabase.co:5432
-#     ports:
-#       - "65432:5432"
-#     networks:
-#       - totf_default
-
-# networks:
-#   totf_default:
-#     external: true

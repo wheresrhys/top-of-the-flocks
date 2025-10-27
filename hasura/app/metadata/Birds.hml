@@ -3,7 +3,7 @@ kind: ObjectType
 version: v1
 definition:
   name: Birds
-  description: Individual ringed birds
+  description: '@graphql({"aggregate": {"enabled": true}})'
   fields:
     - name: ringNo
       type: String_1!
@@ -13,7 +13,7 @@ definition:
     typeName: Birds
     inputTypeName: BirdsInput
   dataConnectorTypeMapping:
-    - dataConnectorName: TOTF
+    - dataConnectorName: totf
       dataConnectorObjectType: Birds
       fieldMapping:
         ringNo:
@@ -48,7 +48,9 @@ definition:
           booleanExpressionType: TextBoolExp
         - fieldName: speciesName
           booleanExpressionType: TextBoolExp
-      comparableRelationships: []
+      comparableRelationships:
+        - relationshipName: species
+        - relationshipName: encounters
   logicalOperators:
     enable: true
   isNull:
@@ -88,7 +90,8 @@ definition:
           orderByExpression: String1OrderByExp
         - fieldName: speciesName
           orderByExpression: String1OrderByExp
-      orderableRelationships: []
+      orderableRelationships:
+        - relationshipName: species
   graphql:
     expressionTypeName: BirdsOrderByExp
 
@@ -99,7 +102,7 @@ definition:
   name: Birds
   objectType: Birds
   source:
-    dataConnectorName: TOTF
+    dataConnectorName: totf
     collection: Birds
   filterExpressionType: BirdsBoolExp
   aggregateExpression: BirdsAggExp
@@ -120,7 +123,7 @@ definition:
       queryRootField: birdsAggregate
       subscription:
         rootField: birdsAggregate
-  description: Individual ringed birds
+  description: '@graphql({"aggregate": {"enabled": true}})'
 
 ---
 kind: ModelPermissions
@@ -132,4 +135,44 @@ definition:
       select:
         filter: null
         allowSubscriptions: true
+
+---
+kind: Relationship
+version: v1
+definition:
+  name: species
+  sourceType: Birds
+  target:
+    model:
+      name: Species
+      relationshipType: Object
+  mapping:
+    - source:
+        fieldPath:
+          - fieldName: speciesName
+      target:
+        modelField:
+          - fieldName: speciesName
+
+---
+kind: Relationship
+version: v1
+definition:
+  name: encounters
+  sourceType: Birds
+  target:
+    model:
+      name: Encounters
+      relationshipType: Array
+      aggregate:
+        aggregateExpression: EncountersAggExp
+  mapping:
+    - source:
+        fieldPath:
+          - fieldName: ringNo
+      target:
+        modelField:
+          - fieldName: ringNo
+  graphql:
+    aggregateFieldName: encountersAggregate
 

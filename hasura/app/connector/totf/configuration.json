@@ -42,8 +42,16 @@
             "ring_no"
           ]
         },
-        "foreignRelations": {},
-        "description": "Individual ringed birds"
+        "foreignRelations": {
+          "Birds_species_name_fkey": {
+            "foreignSchema": "public",
+            "foreignTable": "Species",
+            "columnMapping": {
+              "species_name": "species_name"
+            }
+          }
+        },
+        "description": "@graphql({\"aggregate\": {\"enabled\": true}})"
       },
       "Encounters": {
         "schemaName": "public",
@@ -96,14 +104,6 @@
               "scalarType": "text"
             },
             "nullable": "nullable",
-            "description": null
-          },
-          "new/subsequent": {
-            "name": "new/subsequent",
-            "type": {
-              "scalarType": "text"
-            },
-            "nullable": "nonNullable",
             "description": null
           },
           "old_greater_coverts": {
@@ -194,7 +194,28 @@
             }
           }
         },
-        "description": "Encounters with ringed birds"
+        "description": "Encounters with individual birds"
+      },
+      "Species": {
+        "schemaName": "public",
+        "tableName": "Species",
+        "columns": {
+          "species_name": {
+            "name": "species_name",
+            "type": {
+              "scalarType": "text"
+            },
+            "nullable": "nonNullable",
+            "description": null
+          }
+        },
+        "uniquenessConstraints": {
+          "Species_pkey": [
+            "species_name"
+          ]
+        },
+        "foreignRelations": {},
+        "description": "Bird Species"
       },
       "auth_audit_log_entries": {
         "schemaName": "auth",
@@ -2816,6 +2837,74 @@
             }
           }
         },
+        "description": null
+      },
+      "supabase_migrations_schema_migrations": {
+        "schemaName": "supabase_migrations",
+        "tableName": "schema_migrations",
+        "columns": {
+          "name": {
+            "name": "name",
+            "type": {
+              "scalarType": "text"
+            },
+            "nullable": "nullable",
+            "description": null
+          },
+          "statements": {
+            "name": "statements",
+            "type": {
+              "arrayType": {
+                "scalarType": "text"
+              }
+            },
+            "nullable": "nullable",
+            "description": null
+          },
+          "version": {
+            "name": "version",
+            "type": {
+              "scalarType": "text"
+            },
+            "nullable": "nonNullable",
+            "description": null
+          }
+        },
+        "uniquenessConstraints": {
+          "schema_migrations_pkey": [
+            "version"
+          ]
+        },
+        "foreignRelations": {},
+        "description": null
+      },
+      "supabase_migrations_seed_files": {
+        "schemaName": "supabase_migrations",
+        "tableName": "seed_files",
+        "columns": {
+          "hash": {
+            "name": "hash",
+            "type": {
+              "scalarType": "text"
+            },
+            "nullable": "nonNullable",
+            "description": null
+          },
+          "path": {
+            "name": "path",
+            "type": {
+              "scalarType": "text"
+            },
+            "nullable": "nonNullable",
+            "description": null
+          }
+        },
+        "uniquenessConstraints": {
+          "seed_files_pkey": [
+            "path"
+          ]
+        },
+        "foreignRelations": {},
         "description": null
       },
       "vault_decrypted_secrets": {

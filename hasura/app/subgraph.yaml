@@ -15,5 +15,5 @@ definition:
     APP_TOTF_WRITE_URL:
       fromEnv: APP_TOTF_WRITE_URL
   connectors:
-    - path: connector/TOTF/connector.yaml
-      connectorLinkName: TOTF
+    - path: connector/totf/connector.yaml
+      connectorLinkName: totf

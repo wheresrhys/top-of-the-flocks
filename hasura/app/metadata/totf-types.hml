@@ -50,7 +50,7 @@ definition:
         - name: ts_match_tt
           argumentType: String_1!
       dataConnectorOperatorMapping:
-        - dataConnectorName: TOTF
+        - dataConnectorName: totf
           dataConnectorScalarType: text
           operatorMapping: {}
   logicalOperators:
@@ -64,7 +64,7 @@ definition:
 kind: DataConnectorScalarRepresentation
 version: v1
 definition:
-  dataConnectorName: TOTF
+  dataConnectorName: totf
   dataConnectorScalarType: text
   representation: String_1
   graphql:
@@ -102,7 +102,7 @@ definition:
         - name: _neq
           argumentType: Int64!
       dataConnectorOperatorMapping:
-        - dataConnectorName: TOTF
+        - dataConnectorName: totf
           dataConnectorScalarType: int8
           operatorMapping: {}
   logicalOperators:
@@ -116,7 +116,7 @@ definition:
 kind: DataConnectorScalarRepresentation
 version: v1
 definition:
-  dataConnectorName: TOTF
+  dataConnectorName: totf
   dataConnectorScalarType: int8
   representation: Int64
   graphql:
@@ -136,7 +136,7 @@ definition:
         - name: min
           returnType: String_1
       dataConnectorAggregationFunctionMapping:
-        - dataConnectorName: TOTF
+        - dataConnectorName: totf
           dataConnectorScalarType: text
           functionMapping:
             max:
@@ -197,7 +197,7 @@ definition:
         - name: _neq
           argumentType: Int16!
       dataConnectorOperatorMapping:
-        - dataConnectorName: TOTF
+        - dataConnectorName: totf
           dataConnectorScalarType: int2
           operatorMapping: {}
   logicalOperators:
@@ -211,7 +211,7 @@ definition:
 kind: DataConnectorScalarRepresentation
 version: v1
 definition:
-  dataConnectorName: TOTF
+  dataConnectorName: totf
   dataConnectorScalarType: int2
   representation: Int16
   graphql:
@@ -241,7 +241,7 @@ definition:
         - name: _neq
           argumentType: String_1!
       dataConnectorOperatorMapping:
-        - dataConnectorName: TOTF
+        - dataConnectorName: totf
           dataConnectorScalarType: time
           operatorMapping: {}
   logicalOperators:
@@ -255,7 +255,7 @@ definition:
 kind: DataConnectorScalarRepresentation
 version: v1
 definition:
-  dataConnectorName: TOTF
+  dataConnectorName: totf
   dataConnectorScalarType: time
   representation: String_1
   graphql:
@@ -293,7 +293,7 @@ definition:
         - name: _neq
           argumentType: Boolean_1!
       dataConnectorOperatorMapping:
-        - dataConnectorName: TOTF
+        - dataConnectorName: totf
           dataConnectorScalarType: bool
           operatorMapping: {}
   logicalOperators:
@@ -307,7 +307,7 @@ definition:
 kind: DataConnectorScalarRepresentation
 version: v1
 definition:
-  dataConnectorName: TOTF
+  dataConnectorName: totf
   dataConnectorScalarType: bool
   representation: Boolean_1
   graphql:
@@ -345,7 +345,7 @@ definition:
         - name: _neq
           argumentType: Date!
       dataConnectorOperatorMapping:
-        - dataConnectorName: TOTF
+        - dataConnectorName: totf
           dataConnectorScalarType: date
           operatorMapping: {}
   logicalOperators:
@@ -359,7 +359,7 @@ definition:
 kind: DataConnectorScalarRepresentation
 version: v1
 definition:
-  dataConnectorName: TOTF
+  dataConnectorName: totf
   dataConnectorScalarType: date
   representation: Date
   graphql:
@@ -397,7 +397,7 @@ definition:
         - name: _neq
           argumentType: Float32!
       dataConnectorOperatorMapping:
-        - dataConnectorName: TOTF
+        - dataConnectorName: totf
           dataConnectorScalarType: float4
           operatorMapping: {}
   logicalOperators:
@@ -411,7 +411,7 @@ definition:
 kind: DataConnectorScalarRepresentation
 version: v1
 definition:
-  dataConnectorName: TOTF
+  dataConnectorName: totf
   dataConnectorScalarType: float4
   representation: Float32
   graphql:
@@ -449,7 +449,7 @@ definition:
         - name: _neq
           argumentType: Bigdecimal!
       dataConnectorOperatorMapping:
-        - dataConnectorName: TOTF
+        - dataConnectorName: totf
           dataConnectorScalarType: numeric
           operatorMapping: {}
   logicalOperators:
@@ -463,7 +463,7 @@ definition:
 kind: DataConnectorScalarRepresentation
 version: v1
 definition:
-  dataConnectorName: TOTF
+  dataConnectorName: totf
   dataConnectorScalarType: numeric
   representation: Bigdecimal
   graphql:
@@ -505,7 +505,7 @@ definition:
         - name: variance
           returnType: Bigdecimal
       dataConnectorAggregationFunctionMapping:
-        - dataConnectorName: TOTF
+        - dataConnectorName: totf
           dataConnectorScalarType: int2
           functionMapping:
             avg:
@@ -575,7 +575,7 @@ definition:
         - name: _neq
           argumentType: Json!
       dataConnectorOperatorMapping:
-        - dataConnectorName: TOTF
+        - dataConnectorName: totf
           dataConnectorScalarType: interval
           operatorMapping: {}
   logicalOperators:
@@ -589,7 +589,7 @@ definition:
 kind: DataConnectorScalarRepresentation
 version: v1
 definition:
-  dataConnectorName: TOTF
+  dataConnectorName: totf
   dataConnectorScalarType: interval
   representation: Json
   graphql:
@@ -613,7 +613,7 @@ definition:
         - name: sum
           returnType: Json
       dataConnectorAggregationFunctionMapping:
-        - dataConnectorName: TOTF
+        - dataConnectorName: totf
           dataConnectorScalarType: time
           functionMapping:
             avg:
@@ -649,7 +649,7 @@ definition:
         - name: every
           returnType: Boolean_1
       dataConnectorAggregationFunctionMapping:
-        - dataConnectorName: TOTF
+        - dataConnectorName: totf
           dataConnectorScalarType: bool
           functionMapping:
             bool_and:
@@ -681,7 +681,7 @@ definition:
         - name: min
           returnType: Date
       dataConnectorAggregationFunctionMapping:
-        - dataConnectorName: TOTF
+        - dataConnectorName: totf
           dataConnectorScalarType: date
           functionMapping:
             max:
@@ -729,7 +729,7 @@ definition:
         - name: _neq
           argumentType: Float64!
       dataConnectorOperatorMapping:
-        - dataConnectorName: TOTF
+        - dataConnectorName: totf
           dataConnectorScalarType: float8
           operatorMapping: {}
   logicalOperators:
@@ -743,7 +743,7 @@ definition:
 kind: DataConnectorScalarRepresentation
 version: v1
 definition:
-  dataConnectorName: TOTF
+  dataConnectorName: totf
   dataConnectorScalarType: float8
   representation: Float64
   graphql:
@@ -779,7 +779,7 @@ definition:
         - name: variance
           returnType: Float64
       dataConnectorAggregationFunctionMapping:
-        - dataConnectorName: TOTF
+        - dataConnectorName: totf
           dataConnectorScalarType: float4
           functionMapping:
             avg:

@@ -1,7 +1,7 @@
 kind: Connector
 version: v2
 definition:
-  name: TOTF
+  name: totf
   subgraph: app
   source: hasura/postgres:v3.1.0
   context: .
