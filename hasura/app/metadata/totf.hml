@@ -242,6 +242,10 @@ definition:
               unique_columns:
                 - version
         - arguments: {}
+          name: species_league_table
+          type: species_league_table
+          uniqueness_constraints: {}
+        - arguments: {}
           name: storage_buckets
           type: storage_buckets
           uniqueness_constraints:
@@ -3816,6 +3820,97 @@ definition:
                   type: named
                 type: array
           foreign_keys: {}
+        insert_species_league_table_object:
+          fields:
+            encounters:
+              type:
+                type: nullable
+                underlying_type:
+                  name: int8
+                  type: named
+            frequent_flyer:
+              type:
+                type: nullable
+                underlying_type:
+                  name: numeric
+                  type: named
+            heaviest:
+              type:
+                type: nullable
+                underlying_type:
+                  name: float4
+                  type: named
+            individuals:
+              type:
+                type: nullable
+                underlying_type:
+                  name: int8
+                  type: named
+            lightest:
+              type:
+                type: nullable
+                underlying_type:
+                  name: float4
+                  type: named
+            longest_stay:
+              type:
+                type: nullable
+                underlying_type:
+                  name: numeric
+                  type: named
+            longest_winged:
+              type:
+                type: nullable
+                underlying_type:
+                  name: int2
+                  type: named
+            session_count:
+              type:
+                type: nullable
+                underlying_type:
+                  name: int8
+                  type: named
+            shortest_winged:
+              type:
+                type: nullable
+                underlying_type:
+                  name: int2
+                  type: named
+            species_name:
+              type:
+                type: nullable
+                underlying_type:
+                  name: text
+                  type: named
+            total_weight:
+              type:
+                type: nullable
+                underlying_type:
+                  name: float4
+                  type: named
+            unluckiest:
+              type:
+                type: nullable
+                underlying_type:
+                  name: int8
+                  type: named
+          foreign_keys: {}
+        insert_species_league_table_response:
+          description: Responses from the 'insert_species_league_table' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: species_league_table
+                  type: named
+                type: array
+          foreign_keys: {}
         insert_storage_buckets_analytics_object:
           fields:
             created_at:
@@ -4524,6 +4619,81 @@ definition:
                 type: nullable
                 underlying_type:
                   name: text
+                  type: named
+          foreign_keys: {}
+        species_league_table:
+          fields:
+            encounters:
+              type:
+                type: nullable
+                underlying_type:
+                  name: int8
+                  type: named
+            frequent_flyer:
+              type:
+                type: nullable
+                underlying_type:
+                  name: numeric
+                  type: named
+            heaviest:
+              type:
+                type: nullable
+                underlying_type:
+                  name: float4
+                  type: named
+            individuals:
+              type:
+                type: nullable
+                underlying_type:
+                  name: int8
+                  type: named
+            lightest:
+              type:
+                type: nullable
+                underlying_type:
+                  name: float4
+                  type: named
+            longest_stay:
+              type:
+                type: nullable
+                underlying_type:
+                  name: numeric
+                  type: named
+            longest_winged:
+              type:
+                type: nullable
+                underlying_type:
+                  name: int2
+                  type: named
+            session_count:
+              type:
+                type: nullable
+                underlying_type:
+                  name: int8
+                  type: named
+            shortest_winged:
+              type:
+                type: nullable
+                underlying_type:
+                  name: int2
+                  type: named
+            species_name:
+              type:
+                type: nullable
+                underlying_type:
+                  name: text
+                  type: named
+            total_weight:
+              type:
+                type: nullable
+                underlying_type:
+                  name: float4
+                  type: named
+            unluckiest:
+              type:
+                type: nullable
+                underlying_type:
+                  name: int8
                   type: named
           foreign_keys: {}
         storage_buckets:
@@ -12647,6 +12817,25 @@ definition:
           name: insert_realtime_schema_migrations
           result_type:
             name: insert_realtime_schema_migrations_response
+            type: named
+        - arguments:
+            objects:
+              type:
+                element_type:
+                  name: insert_species_league_table_object
+                  type: named
+                type: array
+            post_check:
+              description: Insert permission predicate over the 'species_league_table' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: species_league_table
+                  type: predicate
+          description: Insert into the species_league_table table
+          name: insert_species_league_table
+          result_type:
+            name: insert_species_league_table_response
             type: named
         - arguments:
             objects:

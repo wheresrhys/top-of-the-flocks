@@ -275,9 +275,72 @@ export type Int2BoolExp = {
   _or?: InputMaybe<Array<Int2BoolExp>>;
 };
 
+export type Int8AggExp = {
+  __typename?: 'Int8AggExp';
+  _count: Scalars['Int64']['output'];
+  _count_distinct: Scalars['Int64']['output'];
+  avg?: Maybe<Scalars['Bigdecimal']['output']>;
+  bit_and?: Maybe<Scalars['Int64']['output']>;
+  bit_or?: Maybe<Scalars['Int64']['output']>;
+  bit_xor?: Maybe<Scalars['Int64']['output']>;
+  max?: Maybe<Scalars['Int64']['output']>;
+  min?: Maybe<Scalars['Int64']['output']>;
+  stddev?: Maybe<Scalars['Bigdecimal']['output']>;
+  stddev_pop?: Maybe<Scalars['Bigdecimal']['output']>;
+  stddev_samp?: Maybe<Scalars['Bigdecimal']['output']>;
+  sum?: Maybe<Scalars['Bigdecimal']['output']>;
+  var_pop?: Maybe<Scalars['Bigdecimal']['output']>;
+  var_samp?: Maybe<Scalars['Bigdecimal']['output']>;
+  variance?: Maybe<Scalars['Bigdecimal']['output']>;
+};
+
+export type Int8BoolExp = {
+  _and?: InputMaybe<Array<Int8BoolExp>>;
+  _eq?: InputMaybe<Scalars['Int64']['input']>;
+  _gt?: InputMaybe<Scalars['Int64']['input']>;
+  _gte?: InputMaybe<Scalars['Int64']['input']>;
+  _in?: InputMaybe<Array<Scalars['Int64']['input']>>;
+  _is_null?: InputMaybe<Scalars['Boolean']['input']>;
+  _lt?: InputMaybe<Scalars['Int64']['input']>;
+  _lte?: InputMaybe<Scalars['Int64']['input']>;
+  _neq?: InputMaybe<Scalars['Int64']['input']>;
+  _not?: InputMaybe<Int8BoolExp>;
+  _or?: InputMaybe<Array<Int8BoolExp>>;
+};
+
 export type Mutation = {
   __typename?: 'Mutation';
   _no_fields_accessible?: Maybe<Scalars['String']['output']>;
+};
+
+export type NumericAggExp = {
+  __typename?: 'NumericAggExp';
+  _count: Scalars['Int64']['output'];
+  _count_distinct: Scalars['Int64']['output'];
+  avg?: Maybe<Scalars['Bigdecimal']['output']>;
+  max?: Maybe<Scalars['Bigdecimal']['output']>;
+  min?: Maybe<Scalars['Bigdecimal']['output']>;
+  stddev?: Maybe<Scalars['Bigdecimal']['output']>;
+  stddev_pop?: Maybe<Scalars['Bigdecimal']['output']>;
+  stddev_samp?: Maybe<Scalars['Bigdecimal']['output']>;
+  sum?: Maybe<Scalars['Bigdecimal']['output']>;
+  var_pop?: Maybe<Scalars['Bigdecimal']['output']>;
+  var_samp?: Maybe<Scalars['Bigdecimal']['output']>;
+  variance?: Maybe<Scalars['Bigdecimal']['output']>;
+};
+
+export type NumericBoolExp = {
+  _and?: InputMaybe<Array<NumericBoolExp>>;
+  _eq?: InputMaybe<Scalars['Bigdecimal']['input']>;
+  _gt?: InputMaybe<Scalars['Bigdecimal']['input']>;
+  _gte?: InputMaybe<Scalars['Bigdecimal']['input']>;
+  _in?: InputMaybe<Array<Scalars['Bigdecimal']['input']>>;
+  _is_null?: InputMaybe<Scalars['Boolean']['input']>;
+  _lt?: InputMaybe<Scalars['Bigdecimal']['input']>;
+  _lte?: InputMaybe<Scalars['Bigdecimal']['input']>;
+  _neq?: InputMaybe<Scalars['Bigdecimal']['input']>;
+  _not?: InputMaybe<NumericBoolExp>;
+  _or?: InputMaybe<Array<NumericBoolExp>>;
 };
 
 export enum OrderBy {
@@ -304,6 +367,8 @@ export type Query = {
   speciesAggregate?: Maybe<SpeciesAggExp>;
   /** Selects a single object from the model. Model description: Bird Species */
   speciesBySpeciesName?: Maybe<Species>;
+  speciesLeagueTable?: Maybe<Array<SpeciesLeagueTable>>;
+  speciesLeagueTableAggregate?: Maybe<SpeciesLeagueTableAggExp>;
 };
 
 
@@ -361,6 +426,19 @@ export type QuerySpeciesBySpeciesNameArgs = {
   speciesName: Scalars['String1']['input'];
 };
 
+
+export type QuerySpeciesLeagueTableArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<SpeciesLeagueTableOrderByExp>>;
+  where?: InputMaybe<SpeciesLeagueTableBoolExp>;
+};
+
+
+export type QuerySpeciesLeagueTableAggregateArgs = {
+  filter_input?: InputMaybe<SpeciesLeagueTableFilterInput>;
+};
+
 /** Bird Species */
 export type Species = {
   __typename?: 'Species';
@@ -405,6 +483,79 @@ export type SpeciesFilterInput = {
   where?: InputMaybe<SpeciesBoolExp>;
 };
 
+export type SpeciesLeagueTable = {
+  __typename?: 'SpeciesLeagueTable';
+  encounters?: Maybe<Scalars['Int64']['output']>;
+  frequentFlyer?: Maybe<Scalars['Bigdecimal']['output']>;
+  heaviest?: Maybe<Scalars['Float32']['output']>;
+  individuals?: Maybe<Scalars['Int64']['output']>;
+  lightest?: Maybe<Scalars['Float32']['output']>;
+  longestStay?: Maybe<Scalars['Bigdecimal']['output']>;
+  longestWinged?: Maybe<Scalars['Int16']['output']>;
+  sessionCount?: Maybe<Scalars['Int64']['output']>;
+  shortestWinged?: Maybe<Scalars['Int16']['output']>;
+  speciesName?: Maybe<Scalars['String1']['output']>;
+  totalWeight?: Maybe<Scalars['Float32']['output']>;
+  unluckiest?: Maybe<Scalars['Int64']['output']>;
+};
+
+export type SpeciesLeagueTableAggExp = {
+  __typename?: 'SpeciesLeagueTableAggExp';
+  _count: Scalars['Int64']['output'];
+  encounters: Int8AggExp;
+  frequentFlyer: NumericAggExp;
+  heaviest: Float4AggExp;
+  individuals: Int8AggExp;
+  lightest: Float4AggExp;
+  longestStay: NumericAggExp;
+  longestWinged: Int2AggExp;
+  sessionCount: Int8AggExp;
+  shortestWinged: Int2AggExp;
+  speciesName: TextAggExp;
+  totalWeight: Float4AggExp;
+  unluckiest: Int8AggExp;
+};
+
+export type SpeciesLeagueTableBoolExp = {
+  _and?: InputMaybe<Array<SpeciesLeagueTableBoolExp>>;
+  _not?: InputMaybe<SpeciesLeagueTableBoolExp>;
+  _or?: InputMaybe<Array<SpeciesLeagueTableBoolExp>>;
+  encounters?: InputMaybe<Int8BoolExp>;
+  frequentFlyer?: InputMaybe<NumericBoolExp>;
+  heaviest?: InputMaybe<Float4BoolExp>;
+  individuals?: InputMaybe<Int8BoolExp>;
+  lightest?: InputMaybe<Float4BoolExp>;
+  longestStay?: InputMaybe<NumericBoolExp>;
+  longestWinged?: InputMaybe<Int2BoolExp>;
+  sessionCount?: InputMaybe<Int8BoolExp>;
+  shortestWinged?: InputMaybe<Int2BoolExp>;
+  speciesName?: InputMaybe<TextBoolExp>;
+  totalWeight?: InputMaybe<Float4BoolExp>;
+  unluckiest?: InputMaybe<Int8BoolExp>;
+};
+
+export type SpeciesLeagueTableFilterInput = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<SpeciesLeagueTableOrderByExp>>;
+  where?: InputMaybe<SpeciesLeagueTableBoolExp>;
+};
+
+export type SpeciesLeagueTableOrderByExp = {
+  encounters?: InputMaybe<OrderBy>;
+  frequentFlyer?: InputMaybe<OrderBy>;
+  heaviest?: InputMaybe<OrderBy>;
+  individuals?: InputMaybe<OrderBy>;
+  lightest?: InputMaybe<OrderBy>;
+  longestStay?: InputMaybe<OrderBy>;
+  longestWinged?: InputMaybe<OrderBy>;
+  sessionCount?: InputMaybe<OrderBy>;
+  shortestWinged?: InputMaybe<OrderBy>;
+  speciesName?: InputMaybe<OrderBy>;
+  totalWeight?: InputMaybe<OrderBy>;
+  unluckiest?: InputMaybe<OrderBy>;
+};
+
 export type SpeciesOrderByExp = {
   speciesName?: InputMaybe<OrderBy>;
 };
@@ -420,6 +571,8 @@ export type Subscription = {
   species?: Maybe<Array<Species>>;
   speciesAggregate?: Maybe<SpeciesAggExp>;
   speciesBySpeciesName?: Maybe<Species>;
+  speciesLeagueTable?: Maybe<Array<SpeciesLeagueTable>>;
+  speciesLeagueTableAggregate?: Maybe<SpeciesLeagueTableAggExp>;
 };
 
 
@@ -475,6 +628,19 @@ export type SubscriptionSpeciesAggregateArgs = {
 
 export type SubscriptionSpeciesBySpeciesNameArgs = {
   speciesName: Scalars['String1']['input'];
+};
+
+
+export type SubscriptionSpeciesLeagueTableArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<SpeciesLeagueTableOrderByExp>>;
+  where?: InputMaybe<SpeciesLeagueTableBoolExp>;
+};
+
+
+export type SubscriptionSpeciesLeagueTableAggregateArgs = {
+  filter_input?: InputMaybe<SpeciesLeagueTableFilterInput>;
 };
 
 export type TextAggExp = {
