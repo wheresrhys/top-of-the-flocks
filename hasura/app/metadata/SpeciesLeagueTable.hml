@@ -1,0 +1,248 @@
+---
+kind: ObjectType
+version: v1
+definition:
+  name: SpeciesLeagueTable
+  fields:
+    - name: frequentFlyer
+      type: Bigdecimal
+    - name: heaviest
+      type: Float32
+    - name: lightest
+      type: Float32
+    - name: longestStay
+      type: Bigdecimal
+    - name: longestWinged
+      type: Int16
+    - name: sessionCount
+      type: Int64
+    - name: shortestWinged
+      type: Int16
+    - name: speciesName
+      type: String_1
+    - name: totalWeight
+      type: Float32
+    - name: unluckiest
+      type: Int64
+    - name: encounters
+      type: Int64
+    - name: individuals
+      type: Int64
+  graphql:
+    typeName: SpeciesLeagueTable
+    inputTypeName: SpeciesLeagueTableInput
+  dataConnectorTypeMapping:
+    - dataConnectorName: totf
+      dataConnectorObjectType: species_league_table
+      fieldMapping:
+        frequentFlyer:
+          column:
+            name: frequent_flyer
+        heaviest:
+          column:
+            name: heaviest
+        lightest:
+          column:
+            name: lightest
+        longestStay:
+          column:
+            name: longest_stay
+        longestWinged:
+          column:
+            name: longest_winged
+        sessionCount:
+          column:
+            name: session_count
+        shortestWinged:
+          column:
+            name: shortest_winged
+        speciesName:
+          column:
+            name: species_name
+        totalWeight:
+          column:
+            name: total_weight
+        unluckiest:
+          column:
+            name: unluckiest
+        encounters:
+          column:
+            name: encounters
+        individuals:
+          column:
+            name: individuals
+
+---
+kind: TypePermissions
+version: v1
+definition:
+  typeName: SpeciesLeagueTable
+  permissions:
+    - role: admin
+      output:
+        allowedFields:
+          - frequentFlyer
+          - heaviest
+          - lightest
+          - longestStay
+          - longestWinged
+          - sessionCount
+          - shortestWinged
+          - speciesName
+          - totalWeight
+          - unluckiest
+          - encounters
+          - individuals
+
+---
+kind: BooleanExpressionType
+version: v1
+definition:
+  name: SpeciesLeagueTableBoolExp
+  operand:
+    object:
+      type: SpeciesLeagueTable
+      comparableFields:
+        - fieldName: frequentFlyer
+          booleanExpressionType: NumericBoolExp
+        - fieldName: heaviest
+          booleanExpressionType: Float4BoolExp
+        - fieldName: lightest
+          booleanExpressionType: Float4BoolExp
+        - fieldName: longestStay
+          booleanExpressionType: NumericBoolExp
+        - fieldName: longestWinged
+          booleanExpressionType: Int2BoolExp
+        - fieldName: sessionCount
+          booleanExpressionType: Int8BoolExp
+        - fieldName: shortestWinged
+          booleanExpressionType: Int2BoolExp
+        - fieldName: speciesName
+          booleanExpressionType: TextBoolExp
+        - fieldName: totalWeight
+          booleanExpressionType: Float4BoolExp
+        - fieldName: unluckiest
+          booleanExpressionType: Int8BoolExp
+        - fieldName: encounters
+          booleanExpressionType: Int8BoolExp
+        - fieldName: individuals
+          booleanExpressionType: Int8BoolExp
+      comparableRelationships: []
+  logicalOperators:
+    enable: true
+  isNull:
+    enable: true
+  graphql:
+    typeName: SpeciesLeagueTableBoolExp
+
+---
+kind: AggregateExpression
+version: v1
+definition:
+  name: SpeciesLeagueTableAggExp
+  operand:
+    object:
+      aggregatedType: SpeciesLeagueTable
+      aggregatableFields:
+        - fieldName: frequentFlyer
+          aggregateExpression: NumericAggExp
+        - fieldName: heaviest
+          aggregateExpression: Float4AggExp
+        - fieldName: lightest
+          aggregateExpression: Float4AggExp
+        - fieldName: longestStay
+          aggregateExpression: NumericAggExp
+        - fieldName: longestWinged
+          aggregateExpression: Int2AggExp
+        - fieldName: sessionCount
+          aggregateExpression: Int8AggExp
+        - fieldName: shortestWinged
+          aggregateExpression: Int2AggExp
+        - fieldName: speciesName
+          aggregateExpression: TextAggExp
+        - fieldName: totalWeight
+          aggregateExpression: Float4AggExp
+        - fieldName: unluckiest
+          aggregateExpression: Int8AggExp
+        - fieldName: encounters
+          aggregateExpression: Int8AggExp
+        - fieldName: individuals
+          aggregateExpression: Int8AggExp
+  count:
+    enable: true
+    returnType: Int64
+  graphql:
+    selectTypeName: SpeciesLeagueTableAggExp
+
+---
+kind: OrderByExpression
+version: v1
+definition:
+  name: SpeciesLeagueTableOrderByExp
+  operand:
+    object:
+      orderedType: SpeciesLeagueTable
+      orderableFields:
+        - fieldName: frequentFlyer
+          orderByExpression: BigdecimalOrderByExp
+        - fieldName: heaviest
+          orderByExpression: Float32OrderByExp
+        - fieldName: lightest
+          orderByExpression: Float32OrderByExp
+        - fieldName: longestStay
+          orderByExpression: BigdecimalOrderByExp
+        - fieldName: longestWinged
+          orderByExpression: Int16OrderByExp
+        - fieldName: sessionCount
+          orderByExpression: Int64OrderByExp
+        - fieldName: shortestWinged
+          orderByExpression: Int16OrderByExp
+        - fieldName: speciesName
+          orderByExpression: String1OrderByExp
+        - fieldName: totalWeight
+          orderByExpression: Float32OrderByExp
+        - fieldName: unluckiest
+          orderByExpression: Int64OrderByExp
+        - fieldName: encounters
+          orderByExpression: Int64OrderByExp
+        - fieldName: individuals
+          orderByExpression: Int64OrderByExp
+      orderableRelationships: []
+  graphql:
+    expressionTypeName: SpeciesLeagueTableOrderByExp
+
+---
+kind: Model
+version: v2
+definition:
+  name: SpeciesLeagueTable
+  objectType: SpeciesLeagueTable
+  source:
+    dataConnectorName: totf
+    collection: species_league_table
+  filterExpressionType: SpeciesLeagueTableBoolExp
+  aggregateExpression: SpeciesLeagueTableAggExp
+  orderByExpression: SpeciesLeagueTableOrderByExp
+  graphql:
+    selectMany:
+      queryRootField: speciesLeagueTable
+      subscription:
+        rootField: speciesLeagueTable
+    selectUniques: []
+    filterInputTypeName: SpeciesLeagueTableFilterInput
+    aggregate:
+      queryRootField: speciesLeagueTableAggregate
+      subscription:
+        rootField: speciesLeagueTableAggregate
+
+---
+kind: ModelPermissions
+version: v1
+definition:
+  modelName: SpeciesLeagueTable
+  permissions:
+    - role: admin
+      select:
+        filter: null
+        allowSubscriptions: true
+

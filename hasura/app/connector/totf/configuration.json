@@ -2219,6 +2219,111 @@
         "foreignRelations": {},
         "description": null
       },
+      "species_league_table": {
+        "schemaName": "public",
+        "tableName": "species_league_table",
+        "columns": {
+          "encounters": {
+            "name": "encounters",
+            "type": {
+              "scalarType": "int8"
+            },
+            "nullable": "nullable",
+            "description": null
+          },
+          "frequent_flyer": {
+            "name": "frequent_flyer",
+            "type": {
+              "scalarType": "numeric"
+            },
+            "nullable": "nullable",
+            "description": null
+          },
+          "heaviest": {
+            "name": "heaviest",
+            "type": {
+              "scalarType": "float4"
+            },
+            "nullable": "nullable",
+            "description": null
+          },
+          "individuals": {
+            "name": "individuals",
+            "type": {
+              "scalarType": "int8"
+            },
+            "nullable": "nullable",
+            "description": null
+          },
+          "lightest": {
+            "name": "lightest",
+            "type": {
+              "scalarType": "float4"
+            },
+            "nullable": "nullable",
+            "description": null
+          },
+          "longest_stay": {
+            "name": "longest_stay",
+            "type": {
+              "scalarType": "numeric"
+            },
+            "nullable": "nullable",
+            "description": null
+          },
+          "longest_winged": {
+            "name": "longest_winged",
+            "type": {
+              "scalarType": "int2"
+            },
+            "nullable": "nullable",
+            "description": null
+          },
+          "session_count": {
+            "name": "session_count",
+            "type": {
+              "scalarType": "int8"
+            },
+            "nullable": "nullable",
+            "description": null
+          },
+          "shortest_winged": {
+            "name": "shortest_winged",
+            "type": {
+              "scalarType": "int2"
+            },
+            "nullable": "nullable",
+            "description": null
+          },
+          "species_name": {
+            "name": "species_name",
+            "type": {
+              "scalarType": "text"
+            },
+            "nullable": "nullable",
+            "description": null
+          },
+          "total_weight": {
+            "name": "total_weight",
+            "type": {
+              "scalarType": "float4"
+            },
+            "nullable": "nullable",
+            "description": null
+          },
+          "unluckiest": {
+            "name": "unluckiest",
+            "type": {
+              "scalarType": "int8"
+            },
+            "nullable": "nullable",
+            "description": null
+          }
+        },
+        "uniquenessConstraints": {},
+        "foreignRelations": {},
+        "description": null
+      },
       "storage_buckets": {
         "schemaName": "storage",
         "tableName": "buckets",

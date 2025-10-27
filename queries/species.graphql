@@ -1,0 +1,16 @@
+query SpeciesPage($speciesName: String1) {
+  species(where: { speciesName: { _eq: $speciesName } }) {
+    speciesName
+    birdsAggregate {
+      _count
+    }
+    birds {
+      encounters {
+        visitDate
+      }
+      encountersAggregate {
+        _count
+      }
+    }
+  }
+}

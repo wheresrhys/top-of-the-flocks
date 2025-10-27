@@ -1,0 +1,16 @@
+query HomePage {
+  speciesLeagueTable {
+    speciesName
+    individuals
+    encounters
+    sessionCount
+    frequentFlyer
+    longestStay
+    unluckiest
+    heaviest
+    lightest
+    totalWeight
+    longestWinged
+    shortestWinged
+  }
+}
