@@ -533,14 +533,14 @@ export type TimeBoolExp = {
   _or?: InputMaybe<Array<TimeBoolExp>>;
 };
 
-export type GetSpeciesDetailsQueryVariables = Exact<{
+export type HomePageQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type HomePageQuery = { __typename?: 'Query', species?: Array<{ __typename?: 'Species', speciesName: any, birdsAggregate: { __typename?: 'BirdsAggExp', _count: any }, birds?: Array<{ __typename?: 'Birds', encountersAggregate: { __typename?: 'EncountersAggExp', _count: any } }> | null }> | null };
+
+export type SpeciesPageQueryVariables = Exact<{
   speciesName?: InputMaybe<Scalars['String1']['input']>;
 }>;
 
 
-export type GetSpeciesDetailsQuery = { __typename?: 'Query', species?: Array<{ __typename?: 'Species', speciesName: any, birdsAggregate: { __typename?: 'BirdsAggExp', _count: any }, birds?: Array<{ __typename?: 'Birds', encounters?: Array<{ __typename?: 'Encounters', visitDate: any }> | null, encountersAggregate: { __typename?: 'EncountersAggExp', _count: any } }> | null }> | null };
-
-export type GetSpeciesWithCountsQueryVariables = Exact<{ [key: string]: never; }>;
-
-
-export type GetSpeciesWithCountsQuery = { __typename?: 'Query', species?: Array<{ __typename?: 'Species', speciesName: any, birdsAggregate: { __typename?: 'BirdsAggExp', _count: any }, birds?: Array<{ __typename?: 'Birds', encountersAggregate: { __typename?: 'EncountersAggExp', _count: any } }> | null }> | null };
+export type SpeciesPageQuery = { __typename?: 'Query', species?: Array<{ __typename?: 'Species', speciesName: any, birdsAggregate: { __typename?: 'BirdsAggExp', _count: any }, birds?: Array<{ __typename?: 'Birds', encounters?: Array<{ __typename?: 'Encounters', visitDate: any }> | null, encountersAggregate: { __typename?: 'EncountersAggExp', _count: any } }> | null }> | null };

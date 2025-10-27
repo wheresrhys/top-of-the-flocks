@@ -14,47 +14,31 @@ import {
   CircularProgress,
 } from '@mui/material';
 import { graphqlRequest } from '../lib/graphql-client';
-import { GetSpeciesWithCountsQuery, GetSpeciesWithCountsQueryVariables } from '../types/graphql.types';
+import { GET_HOME_PAGE, type HomeQuery } from '../lib/queries';
 
-const GET_SPECIES_WITH_COUNTS = `
-  query GetSpeciesWithCounts {
-    species {
-      speciesName
-      birdsAggregate {
-        _count
-      }
-      birds {
-        encountersAggregate {
-          _count
-        }
-      }
-    }
-  }
-`;
+async function getSpeciesData(): Promise<HomeQuery> {
+  const response = await graphqlRequest<HomeQuery>(GET_HOME_PAGE);
 
-async function getSpeciesData(): Promise<GetSpeciesWithCountsQuery> {
-  const response = await graphqlRequest<GetSpeciesWithCountsQuery>(GET_SPECIES_WITH_COUNTS);
-  
   if (response.errors) {
     throw new Error(`GraphQL errors: ${response.errors.map(e => e.message).join(', ')}`);
   }
-  
+
   if (!response.data) {
     throw new Error('No data returned from GraphQL query');
   }
-  
+
   return response.data;
 }
 
 async function SpeciesTable() {
   const data = await getSpeciesData();
-  
+
   // Calculate totals and sort by bird count in descending order
   const speciesWithTotals = data.species
     ? data.species.map(species => ({
         speciesName: species.speciesName,
         birdCount: species.birdsAggregate._count || 0,
-        encounterCount: species.birds?.reduce((sum, bird) => 
+        encounterCount: species.birds?.reduce((sum, bird) =>
           sum + (bird.encountersAggregate._count || 0), 0) || 0
       })).sort((a, b) => b.birdCount - a.birdCount)
     : [];
@@ -83,22 +67,22 @@ async function SpeciesTable() {
         </TableHead>
         <TableBody>
           {speciesWithTotals.map((species, index) => (
-            <TableRow 
-              key={species.speciesName} 
-              sx={{ 
-                '&:nth-of-type(odd)': { 
-                  backgroundColor: 'action.hover' 
-                } 
+            <TableRow
+              key={species.speciesName}
+              sx={{
+                '&:nth-of-type(odd)': {
+                  backgroundColor: 'action.hover'
+                }
               }}
             >
               <TableCell component="th" scope="row">
-                <Link 
+                <Link
                   href={`/species/${encodeURIComponent(species.speciesName)}`}
                   style={{ textDecoration: 'none' }}
                 >
-                  <Typography 
-                    variant="body1" 
-                    sx={{ 
+                  <Typography
+                    variant="body1"
+                    sx={{
                       color: 'primary.main',
                       '&:hover': {
                         textDecoration: 'underline'
@@ -136,11 +120,11 @@ export default function Home() {
           py: 4,
         }}
       >
-        <Typography 
-          variant="h1" 
-          component="h1" 
-          sx={{ 
-            mb: 4, 
+        <Typography
+          variant="h1"
+          component="h1"
+          sx={{
+            mb: 4,
             textAlign: 'center',
             fontSize: { xs: '2.5rem', md: '3.5rem' },
             fontWeight: 'bold',
@@ -148,7 +132,7 @@ export default function Home() {
         >
           Top of the Flocks
         </Typography>
-        
+
         <Suspense fallback={
           <Box display="flex" justifyContent="center" py={4}>
             <CircularProgress />

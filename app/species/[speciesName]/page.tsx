@@ -1,46 +1,10 @@
 import { Container, Box, Typography, Paper } from '@mui/material';
 import { graphqlRequest } from '../../../lib/graphql-client';
+import { GET_SPECIES_PAGE, type SpeciesQuery } from '../../../lib/queries';
 
-// Define types for the species details response
-interface SpeciesDetailsResponse {
-  species: Array<{
-    speciesName: string;
-    birdsAggregate: {
-      _count: number;
-    };
-    birds?: Array<{
-      encounters?: Array<{
-        visitDate: string;
-      }>;
-      encountersAggregate: {
-        _count: number;
-      };
-    }>;
-  }>;
-}
-
-const GET_SPECIES_DETAILS = `
-  query GetSpeciesDetails($speciesName: String1) {
-    species(where: { speciesName: { _eq: $speciesName } }) {
-      speciesName
-      birdsAggregate {
-        _count
-      }
-      birds {
-        encounters {
-          visitDate
-        }
-        encountersAggregate {
-          _count
-        }
-      }
-    }
-  }
-`;
-
-async function getSpeciesDetails(speciesName: string): Promise<SpeciesDetailsResponse> {
-  const response = await graphqlRequest<SpeciesDetailsResponse>(
-    GET_SPECIES_DETAILS, 
+async function getSpeciesDetails(speciesName: string): Promise<SpeciesQuery> {
+  const response = await graphqlRequest<SpeciesQuery>(
+    GET_SPECIES_PAGE, 
     { speciesName }
   );
   

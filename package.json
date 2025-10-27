@@ -34,6 +34,8 @@
     "@graphql-codegen/introspection": "^5.0.0",
     "@graphql-codegen/typescript": "^5.0.2",
     "@graphql-codegen/typescript-operations": "^5.0.2",
+    "@graphql-tools/graphql-file-loader": "^8.1.2",
+    "@graphql-tools/load": "^8.1.2",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
