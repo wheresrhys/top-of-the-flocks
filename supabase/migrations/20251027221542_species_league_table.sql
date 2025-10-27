@@ -1,6 +1,9 @@
-create or update view species_league_table as
+drop view if exists species_league_table;
+create view species_league_table as
 select
   b.species_name,
+  count(DISTINCT b.ring_no) AS individuals,
+  count(e.*) AS encounters,
   count(distinct e.visit_date) as session_count,
   max(e.weight) as heaviest,
   avg(e.weight) as average_weight,
