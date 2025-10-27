@@ -50,7 +50,7 @@ type SpeciesData = {
 // Define which columns should be treated as numeric
 const numericColumns: SortableColumn[] = [
   'individuals',
-  'encounters', 
+  'encounters',
   'sessionCount',
   'unluckiest',
   'heaviest',

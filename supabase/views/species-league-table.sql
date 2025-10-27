@@ -1,10 +1,12 @@
-create view species_league_table as
+create or update view species_league_table as
 select
   b.species_name,
   count(distinct e.visit_date) as session_count,
   max(e.weight) as heaviest,
-  max(e.wing_length) as longest_winged,
+  avg(e.weight) as average_weight,
   min(e.weight) as lightest,
+  max(e.wing_length) as longest_winged,
+  avg(e.wing_length) as average_wing_length,
   min(e.wing_length) as shortest_winged,
   sum(e.weight) as total_weight,
   u.cnt as unluckiest,
