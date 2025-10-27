@@ -1,0 +1,123 @@
+---
+kind: ObjectType
+version: v1
+definition:
+  name: Species
+  description: Bird Species
+  fields:
+    - name: speciesName
+      type: String_1!
+  graphql:
+    typeName: Species
+    inputTypeName: SpeciesInput
+  dataConnectorTypeMapping:
+    - dataConnectorName: totf
+      dataConnectorObjectType: Species
+      fieldMapping:
+        speciesName:
+          column:
+            name: species_name
+
+---
+kind: TypePermissions
+version: v1
+definition:
+  typeName: Species
+  permissions:
+    - role: admin
+      output:
+        allowedFields:
+          - speciesName
+
+---
+kind: BooleanExpressionType
+version: v1
+definition:
+  name: SpeciesBoolExp
+  operand:
+    object:
+      type: Species
+      comparableFields:
+        - fieldName: speciesName
+          booleanExpressionType: TextBoolExp
+      comparableRelationships: []
+  logicalOperators:
+    enable: true
+  isNull:
+    enable: true
+  graphql:
+    typeName: SpeciesBoolExp
+
+---
+kind: AggregateExpression
+version: v1
+definition:
+  name: SpeciesAggExp
+  operand:
+    object:
+      aggregatedType: Species
+      aggregatableFields:
+        - fieldName: speciesName
+          aggregateExpression: TextAggExp
+  count:
+    enable: true
+    returnType: Int64
+  graphql:
+    selectTypeName: SpeciesAggExp
+
+---
+kind: OrderByExpression
+version: v1
+definition:
+  name: SpeciesOrderByExp
+  operand:
+    object:
+      orderedType: Species
+      orderableFields:
+        - fieldName: speciesName
+          orderByExpression: String1OrderByExp
+      orderableRelationships: []
+  graphql:
+    expressionTypeName: SpeciesOrderByExp
+
+---
+kind: Model
+version: v2
+definition:
+  name: Species
+  objectType: Species
+  source:
+    dataConnectorName: totf
+    collection: Species
+  filterExpressionType: SpeciesBoolExp
+  aggregateExpression: SpeciesAggExp
+  orderByExpression: SpeciesOrderByExp
+  graphql:
+    selectMany:
+      queryRootField: species
+      subscription:
+        rootField: species
+    selectUniques:
+      - queryRootField: speciesBySpeciesName
+        uniqueIdentifier:
+          - speciesName
+        subscription:
+          rootField: speciesBySpeciesName
+    filterInputTypeName: SpeciesFilterInput
+    aggregate:
+      queryRootField: speciesAggregate
+      subscription:
+        rootField: speciesAggregate
+  description: Bird Species
+
+---
+kind: ModelPermissions
+version: v1
+definition:
+  modelName: Species
+  permissions:
+    - role: admin
+      select:
+        filter: null
+        allowSubscriptions: true
+
