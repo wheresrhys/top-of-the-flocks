@@ -1,0 +1,312 @@
+---
+kind: ObjectType
+version: v1
+definition:
+  name: Encounters
+  description: Encounters with individual birds
+  fields:
+    - name: age
+      type: Int16!
+    - name: breedingCondition
+      type: String_1
+    - name: captureTime
+      type: String_1!
+    - name: extraText
+      type: String_1
+    - name: isJuv
+      type: Boolean_1!
+    - name: moultCode
+      type: String_1
+    - name: oldGreaterCoverts
+      type: Int16
+    - name: recordType
+      type: String_1!
+    - name: ringNo
+      type: String_1!
+    - name: scheme
+      type: String_1!
+    - name: sex
+      type: String_1!
+    - name: sexingMethod
+      type: String_1
+    - name: visitDate
+      type: Date!
+    - name: weight
+      type: Float32
+    - name: wingLength
+      type: Int16
+  graphql:
+    typeName: Encounters
+    inputTypeName: EncountersInput
+  dataConnectorTypeMapping:
+    - dataConnectorName: totf
+      dataConnectorObjectType: Encounters
+      fieldMapping:
+        age:
+          column:
+            name: age
+        breedingCondition:
+          column:
+            name: breeding_condition
+        captureTime:
+          column:
+            name: capture_time
+        extraText:
+          column:
+            name: extra_text
+        isJuv:
+          column:
+            name: is_juv
+        moultCode:
+          column:
+            name: moult_code
+        oldGreaterCoverts:
+          column:
+            name: old_greater_coverts
+        recordType:
+          column:
+            name: record_type
+        ringNo:
+          column:
+            name: ring_no
+        scheme:
+          column:
+            name: scheme
+        sex:
+          column:
+            name: sex
+        sexingMethod:
+          column:
+            name: sexing_method
+        visitDate:
+          column:
+            name: visit_date
+        weight:
+          column:
+            name: weight
+        wingLength:
+          column:
+            name: wing_length
+
+---
+kind: TypePermissions
+version: v1
+definition:
+  typeName: Encounters
+  permissions:
+    - role: admin
+      output:
+        allowedFields:
+          - age
+          - breedingCondition
+          - captureTime
+          - extraText
+          - isJuv
+          - moultCode
+          - oldGreaterCoverts
+          - recordType
+          - ringNo
+          - scheme
+          - sex
+          - sexingMethod
+          - visitDate
+          - weight
+          - wingLength
+
+---
+kind: BooleanExpressionType
+version: v1
+definition:
+  name: EncountersBoolExp
+  operand:
+    object:
+      type: Encounters
+      comparableFields:
+        - fieldName: age
+          booleanExpressionType: Int2BoolExp
+        - fieldName: breedingCondition
+          booleanExpressionType: TextBoolExp
+        - fieldName: captureTime
+          booleanExpressionType: TimeBoolExp
+        - fieldName: extraText
+          booleanExpressionType: TextBoolExp
+        - fieldName: isJuv
+          booleanExpressionType: BoolBoolExp
+        - fieldName: moultCode
+          booleanExpressionType: TextBoolExp
+        - fieldName: oldGreaterCoverts
+          booleanExpressionType: Int2BoolExp
+        - fieldName: recordType
+          booleanExpressionType: TextBoolExp
+        - fieldName: ringNo
+          booleanExpressionType: TextBoolExp
+        - fieldName: scheme
+          booleanExpressionType: TextBoolExp
+        - fieldName: sex
+          booleanExpressionType: TextBoolExp
+        - fieldName: sexingMethod
+          booleanExpressionType: TextBoolExp
+        - fieldName: visitDate
+          booleanExpressionType: DateBoolExp
+        - fieldName: weight
+          booleanExpressionType: Float4BoolExp
+        - fieldName: wingLength
+          booleanExpressionType: Int2BoolExp
+      comparableRelationships:
+        - relationshipName: bird
+  logicalOperators:
+    enable: true
+  isNull:
+    enable: true
+  graphql:
+    typeName: EncountersBoolExp
+
+---
+kind: AggregateExpression
+version: v1
+definition:
+  name: EncountersAggExp
+  operand:
+    object:
+      aggregatedType: Encounters
+      aggregatableFields:
+        - fieldName: age
+          aggregateExpression: Int2AggExp
+        - fieldName: breedingCondition
+          aggregateExpression: TextAggExp
+        - fieldName: captureTime
+          aggregateExpression: TimeAggExp
+        - fieldName: extraText
+          aggregateExpression: TextAggExp
+        - fieldName: isJuv
+          aggregateExpression: BoolAggExp
+        - fieldName: moultCode
+          aggregateExpression: TextAggExp
+        - fieldName: oldGreaterCoverts
+          aggregateExpression: Int2AggExp
+        - fieldName: recordType
+          aggregateExpression: TextAggExp
+        - fieldName: ringNo
+          aggregateExpression: TextAggExp
+        - fieldName: scheme
+          aggregateExpression: TextAggExp
+        - fieldName: sex
+          aggregateExpression: TextAggExp
+        - fieldName: sexingMethod
+          aggregateExpression: TextAggExp
+        - fieldName: visitDate
+          aggregateExpression: DateAggExp
+        - fieldName: weight
+          aggregateExpression: Float4AggExp
+        - fieldName: wingLength
+          aggregateExpression: Int2AggExp
+  count:
+    enable: true
+    returnType: Int64
+  graphql:
+    selectTypeName: EncountersAggExp
+
+---
+kind: OrderByExpression
+version: v1
+definition:
+  name: EncountersOrderByExp
+  operand:
+    object:
+      orderedType: Encounters
+      orderableFields:
+        - fieldName: age
+          orderByExpression: Int16OrderByExp
+        - fieldName: breedingCondition
+          orderByExpression: String1OrderByExp
+        - fieldName: captureTime
+          orderByExpression: String1OrderByExp
+        - fieldName: extraText
+          orderByExpression: String1OrderByExp
+        - fieldName: isJuv
+          orderByExpression: Boolean1OrderByExp
+        - fieldName: moultCode
+          orderByExpression: String1OrderByExp
+        - fieldName: oldGreaterCoverts
+          orderByExpression: Int16OrderByExp
+        - fieldName: recordType
+          orderByExpression: String1OrderByExp
+        - fieldName: ringNo
+          orderByExpression: String1OrderByExp
+        - fieldName: scheme
+          orderByExpression: String1OrderByExp
+        - fieldName: sex
+          orderByExpression: String1OrderByExp
+        - fieldName: sexingMethod
+          orderByExpression: String1OrderByExp
+        - fieldName: visitDate
+          orderByExpression: DateOrderByExp
+        - fieldName: weight
+          orderByExpression: Float32OrderByExp
+        - fieldName: wingLength
+          orderByExpression: Int16OrderByExp
+      orderableRelationships:
+        - relationshipName: bird
+  graphql:
+    expressionTypeName: EncountersOrderByExp
+
+---
+kind: Model
+version: v2
+definition:
+  name: Encounters
+  objectType: Encounters
+  source:
+    dataConnectorName: totf
+    collection: Encounters
+  filterExpressionType: EncountersBoolExp
+  aggregateExpression: EncountersAggExp
+  orderByExpression: EncountersOrderByExp
+  graphql:
+    selectMany:
+      queryRootField: encounters
+      subscription:
+        rootField: encounters
+    selectUniques:
+      - queryRootField: encountersByEncountersPkey
+        uniqueIdentifier:
+          - ringNo
+          - visitDate
+        subscription:
+          rootField: encountersByEncountersPkey
+    filterInputTypeName: EncountersFilterInput
+    aggregate:
+      queryRootField: encountersAggregate
+      subscription:
+        rootField: encountersAggregate
+  description: Encounters with individual birds
+
+---
+kind: ModelPermissions
+version: v1
+definition:
+  modelName: Encounters
+  permissions:
+    - role: admin
+      select:
+        filter: null
+        allowSubscriptions: true
+
+---
+kind: Relationship
+version: v1
+definition:
+  name: bird
+  sourceType: Encounters
+  target:
+    model:
+      name: Birds
+      relationshipType: Object
+  mapping:
+    - source:
+        fieldPath:
+          - fieldName: ringNo
+      target:
+        modelField:
+          - fieldName: ringNo
+
