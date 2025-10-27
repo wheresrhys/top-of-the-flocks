@@ -1,6 +1,6 @@
 import { loadQuery } from './query-loader';
-import type { 
-  HomePageQuery, 
+import type {
+  HomePageQuery,
   HomePageQueryVariables,
   SpeciesPageQuery,
   SpeciesPageQueryVariables
@@ -16,7 +16,7 @@ export const queries = {
   },
   species: {
     query: loadQuery('species'),
-    // Type helpers for this specific query  
+    // Type helpers for this specific query
     type: {} as SpeciesPageQuery,
     variables: {} as SpeciesPageQueryVariables,
   },

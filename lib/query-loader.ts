@@ -22,10 +22,10 @@ export function loadQuery(filename: string): string {
  */
 export function loadQueries(filenames: string[]): Record<string, string> {
   const queries: Record<string, string> = {};
-  
+
   for (const filename of filenames) {
     queries[filename] = loadQuery(filename);
   }
-  
+
   return queries;
 }
