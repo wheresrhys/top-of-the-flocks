@@ -10,6 +10,17 @@
  */
 
 import { useState, useEffect } from 'react';
+import { 
+  Box, 
+  Typography, 
+  CircularProgress, 
+  Alert, 
+  Card, 
+  CardContent,
+  List,
+  ListItem,
+  ListItemText
+} from '@mui/material';
 
 export default function ExampleComponent() {
   const [loading, setLoading] = useState(true);
@@ -68,30 +79,52 @@ export default function ExampleComponent() {
   }, []);
 
   if (loading) {
-    return <div className="p-4">Loading...</div>;
+    return (
+      <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+        <CircularProgress />
+      </Box>
+    );
   }
 
   if (error) {
-    return <div className="p-4 text-red-600">Error: {error}</div>;
+    return (
+      <Box sx={{ p: 4 }}>
+        <Alert severity="error">Error: {error}</Alert>
+      </Box>
+    );
   }
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Example Component</h2>
-      <p className="mb-4 text-gray-700">
+    <Box sx={{ p: 4 }}>
+      <Typography variant="h4" component="h2" gutterBottom>
+        Example Component
+      </Typography>
+      <Typography variant="body1" color="text.secondary" paragraph>
         This is an example component showing how to integrate Supabase and Hasura.
         See the source code for usage examples.
-      </p>
+      </Typography>
       
-      <div className="bg-blue-50 border border-blue-200 rounded p-4">
-        <h3 className="font-semibold mb-2">To use this component:</h3>
-        <ol className="list-decimal list-inside space-y-1 text-sm">
-          <li>Copy this file to create your own component</li>
-          <li>Uncomment the imports and code sections you need</li>
-          <li>Modify the queries to match your database schema</li>
-          <li>Remove this instructional UI</li>
-        </ol>
-      </div>
-    </div>
+      <Card sx={{ bgcolor: 'primary.50', border: 1, borderColor: 'primary.200' }}>
+        <CardContent>
+          <Typography variant="h6" gutterBottom>
+            To use this component:
+          </Typography>
+          <List dense>
+            <ListItem>
+              <ListItemText primary="1. Copy this file to create your own component" />
+            </ListItem>
+            <ListItem>
+              <ListItemText primary="2. Uncomment the imports and code sections you need" />
+            </ListItem>
+            <ListItem>
+              <ListItemText primary="3. Modify the queries to match your database schema" />
+            </ListItem>
+            <ListItem>
+              <ListItemText primary="4. Remove this instructional UI" />
+            </ListItem>
+          </List>
+        </CardContent>
+      </Card>
+    </Box>
   );
 }
