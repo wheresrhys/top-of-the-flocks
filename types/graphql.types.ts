@@ -702,7 +702,7 @@ export type TimeBoolExp = {
 export type HomePageQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type HomePageQuery = { __typename?: 'Query', species?: Array<{ __typename?: 'Species', speciesName: any, birdsAggregate: { __typename?: 'BirdsAggExp', _count: any }, birds?: Array<{ __typename?: 'Birds', encountersAggregate: { __typename?: 'EncountersAggExp', _count: any } }> | null }> | null };
+export type HomePageQuery = { __typename?: 'Query', speciesLeagueTable?: Array<{ __typename?: 'SpeciesLeagueTable', speciesName?: any | null, individuals?: any | null, encounters?: any | null, sessionCount?: any | null, frequentFlyer?: any | null, longestStay?: any | null, unluckiest?: any | null, heaviest?: any | null, lightest?: any | null, totalWeight?: any | null, longestWinged?: any | null, shortestWinged?: any | null }> | null };
 
 export type SpeciesPageQueryVariables = Exact<{
   speciesName?: InputMaybe<Scalars['String1']['input']>;

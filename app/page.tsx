@@ -33,19 +33,14 @@ async function getSpeciesData(): Promise<HomeQuery> {
 async function SpeciesTable() {
   const data = await getSpeciesData();
 
-  // Calculate totals and sort by bird count in descending order
-  const speciesWithTotals = data.species
-    ? data.species.map(species => ({
-        speciesName: species.speciesName,
-        birdCount: species.birdsAggregate._count || 0,
-        encounterCount: species.birds?.reduce((sum, bird) =>
-          sum + (bird.encountersAggregate._count || 0), 0) || 0
-      })).sort((a, b) => b.birdCount - a.birdCount)
+  // Sort by individuals count in descending order (or you can choose a different sorting field)
+  const sortedSpecies = data.speciesLeagueTable
+    ? [...data.speciesLeagueTable].sort((a, b) => (b.individuals || 0) - (a.individuals || 0))
     : [];
 
   return (
     <TableContainer component={Paper} elevation={2}>
-      <Table>
+      <Table size="small" sx={{ minWidth: 1200 }}>
         <TableHead>
           <TableRow>
             <TableCell>
@@ -55,7 +50,7 @@ async function SpeciesTable() {
             </TableCell>
             <TableCell align="right">
               <Typography variant="h6" fontWeight="bold">
-                Bird Count
+                Individuals
               </Typography>
             </TableCell>
             <TableCell align="right">
@@ -63,10 +58,55 @@ async function SpeciesTable() {
                 Encounters
               </Typography>
             </TableCell>
+            <TableCell align="right">
+              <Typography variant="h6" fontWeight="bold">
+                Session Count
+              </Typography>
+            </TableCell>
+            <TableCell align="right">
+              <Typography variant="h6" fontWeight="bold">
+                Frequent Flyer
+              </Typography>
+            </TableCell>
+            <TableCell align="right">
+              <Typography variant="h6" fontWeight="bold">
+                Longest Stay
+              </Typography>
+            </TableCell>
+            <TableCell align="right">
+              <Typography variant="h6" fontWeight="bold">
+                Unluckiest
+              </Typography>
+            </TableCell>
+            <TableCell align="right">
+              <Typography variant="h6" fontWeight="bold">
+                Heaviest
+              </Typography>
+            </TableCell>
+            <TableCell align="right">
+              <Typography variant="h6" fontWeight="bold">
+                Lightest
+              </Typography>
+            </TableCell>
+            <TableCell align="right">
+              <Typography variant="h6" fontWeight="bold">
+                Total Weight
+              </Typography>
+            </TableCell>
+            <TableCell align="right">
+              <Typography variant="h6" fontWeight="bold">
+                Longest Winged
+              </Typography>
+            </TableCell>
+            <TableCell align="right">
+              <Typography variant="h6" fontWeight="bold">
+                Shortest Winged
+              </Typography>
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {speciesWithTotals.map((species, index) => (
+          {sortedSpecies.map((species, index) => (
             <TableRow
               key={species.speciesName}
               sx={{
@@ -77,7 +117,7 @@ async function SpeciesTable() {
             >
               <TableCell component="th" scope="row">
                 <Link
-                  href={`/species/${encodeURIComponent(species.speciesName)}`}
+                  href={`/species/${encodeURIComponent(species.speciesName || '')}`}
                   style={{ textDecoration: 'none' }}
                 >
                   <Typography
@@ -94,13 +134,58 @@ async function SpeciesTable() {
                 </Link>
               </TableCell>
               <TableCell align="right">
-                <Typography variant="body1" fontWeight="medium">
-                  {species.birdCount.toLocaleString()}
+                <Typography variant="body2">
+                  {species.individuals?.toLocaleString() || 0}
                 </Typography>
               </TableCell>
               <TableCell align="right">
-                <Typography variant="body1" fontWeight="medium">
-                  {species.encounterCount.toLocaleString()}
+                <Typography variant="body2">
+                  {species.encounters?.toLocaleString() || 0}
+                </Typography>
+              </TableCell>
+              <TableCell align="right">
+                <Typography variant="body2">
+                  {species.sessionCount?.toLocaleString() || 0}
+                </Typography>
+              </TableCell>
+              <TableCell align="right">
+                <Typography variant="body2">
+                  {species.frequentFlyer || '-'}
+                </Typography>
+              </TableCell>
+              <TableCell align="right">
+                <Typography variant="body2">
+                  {species.longestStay || '-'}
+                </Typography>
+              </TableCell>
+              <TableCell align="right">
+                <Typography variant="body2">
+                  {species.unluckiest || '-'}
+                </Typography>
+              </TableCell>
+              <TableCell align="right">
+                <Typography variant="body2">
+                  {species.heaviest ? `${species.heaviest}g` : '-'}
+                </Typography>
+              </TableCell>
+              <TableCell align="right">
+                <Typography variant="body2">
+                  {species.lightest ? `${species.lightest}g` : '-'}
+                </Typography>
+              </TableCell>
+              <TableCell align="right">
+                <Typography variant="body2">
+                  {species.totalWeight ? `${species.totalWeight}g` : '-'}
+                </Typography>
+              </TableCell>
+              <TableCell align="right">
+                <Typography variant="body2">
+                  {species.longestWinged ? `${species.longestWinged}mm` : '-'}
+                </Typography>
+              </TableCell>
+              <TableCell align="right">
+                <Typography variant="body2">
+                  {species.shortestWinged ? `${species.shortestWinged}mm` : '-'}
                 </Typography>
               </TableCell>
             </TableRow>
@@ -113,7 +198,7 @@ async function SpeciesTable() {
 
 export default function Home() {
   return (
-    <Container maxWidth="lg">
+    <Container maxWidth="xl">
       <Box
         sx={{
           minHeight: '100vh',

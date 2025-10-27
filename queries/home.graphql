@@ -1,13 +1,16 @@
 query HomePage {
-  species {
+  speciesLeagueTable {
     speciesName
-    birdsAggregate {
-      _count
-    }
-    birds {
-      encountersAggregate {
-        _count
-      }
-    }
+    individuals
+    encounters
+    sessionCount
+    frequentFlyer
+    longestStay
+    unluckiest
+    heaviest
+    lightest
+    totalWeight
+    longestWinged
+    shortestWinged
   }
 }
