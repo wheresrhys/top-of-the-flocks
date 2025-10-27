@@ -5,8 +5,7 @@ Leaderboard for bird ringing data
 
 This is a Next.js application that provides a leaderboard for bird ringing data. The application uses:
 - **Next.js** - React framework for production
-- **Supabase** - PostgreSQL database and authentication
-- **Hasura** - GraphQL API layer
+- **Supabase** - PostgreSQL database, authentication and GraphQL API layer
 - **Vercel** - Hosting and deployment
 - **GitHub Actions** - Continuous Integration
 
@@ -15,7 +14,6 @@ This is a Next.js application that provides a leaderboard for bird ringing data.
 - Node.js 20 or higher
 - npm
 - A Supabase account and project
-- A Hasura Cloud account or self-hosted instance
 
 ## Getting Started
 
@@ -53,31 +51,15 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ## Data Import
 
-To import data from a CSV file into Supabase:
+To import data from a CSV file (export from Demography Online) into Supabase:
 
 ```bash
-npm run import -- <path-to-csv-file> <table-name>
+npm run import -- <path-to-csv-file>
 ```
 
 Example:
 ```bash
-npm run import -- data/birds.csv bird_sightings
-```
-
-The import script:
-- Reads CSV files and parses them
-- Inserts data in batches (100 records at a time by default)
-- Provides progress feedback
-- Reports success/failure statistics
-
-### CSV File Format
-
-Ensure your CSV file has headers that match your Supabase table column names. For example:
-
-```csv
-species,location,date,ringer_id
-Robin,London,2024-01-15,12345
-Sparrow,Manchester,2024-01-16,12346
+npm run import -- data/birds.csv
 ```
 
 ## Deployment
@@ -98,9 +80,8 @@ Vercel will automatically deploy your main branch and create preview deployments
 Add these environment variables in your Vercel project settings:
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `NEXT_PUBLIC_HASURA_ENDPOINT`
 
-**Note:** Do not add `SUPABASE_SERVICE_ROLE_KEY` or `HASURA_ADMIN_SECRET` to Vercel as they are only needed for the import script.
+**Note:** Do not add `SUPABASE_SERVICE_ROLE_KEY` to Vercel as they are only needed for the import script.
 
 ## CI/CD
 
@@ -151,17 +132,11 @@ To use the example component, uncomment the relevant sections and modify the que
 2. Get your project URL and anon key from Settings > API
 3. Create your database tables in the SQL Editor or Table Editor
 
-UPdate types locally using `npm run supabase:types`
-
-## Setting up Hasura
-
-ddn console --local && npm run hasura:dev
-
+Update types locally using `npm run supabase:types`
 
 ## Learn More
 
 - [Next.js Documentation](https://nextjs.org/docs)
 - [Supabase Documentation](https://supabase.com/docs)
-- [Hasura Documentation](https://hasura.io/docs)
 - [Vercel Documentation](https://vercel.com/docs)
 
