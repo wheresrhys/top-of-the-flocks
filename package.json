@@ -10,6 +10,7 @@
     "supabase:types": "./scripts/load-env.sh echo 'beginning type generation' && npx supabase gen types typescript --project-id $(op run --no-masking --env-file=\".env.1password\" -- printenv SUPABASE_PROJECT_ID) --schema public > ./types/supabase.types.ts  && echo 'types regenerated ok' || echo 'run `npx supabase login` to sign in to supabase first'",
     "hasura:update-graph": "cd hasura && ddn supergraph build local",
     "hasura:dev": "cd hasura && ddn console --local && ddn run docker-start",
+    "hasura:types": "./scripts/load-env.sh npx graphql-codegen --config codegen.ts",
     "import": "./scripts/load-env.sh tsx scripts/import-csv.ts",
     "env:load": "./scripts/load-env.sh",
     "env:check": "op whoami && echo '✅ 1Password CLI authenticated' || echo '❌ Please run: op signin'"
@@ -29,6 +30,10 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@graphql-codegen/cli": "^6.0.1",
+    "@graphql-codegen/introspection": "^5.0.0",
+    "@graphql-codegen/typescript": "^5.0.2",
+    "@graphql-codegen/typescript-operations": "^5.0.2",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

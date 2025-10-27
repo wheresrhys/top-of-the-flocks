@@ -1,0 +1,13 @@
+query GetSpeciesWithCounts {
+  species {
+    speciesName
+    birdsAggregate {
+      _count
+    }
+    birds {
+      encountersAggregate {
+        _count
+      }
+    }
+  }
+}
