@@ -2223,6 +2223,22 @@
         "schemaName": "public",
         "tableName": "species_league_table",
         "columns": {
+          "average_weight": {
+            "name": "average_weight",
+            "type": {
+              "scalarType": "float8"
+            },
+            "nullable": "nullable",
+            "description": null
+          },
+          "average_wing_length": {
+            "name": "average_wing_length",
+            "type": {
+              "scalarType": "numeric"
+            },
+            "nullable": "nullable",
+            "description": null
+          },
           "encounters": {
             "name": "encounters",
             "type": {

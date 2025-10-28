@@ -242,6 +242,36 @@ export type Float4BoolExp = {
   _or?: InputMaybe<Array<Float4BoolExp>>;
 };
 
+export type Float8AggExp = {
+  __typename?: 'Float8AggExp';
+  _count: Scalars['Int64']['output'];
+  _count_distinct: Scalars['Int64']['output'];
+  avg?: Maybe<Scalars['Float64']['output']>;
+  max?: Maybe<Scalars['Float64']['output']>;
+  min?: Maybe<Scalars['Float64']['output']>;
+  stddev?: Maybe<Scalars['Float64']['output']>;
+  stddev_pop?: Maybe<Scalars['Float64']['output']>;
+  stddev_samp?: Maybe<Scalars['Float64']['output']>;
+  sum?: Maybe<Scalars['Float64']['output']>;
+  var_pop?: Maybe<Scalars['Float64']['output']>;
+  var_samp?: Maybe<Scalars['Float64']['output']>;
+  variance?: Maybe<Scalars['Float64']['output']>;
+};
+
+export type Float8BoolExp = {
+  _and?: InputMaybe<Array<Float8BoolExp>>;
+  _eq?: InputMaybe<Scalars['Float64']['input']>;
+  _gt?: InputMaybe<Scalars['Float64']['input']>;
+  _gte?: InputMaybe<Scalars['Float64']['input']>;
+  _in?: InputMaybe<Array<Scalars['Float64']['input']>>;
+  _is_null?: InputMaybe<Scalars['Boolean']['input']>;
+  _lt?: InputMaybe<Scalars['Float64']['input']>;
+  _lte?: InputMaybe<Scalars['Float64']['input']>;
+  _neq?: InputMaybe<Scalars['Float64']['input']>;
+  _not?: InputMaybe<Float8BoolExp>;
+  _or?: InputMaybe<Array<Float8BoolExp>>;
+};
+
 export type Int2AggExp = {
   __typename?: 'Int2AggExp';
   _count: Scalars['Int64']['output'];
@@ -485,6 +515,8 @@ export type SpeciesFilterInput = {
 
 export type SpeciesLeagueTable = {
   __typename?: 'SpeciesLeagueTable';
+  averageWeight?: Maybe<Scalars['Float64']['output']>;
+  averageWingLength?: Maybe<Scalars['Bigdecimal']['output']>;
   encounters?: Maybe<Scalars['Int64']['output']>;
   frequentFlyer?: Maybe<Scalars['Bigdecimal']['output']>;
   heaviest?: Maybe<Scalars['Float32']['output']>;
@@ -502,6 +534,8 @@ export type SpeciesLeagueTable = {
 export type SpeciesLeagueTableAggExp = {
   __typename?: 'SpeciesLeagueTableAggExp';
   _count: Scalars['Int64']['output'];
+  averageWeight: Float8AggExp;
+  averageWingLength: NumericAggExp;
   encounters: Int8AggExp;
   frequentFlyer: NumericAggExp;
   heaviest: Float4AggExp;
@@ -520,6 +554,8 @@ export type SpeciesLeagueTableBoolExp = {
   _and?: InputMaybe<Array<SpeciesLeagueTableBoolExp>>;
   _not?: InputMaybe<SpeciesLeagueTableBoolExp>;
   _or?: InputMaybe<Array<SpeciesLeagueTableBoolExp>>;
+  averageWeight?: InputMaybe<Float8BoolExp>;
+  averageWingLength?: InputMaybe<NumericBoolExp>;
   encounters?: InputMaybe<Int8BoolExp>;
   frequentFlyer?: InputMaybe<NumericBoolExp>;
   heaviest?: InputMaybe<Float4BoolExp>;
@@ -542,6 +578,8 @@ export type SpeciesLeagueTableFilterInput = {
 };
 
 export type SpeciesLeagueTableOrderByExp = {
+  averageWeight?: InputMaybe<OrderBy>;
+  averageWingLength?: InputMaybe<OrderBy>;
   encounters?: InputMaybe<OrderBy>;
   frequentFlyer?: InputMaybe<OrderBy>;
   heaviest?: InputMaybe<OrderBy>;
@@ -702,7 +740,7 @@ export type TimeBoolExp = {
 export type HomePageQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type HomePageQuery = { __typename?: 'Query', speciesLeagueTable?: Array<{ __typename?: 'SpeciesLeagueTable', speciesName?: any | null, individuals?: any | null, encounters?: any | null, sessionCount?: any | null, frequentFlyer?: any | null, longestStay?: any | null, unluckiest?: any | null, heaviest?: any | null, lightest?: any | null, totalWeight?: any | null, longestWinged?: any | null, shortestWinged?: any | null }> | null };
+export type HomePageQuery = { __typename?: 'Query', speciesLeagueTable?: Array<{ __typename?: 'SpeciesLeagueTable', speciesName?: any | null, individuals?: any | null, encounters?: any | null, sessionCount?: any | null, frequentFlyer?: any | null, longestStay?: any | null, unluckiest?: any | null, longestWinged?: any | null, averageWingLength?: any | null, shortestWinged?: any | null, heaviest?: any | null, averageWeight?: any | null, lightest?: any | null, totalWeight?: any | null }> | null };
 
 export type GetSpeciesDetailsQueryVariables = Exact<{
   speciesName?: InputMaybe<Scalars['String1']['input']>;
