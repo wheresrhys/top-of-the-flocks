@@ -13,9 +13,10 @@ import {
   Paper,
   TableSortLabel,
 } from '@mui/material';
+import { SpeciesLeagueTable } from '../../types/graphql.types';
 
 // Define the sortable columns and their types
-type SortableColumn =
+type SortableColumn = keyof Pick<SpeciesLeagueTable, 
   | 'speciesName'
   | 'individuals'
   | 'encounters'
@@ -29,27 +30,10 @@ type SortableColumn =
   | 'heaviest'
   | 'averageWeight'
   | 'lightest'
-  | 'totalWeight';
+  | 'totalWeight'
+>;
 
 type SortOrder = 'asc' | 'desc';
-
-// Define the species data type
-type SpeciesData = {
-  speciesName?: string | null;
-  individuals?: number | null;
-  encounters?: number | null;
-  sessionCount?: number | null;
-  frequentFlyer?: string | null;
-  longestStay?: string | null;
-  unluckiest?: string | null;
-  longestWinged?: number | null;
-  averageWingLength?: number | null;
-  shortestWinged?: number | null;
-  heaviest?: number | null;
-  averageWeight?: number | null;
-  lightest?: number | null;
-  totalWeight?: number | null;
-};
 
 // Define which columns should be treated as numeric
 const numericColumns: SortableColumn[] = [
@@ -67,7 +51,7 @@ const numericColumns: SortableColumn[] = [
 ];
 
 // Helper function to compare values for sorting
-function compareValues(a: SpeciesData, b: SpeciesData, orderBy: SortableColumn, order: SortOrder) {
+function compareValues(a: SpeciesLeagueTable, b: SpeciesLeagueTable, orderBy: SortableColumn, order: SortOrder) {
   // Handle null/undefined values
   if (a[orderBy] == null && b[orderBy] == null) return 0;
   if (a[orderBy] == null) return order === 'asc' ? 1 : -1;
@@ -140,7 +124,7 @@ function SortableTableCell({
 }
 
 interface SortableSpeciesTableProps {
-  data: SpeciesData[];
+  data: SpeciesLeagueTable[];
 }
 
 export function SortableSpeciesTable({ data }: SortableSpeciesTableProps) {
@@ -353,7 +337,7 @@ export function SortableSpeciesTable({ data }: SortableSpeciesTableProps) {
               </TableCell>
               <TableCell align="right">
                 <Typography variant="body2">
-                  {species.averageWingLength ? `${species.averageWingLength.toFixed(1)}mm` : '-'}
+                  {species.averageWingLength ? `${Number(species.averageWingLength).toFixed(1)}mm` : '-'}
                 </Typography>
               </TableCell>
               <TableCell align="right">
