@@ -16,7 +16,7 @@ import {
 import { SpeciesLeagueTable } from '../../types/graphql.types';
 
 // Define the sortable columns and their types
-type SortableColumn = keyof Pick<SpeciesLeagueTable, 
+type SortableColumn = keyof Pick<SpeciesLeagueTable,
   | 'speciesName'
   | 'individuals'
   | 'encounters'

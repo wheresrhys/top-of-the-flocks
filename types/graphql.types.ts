@@ -12,15 +12,15 @@ export type Scalars = {
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
   Float: { input: number; output: number; }
-  Bigdecimal: { input: any; output: any; }
-  Boolean1: { input: any; output: any; }
-  Date: { input: any; output: any; }
-  Float32: { input: any; output: any; }
-  Float64: { input: any; output: any; }
-  Int16: { input: any; output: any; }
-  Int64: { input: any; output: any; }
-  Json: { input: any; output: any; }
-  String1: { input: any; output: any; }
+  Bigdecimal: { input: number; output: number; }
+  Boolean1: { input: boolean; output: boolean; }
+  Date: { input: string; output: string; }
+  Float32: { input: number; output: number; }
+  Float64: { input: number; output: number; }
+  Int16: { input: number; output: number; }
+  Int64: { input: number; output: number; }
+  Json: { input: Record<string, unknown>; output: Record<string, unknown>; }
+  String1: { input: string; output: string; }
 };
 
 /** @graphql({"aggregate": {"enabled": true}}) */
@@ -740,18 +740,18 @@ export type TimeBoolExp = {
 export type HomePageQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type HomePageQuery = { __typename?: 'Query', speciesLeagueTable?: Array<{ __typename?: 'SpeciesLeagueTable', speciesName?: any | null, individuals?: any | null, encounters?: any | null, sessionCount?: any | null, frequentFlyer?: any | null, longestStay?: any | null, unluckiest?: any | null, longestWinged?: any | null, averageWingLength?: any | null, shortestWinged?: any | null, heaviest?: any | null, averageWeight?: any | null, lightest?: any | null, totalWeight?: any | null }> | null };
+export type HomePageQuery = { __typename?: 'Query', speciesLeagueTable?: Array<{ __typename?: 'SpeciesLeagueTable', speciesName?: string | null, individuals?: number | null, encounters?: number | null, sessionCount?: number | null, frequentFlyer?: number | null, longestStay?: number | null, unluckiest?: number | null, longestWinged?: number | null, averageWingLength?: number | null, shortestWinged?: number | null, heaviest?: number | null, averageWeight?: number | null, lightest?: number | null, totalWeight?: number | null }> | null };
 
 export type GetSpeciesDetailsQueryVariables = Exact<{
   speciesName?: InputMaybe<Scalars['String1']['input']>;
 }>;
 
 
-export type GetSpeciesDetailsQuery = { __typename?: 'Query', species?: Array<{ __typename?: 'Species', speciesName: any, birdsAggregate: { __typename?: 'BirdsAggExp', _count: any }, birds?: Array<{ __typename?: 'Birds', encounters?: Array<{ __typename?: 'Encounters', visitDate: any }> | null, encountersAggregate: { __typename?: 'EncountersAggExp', _count: any } }> | null }> | null };
+export type GetSpeciesDetailsQuery = { __typename?: 'Query', species?: Array<{ __typename?: 'Species', speciesName: string, birdsAggregate: { __typename?: 'BirdsAggExp', _count: number }, birds?: Array<{ __typename?: 'Birds', encounters?: Array<{ __typename?: 'Encounters', visitDate: string }> | null, encountersAggregate: { __typename?: 'EncountersAggExp', _count: number } }> | null }> | null };
 
 export type SpeciesPageQueryVariables = Exact<{
   speciesName?: InputMaybe<Scalars['String1']['input']>;
 }>;
 
 
-export type SpeciesPageQuery = { __typename?: 'Query', species?: Array<{ __typename?: 'Species', speciesName: any, birdsAggregate: { __typename?: 'BirdsAggExp', _count: any }, birds?: Array<{ __typename?: 'Birds', encounters?: Array<{ __typename?: 'Encounters', visitDate: any }> | null, encountersAggregate: { __typename?: 'EncountersAggExp', _count: any } }> | null }> | null };
+export type SpeciesPageQuery = { __typename?: 'Query', species?: Array<{ __typename?: 'Species', speciesName: string, birdsAggregate: { __typename?: 'BirdsAggExp', _count: number }, birds?: Array<{ __typename?: 'Birds', encounters?: Array<{ __typename?: 'Encounters', visitDate: string }> | null, encountersAggregate: { __typename?: 'EncountersAggExp', _count: number } }> | null }> | null };
