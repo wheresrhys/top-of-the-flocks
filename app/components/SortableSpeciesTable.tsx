@@ -13,9 +13,10 @@ import {
   Paper,
   TableSortLabel,
 } from '@mui/material';
+import { SpeciesLeagueTable } from '../../types/graphql.types';
 
 // Define the sortable columns and their types
-type SortableColumn =
+type SortableColumn = keyof Pick<SpeciesLeagueTable,
   | 'speciesName'
   | 'individuals'
   | 'encounters'
@@ -23,45 +24,34 @@ type SortableColumn =
   | 'frequentFlyer'
   | 'longestStay'
   | 'unluckiest'
+  | 'longestWinged'
+  | 'averageWingLength'
+  | 'shortestWinged'
   | 'heaviest'
+  | 'averageWeight'
   | 'lightest'
   | 'totalWeight'
-  | 'longestWinged'
-  | 'shortestWinged';
+>;
 
 type SortOrder = 'asc' | 'desc';
-
-// Define the species data type
-type SpeciesData = {
-  speciesName?: string | null;
-  individuals?: number | null;
-  encounters?: number | null;
-  sessionCount?: number | null;
-  frequentFlyer?: string | null;
-  longestStay?: string | null;
-  unluckiest?: string | null;
-  heaviest?: number | null;
-  lightest?: number | null;
-  totalWeight?: number | null;
-  longestWinged?: number | null;
-  shortestWinged?: number | null;
-};
 
 // Define which columns should be treated as numeric
 const numericColumns: SortableColumn[] = [
   'individuals',
-  'encounters', 
+  'encounters',
   'sessionCount',
   'unluckiest',
-  'heaviest',
-  'lightest',
-  'totalWeight',
   'longestWinged',
-  'shortestWinged'
+  'averageWingLength',
+  'shortestWinged',
+  'heaviest',
+  'averageWeight',
+  'lightest',
+  'totalWeight'
 ];
 
 // Helper function to compare values for sorting
-function compareValues(a: SpeciesData, b: SpeciesData, orderBy: SortableColumn, order: SortOrder) {
+function compareValues(a: SpeciesLeagueTable, b: SpeciesLeagueTable, orderBy: SortableColumn, order: SortOrder) {
   // Handle null/undefined values
   if (a[orderBy] == null && b[orderBy] == null) return 0;
   if (a[orderBy] == null) return order === 'asc' ? 1 : -1;
@@ -134,7 +124,7 @@ function SortableTableCell({
 }
 
 interface SortableSpeciesTableProps {
-  data: SpeciesData[];
+  data: SpeciesLeagueTable[];
 }
 
 export function SortableSpeciesTable({ data }: SortableSpeciesTableProps) {
@@ -221,10 +211,46 @@ export function SortableSpeciesTable({ data }: SortableSpeciesTableProps) {
               orderBy={orderBy}
               order={order}
               onSort={handleSort}
+              column="longestWinged"
+              align="right"
+            >
+              Max Wing
+            </SortableTableCell>
+            <SortableTableCell
+              orderBy={orderBy}
+              order={order}
+              onSort={handleSort}
+              column="averageWingLength"
+              align="right"
+            >
+              Avg Wing
+            </SortableTableCell>
+            <SortableTableCell
+              orderBy={orderBy}
+              order={order}
+              onSort={handleSort}
+              column="shortestWinged"
+              align="right"
+            >
+              Min Wing
+            </SortableTableCell>
+            <SortableTableCell
+              orderBy={orderBy}
+              order={order}
+              onSort={handleSort}
               column="heaviest"
               align="right"
             >
-              Heaviest
+              Max Weight
+            </SortableTableCell>
+            <SortableTableCell
+              orderBy={orderBy}
+              order={order}
+              onSort={handleSort}
+              column="averageWeight"
+              align="right"
+            >
+              Avg Weight
             </SortableTableCell>
             <SortableTableCell
               orderBy={orderBy}
@@ -233,7 +259,7 @@ export function SortableSpeciesTable({ data }: SortableSpeciesTableProps) {
               column="lightest"
               align="right"
             >
-              Lightest
+              Min Weight
             </SortableTableCell>
             <SortableTableCell
               orderBy={orderBy}
@@ -243,24 +269,6 @@ export function SortableSpeciesTable({ data }: SortableSpeciesTableProps) {
               align="right"
             >
               Total Weight
-            </SortableTableCell>
-            <SortableTableCell
-              orderBy={orderBy}
-              order={order}
-              onSort={handleSort}
-              column="longestWinged"
-              align="right"
-            >
-              Longest Winged
-            </SortableTableCell>
-            <SortableTableCell
-              orderBy={orderBy}
-              order={order}
-              onSort={handleSort}
-              column="shortestWinged"
-              align="right"
-            >
-              Shortest Winged
             </SortableTableCell>
           </TableRow>
         </TableHead>
@@ -324,7 +332,27 @@ export function SortableSpeciesTable({ data }: SortableSpeciesTableProps) {
               </TableCell>
               <TableCell align="right">
                 <Typography variant="body2">
+                  {species.longestWinged ? `${species.longestWinged}mm` : '-'}
+                </Typography>
+              </TableCell>
+              <TableCell align="right">
+                <Typography variant="body2">
+                  {species.averageWingLength ? `${Number(species.averageWingLength).toFixed(1)}mm` : '-'}
+                </Typography>
+              </TableCell>
+              <TableCell align="right">
+                <Typography variant="body2">
+                  {species.shortestWinged ? `${species.shortestWinged}mm` : '-'}
+                </Typography>
+              </TableCell>
+              <TableCell align="right">
+                <Typography variant="body2">
                   {species.heaviest ? `${species.heaviest}g` : '-'}
+                </Typography>
+              </TableCell>
+              <TableCell align="right">
+                <Typography variant="body2">
+                  {species.averageWeight ? `${species.averageWeight.toFixed(1)}g` : '-'}
                 </Typography>
               </TableCell>
               <TableCell align="right">
@@ -335,16 +363,6 @@ export function SortableSpeciesTable({ data }: SortableSpeciesTableProps) {
               <TableCell align="right">
                 <Typography variant="body2">
                   {species.totalWeight ? `${species.totalWeight}g` : '-'}
-                </Typography>
-              </TableCell>
-              <TableCell align="right">
-                <Typography variant="body2">
-                  {species.longestWinged ? `${species.longestWinged}mm` : '-'}
-                </Typography>
-              </TableCell>
-              <TableCell align="right">
-                <Typography variant="body2">
-                  {species.shortestWinged ? `${species.shortestWinged}mm` : '-'}
                 </Typography>
               </TableCell>
             </TableRow>

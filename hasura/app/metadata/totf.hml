@@ -3822,6 +3822,18 @@ definition:
           foreign_keys: {}
         insert_species_league_table_object:
           fields:
+            average_weight:
+              type:
+                type: nullable
+                underlying_type:
+                  name: float8
+                  type: named
+            average_wing_length:
+              type:
+                type: nullable
+                underlying_type:
+                  name: numeric
+                  type: named
             encounters:
               type:
                 type: nullable
@@ -4623,6 +4635,18 @@ definition:
           foreign_keys: {}
         species_league_table:
           fields:
+            average_weight:
+              type:
+                type: nullable
+                underlying_type:
+                  name: float8
+                  type: named
+            average_wing_length:
+              type:
+                type: nullable
+                underlying_type:
+                  name: numeric
+                  type: named
             encounters:
               type:
                 type: nullable

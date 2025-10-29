@@ -7,10 +7,12 @@ query HomePage {
     frequentFlyer
     longestStay
     unluckiest
+    longestWinged
+    averageWingLength
+    shortestWinged
     heaviest
+    averageWeight
     lightest
     totalWeight
-    longestWinged
-    shortestWinged
   }
 }

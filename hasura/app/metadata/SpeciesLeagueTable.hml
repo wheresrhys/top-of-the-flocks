@@ -28,6 +28,10 @@ definition:
       type: Int64
     - name: individuals
       type: Int64
+    - name: averageWeight
+      type: Float64
+    - name: averageWingLength
+      type: Bigdecimal
   graphql:
     typeName: SpeciesLeagueTable
     inputTypeName: SpeciesLeagueTableInput
@@ -71,6 +75,12 @@ definition:
         individuals:
           column:
             name: individuals
+        averageWeight:
+          column:
+            name: average_weight
+        averageWingLength:
+          column:
+            name: average_wing_length
 
 ---
 kind: TypePermissions
@@ -93,6 +103,8 @@ definition:
           - unluckiest
           - encounters
           - individuals
+          - averageWeight
+          - averageWingLength
 
 ---
 kind: BooleanExpressionType
@@ -127,6 +139,10 @@ definition:
           booleanExpressionType: Int8BoolExp
         - fieldName: individuals
           booleanExpressionType: Int8BoolExp
+        - fieldName: averageWeight
+          booleanExpressionType: Float8BoolExp
+        - fieldName: averageWingLength
+          booleanExpressionType: NumericBoolExp
       comparableRelationships: []
   logicalOperators:
     enable: true
@@ -168,6 +184,10 @@ definition:
           aggregateExpression: Int8AggExp
         - fieldName: individuals
           aggregateExpression: Int8AggExp
+        - fieldName: averageWeight
+          aggregateExpression: Float8AggExp
+        - fieldName: averageWingLength
+          aggregateExpression: NumericAggExp
   count:
     enable: true
     returnType: Int64
@@ -207,6 +227,10 @@ definition:
           orderByExpression: Int64OrderByExp
         - fieldName: individuals
           orderByExpression: Int64OrderByExp
+        - fieldName: averageWeight
+          orderByExpression: Float64OrderByExp
+        - fieldName: averageWingLength
+          orderByExpression: BigdecimalOrderByExp
       orderableRelationships: []
   graphql:
     expressionTypeName: SpeciesLeagueTableOrderByExp

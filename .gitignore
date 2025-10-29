@@ -49,3 +49,4 @@ next-env.d.ts
 !/data/README.md
 !/data/sample.csv
 
+ddn-docker.log

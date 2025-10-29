@@ -1025,3 +1025,78 @@ definition:
   graphql:
     expressionTypeName: Int64OrderByExp
 
+---
+kind: AggregateExpression
+version: v1
+definition:
+  name: Float8AggExp
+  operand:
+    scalar:
+      aggregatedType: Float64
+      aggregationFunctions:
+        - name: avg
+          returnType: Float64
+        - name: max
+          returnType: Float64
+        - name: min
+          returnType: Float64
+        - name: stddev
+          returnType: Float64
+        - name: stddev_pop
+          returnType: Float64
+        - name: stddev_samp
+          returnType: Float64
+        - name: sum
+          returnType: Float64
+        - name: var_pop
+          returnType: Float64
+        - name: var_samp
+          returnType: Float64
+        - name: variance
+          returnType: Float64
+      dataConnectorAggregationFunctionMapping:
+        - dataConnectorName: totf
+          dataConnectorScalarType: float8
+          functionMapping:
+            avg:
+              name: avg
+            max:
+              name: max
+            min:
+              name: min
+            stddev:
+              name: stddev
+            stddev_pop:
+              name: stddev_pop
+            stddev_samp:
+              name: stddev_samp
+            sum:
+              name: sum
+            var_pop:
+              name: var_pop
+            var_samp:
+              name: var_samp
+            variance:
+              name: variance
+  count:
+    enable: true
+    returnType: Int64
+  countDistinct:
+    enable: true
+    returnType: Int64
+  graphql:
+    selectTypeName: Float8AggExp
+
+---
+kind: OrderByExpression
+version: v1
+definition:
+  name: Float64OrderByExp
+  operand:
+    scalar:
+      orderedType: Float64
+      enableOrderByDirections:
+        enableAll: true
+  graphql:
+    expressionTypeName: Float64OrderByExp
+
