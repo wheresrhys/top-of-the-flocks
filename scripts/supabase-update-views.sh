@@ -6,7 +6,7 @@
 set -e
 
 echo "Updating Supabase views..."
-
+npx supabase migration fetch --yes
 # Iterate over all SQL files in the supabase/views directory
 for sql_file in supabase/views/*.sql; do
     if [ -f "$sql_file" ]; then
