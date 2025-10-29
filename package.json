@@ -2,6 +2,7 @@
   "name": "top-of-the-flocks",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "./scripts/load-env.sh next dev --turbopack",
     "build": "./scripts/load-env.sh next build --turbopack",
