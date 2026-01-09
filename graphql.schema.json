@@ -4791,18 +4791,6 @@
             "deprecationReason": null
           },
           {
-            "name": "frequentFlyer",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "SCALAR",
-              "name": "Bigdecimal",
-              "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "heaviest",
             "description": null,
             "args": [],
@@ -4992,22 +4980,6 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "Int8AggExp",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "frequentFlyer",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "NumericAggExp",
                 "ofType": null
               }
             },
@@ -5276,18 +5248,6 @@
             "deprecationReason": null
           },
           {
-            "name": "frequentFlyer",
-            "description": null,
-            "type": {
-              "kind": "INPUT_OBJECT",
-              "name": "NumericBoolExp",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
             "name": "heaviest",
             "description": null,
             "type": {
@@ -5513,18 +5473,6 @@
           },
           {
             "name": "encounters",
-            "description": null,
-            "type": {
-              "kind": "ENUM",
-              "name": "OrderBy",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "frequentFlyer",
             "description": null,
             "type": {
               "kind": "ENUM",

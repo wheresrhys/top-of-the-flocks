@@ -719,6 +719,14 @@
             "nullable": "nullable",
             "description": null
           },
+          "last_webauthn_challenge_data": {
+            "name": "last_webauthn_challenge_data",
+            "type": {
+              "scalarType": "jsonb"
+            },
+            "nullable": "nullable",
+            "description": "Stores the latest WebAuthn challenge data including attestation/assertion for customer verification"
+          },
           "phone": {
             "name": "phone",
             "type": {
@@ -873,6 +881,14 @@
             "nullable": "nonNullable",
             "description": null
           },
+          "nonce": {
+            "name": "nonce",
+            "type": {
+              "scalarType": "text"
+            },
+            "nullable": "nullable",
+            "description": null
+          },
           "redirect_uri": {
             "name": "redirect_uri",
             "type": {
@@ -960,6 +976,51 @@
           }
         },
         "description": null
+      },
+      "auth_oauth_client_states": {
+        "schemaName": "auth",
+        "tableName": "oauth_client_states",
+        "columns": {
+          "code_verifier": {
+            "name": "code_verifier",
+            "type": {
+              "scalarType": "text"
+            },
+            "nullable": "nullable",
+            "description": null
+          },
+          "created_at": {
+            "name": "created_at",
+            "type": {
+              "scalarType": "timestamptz"
+            },
+            "nullable": "nonNullable",
+            "description": null
+          },
+          "id": {
+            "name": "id",
+            "type": {
+              "scalarType": "uuid"
+            },
+            "nullable": "nonNullable",
+            "description": null
+          },
+          "provider_type": {
+            "name": "provider_type",
+            "type": {
+              "scalarType": "text"
+            },
+            "nullable": "nonNullable",
+            "description": null
+          }
+        },
+        "uniquenessConstraints": {
+          "oauth_client_states_pkey": [
+            "id"
+          ]
+        },
+        "foreignRelations": {},
+        "description": "Stores OAuth states for third-party provider authentication flows where Supabase acts as the OAuth client."
       },
       "auth_oauth_clients": {
         "schemaName": "auth",
@@ -1599,10 +1660,34 @@
             "nullable": "nullable",
             "description": null
           },
+          "refresh_token_counter": {
+            "name": "refresh_token_counter",
+            "type": {
+              "scalarType": "int8"
+            },
+            "nullable": "nullable",
+            "description": "Holds the ID (counter) of the last issued refresh token."
+          },
+          "refresh_token_hmac_key": {
+            "name": "refresh_token_hmac_key",
+            "type": {
+              "scalarType": "text"
+            },
+            "nullable": "nullable",
+            "description": "Holds a HMAC-SHA256 key used to sign refresh tokens for this session."
+          },
           "refreshed_at": {
             "name": "refreshed_at",
             "type": {
               "scalarType": "timestamp"
+            },
+            "nullable": "nullable",
+            "description": null
+          },
+          "scopes": {
+            "name": "scopes",
+            "type": {
+              "scalarType": "text"
             },
             "nullable": "nullable",
             "description": null
@@ -2247,14 +2332,6 @@
             "nullable": "nullable",
             "description": null
           },
-          "frequent_flyer": {
-            "name": "frequent_flyer",
-            "type": {
-              "scalarType": "numeric"
-            },
-            "nullable": "nullable",
-            "description": null
-          },
           "heaviest": {
             "name": "heaviest",
             "type": {
@@ -2461,10 +2538,75 @@
             "hasDefault": "hasDefault",
             "description": null
           },
+          "deleted_at": {
+            "name": "deleted_at",
+            "type": {
+              "scalarType": "timestamptz"
+            },
+            "nullable": "nullable",
+            "description": null
+          },
           "format": {
             "name": "format",
             "type": {
               "scalarType": "text"
+            },
+            "nullable": "nonNullable",
+            "hasDefault": "hasDefault",
+            "description": null
+          },
+          "id": {
+            "name": "id",
+            "type": {
+              "scalarType": "uuid"
+            },
+            "nullable": "nonNullable",
+            "hasDefault": "hasDefault",
+            "description": null
+          },
+          "name": {
+            "name": "name",
+            "type": {
+              "scalarType": "text"
+            },
+            "nullable": "nonNullable",
+            "description": null
+          },
+          "type": {
+            "name": "type",
+            "type": {
+              "scalarType": "storage_buckettype"
+            },
+            "nullable": "nonNullable",
+            "hasDefault": "hasDefault",
+            "description": null
+          },
+          "updated_at": {
+            "name": "updated_at",
+            "type": {
+              "scalarType": "timestamptz"
+            },
+            "nullable": "nonNullable",
+            "hasDefault": "hasDefault",
+            "description": null
+          }
+        },
+        "uniquenessConstraints": {
+          "buckets_analytics_pkey": [
+            "id"
+          ]
+        },
+        "foreignRelations": {},
+        "description": null
+      },
+      "storage_buckets_vectors": {
+        "schemaName": "storage",
+        "tableName": "buckets_vectors",
+        "columns": {
+          "created_at": {
+            "name": "created_at",
+            "type": {
+              "scalarType": "timestamptz"
             },
             "nullable": "nonNullable",
             "hasDefault": "hasDefault",
@@ -2498,7 +2640,7 @@
           }
         },
         "uniquenessConstraints": {
-          "buckets_analytics_pkey": [
+          "buckets_vectors_pkey": [
             "id"
           ]
         },
@@ -2955,6 +3097,102 @@
             "foreignTable": "s3_multipart_uploads",
             "columnMapping": {
               "upload_id": "id"
+            }
+          }
+        },
+        "description": null
+      },
+      "storage_vector_indexes": {
+        "schemaName": "storage",
+        "tableName": "vector_indexes",
+        "columns": {
+          "bucket_id": {
+            "name": "bucket_id",
+            "type": {
+              "scalarType": "text"
+            },
+            "nullable": "nonNullable",
+            "description": null
+          },
+          "created_at": {
+            "name": "created_at",
+            "type": {
+              "scalarType": "timestamptz"
+            },
+            "nullable": "nonNullable",
+            "hasDefault": "hasDefault",
+            "description": null
+          },
+          "data_type": {
+            "name": "data_type",
+            "type": {
+              "scalarType": "text"
+            },
+            "nullable": "nonNullable",
+            "description": null
+          },
+          "dimension": {
+            "name": "dimension",
+            "type": {
+              "scalarType": "int4"
+            },
+            "nullable": "nonNullable",
+            "description": null
+          },
+          "distance_metric": {
+            "name": "distance_metric",
+            "type": {
+              "scalarType": "text"
+            },
+            "nullable": "nonNullable",
+            "description": null
+          },
+          "id": {
+            "name": "id",
+            "type": {
+              "scalarType": "text"
+            },
+            "nullable": "nonNullable",
+            "hasDefault": "hasDefault",
+            "description": null
+          },
+          "metadata_configuration": {
+            "name": "metadata_configuration",
+            "type": {
+              "scalarType": "jsonb"
+            },
+            "nullable": "nullable",
+            "description": null
+          },
+          "name": {
+            "name": "name",
+            "type": {
+              "scalarType": "text"
+            },
+            "nullable": "nonNullable",
+            "description": null
+          },
+          "updated_at": {
+            "name": "updated_at",
+            "type": {
+              "scalarType": "timestamptz"
+            },
+            "nullable": "nonNullable",
+            "hasDefault": "hasDefault",
+            "description": null
+          }
+        },
+        "uniquenessConstraints": {
+          "vector_indexes_pkey": [
+            "id"
+          ]
+        },
+        "foreignRelations": {
+          "vector_indexes_bucket_id_fkey": {
+            "foreignSchema": "storage",
+            "foreignTable": "buckets_vectors",
+            "columnMapping": {
+              "bucket_id": "id"
             }
           }
         },
@@ -4838,7 +5076,8 @@
           "typeRepresentation": {
             "enum": [
               "STANDARD",
-              "ANALYTICS"
+              "ANALYTICS",
+              "VECTOR"
             ]
           }
         },

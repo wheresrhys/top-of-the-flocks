@@ -518,7 +518,6 @@ export type SpeciesLeagueTable = {
   averageWeight?: Maybe<Scalars['Float64']['output']>;
   averageWingLength?: Maybe<Scalars['Bigdecimal']['output']>;
   encounters?: Maybe<Scalars['Int64']['output']>;
-  frequentFlyer?: Maybe<Scalars['Bigdecimal']['output']>;
   heaviest?: Maybe<Scalars['Float32']['output']>;
   individuals?: Maybe<Scalars['Int64']['output']>;
   lightest?: Maybe<Scalars['Float32']['output']>;
@@ -537,7 +536,6 @@ export type SpeciesLeagueTableAggExp = {
   averageWeight: Float8AggExp;
   averageWingLength: NumericAggExp;
   encounters: Int8AggExp;
-  frequentFlyer: NumericAggExp;
   heaviest: Float4AggExp;
   individuals: Int8AggExp;
   lightest: Float4AggExp;
@@ -557,7 +555,6 @@ export type SpeciesLeagueTableBoolExp = {
   averageWeight?: InputMaybe<Float8BoolExp>;
   averageWingLength?: InputMaybe<NumericBoolExp>;
   encounters?: InputMaybe<Int8BoolExp>;
-  frequentFlyer?: InputMaybe<NumericBoolExp>;
   heaviest?: InputMaybe<Float4BoolExp>;
   individuals?: InputMaybe<Int8BoolExp>;
   lightest?: InputMaybe<Float4BoolExp>;
@@ -581,7 +578,6 @@ export type SpeciesLeagueTableOrderByExp = {
   averageWeight?: InputMaybe<OrderBy>;
   averageWingLength?: InputMaybe<OrderBy>;
   encounters?: InputMaybe<OrderBy>;
-  frequentFlyer?: InputMaybe<OrderBy>;
   heaviest?: InputMaybe<OrderBy>;
   individuals?: InputMaybe<OrderBy>;
   lightest?: InputMaybe<OrderBy>;
@@ -740,7 +736,7 @@ export type TimeBoolExp = {
 export type HomePageQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type HomePageQuery = { __typename?: 'Query', speciesLeagueTable?: Array<{ __typename?: 'SpeciesLeagueTable', speciesName?: string | null, individuals?: number | null, encounters?: number | null, sessionCount?: number | null, frequentFlyer?: number | null, longestStay?: number | null, unluckiest?: number | null, longestWinged?: number | null, averageWingLength?: number | null, shortestWinged?: number | null, heaviest?: number | null, averageWeight?: number | null, lightest?: number | null, totalWeight?: number | null }> | null };
+export type HomePageQuery = { __typename?: 'Query', speciesLeagueTable?: Array<{ __typename?: 'SpeciesLeagueTable', speciesName?: string | null, individuals?: number | null, encounters?: number | null, sessionCount?: number | null, longestStay?: number | null, unluckiest?: number | null, longestWinged?: number | null, averageWingLength?: number | null, shortestWinged?: number | null, heaviest?: number | null, averageWeight?: number | null, lightest?: number | null, totalWeight?: number | null }> | null };
 
 export type GetSpeciesDetailsQueryVariables = Exact<{
   speciesName?: InputMaybe<Scalars['String1']['input']>;

@@ -3,18 +3,23 @@
 import { createTheme, ThemeProvider as MUIThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { useMediaQuery } from '@mui/material';
-import { ReactNode } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
+
 
 interface ThemeProviderProps {
   children: ReactNode;
 }
 
 export default function ThemeProvider({ children }: ThemeProviderProps) {
+  const [mounted, setMounted] = useState(false);
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const theme = createTheme({
     palette: {
-      mode: prefersDarkMode ? 'dark' : 'light',
+      mode: mounted && prefersDarkMode ? 'dark' : 'light',
       primary: {
         main: '#1976d2',
       },

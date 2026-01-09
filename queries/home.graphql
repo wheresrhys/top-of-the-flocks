@@ -4,7 +4,6 @@ query HomePage {
     individuals
     encounters
     sessionCount
-    frequentFlyer
     longestStay
     unluckiest
     longestWinged
