@@ -1,5 +1,4 @@
 'use client';
-import { useState, MouseEvent } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
@@ -21,23 +20,6 @@ const pages = [
 ];
 
 export default function GlobalNav() {
-	const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
-	const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
-
-	const handleOpenNavMenu = (event: MouseEvent<HTMLElement>) => {
-		setAnchorElNav(event.currentTarget);
-	};
-	const handleOpenUserMenu = (event: MouseEvent<HTMLElement>) => {
-		setAnchorElUser(event.currentTarget);
-	};
-
-	const handleCloseNavMenu = () => {
-		setAnchorElNav(null);
-	};
-
-	const handleCloseUserMenu = () => {
-		setAnchorElUser(null);
-	};
 
 	return (
 		<AppBar position="static">
