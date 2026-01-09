@@ -20,7 +20,6 @@ const pages = [
 ];
 
 export default function GlobalNav() {
-
 	return (
 		<AppBar position="static">
 			<Container maxWidth="xl">
