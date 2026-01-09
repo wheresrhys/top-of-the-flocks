@@ -1,0 +1,60 @@
+DEBUG: sql_file=../supabase/views/species_league_table.sql, filename=species_league_table, hml_file=app/metadata/species_league_table.hml, pwd=/Users/wheresrhys/Projects/top-of-the-flocks/hasura
+DEBUG: Checking if file exists: app/metadata/species_league_table.hml
+DEBUG: File NOT FOUND at exact path, listing metadata dir:
+-rw-r--r--  1 wheresrhys  staff    3619 27 Oct 16:18 app/metadata/Birds.hml
+-rw-r--r--  1 wheresrhys  staff    7934 27 Oct 16:18 app/metadata/Encounters.hml
+-rw-r--r--  1 wheresrhys  staff    2902 27 Oct 16:18 app/metadata/Species.hml
+-rw-r--r--  1 wheresrhys  staff    7442 29 Oct 16:10 app/metadata/SpeciesLeagueTable.hml
+-rw-r--r--  1 wheresrhys  staff   23980 29 Oct 16:10 app/metadata/totf-types.hml
+-rw-r--r--  1 wheresrhys  staff  604308  9 Jan 12:32 app/metadata/totf.hml
+DEBUG: Taking ADD branch (file not found)
+DEBUG: sql_file=../supabase/views/species_league_table.sql, filename=species_league_table, hml_filename=UspeciesUleagueUtable, hml_file=app/metadata/UspeciesUleagueUtable.hml, pwd=/Users/wheresrhys/Projects/top-of-the-flocks/hasura
+DEBUG: Checking if file exists: app/metadata/UspeciesUleagueUtable.hml
+DEBUG: File NOT FOUND at exact path, listing metadata dir:
+-rw-r--r--  1 wheresrhys  staff    3619 27 Oct 16:18 app/metadata/Birds.hml
+-rw-r--r--  1 wheresrhys  staff    7934 27 Oct 16:18 app/metadata/Encounters.hml
+-rw-r--r--  1 wheresrhys  staff    2902 27 Oct 16:18 app/metadata/Species.hml
+-rw-r--r--  1 wheresrhys  staff    7442 29 Oct 16:10 app/metadata/SpeciesLeagueTable.hml
+-rw-r--r--  1 wheresrhys  staff   23980 29 Oct 16:10 app/metadata/totf-types.hml
+-rw-r--r--  1 wheresrhys  staff  604308  9 Jan 12:32 app/metadata/totf.hml
+DEBUG: Taking ADD branch (file not found)
+DEBUG: sql_file=../supabase/views/species_league_table.sql, filename=species_league_table, hml_filename=SpeciesLeagueTable, hml_file=app/metadata/SpeciesLeagueTable.hml, pwd=/Users/wheresrhys/Projects/top-of-the-flocks/hasura
+DEBUG: Conversion test - input: species_league_table, output: SpeciesLeagueTable
+DEBUG: Checking if file exists: app/metadata/SpeciesLeagueTable.hml
+DEBUG: File EXISTS at exact path
+DEBUG: Taking UPDATE branch
+DEBUG: sql_file=../supabase/views/species_league_table.sql, filename=species_league_table, hml_filename=SpeciesLeagueTable, hml_file=app/metadata/SpeciesLeagueTable.hml, pwd=/Users/wheresrhys/Projects/top-of-the-flocks/hasura
+DEBUG: Conversion test - input: species_league_table, output: SpeciesLeagueTable
+DEBUG: Checking if file exists: app/metadata/SpeciesLeagueTable.hml
+DEBUG: File EXISTS at exact path
+DEBUG: Taking UPDATE branch
+DEBUG: sql_file=../supabase/views/species_league_table.sql, filename=species_league_table, hml_filename=SpeciesLeagueTable, hml_file=app/metadata/SpeciesLeagueTable.hml, pwd=/Users/wheresrhys/Projects/top-of-the-flocks/hasura
+DEBUG: Conversion test - input: species_league_table, output: SpeciesLeagueTable
+DEBUG: Checking if file exists: app/metadata/SpeciesLeagueTable.hml
+DEBUG: File EXISTS at exact path
+DEBUG: Taking UPDATE branch
+DEBUG: sql_file=../supabase/views/species_league_table.sql, filename=species_league_table, hml_filename=SpeciesLeagueTable, hml_file=app/metadata/SpeciesLeagueTable.hml, pwd=/Users/wheresrhys/Projects/top-of-the-flocks/hasura
+DEBUG: Conversion test - input: species_league_table, output: SpeciesLeagueTable
+DEBUG: Checking if file exists: app/metadata/SpeciesLeagueTable.hml
+DEBUG: File EXISTS at exact path
+DEBUG: Taking UPDATE branch
+DEBUG: sql_file=../supabase/views/species_league_table.sql, filename=species_league_table, hml_filename=SpeciesLeagueTable, hml_file=app/metadata/SpeciesLeagueTable.hml, pwd=/Users/wheresrhys/Projects/top-of-the-flocks/hasura
+DEBUG: Conversion test - input: species_league_table, output: SpeciesLeagueTable
+DEBUG: Checking if file exists: app/metadata/SpeciesLeagueTable.hml
+DEBUG: File EXISTS at exact path
+DEBUG: Taking UPDATE branch
+DEBUG: sql_file=../supabase/views/species_league_table.sql, filename=species_league_table, hml_filename=SpeciesLeagueTable, hml_file=app/metadata/SpeciesLeagueTable.hml, pwd=/Users/wheresrhys/Projects/top-of-the-flocks/hasura
+DEBUG: Conversion test - input: species_league_table, output: SpeciesLeagueTable
+DEBUG: Checking if file exists: app/metadata/SpeciesLeagueTable.hml
+DEBUG: File EXISTS at exact path
+DEBUG: Taking UPDATE branch
+DEBUG: sql_file=../supabase/views/species_league_table.sql, filename=species_league_table, hml_filename=SpeciesLeagueTable, hml_file=app/metadata/SpeciesLeagueTable.hml, pwd=/Users/wheresrhys/Projects/top-of-the-flocks/hasura
+DEBUG: Conversion test - input: species_league_table, output: SpeciesLeagueTable
+DEBUG: Checking if file exists: app/metadata/SpeciesLeagueTable.hml
+DEBUG: File NOT FOUND at exact path, listing metadata dir:
+-rw-r--r--  1 wheresrhys  staff    3619 27 Oct 16:18 app/metadata/Birds.hml
+-rw-r--r--  1 wheresrhys  staff    7934 27 Oct 16:18 app/metadata/Encounters.hml
+-rw-r--r--  1 wheresrhys  staff    2902 27 Oct 16:18 app/metadata/Species.hml
+-rw-r--r--  1 wheresrhys  staff   23980 29 Oct 16:10 app/metadata/totf-types.hml
+-rw-r--r--  1 wheresrhys  staff  604308  9 Jan 12:32 app/metadata/totf.hml
+DEBUG: Taking ADD branch (file not found)

@@ -21,7 +21,6 @@ type SortableColumn = keyof Pick<SpeciesLeagueTable,
   | 'individuals'
   | 'encounters'
   | 'sessionCount'
-  | 'frequentFlyer'
   | 'longestStay'
   | 'unluckiest'
   | 'longestWinged'
@@ -184,15 +183,6 @@ export function SortableSpeciesTable({ data }: SortableSpeciesTableProps) {
               orderBy={orderBy}
               order={order}
               onSort={handleSort}
-              column="frequentFlyer"
-              align="right"
-            >
-              Frequent Flyer
-            </SortableTableCell>
-            <SortableTableCell
-              orderBy={orderBy}
-              order={order}
-              onSort={handleSort}
               column="longestStay"
               align="right"
             >
@@ -313,11 +303,6 @@ export function SortableSpeciesTable({ data }: SortableSpeciesTableProps) {
               <TableCell align="right">
                 <Typography variant="body2">
                   {species.sessionCount?.toLocaleString() || 0}
-                </Typography>
-              </TableCell>
-              <TableCell align="right">
-                <Typography variant="body2">
-                  {species.frequentFlyer || '-'}
                 </Typography>
               </TableCell>
               <TableCell align="right">

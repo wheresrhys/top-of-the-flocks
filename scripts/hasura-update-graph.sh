@@ -12,13 +12,24 @@ ddn connector introspect totf
 
 echo "✓ Hasura connector introspection completed successfully!"
 
-echo "Adding Hasura models for database views..."
+echo "Adding/updating Hasura models for database views..."
 
 for sql_file in ../supabase/views/*.sql; do
     if [ -f "$sql_file" ]; then
-        echo "Adding Hasura model for: $sql_file"
         filename=$(basename "$sql_file" .sql)
-        ddn models add totf "$filename"
+
+        # Convert snake_case to PascalCase for HML filename
+        # e.g., species_league_table -> SpeciesLeagueTable
+        # Using awk for portability (works on macOS BSD sed)
+        hml_filename=$(echo "$filename" | awk -F'_' '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2); print}' OFS='')
+        hml_file="app/metadata/${hml_filename}.hml"
+        if [ -f "$hml_file" ]; then
+            rm $hml_file
+            echo "✓ Successfully removed Hasura model for: $filename"
+        fi
+
+        echo "Adding Hasura model for: $sql_file"
+        ddn model add totf "$filename"
         if [ $? -eq 0 ]; then
             echo "✓ Successfully added GraphQL model for: $filename"
         else
@@ -31,7 +42,7 @@ for sql_file in ../supabase/views/*.sql; do
     fi
 done
 
-echo "✓ All Hasura models added successfully!"
+echo "✓ All Hasura models added/updated successfully!"
 
 echo "Building Hasura supergraph..."
 

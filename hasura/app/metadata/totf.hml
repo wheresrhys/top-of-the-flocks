@@ -125,6 +125,14 @@ definition:
               unique_columns:
                 - id
         - arguments: {}
+          description: Stores OAuth states for third-party provider authentication flows where Supabase acts as the OAuth client.
+          name: auth_oauth_client_states
+          type: auth_oauth_client_states
+          uniqueness_constraints:
+            oauth_client_states_pkey:
+              unique_columns:
+                - id
+        - arguments: {}
           name: auth_oauth_clients
           type: auth_oauth_clients
           uniqueness_constraints:
@@ -260,6 +268,13 @@ definition:
               unique_columns:
                 - id
         - arguments: {}
+          name: storage_buckets_vectors
+          type: storage_buckets_vectors
+          uniqueness_constraints:
+            buckets_vectors_pkey:
+              unique_columns:
+                - id
+        - arguments: {}
           name: storage_migrations
           type: storage_migrations
           uniqueness_constraints:
@@ -297,6 +312,13 @@ definition:
           type: storage_s3_multipart_uploads_parts
           uniqueness_constraints:
             s3_multipart_uploads_parts_pkey:
+              unique_columns:
+                - id
+        - arguments: {}
+          name: storage_vector_indexes
+          type: storage_vector_indexes
+          uniqueness_constraints:
+            vector_indexes_pkey:
               unique_columns:
                 - id
         - arguments: {}
@@ -714,6 +736,13 @@ definition:
                 underlying_type:
                   name: timestamptz
                   type: named
+            last_webauthn_challenge_data:
+              description: Stores the latest WebAuthn challenge data including attestation/assertion for customer verification
+              type:
+                type: nullable
+                underlying_type:
+                  name: jsonb
+                  type: named
             phone:
               type:
                 type: nullable
@@ -802,6 +831,12 @@ definition:
               type:
                 name: uuid
                 type: named
+            nonce:
+              type:
+                type: nullable
+                underlying_type:
+                  name: text
+                  type: named
             redirect_uri:
               type:
                 name: text
@@ -847,6 +882,28 @@ definition:
                 user_id:
                   - id
               foreign_collection: auth_users
+        auth_oauth_client_states:
+          description: Stores OAuth states for third-party provider authentication flows where Supabase acts as the OAuth client.
+          fields:
+            code_verifier:
+              type:
+                type: nullable
+                underlying_type:
+                  name: text
+                  type: named
+            created_at:
+              type:
+                name: timestamptz
+                type: named
+            id:
+              type:
+                name: uuid
+                type: named
+            provider_type:
+              type:
+                name: text
+                type: named
+          foreign_keys: {}
         auth_oauth_clients:
           fields:
             client_name:
@@ -1207,11 +1264,31 @@ definition:
                 underlying_type:
                   name: uuid
                   type: named
+            refresh_token_counter:
+              description: Holds the ID (counter) of the last issued refresh token.
+              type:
+                type: nullable
+                underlying_type:
+                  name: int8
+                  type: named
+            refresh_token_hmac_key:
+              description: Holds a HMAC-SHA256 key used to sign refresh tokens for this session.
+              type:
+                type: nullable
+                underlying_type:
+                  name: text
+                  type: named
             refreshed_at:
               type:
                 type: nullable
                 underlying_type:
                   name: timestamp
+                  type: named
+            scopes:
+              type:
+                type: nullable
+                underlying_type:
+                  name: text
                   type: named
             tag:
               type:
@@ -1777,6 +1854,22 @@ definition:
                   type: named
                 type: array
           foreign_keys: {}
+        delete_auth_oauth_client_states_by_id_response:
+          description: Responses from the 'delete_auth_oauth_client_states_by_id' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: auth_oauth_client_states
+                  type: named
+                type: array
+          foreign_keys: {}
         delete_auth_oauth_clients_by_id_response:
           description: Responses from the 'delete_auth_oauth_clients_by_id' procedure
           fields:
@@ -2081,6 +2174,22 @@ definition:
                   type: named
                 type: array
           foreign_keys: {}
+        delete_storage_buckets_vectors_by_id_response:
+          description: Responses from the 'delete_storage_buckets_vectors_by_id' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: storage_buckets_vectors
+                  type: named
+                type: array
+          foreign_keys: {}
         delete_storage_migrations_by_id_response:
           description: Responses from the 'delete_storage_migrations_by_id' procedure
           fields:
@@ -2174,6 +2283,22 @@ definition:
               type:
                 element_type:
                   name: storage_s3_multipart_uploads_parts
+                  type: named
+                type: array
+          foreign_keys: {}
+        delete_storage_vector_indexes_by_id_response:
+          description: Responses from the 'delete_storage_vector_indexes_by_id' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: storage_vector_indexes
                   type: named
                 type: array
           foreign_keys: {}
@@ -2735,6 +2860,13 @@ definition:
                 underlying_type:
                   name: timestamptz
                   type: named
+            last_webauthn_challenge_data:
+              description: Stores the latest WebAuthn challenge data including attestation/assertion for customer verification
+              type:
+                type: nullable
+                underlying_type:
+                  name: jsonb
+                  type: named
             phone:
               type:
                 type: nullable
@@ -2838,6 +2970,12 @@ definition:
               type:
                 name: uuid
                 type: named
+            nonce:
+              type:
+                type: nullable
+                underlying_type:
+                  name: text
+                  type: named
             redirect_uri:
               type:
                 name: text
@@ -2890,6 +3028,43 @@ definition:
               type:
                 element_type:
                   name: auth_oauth_authorizations
+                  type: named
+                type: array
+          foreign_keys: {}
+        insert_auth_oauth_client_states_object:
+          fields:
+            code_verifier:
+              type:
+                type: nullable
+                underlying_type:
+                  name: text
+                  type: named
+            created_at:
+              type:
+                name: timestamptz
+                type: named
+            id:
+              type:
+                name: uuid
+                type: named
+            provider_type:
+              type:
+                name: text
+                type: named
+          foreign_keys: {}
+        insert_auth_oauth_client_states_response:
+          description: Responses from the 'insert_auth_oauth_client_states' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: auth_oauth_client_states
                   type: named
                 type: array
           foreign_keys: {}
@@ -3339,11 +3514,31 @@ definition:
                 underlying_type:
                   name: uuid
                   type: named
+            refresh_token_counter:
+              description: Holds the ID (counter) of the last issued refresh token.
+              type:
+                type: nullable
+                underlying_type:
+                  name: int8
+                  type: named
+            refresh_token_hmac_key:
+              description: Holds a HMAC-SHA256 key used to sign refresh tokens for this session.
+              type:
+                type: nullable
+                underlying_type:
+                  name: text
+                  type: named
             refreshed_at:
               type:
                 type: nullable
                 underlying_type:
                   name: timestamp
+                  type: named
+            scopes:
+              type:
+                type: nullable
+                underlying_type:
+                  name: text
                   type: named
             tag:
               type:
@@ -3840,12 +4035,6 @@ definition:
                 underlying_type:
                   name: int8
                   type: named
-            frequent_flyer:
-              type:
-                type: nullable
-                underlying_type:
-                  name: numeric
-                  type: named
             heaviest:
               type:
                 type: nullable
@@ -3931,6 +4120,12 @@ definition:
                 underlying_type:
                   name: timestamptz
                   type: named
+            deleted_at:
+              type:
+                type: nullable
+                underlying_type:
+                  name: timestamptz
+                  type: named
             format:
               type:
                 type: nullable
@@ -3938,6 +4133,12 @@ definition:
                   name: text
                   type: named
             id:
+              type:
+                type: nullable
+                underlying_type:
+                  name: uuid
+                  type: named
+            name:
               type:
                 name: text
                 type: named
@@ -4053,6 +4254,47 @@ definition:
               type:
                 element_type:
                   name: storage_buckets
+                  type: named
+                type: array
+          foreign_keys: {}
+        insert_storage_buckets_vectors_object:
+          fields:
+            created_at:
+              type:
+                type: nullable
+                underlying_type:
+                  name: timestamptz
+                  type: named
+            id:
+              type:
+                name: text
+                type: named
+            type:
+              type:
+                type: nullable
+                underlying_type:
+                  name: storage_buckettype
+                  type: named
+            updated_at:
+              type:
+                type: nullable
+                underlying_type:
+                  name: timestamptz
+                  type: named
+          foreign_keys: {}
+        insert_storage_buckets_vectors_response:
+          description: Responses from the 'insert_storage_buckets_vectors' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: storage_buckets_vectors
                   type: named
                 type: array
           foreign_keys: {}
@@ -4351,6 +4593,69 @@ definition:
               type:
                 element_type:
                   name: storage_s3_multipart_uploads
+                  type: named
+                type: array
+          foreign_keys: {}
+        insert_storage_vector_indexes_object:
+          fields:
+            bucket_id:
+              type:
+                name: text
+                type: named
+            created_at:
+              type:
+                type: nullable
+                underlying_type:
+                  name: timestamptz
+                  type: named
+            data_type:
+              type:
+                name: text
+                type: named
+            dimension:
+              type:
+                name: int4
+                type: named
+            distance_metric:
+              type:
+                name: text
+                type: named
+            id:
+              type:
+                type: nullable
+                underlying_type:
+                  name: text
+                  type: named
+            metadata_configuration:
+              type:
+                type: nullable
+                underlying_type:
+                  name: jsonb
+                  type: named
+            name:
+              type:
+                name: text
+                type: named
+            updated_at:
+              type:
+                type: nullable
+                underlying_type:
+                  name: timestamptz
+                  type: named
+          foreign_keys: {}
+        insert_storage_vector_indexes_response:
+          description: Responses from the 'insert_storage_vector_indexes' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: storage_vector_indexes
                   type: named
                 type: array
           foreign_keys: {}
@@ -4653,12 +4958,6 @@ definition:
                 underlying_type:
                   name: int8
                   type: named
-            frequent_flyer:
-              type:
-                type: nullable
-                underlying_type:
-                  name: numeric
-                  type: named
             heaviest:
               type:
                 type: nullable
@@ -4794,9 +5093,38 @@ definition:
               type:
                 name: timestamptz
                 type: named
+            deleted_at:
+              type:
+                type: nullable
+                underlying_type:
+                  name: timestamptz
+                  type: named
             format:
               type:
                 name: text
+                type: named
+            id:
+              type:
+                name: uuid
+                type: named
+            name:
+              type:
+                name: text
+                type: named
+            type:
+              type:
+                name: storage_buckettype
+                type: named
+            updated_at:
+              type:
+                name: timestamptz
+                type: named
+          foreign_keys: {}
+        storage_buckets_vectors:
+          fields:
+            created_at:
+              type:
+                name: timestamptz
                 type: named
             id:
               type:
@@ -5056,6 +5384,52 @@ definition:
                 upload_id:
                   - id
               foreign_collection: storage_s3_multipart_uploads
+        storage_vector_indexes:
+          fields:
+            bucket_id:
+              type:
+                name: text
+                type: named
+            created_at:
+              type:
+                name: timestamptz
+                type: named
+            data_type:
+              type:
+                name: text
+                type: named
+            dimension:
+              type:
+                name: int4
+                type: named
+            distance_metric:
+              type:
+                name: text
+                type: named
+            id:
+              type:
+                name: text
+                type: named
+            metadata_configuration:
+              type:
+                type: nullable
+                underlying_type:
+                  name: jsonb
+                  type: named
+            name:
+              type:
+                name: text
+                type: named
+            updated_at:
+              type:
+                name: timestamptz
+                type: named
+          foreign_keys:
+            vector_indexes_bucket_id_fkey:
+              column_mapping:
+                bucket_id:
+                  - id
+              foreign_collection: storage_buckets_vectors
         supabase_migrations_schema_migrations:
           fields:
             name:
@@ -5875,6 +6249,13 @@ definition:
                 underlying_type:
                   name: update_column_auth_mfa_factors_last_challenged_at
                   type: named
+            last_webauthn_challenge_data:
+              description: Update the 'last_webauthn_challenge_data' column in the 'auth_mfa_factors' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_auth_mfa_factors_last_webauthn_challenge_data
+                  type: named
             phone:
               description: Update the 'phone' column in the 'auth_mfa_factors' collection.
               type:
@@ -5978,6 +6359,13 @@ definition:
                 type: nullable
                 underlying_type:
                   name: update_column_auth_mfa_factors_last_challenged_at
+                  type: named
+            last_webauthn_challenge_data:
+              description: Update the 'last_webauthn_challenge_data' column in the 'auth_mfa_factors' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_auth_mfa_factors_last_webauthn_challenge_data
                   type: named
             phone:
               description: Update the 'phone' column in the 'auth_mfa_factors' collection.
@@ -6111,6 +6499,13 @@ definition:
                 underlying_type:
                   name: update_column_auth_oauth_authorizations_id
                   type: named
+            nonce:
+              description: Update the 'nonce' column in the 'auth_oauth_authorizations' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_auth_oauth_authorizations_nonce
+                  type: named
             redirect_uri:
               description: Update the 'redirect_uri' column in the 'auth_oauth_authorizations' collection.
               type:
@@ -6242,6 +6637,13 @@ definition:
                 type: nullable
                 underlying_type:
                   name: update_column_auth_oauth_authorizations_id
+                  type: named
+            nonce:
+              description: Update the 'nonce' column in the 'auth_oauth_authorizations' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_auth_oauth_authorizations_nonce
                   type: named
             redirect_uri:
               description: Update the 'redirect_uri' column in the 'auth_oauth_authorizations' collection.
@@ -6375,6 +6777,13 @@ definition:
                 underlying_type:
                   name: update_column_auth_oauth_authorizations_id
                   type: named
+            nonce:
+              description: Update the 'nonce' column in the 'auth_oauth_authorizations' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_auth_oauth_authorizations_nonce
+                  type: named
             redirect_uri:
               description: Update the 'redirect_uri' column in the 'auth_oauth_authorizations' collection.
               type:
@@ -6423,6 +6832,54 @@ definition:
                 type: nullable
                 underlying_type:
                   name: update_column_auth_oauth_authorizations_user_id
+                  type: named
+          foreign_keys: {}
+        update_auth_oauth_client_states_by_id_response:
+          description: Responses from the 'update_auth_oauth_client_states_by_id' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: auth_oauth_client_states
+                  type: named
+                type: array
+          foreign_keys: {}
+        update_auth_oauth_client_states_by_id_update_columns:
+          description: Update the columns of the 'auth_oauth_client_states' collection
+          fields:
+            code_verifier:
+              description: Update the 'code_verifier' column in the 'auth_oauth_client_states' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_auth_oauth_client_states_code_verifier
+                  type: named
+            created_at:
+              description: Update the 'created_at' column in the 'auth_oauth_client_states' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_auth_oauth_client_states_created_at
+                  type: named
+            id:
+              description: Update the 'id' column in the 'auth_oauth_client_states' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_auth_oauth_client_states_id
+                  type: named
+            provider_type:
+              description: Update the 'provider_type' column in the 'auth_oauth_client_states' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_auth_oauth_client_states_provider_type
                   type: named
           foreign_keys: {}
         update_auth_oauth_clients_by_id_response:
@@ -7225,12 +7682,33 @@ definition:
                 underlying_type:
                   name: update_column_auth_sessions_oauth_client_id
                   type: named
+            refresh_token_counter:
+              description: Update the 'refresh_token_counter' column in the 'auth_sessions' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_auth_sessions_refresh_token_counter
+                  type: named
+            refresh_token_hmac_key:
+              description: Update the 'refresh_token_hmac_key' column in the 'auth_sessions' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_auth_sessions_refresh_token_hmac_key
+                  type: named
             refreshed_at:
               description: Update the 'refreshed_at' column in the 'auth_sessions' collection.
               type:
                 type: nullable
                 underlying_type:
                   name: update_column_auth_sessions_refreshed_at
+                  type: named
+            scopes:
+              description: Update the 'scopes' column in the 'auth_sessions' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_auth_sessions_scopes
                   type: named
             tag:
               description: Update the 'tag' column in the 'auth_sessions' collection.
@@ -8528,6 +9006,17 @@ definition:
                   name: timestamptz
                   type: named
           foreign_keys: {}
+        update_column_auth_mfa_factors_last_webauthn_challenge_data:
+          description: Update the 'last_webauthn_challenge_data' column in the 'auth_mfa_factors' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                type: nullable
+                underlying_type:
+                  name: jsonb
+                  type: named
+          foreign_keys: {}
         update_column_auth_mfa_factors_phone:
           description: Update the 'phone' column in the 'auth_mfa_factors' collection
           fields:
@@ -8688,6 +9177,17 @@ definition:
                 name: uuid
                 type: named
           foreign_keys: {}
+        update_column_auth_oauth_authorizations_nonce:
+          description: Update the 'nonce' column in the 'auth_oauth_authorizations' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                type: nullable
+                underlying_type:
+                  name: text
+                  type: named
+          foreign_keys: {}
         update_column_auth_oauth_authorizations_redirect_uri:
           description: Update the 'redirect_uri' column in the 'auth_oauth_authorizations' collection
           fields:
@@ -8756,6 +9256,44 @@ definition:
                 underlying_type:
                   name: uuid
                   type: named
+          foreign_keys: {}
+        update_column_auth_oauth_client_states_code_verifier:
+          description: Update the 'code_verifier' column in the 'auth_oauth_client_states' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                type: nullable
+                underlying_type:
+                  name: text
+                  type: named
+          foreign_keys: {}
+        update_column_auth_oauth_client_states_created_at:
+          description: Update the 'created_at' column in the 'auth_oauth_client_states' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: timestamptz
+                type: named
+          foreign_keys: {}
+        update_column_auth_oauth_client_states_id:
+          description: Update the 'id' column in the 'auth_oauth_client_states' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: uuid
+                type: named
+          foreign_keys: {}
+        update_column_auth_oauth_client_states_provider_type:
+          description: Update the 'provider_type' column in the 'auth_oauth_client_states' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: text
+                type: named
           foreign_keys: {}
         update_column_auth_oauth_clients_client_name:
           description: Update the 'client_name' column in the 'auth_oauth_clients' collection
@@ -9348,6 +9886,28 @@ definition:
                   name: uuid
                   type: named
           foreign_keys: {}
+        update_column_auth_sessions_refresh_token_counter:
+          description: Update the 'refresh_token_counter' column in the 'auth_sessions' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                type: nullable
+                underlying_type:
+                  name: int8
+                  type: named
+          foreign_keys: {}
+        update_column_auth_sessions_refresh_token_hmac_key:
+          description: Update the 'refresh_token_hmac_key' column in the 'auth_sessions' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                type: nullable
+                underlying_type:
+                  name: text
+                  type: named
+          foreign_keys: {}
         update_column_auth_sessions_refreshed_at:
           description: Update the 'refreshed_at' column in the 'auth_sessions' collection
           fields:
@@ -9357,6 +9917,17 @@ definition:
                 type: nullable
                 underlying_type:
                   name: timestamp
+                  type: named
+          foreign_keys: {}
+        update_column_auth_sessions_scopes:
+          description: Update the 'scopes' column in the 'auth_sessions' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                type: nullable
+                underlying_type:
+                  name: text
                   type: named
           foreign_keys: {}
         update_column_auth_sessions_tag:
@@ -9993,6 +10564,17 @@ definition:
                 name: timestamptz
                 type: named
           foreign_keys: {}
+        update_column_storage_buckets_analytics_deleted_at:
+          description: Update the 'deleted_at' column in the 'storage_buckets_analytics' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                type: nullable
+                underlying_type:
+                  name: timestamptz
+                  type: named
+          foreign_keys: {}
         update_column_storage_buckets_analytics_format:
           description: Update the 'format' column in the 'storage_buckets_analytics' collection
           fields:
@@ -10004,6 +10586,15 @@ definition:
           foreign_keys: {}
         update_column_storage_buckets_analytics_id:
           description: Update the 'id' column in the 'storage_buckets_analytics' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: uuid
+                type: named
+          foreign_keys: {}
+        update_column_storage_buckets_analytics_name:
+          description: Update the 'name' column in the 'storage_buckets_analytics' collection
           fields:
             _set:
               description: Set the column to this value
@@ -10132,6 +10723,42 @@ definition:
                 underlying_type:
                   name: timestamptz
                   type: named
+          foreign_keys: {}
+        update_column_storage_buckets_vectors_created_at:
+          description: Update the 'created_at' column in the 'storage_buckets_vectors' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: timestamptz
+                type: named
+          foreign_keys: {}
+        update_column_storage_buckets_vectors_id:
+          description: Update the 'id' column in the 'storage_buckets_vectors' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: text
+                type: named
+          foreign_keys: {}
+        update_column_storage_buckets_vectors_type:
+          description: Update the 'type' column in the 'storage_buckets_vectors' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: storage_buckettype
+                type: named
+          foreign_keys: {}
+        update_column_storage_buckets_vectors_updated_at:
+          description: Update the 'updated_at' column in the 'storage_buckets_vectors' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: timestamptz
+                type: named
           foreign_keys: {}
         update_column_storage_migrations_executed_at:
           description: Update the 'executed_at' column in the 'storage_migrations' collection
@@ -10518,6 +11145,89 @@ definition:
                 name: text
                 type: named
           foreign_keys: {}
+        update_column_storage_vector_indexes_bucket_id:
+          description: Update the 'bucket_id' column in the 'storage_vector_indexes' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: text
+                type: named
+          foreign_keys: {}
+        update_column_storage_vector_indexes_created_at:
+          description: Update the 'created_at' column in the 'storage_vector_indexes' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: timestamptz
+                type: named
+          foreign_keys: {}
+        update_column_storage_vector_indexes_data_type:
+          description: Update the 'data_type' column in the 'storage_vector_indexes' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: text
+                type: named
+          foreign_keys: {}
+        update_column_storage_vector_indexes_dimension:
+          description: Update the 'dimension' column in the 'storage_vector_indexes' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: int4
+                type: named
+          foreign_keys: {}
+        update_column_storage_vector_indexes_distance_metric:
+          description: Update the 'distance_metric' column in the 'storage_vector_indexes' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: text
+                type: named
+          foreign_keys: {}
+        update_column_storage_vector_indexes_id:
+          description: Update the 'id' column in the 'storage_vector_indexes' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: text
+                type: named
+          foreign_keys: {}
+        update_column_storage_vector_indexes_metadata_configuration:
+          description: Update the 'metadata_configuration' column in the 'storage_vector_indexes' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                type: nullable
+                underlying_type:
+                  name: jsonb
+                  type: named
+          foreign_keys: {}
+        update_column_storage_vector_indexes_name:
+          description: Update the 'name' column in the 'storage_vector_indexes' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: text
+                type: named
+          foreign_keys: {}
+        update_column_storage_vector_indexes_updated_at:
+          description: Update the 'updated_at' column in the 'storage_vector_indexes' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: timestamptz
+                type: named
+          foreign_keys: {}
         update_column_supabase_migrations_schema_migrations_name:
           description: Update the 'name' column in the 'supabase_migrations_schema_migrations' collection
           fields:
@@ -10785,6 +11495,13 @@ definition:
                 underlying_type:
                   name: update_column_storage_buckets_analytics_created_at
                   type: named
+            deleted_at:
+              description: Update the 'deleted_at' column in the 'storage_buckets_analytics' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_storage_buckets_analytics_deleted_at
+                  type: named
             format:
               description: Update the 'format' column in the 'storage_buckets_analytics' collection.
               type:
@@ -10798,6 +11515,13 @@ definition:
                 type: nullable
                 underlying_type:
                   name: update_column_storage_buckets_analytics_id
+                  type: named
+            name:
+              description: Update the 'name' column in the 'storage_buckets_analytics' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_storage_buckets_analytics_name
                   type: named
             type:
               description: Update the 'type' column in the 'storage_buckets_analytics' collection.
@@ -10909,6 +11633,54 @@ definition:
                 type: nullable
                 underlying_type:
                   name: update_column_storage_buckets_updated_at
+                  type: named
+          foreign_keys: {}
+        update_storage_buckets_vectors_by_id_response:
+          description: Responses from the 'update_storage_buckets_vectors_by_id' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: storage_buckets_vectors
+                  type: named
+                type: array
+          foreign_keys: {}
+        update_storage_buckets_vectors_by_id_update_columns:
+          description: Update the columns of the 'storage_buckets_vectors' collection
+          fields:
+            created_at:
+              description: Update the 'created_at' column in the 'storage_buckets_vectors' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_storage_buckets_vectors_created_at
+                  type: named
+            id:
+              description: Update the 'id' column in the 'storage_buckets_vectors' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_storage_buckets_vectors_id
+                  type: named
+            type:
+              description: Update the 'type' column in the 'storage_buckets_vectors' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_storage_buckets_vectors_type
+                  type: named
+            updated_at:
+              description: Update the 'updated_at' column in the 'storage_buckets_vectors' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_storage_buckets_vectors_updated_at
                   type: named
           foreign_keys: {}
         update_storage_migrations_by_id_response:
@@ -11330,6 +12102,89 @@ definition:
                 type: nullable
                 underlying_type:
                   name: update_column_storage_s3_multipart_uploads_parts_version
+                  type: named
+          foreign_keys: {}
+        update_storage_vector_indexes_by_id_response:
+          description: Responses from the 'update_storage_vector_indexes_by_id' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: storage_vector_indexes
+                  type: named
+                type: array
+          foreign_keys: {}
+        update_storage_vector_indexes_by_id_update_columns:
+          description: Update the columns of the 'storage_vector_indexes' collection
+          fields:
+            bucket_id:
+              description: Update the 'bucket_id' column in the 'storage_vector_indexes' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_storage_vector_indexes_bucket_id
+                  type: named
+            created_at:
+              description: Update the 'created_at' column in the 'storage_vector_indexes' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_storage_vector_indexes_created_at
+                  type: named
+            data_type:
+              description: Update the 'data_type' column in the 'storage_vector_indexes' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_storage_vector_indexes_data_type
+                  type: named
+            dimension:
+              description: Update the 'dimension' column in the 'storage_vector_indexes' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_storage_vector_indexes_dimension
+                  type: named
+            distance_metric:
+              description: Update the 'distance_metric' column in the 'storage_vector_indexes' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_storage_vector_indexes_distance_metric
+                  type: named
+            id:
+              description: Update the 'id' column in the 'storage_vector_indexes' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_storage_vector_indexes_id
+                  type: named
+            metadata_configuration:
+              description: Update the 'metadata_configuration' column in the 'storage_vector_indexes' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_storage_vector_indexes_metadata_configuration
+                  type: named
+            name:
+              description: Update the 'name' column in the 'storage_vector_indexes' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_storage_vector_indexes_name
+                  type: named
+            updated_at:
+              description: Update the 'updated_at' column in the 'storage_vector_indexes' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_storage_vector_indexes_updated_at
                   type: named
           foreign_keys: {}
         update_supabase_migrations_schema_migrations_by_version_response:
@@ -11877,6 +12732,23 @@ definition:
                 name: uuid
                 type: named
             pre_check:
+              description: Delete permission predicate over the 'auth_oauth_client_states' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: auth_oauth_client_states
+                  type: predicate
+          description: Delete any row on the 'auth_oauth_client_states' collection using the 'id' key
+          name: delete_auth_oauth_client_states_by_id
+          result_type:
+            name: delete_auth_oauth_client_states_by_id_response
+            type: named
+        - arguments:
+            key_id:
+              type:
+                name: uuid
+                type: named
+            pre_check:
               description: Delete permission predicate over the 'auth_oauth_clients' collection
               type:
                 type: nullable
@@ -12175,7 +13047,7 @@ definition:
         - arguments:
             key_id:
               type:
-                name: text
+                name: uuid
                 type: named
             pre_check:
               description: Delete permission predicate over the 'storage_buckets_analytics' collection
@@ -12205,6 +13077,23 @@ definition:
           name: delete_storage_buckets_by_id
           result_type:
             name: delete_storage_buckets_by_id_response
+            type: named
+        - arguments:
+            key_id:
+              type:
+                name: text
+                type: named
+            pre_check:
+              description: Delete permission predicate over the 'storage_buckets_vectors' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: storage_buckets_vectors
+                  type: predicate
+          description: Delete any row on the 'storage_buckets_vectors' collection using the 'id' key
+          name: delete_storage_buckets_vectors_by_id
+          result_type:
+            name: delete_storage_buckets_vectors_by_id_response
             type: named
         - arguments:
             key_id:
@@ -12315,6 +13204,23 @@ definition:
           name: delete_storage_s3_multipart_uploads_parts_by_id
           result_type:
             name: delete_storage_s3_multipart_uploads_parts_by_id_response
+            type: named
+        - arguments:
+            key_id:
+              type:
+                name: text
+                type: named
+            pre_check:
+              description: Delete permission predicate over the 'storage_vector_indexes' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: storage_vector_indexes
+                  type: predicate
+          description: Delete any row on the 'storage_vector_indexes' collection using the 'id' key
+          name: delete_storage_vector_indexes_by_id
+          result_type:
+            name: delete_storage_vector_indexes_by_id_response
             type: named
         - arguments:
             key_version:
@@ -12575,6 +13481,25 @@ definition:
           name: insert_auth_oauth_authorizations
           result_type:
             name: insert_auth_oauth_authorizations_response
+            type: named
+        - arguments:
+            objects:
+              type:
+                element_type:
+                  name: insert_auth_oauth_client_states_object
+                  type: named
+                type: array
+            post_check:
+              description: Insert permission predicate over the 'auth_oauth_client_states' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: auth_oauth_client_states
+                  type: predicate
+          description: Insert into the auth_oauth_client_states table
+          name: insert_auth_oauth_client_states
+          result_type:
+            name: insert_auth_oauth_client_states_response
             type: named
         - arguments:
             objects:
@@ -12903,6 +13828,25 @@ definition:
             objects:
               type:
                 element_type:
+                  name: insert_storage_buckets_vectors_object
+                  type: named
+                type: array
+            post_check:
+              description: Insert permission predicate over the 'storage_buckets_vectors' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: storage_buckets_vectors
+                  type: predicate
+          description: Insert into the storage_buckets_vectors table
+          name: insert_storage_buckets_vectors
+          result_type:
+            name: insert_storage_buckets_vectors_response
+            type: named
+        - arguments:
+            objects:
+              type:
+                element_type:
                   name: insert_storage_migrations_object
                   type: named
                 type: array
@@ -12993,6 +13937,25 @@ definition:
           name: insert_storage_s3_multipart_uploads_parts
           result_type:
             name: insert_storage_s3_multipart_uploads_parts_response
+            type: named
+        - arguments:
+            objects:
+              type:
+                element_type:
+                  name: insert_storage_vector_indexes_object
+                  type: named
+                type: array
+            post_check:
+              description: Insert permission predicate over the 'storage_vector_indexes' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: storage_vector_indexes
+                  type: predicate
+          description: Insert into the storage_vector_indexes table
+          name: insert_storage_vector_indexes
+          result_type:
+            name: insert_storage_vector_indexes_response
             type: named
         - arguments:
             objects:
@@ -13540,6 +14503,34 @@ definition:
                 name: uuid
                 type: named
             post_check:
+              description: Update permission post-condition predicate over the 'auth_oauth_client_states' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: auth_oauth_client_states
+                  type: predicate
+            pre_check:
+              description: Update permission pre-condition predicate over the 'auth_oauth_client_states' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: auth_oauth_client_states
+                  type: predicate
+            update_columns:
+              type:
+                name: update_auth_oauth_client_states_by_id_update_columns
+                type: named
+          description: Update any row on the 'auth_oauth_client_states' collection using the 'id' key
+          name: update_auth_oauth_client_states_by_id
+          result_type:
+            name: update_auth_oauth_client_states_by_id_response
+            type: named
+        - arguments:
+            key_id:
+              type:
+                name: uuid
+                type: named
+            post_check:
               description: Update permission post-condition predicate over the 'auth_oauth_clients' collection
               type:
                 type: nullable
@@ -14025,7 +15016,7 @@ definition:
         - arguments:
             key_id:
               type:
-                name: text
+                name: uuid
                 type: named
             post_check:
               description: Update permission post-condition predicate over the 'storage_buckets_analytics' collection
@@ -14077,6 +15068,34 @@ definition:
           name: update_storage_buckets_by_id
           result_type:
             name: update_storage_buckets_by_id_response
+            type: named
+        - arguments:
+            key_id:
+              type:
+                name: text
+                type: named
+            post_check:
+              description: Update permission post-condition predicate over the 'storage_buckets_vectors' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: storage_buckets_vectors
+                  type: predicate
+            pre_check:
+              description: Update permission pre-condition predicate over the 'storage_buckets_vectors' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: storage_buckets_vectors
+                  type: predicate
+            update_columns:
+              type:
+                name: update_storage_buckets_vectors_by_id_update_columns
+                type: named
+          description: Update any row on the 'storage_buckets_vectors' collection using the 'id' key
+          name: update_storage_buckets_vectors_by_id
+          result_type:
+            name: update_storage_buckets_vectors_by_id_response
             type: named
         - arguments:
             key_id:
@@ -14253,6 +15272,34 @@ definition:
           name: update_storage_s3_multipart_uploads_parts_by_id
           result_type:
             name: update_storage_s3_multipart_uploads_parts_by_id_response
+            type: named
+        - arguments:
+            key_id:
+              type:
+                name: text
+                type: named
+            post_check:
+              description: Update permission post-condition predicate over the 'storage_vector_indexes' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: storage_vector_indexes
+                  type: predicate
+            pre_check:
+              description: Update permission pre-condition predicate over the 'storage_vector_indexes' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: storage_vector_indexes
+                  type: predicate
+            update_columns:
+              type:
+                name: update_storage_vector_indexes_by_id_update_columns
+                type: named
+          description: Update any row on the 'storage_vector_indexes' collection using the 'id' key
+          name: update_storage_vector_indexes_by_id
+          result_type:
+            name: update_storage_vector_indexes_by_id_response
             type: named
         - arguments:
             key_version:
@@ -15470,6 +16517,7 @@ definition:
             one_of:
               - STANDARD
               - ANALYTICS
+              - VECTOR
             type: enum
         text:
           aggregate_functions:

@@ -5,7 +5,9 @@ import {
   Typography,
   CircularProgress,
 } from '@mui/material';
-import { graphqlRequest } from '../lib/graphql-client';
+import { graphqlRequest } from '../../lib/graphql-client';
+import { GET_HOME_PAGE, type HomeQuery } from '../../lib/queries';
+import { SortableSpeciesTable } from '../components/SortableSpeciesTable';
 
 async function getSpeciesData(): Promise<HomeQuery> {
   const response = await graphqlRequest<HomeQuery>(GET_HOME_PAGE);
@@ -53,7 +55,7 @@ export default function Home() {
             <CircularProgress />
           </Box>
         }>
-          <p>TODO: Add some records to beat</p>
+          <SpeciesTableWrapper />
         </Suspense>
       </Box>
     </Container>

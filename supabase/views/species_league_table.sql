@@ -13,14 +13,7 @@ select
   min(e.wing_length) as shortest_winged,
   sum(e.weight) as total_weight,
   u.cnt as unluckiest,
-  u.longest_stay as longest_stay,
-  max(
-    case
-      when u.cnt is not null
-      and u.cnt > 1 then ROUND(u.longest_stay / u.cnt, 2)
-      else null
-    end
-  ) as frequent_flyer
+  u.longest_stay as longest_stay
 from
   "Birds" b
   left join "Encounters" e on b.ring_no = e.ring_no
