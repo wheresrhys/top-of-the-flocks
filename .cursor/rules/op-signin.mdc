@@ -1,0 +1,11 @@
+---
+name: op-signin
+description: Encourages cursor to avoid getting blocked by the need for op signin
+---
+
+# Overview
+
+- When suggesting any shell command that relies on environment variables or secrets, never run it directly.
+- Instead, always output the command wrapped in op run --env-file=.env.secret -- … (or my preferred env file) and treat it as something I will run manually.
+- If you need to run a command yourself in Agent mode, also use this wrapping.
+- This does not apply to commands that call the hasura `ddn` cli within the `./hasur` subdirectory

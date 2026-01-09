@@ -1,0 +1,13 @@
+---
+name: reuse-terminals
+description: Encourages cursor to avoid spinning up new terminals when an existing one will do just fine
+---
+
+# Overview
+
+- Always try to reuse the most recently used terminal in Cursor for all commands.
+- If a new terminal is ever opened or a command fails with an authentication / 1Password / missing‑env error, do not assume the command or code is wrong.
+- In those cases, pause executing commands and tell me explicitly:
+  - that a new terminal was opened or secrets are missing;
+  - that I should sign in to 1Password (e.g. eval "$(op signin …)");
+  - and then ask me to confirm when I’m done before retrying.
