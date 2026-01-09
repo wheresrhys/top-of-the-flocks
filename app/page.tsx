@@ -5,26 +5,26 @@ import {
   Typography,
   CircularProgress,
 } from '@mui/material';
-import { graphqlRequest } from '../lib/graphql-client';
+// import { graphqlRequest } from '../lib/graphql-client';
 
-async function getSpeciesData(): Promise<HomeQuery> {
-  const response = await graphqlRequest<HomeQuery>(GET_HOME_PAGE);
+// async function getSpeciesData(): Promise<HomeQuery> {
+//   const response = await graphqlRequest<HomeQuery>(GET_HOME_PAGE);
 
-  if (response.errors) {
-    throw new Error(`GraphQL errors: ${response.errors.map(e => e.message).join(', ')}`);
-  }
+//   if (response.errors) {
+//     throw new Error(`GraphQL errors: ${response.errors.map(e => e.message).join(', ')}`);
+//   }
 
-  if (!response.data) {
-    throw new Error('No data returned from GraphQL query');
-  }
+//   if (!response.data) {
+//     throw new Error('No data returned from GraphQL query');
+//   }
 
-  return response.data;
-}
+//   return response.data;
+// }
 
-async function SpeciesTableWrapper() {
-  const data = await getSpeciesData();
-  return <SortableSpeciesTable data={data.speciesLeagueTable || []} />;
-}
+// async function SpeciesTableWrapper() {
+//   const data = await getSpeciesData();
+//   return <SortableSpeciesTable data={data.speciesLeagueTable || []} />;
+// }
 
 export default function Home() {
   return (
