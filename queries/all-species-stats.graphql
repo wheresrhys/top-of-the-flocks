@@ -1,4 +1,4 @@
-query HomePage {
+query AllSpeciesStats {
   speciesLeagueTable {
     speciesName
     individuals

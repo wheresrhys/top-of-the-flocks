@@ -120,8 +120,8 @@ function a11yProps(index: number) {
 
 // import { graphqlRequest } from '../lib/graphql-client';
 
-// async function getSpeciesData(): Promise<HomeQuery> {
-//   const response = await graphqlRequest<HomeQuery>(GET_HOME_PAGE);
+// async function getSpeciesData(): Promise<AllSpeciesStatsQuery> {
+//   const response = await graphqlRequest<AllSpeciesStatsQuery>(GET_ALL_SPECIES_STATS);
 
 //   if (response.errors) {
 //     throw new Error(`GraphQL errors: ${response.errors.map(e => e.message).join(', ')}`);
