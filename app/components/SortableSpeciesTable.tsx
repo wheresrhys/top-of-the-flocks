@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Typography,
@@ -129,6 +129,11 @@ interface SortableSpeciesTableProps {
 export function SortableSpeciesTable({ data }: SortableSpeciesTableProps) {
   const [orderBy, setOrderBy] = useState<SortableColumn>('individuals');
   const [order, setOrder] = useState<SortOrder>('desc');
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleSort = (column: SortableColumn) => {
     const isAsc = orderBy === column && order === 'asc';
@@ -137,7 +142,10 @@ export function SortableSpeciesTable({ data }: SortableSpeciesTableProps) {
   };
 
   // Sort the data based on current sort settings
-  const sortedSpecies = [...data].sort((a, b) => compareValues(a, b, orderBy, order));
+  // Only sort after component mounts on client to avoid hydration mismatch
+  const sortedSpecies = mounted
+    ? [...data].sort((a, b) => compareValues(a, b, orderBy, order))
+    : data; // Use unsorted data during SSR
 
   return (
     <TableContainer component={Paper} elevation={2}>
