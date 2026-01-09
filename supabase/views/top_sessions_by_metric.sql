@@ -1,11 +1,16 @@
+CREATE TABLE IF NOT EXISTS top_sessions_result (
+  visit_date DATE,
+  metric_value BIGINT
+);
+
+-- Drop the function first to allow changing return type
+DROP FUNCTION IF EXISTS top_sessions_by_metric(TEXT, INTEGER);
+
 CREATE OR REPLACE FUNCTION top_sessions_by_metric(
   sort_by TEXT DEFAULT 'encounters',
   result_limit INTEGER DEFAULT 5
 )
-RETURNS TABLE (
-  visit_date DATE,
-  metric_value BIGINT
-)
+RETURNS SETOF top_sessions_result
 LANGUAGE plpgsql
 STABLE
 AS $$

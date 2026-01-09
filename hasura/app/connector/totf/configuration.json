@@ -3266,6 +3266,31 @@
         "foreignRelations": {},
         "description": null
       },
+      "top_sessions_result": {
+        "schemaName": "public",
+        "tableName": "top_sessions_result",
+        "columns": {
+          "metric_value": {
+            "name": "metric_value",
+            "type": {
+              "scalarType": "int8"
+            },
+            "nullable": "nullable",
+            "description": null
+          },
+          "visit_date": {
+            "name": "visit_date",
+            "type": {
+              "scalarType": "date"
+            },
+            "nullable": "nullable",
+            "description": null
+          }
+        },
+        "uniquenessConstraints": {},
+        "foreignRelations": {},
+        "description": null
+      },
       "vault_decrypted_secrets": {
         "schemaName": "vault",
         "tableName": "decrypted_secrets",
