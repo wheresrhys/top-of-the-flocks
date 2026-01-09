@@ -1,18 +1,18 @@
 import { loadQuery } from './query-loader';
 import type {
-  HomePageQuery,
-  HomePageQueryVariables,
+  AllSpeciesStatsQuery,
+  AllSpeciesStatsQueryVariables,
   SpeciesPageQuery,
   SpeciesPageQueryVariables
 } from '../types/graphql.types';
 
 // Type-safe query definitions
 export const queries = {
-  home: {
-    query: loadQuery('home'),
+  allSpeciesStats: {
+    query: loadQuery('all-species-stats'),
     // Type helpers for this specific query
-    type: {} as HomePageQuery,
-    variables: {} as HomePageQueryVariables,
+    type: {} as AllSpeciesStatsQuery,
+    variables: {} as AllSpeciesStatsQueryVariables,
   },
   species: {
     query: loadQuery('species'),
@@ -23,11 +23,10 @@ export const queries = {
 } as const;
 
 // Export individual queries for convenience
-export const GET_HOME_PAGE = queries.home.query;
+export const GET_ALL_SPECIES_STATS = queries.allSpeciesStats.query;
 export const GET_SPECIES_PAGE = queries.species.query;
 
 // Type helpers
-export type HomeQuery = typeof queries.home.type;
-export type HomeQueryVariables = typeof queries.home.variables;
+export type { AllSpeciesStatsQuery, AllSpeciesStatsQueryVariables };
 export type SpeciesQuery = typeof queries.species.type;
 export type SpeciesQueryVariables = typeof queries.species.variables;

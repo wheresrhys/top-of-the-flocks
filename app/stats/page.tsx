@@ -1,11 +1,11 @@
 import { Suspense } from 'react';
 import { Container, Box, Typography, CircularProgress } from '@mui/material';
 import { graphqlRequest } from '../../lib/graphql-client';
-import { GET_HOME_PAGE, type HomeQuery } from '../../lib/queries';
+import { GET_ALL_SPECIES_STATS, type AllSpeciesStatsQuery } from '../../lib/queries';
 import { SortableSpeciesTable } from '../components/SortableSpeciesTable';
 
-async function getSpeciesData(): Promise<HomeQuery> {
-	const response = await graphqlRequest<HomeQuery>(GET_HOME_PAGE);
+async function getSpeciesData(): Promise<AllSpeciesStatsQuery> {
+	const response = await graphqlRequest<AllSpeciesStatsQuery>(GET_ALL_SPECIES_STATS);
 
 	if (response.errors) {
 		throw new Error(
@@ -25,7 +25,7 @@ async function SpeciesTableWrapper() {
 	return <SortableSpeciesTable data={data.speciesLeagueTable || []} />;
 }
 
-export default function Home() {
+export default function SpeciesStats() {
 	return (
 		<Container maxWidth="xl">
 			<Box
@@ -34,18 +34,6 @@ export default function Home() {
 					py: 4
 				}}
 			>
-				<Typography
-					variant="h1"
-					component="h1"
-					sx={{
-						mb: 4,
-						textAlign: 'center',
-						fontSize: { xs: '2.5rem', md: '3.5rem' },
-						fontWeight: 'bold'
-					}}
-				>
-					Top of the Flocks
-				</Typography>
 
 				<Suspense
 					fallback={

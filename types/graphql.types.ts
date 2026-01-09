@@ -733,10 +733,10 @@ export type TimeBoolExp = {
   _or?: InputMaybe<Array<TimeBoolExp>>;
 };
 
-export type HomePageQueryVariables = Exact<{ [key: string]: never; }>;
+export type AllSpeciesStatsQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type HomePageQuery = { __typename?: 'Query', speciesLeagueTable?: Array<{ __typename?: 'SpeciesLeagueTable', speciesName?: string | null, individuals?: number | null, encounters?: number | null, sessionCount?: number | null, longestStay?: number | null, unluckiest?: number | null, longestWinged?: number | null, averageWingLength?: number | null, shortestWinged?: number | null, heaviest?: number | null, averageWeight?: number | null, lightest?: number | null, totalWeight?: number | null }> | null };
+export type AllSpeciesStatsQuery = { __typename?: 'Query', speciesLeagueTable?: Array<{ __typename?: 'SpeciesLeagueTable', speciesName?: string | null, individuals?: number | null, encounters?: number | null, sessionCount?: number | null, longestStay?: number | null, unluckiest?: number | null, longestWinged?: number | null, averageWingLength?: number | null, shortestWinged?: number | null, heaviest?: number | null, averageWeight?: number | null, lightest?: number | null, totalWeight?: number | null }> | null };
 
 export type GetSpeciesDetailsQueryVariables = Exact<{
   speciesName?: InputMaybe<Scalars['String1']['input']>;
