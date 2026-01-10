@@ -4,8 +4,8 @@
  * This script parses Postgres functions and adds them to the nativeOperations.queries section
  */
 
-import { readFileSync, writeFileSync } from 'fs';
-import { join } from 'path';
+import { readFileSync, writeFileSync, existsSync, readdirSync } from 'fs';
+import { join, basename } from 'path';
 
 interface FunctionArg {
   name: string;
@@ -122,10 +122,10 @@ function generateNativeOperationConfig(funcInfo: FunctionInfo): any {
     };
   }
 
-  const arguments: Record<string, any> = {};
+  const functionArgs: Record<string, any> = {};
   for (const arg of funcInfo.args) {
     const scalarType = pgTypeToHasuraScalarType(arg.type);
-    arguments[arg.name] = {
+    functionArgs[arg.name] = {
       name: arg.name,
       type: {
         scalarType: scalarType,
@@ -140,7 +140,7 @@ function generateNativeOperationConfig(funcInfo: FunctionInfo): any {
       inline: sqlQuery,
     },
     columns,
-    arguments,
+    arguments: functionArgs,
     description: null,
   };
 }
@@ -157,18 +157,16 @@ function main() {
   }
 
   // Find project root by looking for package.json
-  const fs = require('fs');
-  const path = require('path');
   let projectRoot = process.cwd();
 
   // If we're in hasura directory, go up to project root
-  if (path.basename(projectRoot) === 'hasura') {
+  if (basename(projectRoot) === 'hasura') {
     projectRoot = join(projectRoot, '..');
   }
 
   // Verify we're in the right place by checking for package.json
   const packageJsonPath = join(projectRoot, 'package.json');
-  if (!fs.existsSync(packageJsonPath)) {
+  if (!existsSync(packageJsonPath)) {
     console.error(`Could not find project root. Looking for package.json in: ${projectRoot}`);
     process.exit(1);
   }
@@ -176,12 +174,12 @@ function main() {
   // Find SQL file containing the function
   const viewsDir = join(projectRoot, 'supabase', 'views');
 
-  if (!fs.existsSync(viewsDir)) {
+  if (!existsSync(viewsDir)) {
     console.error(`Views directory not found: ${viewsDir}`);
     process.exit(1);
   }
 
-  const files = fs.readdirSync(viewsDir).filter((f: string) => f.endsWith('.sql'));
+  const files = readdirSync(viewsDir).filter((f: string) => f.endsWith('.sql'));
 
   let funcInfo: FunctionInfo | null = null;
   let sqlFile: string | null = null;

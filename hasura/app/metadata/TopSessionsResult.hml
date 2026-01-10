@@ -21,6 +21,7 @@ definition:
         visitDate:
           column:
             name: visit_date
+
     - dataConnectorName: totf
       dataConnectorObjectType: topSessionsByMetric
       fieldMapping:
@@ -30,6 +31,7 @@ definition:
         visitDate:
           column:
             name: visit_date
+
 
 ---
 kind: TypePermissions

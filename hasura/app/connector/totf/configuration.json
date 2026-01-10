@@ -5609,17 +5609,9 @@
       "queries": {
         "topSessionsByMetric": {
           "sql": {
-            "inline": "SELECT * FROM top_sessions_by_metric({{metric}})"
+            "inline": "SELECT * FROM top_sessions_by_metric({{sort_by}}, {{result_limit}})"
           },
           "columns": {
-            "metric_value": {
-              "name": "metric_value",
-              "type": {
-                "scalarType": "int8"
-              },
-              "nullable": "nullable",
-              "description": null
-            },
             "visit_date": {
               "name": "visit_date",
               "type": {
@@ -5627,16 +5619,32 @@
               },
               "nullable": "nullable",
               "description": null
-            }
-          },
-          "arguments": {
-            "id": {
-              "name": "metric",
+            },
+            "metric_value": {
+              "name": "metric_value",
               "type": {
-                "scalarType": "string"
+                "scalarType": "int8"
               },
               "nullable": "nullable",
               "description": null
+            }
+          },
+          "arguments": {
+            "sort_by": {
+              "name": "sort_by",
+              "type": {
+                "scalarType": "text"
+              },
+              "nullable": "nullable",
+              "description": "Default: 'encounters'"
+            },
+            "result_limit": {
+              "name": "result_limit",
+              "type": {
+                "scalarType": "int4"
+              },
+              "nullable": "nullable",
+              "description": "Default: 5\n"
             }
           },
           "description": null

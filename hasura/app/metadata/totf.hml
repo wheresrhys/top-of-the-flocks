@@ -352,11 +352,20 @@ definition:
               unique_columns:
                 - id
         - arguments:
-            id:
+            result_limit:
+              description: |
+                Default: 5
               type:
                 type: nullable
                 underlying_type:
-                  name: string
+                  name: int4
+                  type: named
+            sort_by:
+              description: 'Default: ''encounters'''
+              type:
+                type: nullable
+                underlying_type:
+                  name: text
                   type: named
           name: topSessionsByMetric
           type: topSessionsByMetric
