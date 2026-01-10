@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useState, SyntheticEvent, ReactNode } from 'react';
+import { useState, SyntheticEvent, ReactNode } from 'react';
 import {
 	Container,
 	Box,
@@ -9,7 +9,7 @@ import {
 	Tabs
 } from '@mui/material';
 import Top5Table from './components/Top5Table';
-import { TOP5_SESSIONS, TOP5_MONTHS, TOP5_YEARS} from '../../lib/queries';
+
 interface TabPanelProps {
 	children?: ReactNode;
 	index: number;
@@ -89,13 +89,13 @@ export default function Home() {
 						</Tabs>
 					</Box>
 					<CustomTabPanel value={value} index={0}>
-						<Top5Table />
+						<Top5Table temporalUnit="day" />
 					</CustomTabPanel>
 					<CustomTabPanel value={value} index={1}>
-						<Top5Table />
+						<Top5Table temporalUnit="month" />
 					</CustomTabPanel>
 					<CustomTabPanel value={value} index={2}>
-						<Top5Table />
+						<Top5Table temporalUnit="year" />
 					</CustomTabPanel>
 				</Box>
 			</Box>

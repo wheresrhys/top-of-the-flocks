@@ -1,4 +1,4 @@
-import { Suspense, useState, SyntheticEvent, ReactNode } from 'react';
+import { Suspense } from 'react';
 import {
 	Box,
 	Typography,
@@ -18,7 +18,6 @@ import {
 	TOP5_MONTHS,
 	TOP5_YEARS,
 	type TopSessionsResult,
-	QueryTopSessionsByMetricArgs
 } from '../../lib/queries';
 
 type Top5TableData = {
@@ -83,6 +82,7 @@ function Top5Entry({ config: Top5TableConfig, entry: TopSessionsResult }) {
 
 // TODO can use generated type from GraphQL for data
 function Top5Table({ data: Top5TableData, config: Top5TableConfig }) {
+	console.log(config, data)
 	return (
 		<TableContainer component={Paper} elevation={2}>
 			<Table size="small">
