@@ -5606,7 +5606,35 @@
       }
     },
     "nativeOperations": {
-      "queries": {}
+      "queries": {
+        "topSessionsByMetric": {
+          "sql": {
+            "inline": "SELECT * FROM top_sessions_by_metric({{metric}});"
+          },
+          "columns": {
+            "metric_value": {
+              "name": "metric_value",
+              "type": {
+                "scalarType": "int8"
+              }
+            },
+            "visit_date": {
+              "name": "visit_date",
+              "type": {
+                "scalarType": "date"
+              }
+            }
+          },
+          "arguments": {
+            "id": {
+              "name": "metric",
+              "type": {
+                "scalarType": "string"
+              }
+            }
+          }
+        }
+      }
       "mutations": {}
     }
   },
