@@ -7,32 +7,54 @@ set -e
 
 echo "Updating Supabase views..."
 npx supabase migration fetch --yes
-# Iterate over all SQL files in the supabase/views directory
+
+# Check if there are any SQL files in the views directory
+if ! ls supabase/views/*.sql 1> /dev/null 2>&1; then
+    echo "No SQL files found in supabase/views/"
+    exit 0
+fi
+
+# Create a single migration for all views
+echo "Creating single migration for all views..."
+migration_output=$(npx supabase migration new update_views)
+
+echo "$migration_output"
+
+# Extract the migration file path from the output
+migration_file=$(echo "$migration_output" | grep -o 'supabase/migrations/[^[:space:]]*\.sql')
+
+if [ -z "$migration_file" ]; then
+    echo "✗ Failed to extract migration file path from output"
+    exit 1
+fi
+
+echo "Concatenating all SQL files from supabase/views/ into $migration_file"
+
+# Write a header comment
+cat > "$migration_file" << 'EOF'
+-- Migration: Update all views and functions
+-- This migration combines all SQL files from supabase/views/
+-- Generated automatically by supabase-update-views.sh
+
+EOF
+
+# Concatenate all SQL files with separators
 for sql_file in supabase/views/*.sql; do
     if [ -f "$sql_file" ]; then
-        echo "Processing: $sql_file"
-        # Create new migration and capture the output
-        migration_output=$(npx supabase migration new species_league_table)
-        echo "$migration_output"
-
-        # Extract the migration file path from the output
-        migration_file=$(echo "$migration_output" | grep -o 'supabase/migrations/[^[:space:]]*\.sql')
-
-        if [ -n "$migration_file" ]; then
-            echo "Writing contents of $sql_file to $migration_file"
-            cat "$sql_file" > "$migration_file"
-            echo "✓ Successfully wrote SQL to migration file: $migration_file"
-        else
-            echo "✗ Failed to extract migration file path from output"
-            exit 1
-        fi
-    else
-        echo "No SQL files found in supabase/views/"
+        echo "Adding: $sql_file"
+        echo "" >> "$migration_file"
+        echo "-- ============================================" >> "$migration_file"
+        echo "-- File: $(basename "$sql_file")" >> "$migration_file"
+        echo "-- ============================================" >> "$migration_file"
+        echo "" >> "$migration_file"
+        cat "$sql_file" >> "$migration_file"
+        echo "" >> "$migration_file"
     fi
 done
 
+echo "✓ Successfully created combined migration file: $migration_file"
 echo "Applying migrations to linked database..."
-npx supabase migration up --linked
+npx supabase migration up --linked --debug
 
 echo "✓ All Supabase migrations completed successfully!"
 

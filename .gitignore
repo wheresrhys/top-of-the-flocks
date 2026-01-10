@@ -50,3 +50,4 @@ next-env.d.ts
 !/data/sample.csv
 
 ddn-docker.log
+.cursor/debug.log
