@@ -103,7 +103,31 @@ function pgTypeToHasuraScalarType(pgType: string): string {
 }
 
 function generateNativeOperationConfig(funcInfo: FunctionInfo): any {
+  // Generate argument placeholders with COALESCE for defaults
+  // PostgreSQL functions only use DEFAULT when arguments are omitted, not when null is passed
+  // So we need to handle null values explicitly using COALESCE
   const argPlaceholders = funcInfo.args.map((arg) => {
+    if (arg.default) {
+      // Parse default value - handle strings vs numbers
+      let defaultValue = arg.default.trim();
+      // Remove surrounding quotes if present (we'll add them back if needed)
+      const isQuoted = (defaultValue.startsWith("'") && defaultValue.endsWith("'")) ||
+                       (defaultValue.startsWith('"') && defaultValue.endsWith('"'));
+      if (isQuoted) {
+        // Extract the inner value
+        defaultValue = defaultValue.slice(1, -1);
+        // Escape single quotes in the value
+        defaultValue = defaultValue.replace(/'/g, "''");
+        return `COALESCE({{${arg.name}}}, '${defaultValue}')`;
+      } else if (defaultValue.match(/^\d+$/)) {
+        // Numeric default
+        return `COALESCE({{${arg.name}}}, ${defaultValue})`;
+      } else {
+        // String default without quotes - add quotes and escape
+        defaultValue = defaultValue.replace(/'/g, "''");
+        return `COALESCE({{${arg.name}}}, '${defaultValue}')`;
+      }
+    }
     return `{{${arg.name}}}`;
   }).join(', ');
 
