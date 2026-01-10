@@ -5609,20 +5609,24 @@
       "queries": {
         "topSessionsByMetric": {
           "sql": {
-            "inline": "SELECT * FROM top_sessions_by_metric({{metric}});"
+            "inline": "SELECT * FROM top_sessions_by_metric({{metric}})"
           },
           "columns": {
             "metric_value": {
               "name": "metric_value",
               "type": {
                 "scalarType": "int8"
-              }
+              },
+              "nullable": "nullable",
+              "description": null
             },
             "visit_date": {
               "name": "visit_date",
               "type": {
                 "scalarType": "date"
-              }
+              },
+              "nullable": "nullable",
+              "description": null
             }
           },
           "arguments": {
@@ -5630,11 +5634,14 @@
               "name": "metric",
               "type": {
                 "scalarType": "string"
-              }
+              },
+              "nullable": "nullable",
+              "description": null
             }
-          }
+          },
+          "description": null
         }
-      }
+      },
       "mutations": {}
     }
   },

@@ -1,0 +1,34 @@
+---
+kind: Model
+version: v2
+definition:
+  name: TopSessionsByMetric
+  objectType: TopSessionsResult
+  source:
+    dataConnectorName: totf
+    collection: topSessionsByMetric
+  filterExpressionType: TopSessionsResultBoolExp
+  aggregateExpression: TopSessionsResultAggExp
+  orderByExpression: TopSessionsResultOrderByExp
+  graphql:
+    selectMany:
+      queryRootField: topSessionsByMetric
+      subscription:
+        rootField: topSessionsByMetric
+    selectUniques: []
+    filterInputTypeName: TopSessionsResultFilterInput
+    aggregate:
+      queryRootField: topSessionsByMetricAggregate
+      subscription:
+        rootField: topSessionsByMetricAggregate
+
+---
+kind: ModelPermissions
+version: v1
+definition:
+  modelName: TopSessionsByMetric
+  permissions:
+    - role: admin
+      select:
+        filter: null
+        allowSubscriptions: true

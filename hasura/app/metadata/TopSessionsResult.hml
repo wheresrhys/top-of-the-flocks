@@ -21,6 +21,15 @@ definition:
         visitDate:
           column:
             name: visit_date
+    - dataConnectorName: totf
+      dataConnectorObjectType: topSessionsByMetric
+      fieldMapping:
+        metricValue:
+          column:
+            name: metric_value
+        visitDate:
+          column:
+            name: visit_date
 
 ---
 kind: TypePermissions
@@ -109,7 +118,7 @@ definition:
       subscription:
         rootField: topSessionsResult
     selectUniques: []
-    filterInputTypeName: TopSessionsResultFilterInput
+    filterInputTypeName: TopSessionsResultFilterInput_1
     aggregate:
       queryRootField: topSessionsResultAggregate
       subscription:

@@ -351,6 +351,16 @@ definition:
             secrets_pkey:
               unique_columns:
                 - id
+        - arguments:
+            id:
+              type:
+                type: nullable
+                underlying_type:
+                  name: string
+                  type: named
+          name: topSessionsByMetric
+          type: topSessionsByMetric
+          uniqueness_constraints: {}
       functions: []
       object_types:
         Birds:
@@ -5500,6 +5510,21 @@ definition:
                 type: named
           foreign_keys: {}
         top_sessions_result:
+          fields:
+            metric_value:
+              type:
+                type: nullable
+                underlying_type:
+                  name: int8
+                  type: named
+            visit_date:
+              type:
+                type: nullable
+                underlying_type:
+                  name: date
+                  type: named
+          foreign_keys: {}
+        topSessionsByMetric:
           fields:
             metric_value:
               type:
