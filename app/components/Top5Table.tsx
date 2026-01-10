@@ -1,5 +1,3 @@
-'use client';
-
 import { Suspense, useState, SyntheticEvent, ReactNode } from 'react';
 import {
 	Box,
@@ -19,9 +17,9 @@ import {
 	TOP5_SESSIONS,
 	TOP5_MONTHS,
 	TOP5_YEARS,
-	type TopSessionsResult
+	type TopSessionsResult,
+	QueryTopSessionsByMetricArgs
 } from '../../lib/queries';
-
 
 type Top5TableData = {
 	byEncounters: [TopSessionsResult];
@@ -56,6 +54,7 @@ type Top5TableConfig = {
 	dateFormat: string;
 	query: string;
 };
+
 const top5TableConfigs: { [key: TemporalUnit]: Top5TableConfig } = {
 	day: {
 		connectingVerb: 'on',

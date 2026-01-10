@@ -5,11 +5,11 @@ import {
 	Container,
 	Box,
 	Typography,
-	CircularProgress,
 	Tab,
 	Tabs
 } from '@mui/material';
 import Top5Table from './components/Top5Table';
+import { TOP5_SESSIONS, TOP5_MONTHS, TOP5_YEARS} from '../../lib/queries';
 interface TabPanelProps {
 	children?: ReactNode;
 	index: number;

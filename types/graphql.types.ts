@@ -825,3 +825,10 @@ export type SpeciesPageQueryVariables = Exact<{
 
 
 export type SpeciesPageQuery = { __typename?: 'Query', species?: Array<{ __typename?: 'Species', speciesName: string, birdsAggregate: { __typename?: 'BirdsAggExp', _count: number }, birds?: Array<{ __typename?: 'Birds', encounters?: Array<{ __typename?: 'Encounters', visitDate: string }> | null, encountersAggregate: { __typename?: 'EncountersAggExp', _count: number } }> | null }> | null };
+
+export type Top5TableQueryVariables = Exact<{
+  temporalUnit?: InputMaybe<Scalars['String1']['input']>;
+}>;
+
+
+export type Top5TableQuery = { __typename?: 'Query', byEncounter?: Array<{ __typename?: 'TopSessionsResult', metricValue?: number | null, visitDate?: string | null }> | null, byIndividual?: Array<{ __typename?: 'TopSessionsResult', metricValue?: number | null, visitDate?: string | null }> | null, bySpecies?: Array<{ __typename?: 'TopSessionsResult', metricValue?: number | null, visitDate?: string | null }> | null };
