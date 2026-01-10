@@ -82,27 +82,76 @@ for sql_file in ../supabase/views/*.sql; do
         hml_filename=$(echo "$table_to_track" | awk -F'_' '{for(i=1;i<=NF;i++) $i=toupper(substr($i,1,1)) substr($i,2); print}' OFS='')
         hml_file="app/metadata/${hml_filename}.hml"
 
-        # Remove existing HML file if it exists (ddn model add will regenerate it)
-        if [ -f "$hml_file" ]; then
-            echo "  Removing existing model: $table_to_track"
-            rm "$hml_file"
-        fi
+        # For functions, we need to:
+        # 1. First create the return table Model (if it doesn't exist) - but don't remove it!
+        # 2. Then create the function Model with arguments mapping
+        if [ -n "$return_table" ] && [ -n "$func_name" ]; then
+            camel_case_func=$(echo "$func_name" | awk -F'_' '{for(i=1;i<=NF;i++) if(i==1) printf "%s", $i; else printf "%s%s", toupper(substr($i,1,1)), substr($i,2);}')
 
-        echo "  Adding Hasura model for: $table_to_track"
-        if ddn model add totf "$table_to_track" 2>&1; then
-            echo "  ✓ Successfully added GraphQL model for: $table_to_track"
-            # Add to processed list (space-separated string)
+            # First, ensure the return table Model exists (but don't remove it if it exists)
+            echo "  Ensuring return table Model exists: $table_to_track"
+            if [ -f "$hml_file" ]; then
+                echo "  Return table Model already exists: $table_to_track"
+            else
+                echo "  Creating return table Model: $table_to_track"
+                if ddn model add totf "$table_to_track" 2>&1; then
+                    echo "  ✓ Successfully created return table Model for: $table_to_track"
+                else
+                    echo "  ⚠️  Failed to create return table Model, continuing anyway..."
+                fi
+            fi
+
+            # Now create the function Model with arguments
+            # Convert camelCase function name to PascalCase for Model name
+            func_model_name=$(echo "$camel_case_func" | awk '{print toupper(substr($0,1,1)) substr($0,2)}')
+            func_hml_file="app/metadata/${func_model_name}.hml"
+
+            echo "  Generating Model with arguments for function collection: $camel_case_func"
+
+            # Remove existing function Model if it exists
+            if [ -f "$func_hml_file" ]; then
+                echo "  Removing existing function Model: $func_model_name"
+                rm "$func_hml_file"
+            fi
+
+            # Generate Model with arguments mapping
+            if (cd .. && node --import tsx scripts/generate-model-with-arguments.ts "$camel_case_func" "$return_table" 2>&1); then
+                echo "  ✓ Successfully generated Model with arguments for: $camel_case_func"
+            else
+                echo "  ⚠️  Failed to generate Model with arguments for: $camel_case_func"
+                echo "  ℹ️  This might happen if the collection doesn't have arguments or introspection hasn't run yet"
+            fi
+
+            # Add return table to processed list (so we don't process it again)
             if [ -z "$processed_models" ]; then
                 processed_models="$table_to_track"
             else
                 processed_models="$processed_models $table_to_track"
             fi
         else
-            model_exit=$?
-            echo "  ✗ Failed to add GraphQL model for: $table_to_track (exit code: $model_exit)"
-            echo "  ℹ️  This might be expected if the table/view doesn't exist yet"
-            echo "  ℹ️  Make sure your SQL migrations have been applied to the database"
-            # Don't exit - continue processing other models
+            # Standard table/view - use ddn model add
+            # Remove existing HML file if it exists (ddn model add will regenerate it)
+            if [ -f "$hml_file" ]; then
+                echo "  Removing existing model: $table_to_track"
+                rm "$hml_file"
+            fi
+
+            echo "  Adding Hasura model for: $table_to_track"
+            if ddn model add totf "$table_to_track" 2>&1; then
+                echo "  ✓ Successfully added GraphQL model for: $table_to_track"
+                # Add to processed list (space-separated string)
+                if [ -z "$processed_models" ]; then
+                    processed_models="$table_to_track"
+                else
+                    processed_models="$processed_models $table_to_track"
+                fi
+            else
+                model_exit=$?
+                echo "  ✗ Failed to add GraphQL model for: $table_to_track (exit code: $model_exit)"
+                echo "  ℹ️  This might be expected if the table/view doesn't exist yet"
+                echo "  ℹ️  Make sure your SQL migrations have been applied to the database"
+                # Don't exit - continue processing other models
+            fi
         fi
     fi
 done

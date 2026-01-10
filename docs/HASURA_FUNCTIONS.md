@@ -74,9 +74,23 @@ The `hasura:update-graph` script automatically:
 
 1. **Detects functions** - Scans `supabase/views/*.sql` for functions with `RETURNS SETOF`
 2. **Adds native operations** - Automatically generates and adds native operation config to `configuration.json`
-3. **Creates models** - Adds Hasura models for return tables
-4. **Generates metadata** - Creates all required HML files (ObjectType, BooleanExpression, AggregateExpression, OrderByExpression, Permissions)
-5. **Builds supergraph** - Runs introspection and builds the GraphQL schema
+3. **Creates return table models** - Adds Hasura models for return tables (for ObjectType definitions)
+4. **Creates function models with arguments** - Automatically generates Models with proper argument mapping for native operation collections
+5. **Generates metadata** - Creates all required HML files (ObjectType, BooleanExpression, AggregateExpression, OrderByExpression, Permissions)
+6. **Builds supergraph** - Runs introspection and builds the GraphQL schema
+
+### Function Arguments
+
+For functions with arguments, the script automatically:
+- Maps PostgreSQL argument types to Hasura scalar types (e.g., `int4` → `Int64`, `text` → `String_1`)
+- Creates Model arguments with camelCase names (e.g., `sort_by` → `sortBy`)
+- Maps GraphQL argument names to collection argument names via `argumentMapping`
+- Exposes arguments through the `args` field in GraphQL queries
+
+The resulting GraphQL API will expose function arguments like:
+```graphql
+topSessionsByMetric(args: { sortBy: String, resultLimit: Int }, limit: Int, where: {...})
+```
 
 ## Helper Scripts (Advanced Usage)
 
@@ -112,6 +126,20 @@ Interactive helper to add a function with step-by-step instructions (legacy, use
 **Usage:**
 ```bash
 npm run hasura:add-function <function_name> [return_table]
+```
+
+### `scripts/generate-model-with-arguments.ts`
+
+Generates Model configuration with arguments mapping for native operation collections. This is automatically called by `hasura-update-graph.sh` for functions with arguments.
+
+**Usage:**
+```bash
+tsx scripts/generate-model-with-arguments.ts <collection_name> <return_table_name>
+```
+
+**Example:**
+```bash
+tsx scripts/generate-model-with-arguments.ts topSessionsByMetric top_sessions_result
 ```
 
 ### `scripts/hasura-update-graph.sh`
@@ -155,7 +183,16 @@ With the automated workflow, adding a function is now just 3 steps:
    npm run hasura:types
    ```
 
-Done! The function is now available in your GraphQL API as `topSessionsByMetric`.
+Done! The function is now available in your GraphQL API as `topSessionsByMetric` with arguments exposed through the `args` field:
+
+```graphql
+query {
+  topSessionsByMetric(args: { sortBy: "encounters", resultLimit: 10 }) {
+    visitDate
+    metricValue
+  }
+}
+```
 
 ## Tips
 

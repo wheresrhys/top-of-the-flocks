@@ -4,9 +4,19 @@ version: v2
 definition:
   name: TopSessionsByMetric
   objectType: TopSessionsResult
+  arguments:
+    - name: resultLimit
+      type: Int64
+      description: "Default: 5"
+    - name: sortBy
+      type: String_1
+      description: "'Default: ''encounters'''"
   source:
     dataConnectorName: totf
     collection: topSessionsByMetric
+    argumentMapping:
+      resultLimit: result_limit
+      sortBy: sort_by
   filterExpressionType: TopSessionsResultBoolExp
   aggregateExpression: TopSessionsResultAggExp
   orderByExpression: TopSessionsResultOrderByExp
@@ -16,6 +26,7 @@ definition:
       subscription:
         rootField: topSessionsByMetric
     selectUniques: []
+    argumentsInputType: TopSessionsByMetricArguments
     filterInputTypeName: TopSessionsResultFilterInput
     aggregate:
       queryRootField: topSessionsByMetricAggregate

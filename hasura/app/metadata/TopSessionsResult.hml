@@ -102,38 +102,3 @@ definition:
   graphql:
     expressionTypeName: TopSessionsResultOrderByExp
 
----
-kind: Model
-version: v2
-definition:
-  name: TopSessionsResult
-  objectType: TopSessionsResult
-  source:
-    dataConnectorName: totf
-    collection: top_sessions_result
-  filterExpressionType: TopSessionsResultBoolExp
-  aggregateExpression: TopSessionsResultAggExp
-  orderByExpression: TopSessionsResultOrderByExp
-  graphql:
-    selectMany:
-      queryRootField: topSessionsResult
-      subscription:
-        rootField: topSessionsResult
-    selectUniques: []
-    filterInputTypeName: TopSessionsResultFilterInput_1
-    aggregate:
-      queryRootField: topSessionsResultAggregate
-      subscription:
-        rootField: topSessionsResultAggregate
-
----
-kind: ModelPermissions
-version: v1
-definition:
-  modelName: TopSessionsResult
-  permissions:
-    - role: admin
-      select:
-        filter: null
-        allowSubscriptions: true
-
