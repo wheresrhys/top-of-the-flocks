@@ -5606,7 +5606,7 @@
       }
     },
     "nativeOperations": {
-      "queries": {},
+      "queries": {}
       "mutations": {}
     }
   },
