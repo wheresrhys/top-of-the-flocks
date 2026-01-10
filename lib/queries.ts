@@ -1,4 +1,60 @@
-import { loadQuery } from './query-loader';
+import { gql } from 'graphql-tag';
+
+ const ALL_SPECIES_STATS_QUERY = gql`
+  query AllSpeciesStats {
+    speciesLeagueTable {
+      speciesName
+      individuals
+      encounters
+      sessionCount
+      longestStay
+      unluckiest
+      longestWinged
+      averageWingLength
+      shortestWinged
+      heaviest
+      averageWeight
+      lightest
+      totalWeight
+    }
+  }
+`;
+
+const TOP5_TABLE_QUERY = gql`
+  query Top5Table($temporalUnit: String1) {
+    byEncounter: topSessionsByMetric(args: {sortBy:"encounters"}) {
+      metricValue
+      visitDate
+    }
+    byIndividual: topSessionsByMetric(args: {sortBy:"individuals"}) {
+      metricValue
+      visitDate
+    }
+    bySpecies: topSessionsByMetric(args: {sortBy:"species"}) {
+      metricValue
+      visitDate
+    }
+  }
+`;
+const SPECIES_QUERY = gql`
+  query SpeciesPage($speciesName: String1) {
+    species(where: { speciesName: { _eq: $speciesName } }) {
+      speciesName
+      birdsAggregate {
+        _count
+      }
+      birds {
+        encounters {
+          visitDate
+        }
+        encountersAggregate {
+          _count
+        }
+      }
+    }
+  }
+`;
+
 export type {
   AllSpeciesStatsQuery,
   AllSpeciesStatsQueryVariables,
@@ -8,23 +64,37 @@ export type {
   QueryTopSessionsByMetricArgs
 } from '../types/graphql.types';
 
+/**
+ * Extract query string from graphql-tag DocumentNode
+ */
+function extractQueryString(doc: { loc?: { source: { body: string } } }): string {
+  if (doc.loc?.source?.body) {
+    return doc.loc.source.body;
+  }
+  throw new Error('Unable to extract query string from DocumentNode');
+}
+
+// Extract query strings from DocumentNode objects
+const ALL_SPECIES_STATS_QUERY_STRING = extractQueryString(ALL_SPECIES_STATS_QUERY);
+const SPECIES_QUERY_STRING = extractQueryString(SPECIES_QUERY);
+const TOP5_TABLE_QUERY_STRING = extractQueryString(TOP5_TABLE_QUERY);
 
 // Type-safe query definitions
 export const queries = {
   allSpeciesStats: {
-    query: loadQuery('all-species-stats'),
+    query: ALL_SPECIES_STATS_QUERY_STRING,
     // Type helpers for this specific query
     type: {} as AllSpeciesStatsQuery,
     variables: {} as AllSpeciesStatsQueryVariables,
   },
   species: {
-    query: loadQuery('species'),
+    query: SPECIES_QUERY_STRING,
     // Type helpers for this specific query
     type: {} as SpeciesPageQuery,
     variables: {} as SpeciesPageQueryVariables,
   },
   top5Table: {
-    query: loadQuery('top5-table'),
+    query: TOP5_TABLE_QUERY_STRING,
     // Type helpers for this specific query
     type: {} as Top5TableQuery,
     variables: {} as Top5TableQueryVariables,

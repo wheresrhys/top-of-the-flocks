@@ -812,12 +812,12 @@ export type AllSpeciesStatsQueryVariables = Exact<{ [key: string]: never; }>;
 
 export type AllSpeciesStatsQuery = { __typename?: 'Query', speciesLeagueTable?: Array<{ __typename?: 'SpeciesLeagueTable', speciesName?: string | null, individuals?: number | null, encounters?: number | null, sessionCount?: number | null, longestStay?: number | null, unluckiest?: number | null, longestWinged?: number | null, averageWingLength?: number | null, shortestWinged?: number | null, heaviest?: number | null, averageWeight?: number | null, lightest?: number | null, totalWeight?: number | null }> | null };
 
-export type GetSpeciesDetailsQueryVariables = Exact<{
-  speciesName?: InputMaybe<Scalars['String1']['input']>;
+export type Top5TableQueryVariables = Exact<{
+  temporalUnit?: InputMaybe<Scalars['String1']['input']>;
 }>;
 
 
-export type GetSpeciesDetailsQuery = { __typename?: 'Query', species?: Array<{ __typename?: 'Species', speciesName: string, birdsAggregate: { __typename?: 'BirdsAggExp', _count: number }, birds?: Array<{ __typename?: 'Birds', encounters?: Array<{ __typename?: 'Encounters', visitDate: string }> | null, encountersAggregate: { __typename?: 'EncountersAggExp', _count: number } }> | null }> | null };
+export type Top5TableQuery = { __typename?: 'Query', byEncounter?: Array<{ __typename?: 'TopSessionsResult', metricValue?: number | null, visitDate?: string | null }> | null, byIndividual?: Array<{ __typename?: 'TopSessionsResult', metricValue?: number | null, visitDate?: string | null }> | null, bySpecies?: Array<{ __typename?: 'TopSessionsResult', metricValue?: number | null, visitDate?: string | null }> | null };
 
 export type SpeciesPageQueryVariables = Exact<{
   speciesName?: InputMaybe<Scalars['String1']['input']>;
@@ -825,10 +825,3 @@ export type SpeciesPageQueryVariables = Exact<{
 
 
 export type SpeciesPageQuery = { __typename?: 'Query', species?: Array<{ __typename?: 'Species', speciesName: string, birdsAggregate: { __typename?: 'BirdsAggExp', _count: number }, birds?: Array<{ __typename?: 'Birds', encounters?: Array<{ __typename?: 'Encounters', visitDate: string }> | null, encountersAggregate: { __typename?: 'EncountersAggExp', _count: number } }> | null }> | null };
-
-export type Top5TableQueryVariables = Exact<{
-  temporalUnit?: InputMaybe<Scalars['String1']['input']>;
-}>;
-
-
-export type Top5TableQuery = { __typename?: 'Query', byEncounter?: Array<{ __typename?: 'TopSessionsResult', metricValue?: number | null, visitDate?: string | null }> | null, byIndividual?: Array<{ __typename?: 'TopSessionsResult', metricValue?: number | null, visitDate?: string | null }> | null, bySpecies?: Array<{ __typename?: 'TopSessionsResult', metricValue?: number | null, visitDate?: string | null }> | null };

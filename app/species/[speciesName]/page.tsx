@@ -1,9 +1,9 @@
 import { Container, Box, Typography, Paper } from '@mui/material';
 import { graphqlRequest } from '../../../lib/graphql-client';
-import { GET_SPECIES_PAGE, type SpeciesQuery } from '../../../lib/queries';
+import { GET_SPECIES_PAGE, type SpeciesPageQuery } from '../../../lib/queries';
 
-async function getSpeciesDetails(speciesName: string): Promise<SpeciesQuery> {
-	const response = await graphqlRequest<SpeciesQuery>(GET_SPECIES_PAGE, {
+async function getSpeciesDetails(speciesName: string): Promise<SpeciesPageQuery> {
+	const response = await graphqlRequest<SpeciesPageQuery>(GET_SPECIES_PAGE, {
 		speciesName
 	});
 
