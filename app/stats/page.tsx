@@ -1,15 +1,35 @@
 import { Suspense } from 'react';
 import { Container, Box, Typography, CircularProgress } from '@mui/material';
 import { graphqlRequest } from '../../lib/graphql-client';
+import { gql } from 'graphql-tag';
 import {
-	GET_ALL_SPECIES_STATS,
 	type AllSpeciesStatsQuery
-} from '../../lib/queries';
+} from '../../types/graphql.types';
 import { SortableSpeciesTable } from '../components/SortableSpeciesTable';
+
+const ALL_SPECIES_STATS_QUERY = gql`
+  query AllSpeciesStats {
+    speciesLeagueTable {
+      speciesName
+      individuals
+      encounters
+      sessionCount
+      longestStay
+      unluckiest
+      longestWinged
+      averageWingLength
+      shortestWinged
+      heaviest
+      averageWeight
+      lightest
+      totalWeight
+    }
+  }
+`;
 
 async function getSpeciesData(): Promise<AllSpeciesStatsQuery> {
 	const response = await graphqlRequest<AllSpeciesStatsQuery>(
-		GET_ALL_SPECIES_STATS
+		ALL_SPECIES_STATS_QUERY
 	);
 
 	if (response.errors) {
