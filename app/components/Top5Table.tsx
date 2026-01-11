@@ -1,8 +1,5 @@
-import { Suspense } from 'react';
 import {
-	Box,
 	Typography,
-	CircularProgress,
 	Table,
 	TableBody,
 	TableCell,
@@ -18,43 +15,18 @@ import {
 	TOP5_MONTHS,
 	TOP5_YEARS,
 	type TopSessionsResult,
+	type Top5TableQuery,
 } from '../../lib/queries';
 
-type Top5TableData = {
-	byEncounters: [TopSessionsResult];
-	byIndividuals: [TopSessionsResult];
-	bySpecies: [TopSessionsResult];
-};
+export type TemporalUnit = 'day' | 'month' | 'year';
 
-// TODO use the gql string template modifier
-async function getTop5Data(query: string): Promise<Top5TableData> {
-	const response = await graphqlRequest<Top5TableData>(query);
-
-	if (response.errors) {
-		throw new Error(
-			`GraphQL errors: ${response.errors.map((e) => e.message).join(', ')}`
-		);
-	}
-
-	if (!response.data) {
-		throw new Error('No data returned from GraphQL query');
-	}
-
-	return response.data;
-}
-
-type TemporalUnit = 'day' | 'month' | 'year';
-
-type Top5TableProps = {
-	temporalUnit: TemporalUnit;
-};
-type Top5TableConfig = {
+export type Top5TableConfig = {
 	connectingVerb: 'in' | 'on';
 	dateFormat: string;
 	query: string;
 };
 
-const top5TableConfigs: { [key: TemporalUnit]: Top5TableConfig } = {
+const top5TableConfigs: Record<TemporalUnit, Top5TableConfig> = {
 	day: {
 		connectingVerb: 'on',
 		dateFormat: 'dd MMM YYYY',
@@ -72,7 +44,8 @@ const top5TableConfigs: { [key: TemporalUnit]: Top5TableConfig } = {
 	}
 };
 
-function Top5Entry({ config: Top5TableConfig, entry: TopSessionsResult }) {
+function Top5Entry({ config, entry }: { config: Top5TableConfig; entry: TopSessionsResult }) {
+	console.log({entry})
 	return (
 		<Typography variant="body2">
 			<b>5</b> {config.connectingVerb} 2nd June 2007
@@ -80,9 +53,16 @@ function Top5Entry({ config: Top5TableConfig, entry: TopSessionsResult }) {
 	);
 }
 
-// TODO can use generated type from GraphQL for data
-function Top5Table({ data: Top5TableData, config: Top5TableConfig }) {
-	console.log(config, data)
+// Pure presentation component - no data fetching logic
+export function Top5TableDisplay({
+	data,
+	temporalUnit
+}: {
+	data: Top5TableQuery;
+	temporalUnit: TemporalUnit;
+}) {
+	const config = top5TableConfigs[temporalUnit];
+	console.log(data)
 	return (
 		<TableContainer component={Paper} elevation={2}>
 			<Table size="small">
@@ -137,10 +117,10 @@ function Top5Table({ data: Top5TableData, config: Top5TableConfig }) {
 								</Typography>
 							</TableCell>
 							<TableCell>
-								<Top5Entry entry={data.byEncounters[index]} config={config} />
+								<Top5Entry entry={data.byEncounter[index]} config={config} />
 							</TableCell>
 							<TableCell>
-								<Top5Entry entry={data.byIndividuals[index]} config={config} />
+								<Top5Entry entry={data.byIndividual[index]} config={config} />
 							</TableCell>
 							<TableCell>
 								<Top5Entry entry={data.bySpecies[index]} config={config} />
@@ -153,22 +133,18 @@ function Top5Table({ data: Top5TableData, config: Top5TableConfig }) {
 	);
 }
 
-async function Top5TableWrapper(props: Top5TableProps) {
-	const config = top5TableConfigs[props.temporalUnit];
-	const data = await getTop5Data(config.query);
-	return <Top5Table data={data || {}} config={config} />;
-}
+export async function getTop5Data(query: string): Promise<Top5TableQuery> {
+	const response = await graphqlRequest<Top5TableQuery>(query);
 
-export default function Top5TableLoader(props: Top5TableProps) {
-	return (
-		<Suspense
-			fallback={
-				<Box display="flex" justifyContent="center" py={4}>
-					<CircularProgress />
-				</Box>
-			}
-		>
-			<Top5TableWrapper {...props} />
-		</Suspense>
-	);
+	if (response.errors) {
+		throw new Error(
+			`GraphQL errors: ${response.errors.map((e) => e.message).join(', ')}`
+		);
+	}
+
+	if (!response.data) {
+		throw new Error('No data returned from GraphQL query');
+	}
+
+	return response.data;
 }

@@ -1,9 +1,12 @@
 'use client';
 
-import { useState, SyntheticEvent, ReactNode } from 'react';
-import { Box, Typography, Tab, Tabs } from '@mui/material';
+import { useState, SyntheticEvent } from 'react';
+import { Box, Typography, Tab, Tabs, CircularProgress } from '@mui/material';
+import { Top5TableDisplay, type Top5TableData, getTop5Data } from './Top5Table';
+import { TOP5_SESSIONS, TOP5_MONTHS, TOP5_YEARS } from '../../lib/queries';
+
 interface TabPanelProps {
-	children?: ReactNode;
+	children?: React.ReactNode;
 	index: number;
 	value: number;
 }
@@ -31,11 +34,34 @@ function a11yProps(index: number) {
 	};
 }
 
-export default function Top5Tabs({ children }: { children: ReactNode[] }) {
-	const [value, setValue] = useState(0);
+const queryMap = [TOP5_SESSIONS, TOP5_MONTHS, TOP5_YEARS];
 
-	const handleChange = (event: SyntheticEvent, newValue: number) => {
+export default function Top5Tabs({ initialData }: { initialData: Top5TableData }) {
+	const [value, setValue] = useState(0);
+	const [dataCache, setDataCache] = useState<Record<number, Top5TableData>>({
+		0: initialData
+	});
+	const [loading, setLoading] = useState<Record<number, boolean>>({
+		0: false,
+		1: false,
+		2: false
+	});
+
+	const handleChange = async (event: SyntheticEvent, newValue: number) => {
 		setValue(newValue);
+
+		// If data is not cached, fetch it
+		if (!dataCache[newValue]) {
+			setLoading(prev => ({ ...prev, [newValue]: true }));
+			try {
+				const data = await getTop5Data(queryMap[newValue]);
+				setDataCache(prev => ({ ...prev, [newValue]: data }));
+			} catch (error) {
+				console.error('Failed to fetch data:', error);
+			} finally {
+				setLoading(prev => ({ ...prev, [newValue]: false }));
+			}
+		}
 	};
 
 	return (
@@ -62,11 +88,33 @@ export default function Top5Tabs({ children }: { children: ReactNode[] }) {
 					<Tab label="Years" {...a11yProps(2)} />
 				</Tabs>
 			</Box>
-			{children.map((child, index) => (
-				<CustomTabPanel value={value} index={index} key={index}>
-					{child}
-				</CustomTabPanel>
-			))}
+			<CustomTabPanel value={value} index={0}>
+				{loading[0] ? (
+					<Box display="flex" justifyContent="center" py={4}>
+						<CircularProgress />
+					</Box>
+				) : (
+					<Top5TableDisplay temporalUnit="day" data={dataCache[0]} />
+				)}
+			</CustomTabPanel>
+			<CustomTabPanel value={value} index={1}>
+				{loading[1] ? (
+					<Box display="flex" justifyContent="center" py={4}>
+						<CircularProgress />
+					</Box>
+				) : dataCache[1] ? (
+					<Top5TableDisplay temporalUnit="month" data={dataCache[1]} />
+				) : null}
+			</CustomTabPanel>
+			<CustomTabPanel value={value} index={2}>
+				{loading[2] ? (
+					<Box display="flex" justifyContent="center" py={4}>
+						<CircularProgress />
+					</Box>
+				) : dataCache[2] ? (
+					<Top5TableDisplay temporalUnit="year" data={dataCache[2]} />
+				) : null}
+			</CustomTabPanel>
 		</Box>
 	);
 }

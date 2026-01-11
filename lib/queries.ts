@@ -61,6 +61,7 @@ export type {
   SpeciesPageQuery,
   SpeciesPageQueryVariables,
   TopSessionsResult,
+  Top5TableQuery,
   QueryTopSessionsByMetricArgs
 } from '../types/graphql.types';
 
