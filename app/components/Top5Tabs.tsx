@@ -2,7 +2,13 @@
 
 import { useState, SyntheticEvent } from 'react';
 import { Box, Typography, Tab, Tabs, CircularProgress } from '@mui/material';
-import { Top5TableDisplay, TOP5_TABLE_QUERY, type Top5TableData, getTop5Data } from './Top5Table';
+import {
+	top5TableConfigs,
+	Top5TableDisplay,
+	TOP5_TABLE_QUERY,
+	type Top5TableData,
+	getTop5Data
+} from './Top5Table';
 
 interface TabPanelProps {
 	children?: React.ReactNode;
@@ -33,9 +39,11 @@ function a11yProps(index: number) {
 	};
 }
 
-const queryMap = [TOP5_TABLE_QUERY, TOP5_TABLE_QUERY, TOP5_TABLE_QUERY];
-
-export default function Top5Tabs({ initialData }: { initialData: Top5TableData }) {
+export default function Top5Tabs({
+	initialData
+}: {
+	initialData: Top5TableData;
+}) {
 	const [value, setValue] = useState(0);
 	const [dataCache, setDataCache] = useState<Record<number, Top5TableData>>({
 		0: initialData
@@ -51,14 +59,14 @@ export default function Top5Tabs({ initialData }: { initialData: Top5TableData }
 
 		// If data is not cached, fetch it
 		if (!dataCache[newValue]) {
-			setLoading(prev => ({ ...prev, [newValue]: true }));
+			setLoading((prev) => ({ ...prev, [newValue]: true }));
 			try {
-				const data = await getTop5Data(queryMap[newValue]);
-				setDataCache(prev => ({ ...prev, [newValue]: data }));
+				const data = await getTop5Data(top5TableConfigs[newValue].query);
+				setDataCache((prev) => ({ ...prev, [newValue]: data }));
 			} catch (error) {
 				console.error('Failed to fetch data:', error);
 			} finally {
-				setLoading(prev => ({ ...prev, [newValue]: false }));
+				setLoading((prev) => ({ ...prev, [newValue]: false }));
 			}
 		}
 	};

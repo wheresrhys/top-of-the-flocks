@@ -13,25 +13,25 @@ import {
 import type { DocumentNode } from 'graphql';
 import { graphqlRequest } from '../../lib/graphql-client';
 export const TOP5_TABLE_QUERY = gql`
-  query Top5Table($temporalUnit: String1) {
-    byEncounter: topSessionsByMetric(args: {sortBy:"encounters"}) {
-      metricValue
-      visitDate
-    }
-    byIndividual: topSessionsByMetric(args: {sortBy:"individuals"}) {
-      metricValue
-      visitDate
-    }
-    bySpecies: topSessionsByMetric(args: {sortBy:"species"}) {
-      metricValue
-      visitDate
-    }
-  }
+	query Top5Table($temporalUnit: String1) {
+		byEncounter: topSessionsByMetric(args: { sortBy: "encounters" }) {
+			metricValue
+			visitDate
+		}
+		byIndividual: topSessionsByMetric(args: { sortBy: "individuals" }) {
+			metricValue
+			visitDate
+		}
+		bySpecies: topSessionsByMetric(args: { sortBy: "species" }) {
+			metricValue
+			visitDate
+		}
+	}
 `;
 
 import type {
 	TopSessionsResult,
-	Top5TableQuery,
+	Top5TableQuery
 } from '../../types/graphql.types';
 
 export type TemporalUnit = 'day' | 'month' | 'year';
@@ -42,7 +42,7 @@ export type Top5TableConfig = {
 	query: DocumentNode;
 };
 
-const top5TableConfigs: Record<TemporalUnit, Top5TableConfig> = {
+export const top5TableConfigs: Record<TemporalUnit, Top5TableConfig> = {
 	day: {
 		connectingVerb: 'on',
 		dateFormat: 'dd MMM YYYY',
@@ -60,7 +60,13 @@ const top5TableConfigs: Record<TemporalUnit, Top5TableConfig> = {
 	}
 };
 
-function Top5Entry({ config, entry }: { config: Top5TableConfig; entry: TopSessionsResult }) {
+function Top5Entry({
+	config,
+	entry
+}: {
+	config: Top5TableConfig;
+	entry: TopSessionsResult;
+}) {
 	return (
 		<Typography variant="body2">
 			<b>5</b> {config.connectingVerb} 2nd June 2007
@@ -77,7 +83,7 @@ export function Top5TableDisplay({
 	temporalUnit: TemporalUnit;
 }) {
 	const config = top5TableConfigs[temporalUnit];
-	console.log(data)
+	console.log(data);
 	return (
 		<TableContainer component={Paper} elevation={2}>
 			<Table size="small">
@@ -148,7 +154,9 @@ export function Top5TableDisplay({
 	);
 }
 
-export async function getTop5Data(query: DocumentNode): Promise<Top5TableQuery> {
+export async function getTop5Data(
+	query: DocumentNode
+): Promise<Top5TableQuery> {
 	const response = await graphqlRequest<Top5TableQuery>(query);
 
 	if (response.errors) {
