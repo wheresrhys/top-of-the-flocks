@@ -9,22 +9,27 @@ import {
 	TableRow,
 	Paper
 } from '@mui/material';
-import formatDate from 'intl-dateformat'
-
+import formatDate from 'intl-dateformat';
 
 import type { DocumentNode } from 'graphql';
 import { graphqlRequest } from '../../lib/graphql-client';
-export const TOP5_TABLE_QUERY = gql`
+const TOP5_TABLE_QUERY = gql`
 	query Top5Table($temporalUnit: String1) {
-		byEncounter: topSessionsByMetric(args: { sortBy: "encounters" }) {
+		byEncounter: topPeriodsByMetric(
+			args: { metricName: "encounters", temporalUnit: $temporalUnit }
+		) {
 			metricValue
 			visitDate
 		}
-		byIndividual: topSessionsByMetric(args: { sortBy: "individuals" }) {
+		byIndividual: topPeriodsByMetric(
+			args: { metricName: "individuals", temporalUnit: $temporalUnit }
+		) {
 			metricValue
 			visitDate
 		}
-		bySpecies: topSessionsByMetric(args: { sortBy: "species" }) {
+		bySpecies: topPeriodsByMetric(
+			args: { metricName: "species", temporalUnit: $temporalUnit }
+		) {
 			metricValue
 			visitDate
 		}
@@ -42,7 +47,6 @@ export type Top5TableConfig = {
 	temporalUnit: TemporalUnit;
 	connectingVerb: 'in' | 'on';
 	dateFormat: string;
-	query: DocumentNode;
 };
 
 function Top5Entry({
@@ -54,8 +58,8 @@ function Top5Entry({
 }) {
 	return (
 		<Typography variant="body2">
-			<b>{entry.metricValue}</b> {config.connectingVerb} {
-			formatDate(new Date(entry.visitDate as string), config.dateFormat)}
+			<b>{entry.metricValue}</b> {config.connectingVerb}{' '}
+			{formatDate(new Date(entry.visitDate as string), config.dateFormat)}
 		</Typography>
 	);
 }
@@ -139,9 +143,11 @@ export function Top5TableDisplay({
 }
 
 export async function getTop5Data(
-	query: DocumentNode
+	temporalUnit: TemporalUnit
 ): Promise<Top5TableQuery> {
-	const response = await graphqlRequest<Top5TableQuery>(query);
+	const response = await graphqlRequest<Top5TableQuery>(TOP5_TABLE_QUERY, {
+		temporalUnit: temporalUnit as string
+	});
 
 	if (response.errors) {
 		throw new Error(

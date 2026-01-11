@@ -2,12 +2,7 @@
 
 import { useState, SyntheticEvent } from 'react';
 import { Box, Typography, Tab, Tabs, CircularProgress } from '@mui/material';
-import {
-	Top5TableDisplay,
-	Top5TableConfig,
-	TOP5_TABLE_QUERY,
-	getTop5Data
-} from './Top5Table';
+import { Top5TableDisplay, Top5TableConfig, getTop5Data } from './Top5Table';
 import { Top5TableQuery } from '@/types/graphql.types';
 
 interface TabPanelProps {
@@ -16,24 +11,21 @@ interface TabPanelProps {
 	value: number;
 }
 
-export const top5TabConfigs:Top5TableConfig[] = [
+export const top5TabConfigs: Top5TableConfig[] = [
 	{
 		temporalUnit: 'day',
 		connectingVerb: 'on',
-		dateFormat: 'DD MMMM YYYY',
-		query: TOP5_TABLE_QUERY
+		dateFormat: 'DD MMMM YYYY'
 	},
 	{
 		temporalUnit: 'month',
 		connectingVerb: 'in',
-		dateFormat: 'MMMM YYYY',
-		query: TOP5_TABLE_QUERY
+		dateFormat: 'MMMM YYYY'
 	},
 	{
 		temporalUnit: 'year',
 		connectingVerb: 'in',
-		dateFormat: 'YYYY',
-		query: TOP5_TABLE_QUERY
+		dateFormat: 'YYYY'
 	}
 ];
 
@@ -75,7 +67,6 @@ export default function Top5Tabs({
 		2: false
 	});
 
-
 	const handleChange = async (event: SyntheticEvent, newValue: number) => {
 		setActiveTab(newValue);
 		const tabConfig = top5TabConfigs[newValue];
@@ -83,7 +74,7 @@ export default function Top5Tabs({
 		if (!dataCache[newValue]) {
 			setLoading((prev) => ({ ...prev, [newValue]: true }));
 			try {
-				const data = await getTop5Data(tabConfig.query);
+				const data = await getTop5Data(tabConfig.temporalUnit);
 				setDataCache((prev) => ({ ...prev, [newValue]: data }));
 			} catch (error) {
 				console.error('Failed to fetch data:', error);
