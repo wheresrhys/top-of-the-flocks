@@ -399,6 +399,8 @@ export type Query = {
   speciesBySpeciesName?: Maybe<Species>;
   speciesLeagueTable?: Maybe<Array<SpeciesLeagueTable>>;
   speciesLeagueTableAggregate?: Maybe<SpeciesLeagueTableAggExp>;
+  topPeriodsByMetric?: Maybe<Array<TopPeriodsResult>>;
+  topPeriodsByMetricAggregate?: Maybe<TopPeriodsResultAggExp>;
   topSessionsByMetric?: Maybe<Array<TopSessionsResult>>;
   topSessionsByMetricAggregate?: Maybe<TopSessionsResultAggExp>;
 };
@@ -469,6 +471,21 @@ export type QuerySpeciesLeagueTableArgs = {
 
 export type QuerySpeciesLeagueTableAggregateArgs = {
   filter_input?: InputMaybe<SpeciesLeagueTableFilterInput>;
+};
+
+
+export type QueryTopPeriodsByMetricArgs = {
+  args: TopPeriodsByMetricArguments;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<TopPeriodsResultOrderByExp>>;
+  where?: InputMaybe<TopPeriodsResultBoolExp>;
+};
+
+
+export type QueryTopPeriodsByMetricAggregateArgs = {
+  args: TopPeriodsByMetricArguments;
+  filter_input?: InputMaybe<TopPeriodsResultFilterInput>;
 };
 
 
@@ -624,6 +641,8 @@ export type Subscription = {
   speciesBySpeciesName?: Maybe<Species>;
   speciesLeagueTable?: Maybe<Array<SpeciesLeagueTable>>;
   speciesLeagueTableAggregate?: Maybe<SpeciesLeagueTableAggExp>;
+  topPeriodsByMetric?: Maybe<Array<TopPeriodsResult>>;
+  topPeriodsByMetricAggregate?: Maybe<TopPeriodsResultAggExp>;
   topSessionsByMetric?: Maybe<Array<TopSessionsResult>>;
   topSessionsByMetricAggregate?: Maybe<TopSessionsResultAggExp>;
 };
@@ -697,6 +716,21 @@ export type SubscriptionSpeciesLeagueTableAggregateArgs = {
 };
 
 
+export type SubscriptionTopPeriodsByMetricArgs = {
+  args: TopPeriodsByMetricArguments;
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<TopPeriodsResultOrderByExp>>;
+  where?: InputMaybe<TopPeriodsResultBoolExp>;
+};
+
+
+export type SubscriptionTopPeriodsByMetricAggregateArgs = {
+  args: TopPeriodsByMetricArguments;
+  filter_input?: InputMaybe<TopPeriodsResultFilterInput>;
+};
+
+
 export type SubscriptionTopSessionsByMetricArgs = {
   args: TopSessionsByMetricArguments;
   limit?: InputMaybe<Scalars['Int']['input']>;
@@ -765,6 +799,48 @@ export type TimeBoolExp = {
   _neq?: InputMaybe<Scalars['String1']['input']>;
   _not?: InputMaybe<TimeBoolExp>;
   _or?: InputMaybe<Array<TimeBoolExp>>;
+};
+
+export type TopPeriodsByMetricArguments = {
+  /** 'Default: ''encounters''' */
+  metricName?: InputMaybe<Scalars['String1']['input']>;
+  /** Default: 5 */
+  resultLimit?: InputMaybe<Scalars['Int64']['input']>;
+  /** 'Default: ''day''' */
+  temporalUnit?: InputMaybe<Scalars['String1']['input']>;
+};
+
+export type TopPeriodsResult = {
+  __typename?: 'TopPeriodsResult';
+  metricValue?: Maybe<Scalars['Int64']['output']>;
+  visitDate?: Maybe<Scalars['Date']['output']>;
+};
+
+export type TopPeriodsResultAggExp = {
+  __typename?: 'TopPeriodsResultAggExp';
+  _count: Scalars['Int64']['output'];
+  metricValue: Int8AggExp;
+  visitDate: DateAggExp;
+};
+
+export type TopPeriodsResultBoolExp = {
+  _and?: InputMaybe<Array<TopPeriodsResultBoolExp>>;
+  _not?: InputMaybe<TopPeriodsResultBoolExp>;
+  _or?: InputMaybe<Array<TopPeriodsResultBoolExp>>;
+  metricValue?: InputMaybe<Int8BoolExp>;
+  visitDate?: InputMaybe<DateBoolExp>;
+};
+
+export type TopPeriodsResultFilterInput = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<TopPeriodsResultOrderByExp>>;
+  where?: InputMaybe<TopPeriodsResultBoolExp>;
+};
+
+export type TopPeriodsResultOrderByExp = {
+  metricValue?: InputMaybe<OrderBy>;
+  visitDate?: InputMaybe<OrderBy>;
 };
 
 export type TopSessionsByMetricArguments = {

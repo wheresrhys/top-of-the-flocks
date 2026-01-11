@@ -336,6 +336,10 @@ definition:
               unique_columns:
                 - path
         - arguments: {}
+          name: top_periods_result
+          type: top_periods_result
+          uniqueness_constraints: {}
+        - arguments: {}
           name: top_sessions_result
           type: top_sessions_result
           uniqueness_constraints: {}
@@ -351,6 +355,32 @@ definition:
             secrets_pkey:
               unique_columns:
                 - id
+        - arguments:
+            metric_name:
+              description: 'Default: ''encounters'''
+              type:
+                type: nullable
+                underlying_type:
+                  name: text
+                  type: named
+            result_limit:
+              description: |
+                Default: 5
+              type:
+                type: nullable
+                underlying_type:
+                  name: int4
+                  type: named
+            temporal_unit:
+              description: 'Default: ''day'''
+              type:
+                type: nullable
+                underlying_type:
+                  name: text
+                  type: named
+          name: topPeriodsByMetric
+          type: topPeriodsByMetric
+          uniqueness_constraints: {}
         - arguments:
             result_limit:
               description: |
@@ -4748,6 +4778,37 @@ definition:
                   type: named
                 type: array
           foreign_keys: {}
+        insert_top_periods_result_object:
+          fields:
+            metric_value:
+              type:
+                type: nullable
+                underlying_type:
+                  name: int8
+                  type: named
+            visit_date:
+              type:
+                type: nullable
+                underlying_type:
+                  name: date
+                  type: named
+          foreign_keys: {}
+        insert_top_periods_result_response:
+          description: Responses from the 'insert_top_periods_result' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: top_periods_result
+                  type: named
+                type: array
+          foreign_keys: {}
         insert_top_sessions_result_object:
           fields:
             metric_value:
@@ -5518,7 +5579,37 @@ definition:
                 name: text
                 type: named
           foreign_keys: {}
+        top_periods_result:
+          fields:
+            metric_value:
+              type:
+                type: nullable
+                underlying_type:
+                  name: int8
+                  type: named
+            visit_date:
+              type:
+                type: nullable
+                underlying_type:
+                  name: date
+                  type: named
+          foreign_keys: {}
         top_sessions_result:
+          fields:
+            metric_value:
+              type:
+                type: nullable
+                underlying_type:
+                  name: int8
+                  type: named
+            visit_date:
+              type:
+                type: nullable
+                underlying_type:
+                  name: date
+                  type: named
+          foreign_keys: {}
+        topPeriodsByMetric:
           fields:
             metric_value:
               type:
@@ -14078,6 +14169,25 @@ definition:
           name: insert_supabase_migrations_seed_files
           result_type:
             name: insert_supabase_migrations_seed_files_response
+            type: named
+        - arguments:
+            objects:
+              type:
+                element_type:
+                  name: insert_top_periods_result_object
+                  type: named
+                type: array
+            post_check:
+              description: Insert permission predicate over the 'top_periods_result' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: top_periods_result
+                  type: predicate
+          description: Insert into the top_periods_result table
+          name: insert_top_periods_result
+          result_type:
+            name: insert_top_periods_result_response
             type: named
         - arguments:
             objects:

@@ -3266,6 +3266,31 @@
         "foreignRelations": {},
         "description": null
       },
+      "top_periods_result": {
+        "schemaName": "public",
+        "tableName": "top_periods_result",
+        "columns": {
+          "metric_value": {
+            "name": "metric_value",
+            "type": {
+              "scalarType": "int8"
+            },
+            "nullable": "nullable",
+            "description": null
+          },
+          "visit_date": {
+            "name": "visit_date",
+            "type": {
+              "scalarType": "date"
+            },
+            "nullable": "nullable",
+            "description": null
+          }
+        },
+        "uniquenessConstraints": {},
+        "foreignRelations": {},
+        "description": null
+      },
       "top_sessions_result": {
         "schemaName": "public",
         "tableName": "top_sessions_result",
@@ -5607,19 +5632,11 @@
     },
     "nativeOperations": {
       "queries": {
-        "topSessionsByMetric": {
+        "topPeriodsByMetric": {
           "sql": {
-            "inline": "SELECT * FROM top_sessions_by_metric(COALESCE({{sort_by}}, 'encounters'), COALESCE({{result_limit}}, 5))"
+            "inline": "SELECT * FROM top_periods_by_metric(COALESCE({{temporal_unit}}, 'day'), COALESCE({{metric_name}}, 'encounters'), COALESCE({{result_limit}}, 5))"
           },
           "columns": {
-            "metric_value": {
-              "name": "metric_value",
-              "type": {
-                "scalarType": "int8"
-              },
-              "nullable": "nullable",
-              "description": null
-            },
             "visit_date": {
               "name": "visit_date",
               "type": {
@@ -5627,9 +5644,33 @@
               },
               "nullable": "nullable",
               "description": null
+            },
+            "metric_value": {
+              "name": "metric_value",
+              "type": {
+                "scalarType": "int8"
+              },
+              "nullable": "nullable",
+              "description": null
             }
           },
           "arguments": {
+            "temporal_unit": {
+              "name": "temporal_unit",
+              "type": {
+                "scalarType": "text"
+              },
+              "nullable": "nullable",
+              "description": "Default: 'day'"
+            },
+            "metric_name": {
+              "name": "metric_name",
+              "type": {
+                "scalarType": "text"
+              },
+              "nullable": "nullable",
+              "description": "Default: 'encounters'"
+            },
             "result_limit": {
               "name": "result_limit",
               "type": {
@@ -5637,7 +5678,33 @@
               },
               "nullable": "nullable",
               "description": "Default: 5\n"
+            }
+          },
+          "description": null
+        },
+        "topSessionsByMetric": {
+          "sql": {
+            "inline": "SELECT * FROM top_sessions_by_metric(COALESCE({{sort_by}}, 'encounters'), COALESCE({{result_limit}}, 5))"
+          },
+          "columns": {
+            "visit_date": {
+              "name": "visit_date",
+              "type": {
+                "scalarType": "date"
+              },
+              "nullable": "nullable",
+              "description": null
             },
+            "metric_value": {
+              "name": "metric_value",
+              "type": {
+                "scalarType": "int8"
+              },
+              "nullable": "nullable",
+              "description": null
+            }
+          },
+          "arguments": {
             "sort_by": {
               "name": "sort_by",
               "type": {
@@ -5645,6 +5712,14 @@
               },
               "nullable": "nullable",
               "description": "Default: 'encounters'"
+            },
+            "result_limit": {
+              "name": "result_limit",
+              "type": {
+                "scalarType": "int4"
+              },
+              "nullable": "nullable",
+              "description": "Default: 5\n"
             }
           },
           "description": null
