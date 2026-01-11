@@ -83,7 +83,6 @@ export function Top5TableDisplay({
 	temporalUnit: TemporalUnit;
 }) {
 	const config = top5TableConfigs[temporalUnit];
-	console.log(data);
 	return (
 		<TableContainer component={Paper} elevation={2}>
 			<Table size="small">

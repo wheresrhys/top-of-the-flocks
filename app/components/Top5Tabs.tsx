@@ -5,7 +5,6 @@ import { Box, Typography, Tab, Tabs, CircularProgress } from '@mui/material';
 import {
 	top5TableConfigs,
 	Top5TableDisplay,
-	TOP5_TABLE_QUERY,
 	type Top5TableData,
 	getTop5Data
 } from './Top5Table';
@@ -44,7 +43,7 @@ export default function Top5Tabs({
 }: {
 	initialData: Top5TableData;
 }) {
-	const [value, setValue] = useState(0);
+	const [activeTab, setActiveTab] = useState(0);
 	const [dataCache, setDataCache] = useState<Record<number, Top5TableData>>({
 		0: initialData
 	});
@@ -54,14 +53,15 @@ export default function Top5Tabs({
 		2: false
 	});
 
+
 	const handleChange = async (event: SyntheticEvent, newValue: number) => {
-		setValue(newValue);
+		setActiveTab(newValue);
 
 		// If data is not cached, fetch it
 		if (!dataCache[newValue]) {
 			setLoading((prev) => ({ ...prev, [newValue]: true }));
 			try {
-				const data = await getTop5Data(top5TableConfigs[newValue].query);
+				const data = await getTop5Data(Object.values(top5TableConfigs)[newValue].query);
 				setDataCache((prev) => ({ ...prev, [newValue]: data }));
 			} catch (error) {
 				console.error('Failed to fetch data:', error);
@@ -86,7 +86,7 @@ export default function Top5Tabs({
 
 			<Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
 				<Tabs
-					value={value}
+					value={activeTab}
 					onChange={handleChange}
 					aria-label="basic tabs example"
 				>
@@ -95,7 +95,7 @@ export default function Top5Tabs({
 					<Tab label="Years" {...a11yProps(2)} />
 				</Tabs>
 			</Box>
-			<CustomTabPanel value={value} index={0}>
+			<CustomTabPanel value={activeTab} index={0}>
 				{loading[0] ? (
 					<Box display="flex" justifyContent="center" py={4}>
 						<CircularProgress />
@@ -104,7 +104,7 @@ export default function Top5Tabs({
 					<Top5TableDisplay temporalUnit="day" data={dataCache[0]} />
 				)}
 			</CustomTabPanel>
-			<CustomTabPanel value={value} index={1}>
+			<CustomTabPanel value={activeTab} index={1}>
 				{loading[1] ? (
 					<Box display="flex" justifyContent="center" py={4}>
 						<CircularProgress />
@@ -113,7 +113,7 @@ export default function Top5Tabs({
 					<Top5TableDisplay temporalUnit="month" data={dataCache[1]} />
 				) : null}
 			</CustomTabPanel>
-			<CustomTabPanel value={value} index={2}>
+			<CustomTabPanel value={activeTab} index={2}>
 				{loading[2] ? (
 					<Box display="flex" justifyContent="center" py={4}>
 						<CircularProgress />
