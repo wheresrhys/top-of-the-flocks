@@ -3,17 +3,39 @@
 import { useState, SyntheticEvent } from 'react';
 import { Box, Typography, Tab, Tabs, CircularProgress } from '@mui/material';
 import {
-	top5TableConfigs,
 	Top5TableDisplay,
-	type Top5TableData,
+	Top5TableConfig,
+	TOP5_TABLE_QUERY,
 	getTop5Data
 } from './Top5Table';
+import { Top5TableQuery } from '@/types/graphql.types';
 
 interface TabPanelProps {
 	children?: React.ReactNode;
 	index: number;
 	value: number;
 }
+
+export const top5TabConfigs:Top5TableConfig[] = [
+	{
+		temporalUnit: 'day',
+		connectingVerb: 'on',
+		dateFormat: 'dd MMM YYYY',
+		query: TOP5_TABLE_QUERY
+	},
+	{
+		temporalUnit: 'month',
+		connectingVerb: 'in',
+		dateFormat: 'MMM YYYY',
+		query: TOP5_TABLE_QUERY
+	},
+	{
+		temporalUnit: 'year',
+		connectingVerb: 'in',
+		dateFormat: 'YYYY',
+		query: TOP5_TABLE_QUERY
+	}
+];
 
 function CustomTabPanel(props: TabPanelProps) {
 	const { children, value, index, ...other } = props;
@@ -41,10 +63,10 @@ function a11yProps(index: number) {
 export default function Top5Tabs({
 	initialData
 }: {
-	initialData: Top5TableData;
+	initialData: Top5TableQuery;
 }) {
 	const [activeTab, setActiveTab] = useState(0);
-	const [dataCache, setDataCache] = useState<Record<number, Top5TableData>>({
+	const [dataCache, setDataCache] = useState<Record<number, Top5TableQuery>>({
 		0: initialData
 	});
 	const [loading, setLoading] = useState<Record<number, boolean>>({
@@ -56,12 +78,12 @@ export default function Top5Tabs({
 
 	const handleChange = async (event: SyntheticEvent, newValue: number) => {
 		setActiveTab(newValue);
-
+		const tabConfig = top5TabConfigs[newValue];
 		// If data is not cached, fetch it
 		if (!dataCache[newValue]) {
 			setLoading((prev) => ({ ...prev, [newValue]: true }));
 			try {
-				const data = await getTop5Data(Object.values(top5TableConfigs)[newValue].query);
+				const data = await getTop5Data(tabConfig.query);
 				setDataCache((prev) => ({ ...prev, [newValue]: data }));
 			} catch (error) {
 				console.error('Failed to fetch data:', error);
@@ -101,7 +123,7 @@ export default function Top5Tabs({
 						<CircularProgress />
 					</Box>
 				) : (
-					<Top5TableDisplay temporalUnit="day" data={dataCache[0]} />
+					<Top5TableDisplay config={top5TabConfigs[0]} data={dataCache[0]} />
 				)}
 			</CustomTabPanel>
 			<CustomTabPanel value={activeTab} index={1}>
@@ -110,7 +132,7 @@ export default function Top5Tabs({
 						<CircularProgress />
 					</Box>
 				) : dataCache[1] ? (
-					<Top5TableDisplay temporalUnit="month" data={dataCache[1]} />
+					<Top5TableDisplay config={top5TabConfigs[1]} data={dataCache[1]} />
 				) : null}
 			</CustomTabPanel>
 			<CustomTabPanel value={activeTab} index={2}>
@@ -119,7 +141,7 @@ export default function Top5Tabs({
 						<CircularProgress />
 					</Box>
 				) : dataCache[2] ? (
-					<Top5TableDisplay temporalUnit="year" data={dataCache[2]} />
+					<Top5TableDisplay config={top5TabConfigs[2]} data={dataCache[2]} />
 				) : null}
 			</CustomTabPanel>
 		</Box>

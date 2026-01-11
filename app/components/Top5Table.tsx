@@ -37,27 +37,10 @@ import type {
 export type TemporalUnit = 'day' | 'month' | 'year';
 
 export type Top5TableConfig = {
+	temporalUnit: TemporalUnit;
 	connectingVerb: 'in' | 'on';
 	dateFormat: string;
 	query: DocumentNode;
-};
-
-export const top5TableConfigs: Record<TemporalUnit, Top5TableConfig> = {
-	day: {
-		connectingVerb: 'on',
-		dateFormat: 'dd MMM YYYY',
-		query: TOP5_TABLE_QUERY
-	},
-	month: {
-		connectingVerb: 'in',
-		dateFormat: 'MMM YYYY',
-		query: TOP5_TABLE_QUERY
-	},
-	year: {
-		connectingVerb: 'in',
-		dateFormat: 'YYYY',
-		query: TOP5_TABLE_QUERY
-	}
 };
 
 function Top5Entry({
@@ -77,12 +60,11 @@ function Top5Entry({
 // Pure presentation component - no data fetching logic
 export function Top5TableDisplay({
 	data,
-	temporalUnit
+	config
 }: {
 	data: Top5TableQuery;
-	temporalUnit: TemporalUnit;
+	config: Top5TableConfig;
 }) {
-	const config = top5TableConfigs[temporalUnit];
 	return (
 		<TableContainer component={Paper} elevation={2}>
 			<Table size="small">
