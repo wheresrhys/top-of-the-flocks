@@ -9,6 +9,8 @@ import {
 	TableRow,
 	Paper
 } from '@mui/material';
+import formatDate from 'intl-dateformat'
+
 
 import type { DocumentNode } from 'graphql';
 import { graphqlRequest } from '../../lib/graphql-client';
@@ -52,7 +54,8 @@ function Top5Entry({
 }) {
 	return (
 		<Typography variant="body2">
-			<b>5</b> {config.connectingVerb} 2nd June 2007
+			<b>{entry.metricValue}</b> {config.connectingVerb} {
+			formatDate(new Date(entry.visitDate as string), config.dateFormat)}
 		</Typography>
 	);
 }

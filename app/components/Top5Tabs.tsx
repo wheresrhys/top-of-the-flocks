@@ -20,13 +20,13 @@ export const top5TabConfigs:Top5TableConfig[] = [
 	{
 		temporalUnit: 'day',
 		connectingVerb: 'on',
-		dateFormat: 'dd MMM YYYY',
+		dateFormat: 'DD MMMM YYYY',
 		query: TOP5_TABLE_QUERY
 	},
 	{
 		temporalUnit: 'month',
 		connectingVerb: 'in',
-		dateFormat: 'MMM YYYY',
+		dateFormat: 'MMMM YYYY',
 		query: TOP5_TABLE_QUERY
 	},
 	{
