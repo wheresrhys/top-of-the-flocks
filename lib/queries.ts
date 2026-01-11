@@ -1,6 +1,14 @@
 import { gql } from 'graphql-tag';
+import type {
+  AllSpeciesStatsQuery,
+  AllSpeciesStatsQueryVariables,
+  SpeciesPageQuery,
+  SpeciesPageQueryVariables,
+  Top5TableQuery,
+  Top5TableQueryVariables,
+} from '../types/graphql.types';
 
- const ALL_SPECIES_STATS_QUERY = gql`
+const ALL_SPECIES_STATS_QUERY = gql`
   query AllSpeciesStats {
     speciesLeagueTable {
       speciesName
@@ -62,40 +70,29 @@ export type {
   SpeciesPageQueryVariables,
   TopSessionsResult,
   Top5TableQuery,
+  Top5TableQueryVariables,
   QueryTopSessionsByMetricArgs
 } from '../types/graphql.types';
 
-/**
- * Extract query string from graphql-tag DocumentNode
- */
-function extractQueryString(doc: { loc?: { source: { body: string } } }): string {
-  if (doc.loc?.source?.body) {
-    return doc.loc.source.body;
-  }
-  throw new Error('Unable to extract query string from DocumentNode');
-}
-
-// Extract query strings from DocumentNode objects
-const ALL_SPECIES_STATS_QUERY_STRING = extractQueryString(ALL_SPECIES_STATS_QUERY);
-const SPECIES_QUERY_STRING = extractQueryString(SPECIES_QUERY);
-const TOP5_TABLE_QUERY_STRING = extractQueryString(TOP5_TABLE_QUERY);
+// Export DocumentNode objects directly
+export { ALL_SPECIES_STATS_QUERY, TOP5_TABLE_QUERY, SPECIES_QUERY };
 
 // Type-safe query definitions
 export const queries = {
   allSpeciesStats: {
-    query: ALL_SPECIES_STATS_QUERY_STRING,
+    query: ALL_SPECIES_STATS_QUERY,
     // Type helpers for this specific query
     type: {} as AllSpeciesStatsQuery,
     variables: {} as AllSpeciesStatsQueryVariables,
   },
   species: {
-    query: SPECIES_QUERY_STRING,
+    query: SPECIES_QUERY,
     // Type helpers for this specific query
     type: {} as SpeciesPageQuery,
     variables: {} as SpeciesPageQueryVariables,
   },
   top5Table: {
-    query: TOP5_TABLE_QUERY_STRING,
+    query: TOP5_TABLE_QUERY,
     // Type helpers for this specific query
     type: {} as Top5TableQuery,
     variables: {} as Top5TableQueryVariables,

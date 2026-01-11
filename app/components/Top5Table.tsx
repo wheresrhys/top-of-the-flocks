@@ -9,6 +9,7 @@ import {
 	Paper
 } from '@mui/material';
 
+import type { DocumentNode } from 'graphql';
 import { graphqlRequest } from '../../lib/graphql-client';
 import {
 	TOP5_SESSIONS,
@@ -23,7 +24,7 @@ export type TemporalUnit = 'day' | 'month' | 'year';
 export type Top5TableConfig = {
 	connectingVerb: 'in' | 'on';
 	dateFormat: string;
-	query: string;
+	query: DocumentNode;
 };
 
 const top5TableConfigs: Record<TemporalUnit, Top5TableConfig> = {
@@ -133,7 +134,7 @@ export function Top5TableDisplay({
 	);
 }
 
-export async function getTop5Data(query: string): Promise<Top5TableQuery> {
+export async function getTop5Data(query: DocumentNode): Promise<Top5TableQuery> {
 	const response = await graphqlRequest<Top5TableQuery>(query);
 
 	if (response.errors) {
