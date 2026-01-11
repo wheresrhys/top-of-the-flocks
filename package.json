@@ -18,6 +18,7 @@
 		"supabase:sync": "npm run supabase:migrate && npm run hasura:update-graph && npm run hasura:restart && npm run hasura:types",
 		"hasura:sync": "npm run hasura:update-graph && npm run hasura:restart && npm run hasura:types",
 		"hasura:dev": "cd hasura && ddn console --local && ddn run docker-start",
+		"hasura:deploy": "cd hasura &&  ddn supergraph build create --apply",
 		"hasura:types": "./scripts/load-env.sh npx graphql-codegen --config codegen.ts",
 		"import": "./scripts/load-env.sh tsx scripts/import-csv.ts",
 		"env:load": "./scripts/load-env.sh",

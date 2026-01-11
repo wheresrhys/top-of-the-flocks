@@ -18,7 +18,7 @@ interface FunctionInfo {
   returnType: string;
   returnTable?: string;
   fields: FieldInfo[];
-  arguments: Array<{ name: string; type: string; default?: string }>;
+  argumentsArray: Array<{ name: string; type: string; default?: string }>;
 }
 
 interface ViewInfo {
@@ -124,11 +124,11 @@ function parseFunction(sql: string, filename: string): FunctionInfo | null {
   const [, funcName, argsStr, returnTable] = functionMatch;
 
   // Parse arguments
-  const arguments: Array<{ name: string; type: string; default?: string }> = [];
+  const argumentsArray: Array<{ name: string; type: string; default?: string }> = [];
   if (argsStr.trim()) {
     const argMatches = argsStr.matchAll(/(\w+)\s+(\w+)(?:\s+DEFAULT\s+([^,]+))?/gi);
     for (const match of argMatches) {
-      arguments.push({
+      argumentsArray.push({
         name: match[1],
         type: match[2],
         default: match[3],
@@ -160,7 +160,7 @@ function parseFunction(sql: string, filename: string): FunctionInfo | null {
     returnType: returnTable,
     returnTable,
     fields,
-    arguments,
+    argumentsArray,
   };
 }
 
@@ -402,7 +402,7 @@ function main() {
     console.log(`Processing ${sqlFile}...`);
 
     // Try to parse as function first
-    let info = parseFunction(sql, filename);
+    let info: FunctionInfo | ViewInfo | null = parseFunction(sql, filename);
     let isFunction = true;
 
     if (!info) {

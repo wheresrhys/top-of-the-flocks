@@ -146,10 +146,10 @@ function generateNativeOperation(funcInfo: FunctionInfo): string {
     };
   }
 
-  const arguments: Record<string, any> = {};
+  const argumentsObject: Record<string, any> = {};
   for (const arg of funcInfo.args) {
     const scalarType = pgTypeToHasuraScalarType(arg.type);
-    arguments[arg.name] = {
+    argumentsObject[arg.name] = {
       name: arg.name,
       type: {
         scalarType: scalarType,
