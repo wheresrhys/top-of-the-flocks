@@ -1,9 +1,32 @@
 import { Container, Box, Typography, Paper } from '@mui/material';
 import { graphqlRequest } from '../../../lib/graphql-client';
-import { GET_SPECIES_PAGE, type SpeciesPageQuery } from '../../../lib/queries';
+import { gql } from 'graphql-tag';
+import type {
+	SpeciesPageQuery,
+} from '../../../types/graphql.types';
+
+
+const SPECIES_DETAILS_QUERY = gql`
+  query SpeciesPage($speciesName: String1) {
+    species(where: { speciesName: { _eq: $speciesName } }) {
+      speciesName
+      birdsAggregate {
+        _count
+      }
+      birds {
+        encounters {
+          visitDate
+        }
+        encountersAggregate {
+          _count
+        }
+      }
+    }
+  }
+`;
 
 async function getSpeciesDetails(speciesName: string): Promise<SpeciesPageQuery> {
-	const response = await graphqlRequest<SpeciesPageQuery>(GET_SPECIES_PAGE, {
+	const response = await graphqlRequest<SpeciesPageQuery>(SPECIES_DETAILS_QUERY, {
 		speciesName
 	});
 
