@@ -2,7 +2,11 @@
 
 import { useState, SyntheticEvent } from 'react';
 import { Box, Typography, Tab, Tabs, CircularProgress } from '@mui/material';
-import { LeagueTableDisplay, LeagueTableConfig, getLeagueTableData } from './LeagueTable';
+import {
+	LeagueTableDisplay,
+	LeagueTableConfig,
+	getLeagueTableData
+} from './LeagueTable';
 import { LeagueTableQuery } from '@/types/graphql.types';
 
 interface TabPanelProps {
@@ -76,7 +80,10 @@ export default function LeagueTableTabs({
 		if (!dataCache[newValue]) {
 			setLoading((prev) => ({ ...prev, [newValue]: true }));
 			try {
-				const data = await getLeagueTableData(tabConfig.temporalUnit, numberOfEntries);
+				const data = await getLeagueTableData(
+					tabConfig.temporalUnit,
+					numberOfEntries
+				);
 				setDataCache((prev) => ({ ...prev, [newValue]: data }));
 			} catch (error) {
 				console.error('Failed to fetch data:', error);
@@ -116,7 +123,11 @@ export default function LeagueTableTabs({
 						<CircularProgress />
 					</Box>
 				) : (
-					<LeagueTableDisplay config={leagueTableTabConfigs[0]} data={dataCache[0]} numberOfEntries={numberOfEntries} />
+					<LeagueTableDisplay
+						config={leagueTableTabConfigs[0]}
+						data={dataCache[0]}
+						numberOfEntries={numberOfEntries}
+					/>
 				)}
 			</CustomTabPanel>
 			<CustomTabPanel value={activeTab} index={1}>
@@ -125,7 +136,11 @@ export default function LeagueTableTabs({
 						<CircularProgress />
 					</Box>
 				) : dataCache[1] ? (
-					<LeagueTableDisplay config={leagueTableTabConfigs[1]} data={dataCache[1]} numberOfEntries={numberOfEntries} />
+					<LeagueTableDisplay
+						config={leagueTableTabConfigs[1]}
+						data={dataCache[1]}
+						numberOfEntries={numberOfEntries}
+					/>
 				) : null}
 			</CustomTabPanel>
 			<CustomTabPanel value={activeTab} index={2}>
@@ -134,7 +149,11 @@ export default function LeagueTableTabs({
 						<CircularProgress />
 					</Box>
 				) : dataCache[2] ? (
-					<LeagueTableDisplay config={leagueTableTabConfigs[2]} data={dataCache[2]} numberOfEntries={numberOfEntries} />
+					<LeagueTableDisplay
+						config={leagueTableTabConfigs[2]}
+						data={dataCache[2]}
+						numberOfEntries={numberOfEntries}
+					/>
 				) : null}
 			</CustomTabPanel>
 		</Box>

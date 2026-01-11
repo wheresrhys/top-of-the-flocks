@@ -24,7 +24,7 @@ export default async function Home() {
 					Top of the Flocks
 				</Typography>
 
-				<LeagueTableTabs initialData={initialData} numberOfEntries={10}/>
+				<LeagueTableTabs initialData={initialData} numberOfEntries={10} />
 			</Box>
 		</Container>
 	);

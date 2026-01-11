@@ -15,19 +15,31 @@ import { graphqlRequest } from '../../lib/graphql-client';
 const LEAGUE_TABLE_QUERY = gql`
 	query LeagueTable($temporalUnit: String1, $numberOfEntries: Int64) {
 		byEncounter: topPeriodsByMetric(
-			args: { metricName: "encounters", temporalUnit: $temporalUnit, resultLimit: $numberOfEntries }
+			args: {
+				metricName: "encounters"
+				temporalUnit: $temporalUnit
+				resultLimit: $numberOfEntries
+			}
 		) {
 			metricValue
 			visitDate
 		}
 		byIndividual: topPeriodsByMetric(
-			args: { metricName: "individuals", temporalUnit: $temporalUnit, resultLimit: $numberOfEntries }
+			args: {
+				metricName: "individuals"
+				temporalUnit: $temporalUnit
+				resultLimit: $numberOfEntries
+			}
 		) {
 			metricValue
 			visitDate
 		}
 		bySpecies: topPeriodsByMetric(
-			args: { metricName: "species", temporalUnit: $temporalUnit, resultLimit: $numberOfEntries }
+			args: {
+				metricName: "species"
+				temporalUnit: $temporalUnit
+				resultLimit: $numberOfEntries
+			}
 		) {
 			metricValue
 			visitDate
@@ -128,13 +140,22 @@ export function LeagueTableDisplay({
 								</Typography>
 							</TableCell>
 							<TableCell>
-								<LeagueTableEntry entry={data.byEncounter?.[index]} config={config} />
+								<LeagueTableEntry
+									entry={data.byEncounter?.[index]}
+									config={config}
+								/>
 							</TableCell>
 							<TableCell>
-								<LeagueTableEntry entry={data.byIndividual?.[index]} config={config} />
+								<LeagueTableEntry
+									entry={data.byIndividual?.[index]}
+									config={config}
+								/>
 							</TableCell>
 							<TableCell>
-								<LeagueTableEntry entry={data.bySpecies?.[index]} config={config} />
+								<LeagueTableEntry
+									entry={data.bySpecies?.[index]}
+									config={config}
+								/>
 							</TableCell>
 						</TableRow>
 					))}
