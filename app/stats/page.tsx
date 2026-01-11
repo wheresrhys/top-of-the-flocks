@@ -1,11 +1,34 @@
 import { Suspense } from 'react';
-import { Container, Box, Typography, CircularProgress } from '@mui/material';
+import { Container, Box, CircularProgress } from '@mui/material';
 import { graphqlRequest } from '../../lib/graphql-client';
-import { GET_ALL_SPECIES_STATS, type AllSpeciesStatsQuery } from '../../lib/queries';
+import { gql } from 'graphql-tag';
+import { type AllSpeciesStatsQuery } from '../../types/graphql.types';
 import { SortableSpeciesTable } from '../components/SortableSpeciesTable';
 
+const ALL_SPECIES_STATS_QUERY = gql`
+	query AllSpeciesStats {
+		speciesLeagueTable {
+			speciesName
+			individuals
+			encounters
+			sessionCount
+			longestStay
+			unluckiest
+			longestWinged
+			averageWingLength
+			shortestWinged
+			heaviest
+			averageWeight
+			lightest
+			totalWeight
+		}
+	}
+`;
+
 async function getSpeciesData(): Promise<AllSpeciesStatsQuery> {
-	const response = await graphqlRequest<AllSpeciesStatsQuery>(GET_ALL_SPECIES_STATS);
+	const response = await graphqlRequest<AllSpeciesStatsQuery>(
+		ALL_SPECIES_STATS_QUERY
+	);
 
 	if (response.errors) {
 		throw new Error(
@@ -34,7 +57,6 @@ export default function SpeciesStats() {
 					py: 4
 				}}
 			>
-
 				<Suspense
 					fallback={
 						<Box display="flex" justifyContent="center" py={4}>

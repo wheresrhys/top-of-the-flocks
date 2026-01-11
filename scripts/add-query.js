@@ -30,8 +30,12 @@ const queriesPath = path.join(__dirname, '../lib/queries.ts');
 const queriesContent = fs.readFileSync(queriesPath, 'utf-8');
 
 // Add import for the new query type (you'll need to run codegen after)
-const newQueryImport = `  ${toCamelCase(queryName)}: {
-    query: loadQuery('${queryName}'),
+const constantName = queryName.split('-').map(word => word.toUpperCase()).join('_');
+const newQueryImport = `import ${toCamelCase(queryName)}Query from '../queries/${queryName}.graphql';
+
+// Then in queries object:
+  ${toCamelCase(queryName)}: {
+    query: extractQueryString(${toCamelCase(queryName)}Query),
     type: {} as ${toPascalCase(queryName)}Query,
     variables: {} as ${toPascalCase(queryName)}QueryVariables,
   },`;
