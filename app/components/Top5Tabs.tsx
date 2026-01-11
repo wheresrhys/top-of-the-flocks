@@ -2,8 +2,7 @@
 
 import { useState, SyntheticEvent } from 'react';
 import { Box, Typography, Tab, Tabs, CircularProgress } from '@mui/material';
-import { Top5TableDisplay, type Top5TableData, getTop5Data } from './Top5Table';
-import { TOP5_SESSIONS, TOP5_MONTHS, TOP5_YEARS } from '../../lib/queries';
+import { Top5TableDisplay, TOP5_TABLE_QUERY, type Top5TableData, getTop5Data } from './Top5Table';
 
 interface TabPanelProps {
 	children?: React.ReactNode;
@@ -34,7 +33,7 @@ function a11yProps(index: number) {
 	};
 }
 
-const queryMap = [TOP5_SESSIONS, TOP5_MONTHS, TOP5_YEARS];
+const queryMap = [TOP5_TABLE_QUERY, TOP5_TABLE_QUERY, TOP5_TABLE_QUERY];
 
 export default function Top5Tabs({ initialData }: { initialData: Top5TableData }) {
 	const [value, setValue] = useState(0);

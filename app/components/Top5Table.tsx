@@ -1,3 +1,4 @@
+import { gql } from 'graphql-tag';
 import {
 	Typography,
 	Table,
@@ -11,13 +12,27 @@ import {
 
 import type { DocumentNode } from 'graphql';
 import { graphqlRequest } from '../../lib/graphql-client';
-import {
-	TOP5_SESSIONS,
-	TOP5_MONTHS,
-	TOP5_YEARS,
-	type TopSessionsResult,
-	type Top5TableQuery,
-} from '../../lib/queries';
+export const TOP5_TABLE_QUERY = gql`
+  query Top5Table($temporalUnit: String1) {
+    byEncounter: topSessionsByMetric(args: {sortBy:"encounters"}) {
+      metricValue
+      visitDate
+    }
+    byIndividual: topSessionsByMetric(args: {sortBy:"individuals"}) {
+      metricValue
+      visitDate
+    }
+    bySpecies: topSessionsByMetric(args: {sortBy:"species"}) {
+      metricValue
+      visitDate
+    }
+  }
+`;
+
+import type {
+	TopSessionsResult,
+	Top5TableQuery,
+} from '../../types/graphql.types';
 
 export type TemporalUnit = 'day' | 'month' | 'year';
 
@@ -31,22 +46,21 @@ const top5TableConfigs: Record<TemporalUnit, Top5TableConfig> = {
 	day: {
 		connectingVerb: 'on',
 		dateFormat: 'dd MMM YYYY',
-		query: TOP5_SESSIONS
+		query: TOP5_TABLE_QUERY
 	},
 	month: {
 		connectingVerb: 'in',
 		dateFormat: 'MMM YYYY',
-		query: TOP5_MONTHS
+		query: TOP5_TABLE_QUERY
 	},
 	year: {
 		connectingVerb: 'in',
 		dateFormat: 'YYYY',
-		query: TOP5_YEARS
+		query: TOP5_TABLE_QUERY
 	}
 };
 
 function Top5Entry({ config, entry }: { config: Top5TableConfig; entry: TopSessionsResult }) {
-	console.log({entry})
 	return (
 		<Typography variant="body2">
 			<b>5</b> {config.connectingVerb} 2nd June 2007

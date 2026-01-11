@@ -1,11 +1,10 @@
 import { Container, Box, Typography } from '@mui/material';
-import { TOP5_SESSIONS } from '../lib/queries';
 import Top5Tabs from './components/Top5Tabs';
-import { getTop5Data } from './components/Top5Table';
+import { getTop5Data, TOP5_TABLE_QUERY } from './components/Top5Table';
 
 export default async function Home() {
 	// Fetch the first tab's data server-side
-	const initialData = await getTop5Data(TOP5_SESSIONS);
+	const initialData = await getTop5Data(TOP5_TABLE_QUERY);
 	return (
 		<Container maxWidth="xl">
 			<Box
