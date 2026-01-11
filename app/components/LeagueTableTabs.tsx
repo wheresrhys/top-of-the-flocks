@@ -2,8 +2,8 @@
 
 import { useState, SyntheticEvent } from 'react';
 import { Box, Typography, Tab, Tabs, CircularProgress } from '@mui/material';
-import { Top5TableDisplay, Top5TableConfig, getTop5Data } from './Top5Table';
-import { Top5TableQuery } from '@/types/graphql.types';
+import { LeagueTableDisplay, LeagueTableConfig, getLeagueTableData } from './LeagueTable';
+import { LeagueTableQuery } from '@/types/graphql.types';
 
 interface TabPanelProps {
 	children?: React.ReactNode;
@@ -11,7 +11,7 @@ interface TabPanelProps {
 	value: number;
 }
 
-export const top5TabConfigs: Top5TableConfig[] = [
+export const leagueTableTabConfigs: LeagueTableConfig[] = [
 	{
 		temporalUnit: 'day',
 		connectingVerb: 'on',
@@ -52,13 +52,15 @@ function a11yProps(index: number) {
 	};
 }
 
-export default function Top5Tabs({
-	initialData
+export default function LeagueTableTabs({
+	initialData,
+	numberOfEntries
 }: {
-	initialData: Top5TableQuery;
+	initialData: LeagueTableQuery;
+	numberOfEntries: number;
 }) {
 	const [activeTab, setActiveTab] = useState(0);
-	const [dataCache, setDataCache] = useState<Record<number, Top5TableQuery>>({
+	const [dataCache, setDataCache] = useState<Record<number, LeagueTableQuery>>({
 		0: initialData
 	});
 	const [loading, setLoading] = useState<Record<number, boolean>>({
@@ -69,12 +71,12 @@ export default function Top5Tabs({
 
 	const handleChange = async (event: SyntheticEvent, newValue: number) => {
 		setActiveTab(newValue);
-		const tabConfig = top5TabConfigs[newValue];
+		const tabConfig = leagueTableTabConfigs[newValue];
 		// If data is not cached, fetch it
 		if (!dataCache[newValue]) {
 			setLoading((prev) => ({ ...prev, [newValue]: true }));
 			try {
-				const data = await getTop5Data(tabConfig.temporalUnit);
+				const data = await getLeagueTableData(tabConfig.temporalUnit, numberOfEntries);
 				setDataCache((prev) => ({ ...prev, [newValue]: data }));
 			} catch (error) {
 				console.error('Failed to fetch data:', error);
@@ -94,7 +96,7 @@ export default function Top5Tabs({
 					textAlign: 'left'
 				}}
 			>
-				Top 5
+				Top {numberOfEntries}
 			</Typography>
 
 			<Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
@@ -114,7 +116,7 @@ export default function Top5Tabs({
 						<CircularProgress />
 					</Box>
 				) : (
-					<Top5TableDisplay config={top5TabConfigs[0]} data={dataCache[0]} />
+					<LeagueTableDisplay config={leagueTableTabConfigs[0]} data={dataCache[0]} numberOfEntries={numberOfEntries} />
 				)}
 			</CustomTabPanel>
 			<CustomTabPanel value={activeTab} index={1}>
@@ -123,7 +125,7 @@ export default function Top5Tabs({
 						<CircularProgress />
 					</Box>
 				) : dataCache[1] ? (
-					<Top5TableDisplay config={top5TabConfigs[1]} data={dataCache[1]} />
+					<LeagueTableDisplay config={leagueTableTabConfigs[1]} data={dataCache[1]} numberOfEntries={numberOfEntries} />
 				) : null}
 			</CustomTabPanel>
 			<CustomTabPanel value={activeTab} index={2}>
@@ -132,7 +134,7 @@ export default function Top5Tabs({
 						<CircularProgress />
 					</Box>
 				) : dataCache[2] ? (
-					<Top5TableDisplay config={top5TabConfigs[2]} data={dataCache[2]} />
+					<LeagueTableDisplay config={leagueTableTabConfigs[2]} data={dataCache[2]} numberOfEntries={numberOfEntries} />
 				) : null}
 			</CustomTabPanel>
 		</Box>

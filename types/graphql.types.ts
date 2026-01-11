@@ -809,12 +809,12 @@ export type TopPeriodsResultOrderByExp = {
   visitDate?: InputMaybe<OrderBy>;
 };
 
-export type Top5TableQueryVariables = Exact<{
+export type LeagueTableQueryVariables = Exact<{
   temporalUnit?: InputMaybe<Scalars['String1']['input']>;
 }>;
 
 
-export type Top5TableQuery = { __typename?: 'Query', byEncounter?: Array<{ __typename?: 'TopPeriodsResult', metricValue?: number | null, visitDate?: string | null }> | null, byIndividual?: Array<{ __typename?: 'TopPeriodsResult', metricValue?: number | null, visitDate?: string | null }> | null, bySpecies?: Array<{ __typename?: 'TopPeriodsResult', metricValue?: number | null, visitDate?: string | null }> | null };
+export type LeagueTableQuery = { __typename?: 'Query', byEncounter?: Array<{ __typename?: 'TopPeriodsResult', metricValue?: number | null, visitDate?: string | null }> | null, byIndividual?: Array<{ __typename?: 'TopPeriodsResult', metricValue?: number | null, visitDate?: string | null }> | null, bySpecies?: Array<{ __typename?: 'TopPeriodsResult', metricValue?: number | null, visitDate?: string | null }> | null };
 
 export type SpeciesPageQueryVariables = Exact<{
   speciesName?: InputMaybe<Scalars['String1']['input']>;

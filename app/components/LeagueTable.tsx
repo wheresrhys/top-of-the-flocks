@@ -11,24 +11,23 @@ import {
 } from '@mui/material';
 import formatDate from 'intl-dateformat';
 
-import type { DocumentNode } from 'graphql';
 import { graphqlRequest } from '../../lib/graphql-client';
-const TOP5_TABLE_QUERY = gql`
-	query Top5Table($temporalUnit: String1) {
+const LEAGUE_TABLE_QUERY = gql`
+	query LeagueTable($temporalUnit: String1, $numberOfEntries: Int64) {
 		byEncounter: topPeriodsByMetric(
-			args: { metricName: "encounters", temporalUnit: $temporalUnit }
+			args: { metricName: "encounters", temporalUnit: $temporalUnit, resultLimit: $numberOfEntries }
 		) {
 			metricValue
 			visitDate
 		}
 		byIndividual: topPeriodsByMetric(
-			args: { metricName: "individuals", temporalUnit: $temporalUnit }
+			args: { metricName: "individuals", temporalUnit: $temporalUnit, resultLimit: $numberOfEntries }
 		) {
 			metricValue
 			visitDate
 		}
 		bySpecies: topPeriodsByMetric(
-			args: { metricName: "species", temporalUnit: $temporalUnit }
+			args: { metricName: "species", temporalUnit: $temporalUnit, resultLimit: $numberOfEntries }
 		) {
 			metricValue
 			visitDate
@@ -37,25 +36,26 @@ const TOP5_TABLE_QUERY = gql`
 `;
 
 import type {
-	TopSessionsResult,
-	Top5TableQuery
+	TopPeriodsResult,
+	LeagueTableQuery
 } from '../../types/graphql.types';
 
 export type TemporalUnit = 'day' | 'month' | 'year';
 
-export type Top5TableConfig = {
+export type LeagueTableConfig = {
 	temporalUnit: TemporalUnit;
 	connectingVerb: 'in' | 'on';
 	dateFormat: string;
 };
 
-function Top5Entry({
+function LeagueTableEntry({
 	config,
 	entry
 }: {
-	config: Top5TableConfig;
-	entry: TopSessionsResult;
+	config: LeagueTableConfig;
+	entry: TopPeriodsResult | null | undefined;
 }) {
+	if (!entry) return null;
 	return (
 		<Typography variant="body2">
 			<b>{entry.metricValue}</b> {config.connectingVerb}{' '}
@@ -65,12 +65,14 @@ function Top5Entry({
 }
 
 // Pure presentation component - no data fetching logic
-export function Top5TableDisplay({
+export function LeagueTableDisplay({
 	data,
-	config
+	config,
+	numberOfEntries
 }: {
-	data: Top5TableQuery;
-	config: Top5TableConfig;
+	data: LeagueTableQuery;
+	config: LeagueTableConfig;
+	numberOfEntries: number;
 }) {
 	return (
 		<TableContainer component={Paper} elevation={2}>
@@ -105,7 +107,7 @@ export function Top5TableDisplay({
 					</TableRow>
 				</TableHead>
 				<TableBody>
-					{[...Array(5)].map((_, index) => (
+					{[...Array(numberOfEntries)].map((_, index) => (
 						<TableRow
 							key={index}
 							sx={{
@@ -126,13 +128,13 @@ export function Top5TableDisplay({
 								</Typography>
 							</TableCell>
 							<TableCell>
-								<Top5Entry entry={data.byEncounter[index]} config={config} />
+								<LeagueTableEntry entry={data.byEncounter?.[index]} config={config} />
 							</TableCell>
 							<TableCell>
-								<Top5Entry entry={data.byIndividual[index]} config={config} />
+								<LeagueTableEntry entry={data.byIndividual?.[index]} config={config} />
 							</TableCell>
 							<TableCell>
-								<Top5Entry entry={data.bySpecies[index]} config={config} />
+								<LeagueTableEntry entry={data.bySpecies?.[index]} config={config} />
 							</TableCell>
 						</TableRow>
 					))}
@@ -142,11 +144,13 @@ export function Top5TableDisplay({
 	);
 }
 
-export async function getTop5Data(
-	temporalUnit: TemporalUnit
-): Promise<Top5TableQuery> {
-	const response = await graphqlRequest<Top5TableQuery>(TOP5_TABLE_QUERY, {
-		temporalUnit: temporalUnit as string
+export async function getLeagueTableData(
+	temporalUnit: TemporalUnit,
+	numberOfEntries: number
+): Promise<LeagueTableQuery> {
+	const response = await graphqlRequest<LeagueTableQuery>(LEAGUE_TABLE_QUERY, {
+		temporalUnit: temporalUnit as string,
+		numberOfEntries: numberOfEntries
 	});
 
 	if (response.errors) {
