@@ -7,9 +7,9 @@ CREATE TABLE IF NOT EXISTS top_periods_result (
 DROP FUNCTION IF EXISTS top_periods_by_metric(TEXT, TEXT, INTEGER);
 
 CREATE OR REPLACE FUNCTION top_periods_by_metric(
-  temporalUnit TEXT DEFAULT 'day',
-  metric TEXT DEFAULT 'encounters',
-  limit INTEGER DEFAULT 5
+  temporal_unit TEXT DEFAULT 'day',
+  metric_name TEXT DEFAULT 'encounters',
+  result_limit INTEGER DEFAULT 5
 )
 RETURNS SETOF top_periods_result
 LANGUAGE plpgsql
@@ -18,11 +18,11 @@ AS $$
 BEGIN
   RETURN QUERY
   SELECT
-    date_trunc(temporalUnit, e.visit_date)::DATE AS visit_date,
+    date_trunc(temporal_unit, e.visit_date)::DATE AS visit_date,
     CASE
-      WHEN metric = 'encounters' THEN count(e.*)
-      WHEN metric = 'individuals' THEN count(DISTINCT e.ring_no)
-      WHEN metric = 'species' THEN count(DISTINCT b.species_name)
+      WHEN metric_name = 'encounters' THEN count(e.*)
+      WHEN metric_name = 'individuals' THEN count(DISTINCT e.ring_no)
+      WHEN metric_name = 'species' THEN count(DISTINCT b.species_name)
       ELSE count(e.*)
     END::BIGINT AS metric_value
   FROM
@@ -31,9 +31,9 @@ BEGIN
   WHERE
     e.visit_date IS NOT NULL
   GROUP BY
-    date_trunc(temporalUnit, e.visit_date)
+    date_trunc(temporal_unit, e.visit_date)
   ORDER BY
     metric_value DESC
-  LIMIT limit;
+  LIMIT result_limit;
 END;
 $$;

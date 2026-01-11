@@ -51,3 +51,4 @@ next-env.d.ts
 
 ddn-docker.log
 .cursor/debug.log
+supabase/migrations/*
