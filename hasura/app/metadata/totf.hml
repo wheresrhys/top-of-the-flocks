@@ -336,8 +336,8 @@ definition:
               unique_columns:
                 - path
         - arguments: {}
-          name: top_sessions_result
-          type: top_sessions_result
+          name: top_periods_result
+          type: top_periods_result
           uniqueness_constraints: {}
         - arguments: {}
           name: vault_decrypted_secrets
@@ -352,6 +352,13 @@ definition:
               unique_columns:
                 - id
         - arguments:
+            metric_name:
+              description: 'Default: ''encounters'''
+              type:
+                type: nullable
+                underlying_type:
+                  name: text
+                  type: named
             result_limit:
               description: |
                 Default: 5
@@ -360,15 +367,15 @@ definition:
                 underlying_type:
                   name: int4
                   type: named
-            sort_by:
-              description: 'Default: ''encounters'''
+            temporal_unit:
+              description: 'Default: ''day'''
               type:
                 type: nullable
                 underlying_type:
                   name: text
                   type: named
-          name: topSessionsByMetric
-          type: topSessionsByMetric
+          name: topPeriodsByMetric
+          type: topPeriodsByMetric
           uniqueness_constraints: {}
       functions: []
       object_types:
@@ -4748,7 +4755,7 @@ definition:
                   type: named
                 type: array
           foreign_keys: {}
-        insert_top_sessions_result_object:
+        insert_top_periods_result_object:
           fields:
             metric_value:
               type:
@@ -4763,8 +4770,8 @@ definition:
                   name: date
                   type: named
           foreign_keys: {}
-        insert_top_sessions_result_response:
-          description: Responses from the 'insert_top_sessions_result' procedure
+        insert_top_periods_result_response:
+          description: Responses from the 'insert_top_periods_result' procedure
           fields:
             affected_rows:
               description: The number of rows affected by the mutation
@@ -4775,7 +4782,7 @@ definition:
               description: Data from rows affected by the mutation
               type:
                 element_type:
-                  name: top_sessions_result
+                  name: top_periods_result
                   type: named
                 type: array
           foreign_keys: {}
@@ -5518,7 +5525,7 @@ definition:
                 name: text
                 type: named
           foreign_keys: {}
-        top_sessions_result:
+        top_periods_result:
           fields:
             metric_value:
               type:
@@ -5533,7 +5540,7 @@ definition:
                   name: date
                   type: named
           foreign_keys: {}
-        topSessionsByMetric:
+        topPeriodsByMetric:
           fields:
             metric_value:
               type:
@@ -14083,20 +14090,20 @@ definition:
             objects:
               type:
                 element_type:
-                  name: insert_top_sessions_result_object
+                  name: insert_top_periods_result_object
                   type: named
                 type: array
             post_check:
-              description: Insert permission predicate over the 'top_sessions_result' collection
+              description: Insert permission predicate over the 'top_periods_result' collection
               type:
                 type: nullable
                 underlying_type:
-                  object_type_name: top_sessions_result
+                  object_type_name: top_periods_result
                   type: predicate
-          description: Insert into the top_sessions_result table
-          name: insert_top_sessions_result
+          description: Insert into the top_periods_result table
+          name: insert_top_periods_result
           result_type:
-            name: insert_top_sessions_result_response
+            name: insert_top_periods_result_response
             type: named
         - arguments:
             objects:

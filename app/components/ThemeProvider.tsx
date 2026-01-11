@@ -19,9 +19,11 @@ export default function ThemeProvider({ children }: ThemeProviderProps) {
 	useEffect(() => {
 		setMounted(true);
 	}, []);
+	const themeMode = mounted && prefersDarkMode ? 'dark' : 'light';
+
 	const theme = createTheme({
 		palette: {
-			mode: mounted && prefersDarkMode ? 'dark' : 'light',
+			mode: themeMode,
 			primary: {
 				main: '#1976d2'
 			},

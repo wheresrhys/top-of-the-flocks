@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import ThemeProvider from './components/ThemeProvider';
+import EmotionRegistry from '../lib/emotion-registry';
 import GlobalNav from './components/GlobalNav';
 
 export const metadata: Metadata = {
@@ -16,10 +17,12 @@ export default function RootLayout({
 	return (
 		<html lang="en">
 			<body>
-				<ThemeProvider>
-					<GlobalNav />
-					{children}
-				</ThemeProvider>
+				<EmotionRegistry>
+					<ThemeProvider>
+						<GlobalNav />
+						{children}
+					</ThemeProvider>
+				</EmotionRegistry>
 			</body>
 		</html>
 	);

@@ -2,19 +2,32 @@
 
 import { useState, SyntheticEvent } from 'react';
 import { Box, Typography, Tab, Tabs, CircularProgress } from '@mui/material';
-import {
-	top5TableConfigs,
-	Top5TableDisplay,
-	TOP5_TABLE_QUERY,
-	type Top5TableData,
-	getTop5Data
-} from './Top5Table';
+import { LeagueTableDisplay, LeagueTableConfig, getLeagueTableData } from './LeagueTable';
+import { LeagueTableQuery } from '@/types/graphql.types';
 
 interface TabPanelProps {
 	children?: React.ReactNode;
 	index: number;
 	value: number;
 }
+
+export const leagueTableTabConfigs: LeagueTableConfig[] = [
+	{
+		temporalUnit: 'day',
+		connectingVerb: 'on',
+		dateFormat: 'DD MMMM YYYY'
+	},
+	{
+		temporalUnit: 'month',
+		connectingVerb: 'in',
+		dateFormat: 'MMMM YYYY'
+	},
+	{
+		temporalUnit: 'year',
+		connectingVerb: 'in',
+		dateFormat: 'YYYY'
+	}
+];
 
 function CustomTabPanel(props: TabPanelProps) {
 	const { children, value, index, ...other } = props;
@@ -39,13 +52,15 @@ function a11yProps(index: number) {
 	};
 }
 
-export default function Top5Tabs({
-	initialData
+export default function LeagueTableTabs({
+	initialData,
+	numberOfEntries
 }: {
-	initialData: Top5TableData;
+	initialData: LeagueTableQuery;
+	numberOfEntries: number;
 }) {
-	const [value, setValue] = useState(0);
-	const [dataCache, setDataCache] = useState<Record<number, Top5TableData>>({
+	const [activeTab, setActiveTab] = useState(0);
+	const [dataCache, setDataCache] = useState<Record<number, LeagueTableQuery>>({
 		0: initialData
 	});
 	const [loading, setLoading] = useState<Record<number, boolean>>({
@@ -55,13 +70,13 @@ export default function Top5Tabs({
 	});
 
 	const handleChange = async (event: SyntheticEvent, newValue: number) => {
-		setValue(newValue);
-
+		setActiveTab(newValue);
+		const tabConfig = leagueTableTabConfigs[newValue];
 		// If data is not cached, fetch it
 		if (!dataCache[newValue]) {
 			setLoading((prev) => ({ ...prev, [newValue]: true }));
 			try {
-				const data = await getTop5Data(top5TableConfigs[newValue].query);
+				const data = await getLeagueTableData(tabConfig.temporalUnit, numberOfEntries);
 				setDataCache((prev) => ({ ...prev, [newValue]: data }));
 			} catch (error) {
 				console.error('Failed to fetch data:', error);
@@ -81,12 +96,12 @@ export default function Top5Tabs({
 					textAlign: 'left'
 				}}
 			>
-				Top 5
+				Top {numberOfEntries}
 			</Typography>
 
 			<Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
 				<Tabs
-					value={value}
+					value={activeTab}
 					onChange={handleChange}
 					aria-label="basic tabs example"
 				>
@@ -95,31 +110,31 @@ export default function Top5Tabs({
 					<Tab label="Years" {...a11yProps(2)} />
 				</Tabs>
 			</Box>
-			<CustomTabPanel value={value} index={0}>
+			<CustomTabPanel value={activeTab} index={0}>
 				{loading[0] ? (
 					<Box display="flex" justifyContent="center" py={4}>
 						<CircularProgress />
 					</Box>
 				) : (
-					<Top5TableDisplay temporalUnit="day" data={dataCache[0]} />
+					<LeagueTableDisplay config={leagueTableTabConfigs[0]} data={dataCache[0]} numberOfEntries={numberOfEntries} />
 				)}
 			</CustomTabPanel>
-			<CustomTabPanel value={value} index={1}>
+			<CustomTabPanel value={activeTab} index={1}>
 				{loading[1] ? (
 					<Box display="flex" justifyContent="center" py={4}>
 						<CircularProgress />
 					</Box>
 				) : dataCache[1] ? (
-					<Top5TableDisplay temporalUnit="month" data={dataCache[1]} />
+					<LeagueTableDisplay config={leagueTableTabConfigs[1]} data={dataCache[1]} numberOfEntries={numberOfEntries} />
 				) : null}
 			</CustomTabPanel>
-			<CustomTabPanel value={value} index={2}>
+			<CustomTabPanel value={activeTab} index={2}>
 				{loading[2] ? (
 					<Box display="flex" justifyContent="center" py={4}>
 						<CircularProgress />
 					</Box>
 				) : dataCache[2] ? (
-					<Top5TableDisplay temporalUnit="year" data={dataCache[2]} />
+					<LeagueTableDisplay config={leagueTableTabConfigs[2]} data={dataCache[2]} numberOfEntries={numberOfEntries} />
 				) : null}
 			</CustomTabPanel>
 		</Box>

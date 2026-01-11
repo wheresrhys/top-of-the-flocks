@@ -9,20 +9,26 @@ import {
 	TableRow,
 	Paper
 } from '@mui/material';
+import formatDate from 'intl-dateformat';
 
-import type { DocumentNode } from 'graphql';
 import { graphqlRequest } from '../../lib/graphql-client';
-export const TOP5_TABLE_QUERY = gql`
-	query Top5Table($temporalUnit: String1) {
-		byEncounter: topSessionsByMetric(args: { sortBy: "encounters" }) {
+const LEAGUE_TABLE_QUERY = gql`
+	query LeagueTable($temporalUnit: String1, $numberOfEntries: Int64) {
+		byEncounter: topPeriodsByMetric(
+			args: { metricName: "encounters", temporalUnit: $temporalUnit, resultLimit: $numberOfEntries }
+		) {
 			metricValue
 			visitDate
 		}
-		byIndividual: topSessionsByMetric(args: { sortBy: "individuals" }) {
+		byIndividual: topPeriodsByMetric(
+			args: { metricName: "individuals", temporalUnit: $temporalUnit, resultLimit: $numberOfEntries }
+		) {
 			metricValue
 			visitDate
 		}
-		bySpecies: topSessionsByMetric(args: { sortBy: "species" }) {
+		bySpecies: topPeriodsByMetric(
+			args: { metricName: "species", temporalUnit: $temporalUnit, resultLimit: $numberOfEntries }
+		) {
 			metricValue
 			visitDate
 		}
@@ -30,60 +36,44 @@ export const TOP5_TABLE_QUERY = gql`
 `;
 
 import type {
-	TopSessionsResult,
-	Top5TableQuery
+	TopPeriodsResult,
+	LeagueTableQuery
 } from '../../types/graphql.types';
 
 export type TemporalUnit = 'day' | 'month' | 'year';
 
-export type Top5TableConfig = {
+export type LeagueTableConfig = {
+	temporalUnit: TemporalUnit;
 	connectingVerb: 'in' | 'on';
 	dateFormat: string;
-	query: DocumentNode;
 };
 
-export const top5TableConfigs: Record<TemporalUnit, Top5TableConfig> = {
-	day: {
-		connectingVerb: 'on',
-		dateFormat: 'dd MMM YYYY',
-		query: TOP5_TABLE_QUERY
-	},
-	month: {
-		connectingVerb: 'in',
-		dateFormat: 'MMM YYYY',
-		query: TOP5_TABLE_QUERY
-	},
-	year: {
-		connectingVerb: 'in',
-		dateFormat: 'YYYY',
-		query: TOP5_TABLE_QUERY
-	}
-};
-
-function Top5Entry({
+function LeagueTableEntry({
 	config,
 	entry
 }: {
-	config: Top5TableConfig;
-	entry: TopSessionsResult;
+	config: LeagueTableConfig;
+	entry: TopPeriodsResult | null | undefined;
 }) {
+	if (!entry) return null;
 	return (
 		<Typography variant="body2">
-			<b>5</b> {config.connectingVerb} 2nd June 2007
+			<b>{entry.metricValue}</b> {config.connectingVerb}{' '}
+			{formatDate(new Date(entry.visitDate as string), config.dateFormat)}
 		</Typography>
 	);
 }
 
 // Pure presentation component - no data fetching logic
-export function Top5TableDisplay({
+export function LeagueTableDisplay({
 	data,
-	temporalUnit
+	config,
+	numberOfEntries
 }: {
-	data: Top5TableQuery;
-	temporalUnit: TemporalUnit;
+	data: LeagueTableQuery;
+	config: LeagueTableConfig;
+	numberOfEntries: number;
 }) {
-	const config = top5TableConfigs[temporalUnit];
-	console.log(data);
 	return (
 		<TableContainer component={Paper} elevation={2}>
 			<Table size="small">
@@ -117,7 +107,7 @@ export function Top5TableDisplay({
 					</TableRow>
 				</TableHead>
 				<TableBody>
-					{[...Array(5)].map((_, index) => (
+					{[...Array(numberOfEntries)].map((_, index) => (
 						<TableRow
 							key={index}
 							sx={{
@@ -138,13 +128,13 @@ export function Top5TableDisplay({
 								</Typography>
 							</TableCell>
 							<TableCell>
-								<Top5Entry entry={data.byEncounter[index]} config={config} />
+								<LeagueTableEntry entry={data.byEncounter?.[index]} config={config} />
 							</TableCell>
 							<TableCell>
-								<Top5Entry entry={data.byIndividual[index]} config={config} />
+								<LeagueTableEntry entry={data.byIndividual?.[index]} config={config} />
 							</TableCell>
 							<TableCell>
-								<Top5Entry entry={data.bySpecies[index]} config={config} />
+								<LeagueTableEntry entry={data.bySpecies?.[index]} config={config} />
 							</TableCell>
 						</TableRow>
 					))}
@@ -154,10 +144,14 @@ export function Top5TableDisplay({
 	);
 }
 
-export async function getTop5Data(
-	query: DocumentNode
-): Promise<Top5TableQuery> {
-	const response = await graphqlRequest<Top5TableQuery>(query);
+export async function getLeagueTableData(
+	temporalUnit: TemporalUnit,
+	numberOfEntries: number
+): Promise<LeagueTableQuery> {
+	const response = await graphqlRequest<LeagueTableQuery>(LEAGUE_TABLE_QUERY, {
+		temporalUnit: temporalUnit as string,
+		numberOfEntries: numberOfEntries
+	});
 
 	if (response.errors) {
 		throw new Error(

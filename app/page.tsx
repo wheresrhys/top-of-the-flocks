@@ -1,10 +1,10 @@
 import { Container, Box, Typography } from '@mui/material';
-import Top5Tabs from './components/Top5Tabs';
-import { getTop5Data, TOP5_TABLE_QUERY } from './components/Top5Table';
+import LeagueTableTabs from './components/LeagueTableTabs';
+import { getLeagueTableData, TemporalUnit } from './components/LeagueTable';
 
 export default async function Home() {
 	// Fetch the first tab's data server-side
-	const initialData = await getTop5Data(TOP5_TABLE_QUERY);
+	const initialData = await getLeagueTableData('day' as TemporalUnit, 10);
 	return (
 		<Container maxWidth="xl">
 			<Box
@@ -24,7 +24,7 @@ export default async function Home() {
 					Top of the Flocks
 				</Typography>
 
-				<Top5Tabs initialData={initialData} />
+				<LeagueTableTabs initialData={initialData} numberOfEntries={10}/>
 			</Box>
 		</Container>
 	);

@@ -2,18 +2,18 @@
 kind: ObjectType
 version: v1
 definition:
-  name: TopSessionsResult
+  name: TopPeriodsResult
   fields:
     - name: metricValue
       type: Int64
     - name: visitDate
       type: Date
   graphql:
-    typeName: TopSessionsResult
-    inputTypeName: TopSessionsResultInput
+    typeName: TopPeriodsResult
+    inputTypeName: TopPeriodsResultInput
   dataConnectorTypeMapping:
     - dataConnectorName: totf
-      dataConnectorObjectType: top_sessions_result
+      dataConnectorObjectType: top_periods_result
       fieldMapping:
         metricValue:
           column:
@@ -23,7 +23,7 @@ definition:
             name: visit_date
 
     - dataConnectorName: totf
-      dataConnectorObjectType: topSessionsByMetric
+      dataConnectorObjectType: topPeriodsByMetric
       fieldMapping:
         metricValue:
           column:
@@ -37,7 +37,7 @@ definition:
 kind: TypePermissions
 version: v1
 definition:
-  typeName: TopSessionsResult
+  typeName: TopPeriodsResult
   permissions:
     - role: admin
       output:
@@ -49,10 +49,10 @@ definition:
 kind: BooleanExpressionType
 version: v1
 definition:
-  name: TopSessionsResultBoolExp
+  name: TopPeriodsResultBoolExp
   operand:
     object:
-      type: TopSessionsResult
+      type: TopPeriodsResult
       comparableFields:
         - fieldName: metricValue
           booleanExpressionType: Int8BoolExp
@@ -64,16 +64,16 @@ definition:
   isNull:
     enable: true
   graphql:
-    typeName: TopSessionsResultBoolExp
+    typeName: TopPeriodsResultBoolExp
 
 ---
 kind: AggregateExpression
 version: v1
 definition:
-  name: TopSessionsResultAggExp
+  name: TopPeriodsResultAggExp
   operand:
     object:
-      aggregatedType: TopSessionsResult
+      aggregatedType: TopPeriodsResult
       aggregatableFields:
         - fieldName: metricValue
           aggregateExpression: Int8AggExp
@@ -83,16 +83,16 @@ definition:
     enable: true
     returnType: Int64
   graphql:
-    selectTypeName: TopSessionsResultAggExp
+    selectTypeName: TopPeriodsResultAggExp
 
 ---
 kind: OrderByExpression
 version: v1
 definition:
-  name: TopSessionsResultOrderByExp
+  name: TopPeriodsResultOrderByExp
   operand:
     object:
-      orderedType: TopSessionsResult
+      orderedType: TopPeriodsResult
       orderableFields:
         - fieldName: metricValue
           orderByExpression: Int64OrderByExp
@@ -100,5 +100,5 @@ definition:
           orderByExpression: DateOrderByExp
       orderableRelationships: []
   graphql:
-    expressionTypeName: TopSessionsResultOrderByExp
+    expressionTypeName: TopPeriodsResultOrderByExp
 

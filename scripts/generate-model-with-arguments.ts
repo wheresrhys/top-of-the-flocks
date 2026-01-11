@@ -63,24 +63,45 @@ function pgScalarTypeToHasuraType(pgScalarType: string): string {
 function parseCollectionFromTotfHml(totfHmlPath: string, collectionName: string): CollectionInfo | null {
   const content = readFileSync(totfHmlPath, 'utf-8');
 
-  // Find the collection definition - look for the collection name
-  const collectionPattern = new RegExp(
-    `-\\s+arguments:([\\s\\S]*?)\\s+name:\\s+${collectionName}\\s*\\n([\\s\\S]*?)\\s+type:\\s+(\\w+)`,
+  // Find the collection definition - look for the collection name first, then find the arguments block immediately before it
+  // This ensures we match the correct arguments block for this specific collection
+  const collectionNamePattern = new RegExp(
+    `name:\\s+${collectionName}\\s*\\n\\s+type:\\s+(\\w+)`,
     'm'
   );
 
-  const match = content.match(collectionPattern);
-  if (!match) return null;
+  const nameMatch = content.match(collectionNamePattern);
+  if (!nameMatch) return null;
 
-  const argsSection = match[1];
-  const returnType = match[3];
+  const returnType = nameMatch[1];
+
+  // Find the position of the collection name
+  const nameIndex = content.indexOf(`name: ${collectionName}`);
+  if (nameIndex === -1) return null;
+
+  // Look backwards from the collection name to find the immediately preceding arguments block
+  // Find the last occurrence of "- arguments:" before the collection name
+  const beforeName = content.substring(0, nameIndex);
+  const argsStartPattern = /-\s+arguments:/g;
+  let lastArgsStartIndex = -1;
+  let match;
+
+  // Find all "- arguments:" occurrences before the collection name
+  while ((match = argsStartPattern.exec(beforeName)) !== null) {
+    lastArgsStartIndex = match.index;
+  }
+
+  if (lastArgsStartIndex === -1) return null;
+
+  // Extract the arguments section from the last "- arguments:" until just before "name: ${collectionName}"
+  const argsSection = beforeName.substring(lastArgsStartIndex).replace(/^-\s+arguments:\s*/, '');
 
   // Parse arguments from YAML format
   // Format: arg_name:\n              description: |\n                Default: 5\n              type:\n                type: nullable\n                underlying_type:\n                  name: int4
   const args: CollectionArgument[] = [];
 
   // Match each argument block
-  const argBlockPattern = /(\w+):\s*\n\s+description:\s*(?:\|\s*\n\s+)?(.*?)\s+type:\s*\n\s+type:\s+nullable\s*\n\s+underlying_type:\s*\n\s+name:\s+(\w+)/gs;
+  const argBlockPattern = /(\w+):\s*\n\s+description:\s*(?:\|\s*\n\s+)?([\s\S]*?)\s+type:\s*\n\s+type:\s+nullable\s*\n\s+underlying_type:\s*\n\s+name:\s+(\w+)/g;
   let argMatch;
 
   while ((argMatch = argBlockPattern.exec(argsSection)) !== null) {

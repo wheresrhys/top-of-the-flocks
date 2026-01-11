@@ -4409,7 +4409,7 @@
             "deprecationReason": null
           },
           {
-            "name": "topSessionsByMetric",
+            "name": "topPeriodsByMetric",
             "description": null,
             "args": [
               {
@@ -4420,7 +4420,7 @@
                   "name": null,
                   "ofType": {
                     "kind": "INPUT_OBJECT",
-                    "name": "TopSessionsByMetricArguments",
+                    "name": "TopPeriodsByMetricArguments",
                     "ofType": null
                   }
                 },
@@ -4463,7 +4463,7 @@
                     "name": null,
                     "ofType": {
                       "kind": "INPUT_OBJECT",
-                      "name": "TopSessionsResultOrderByExp",
+                      "name": "TopPeriodsResultOrderByExp",
                       "ofType": null
                     }
                   }
@@ -4477,7 +4477,7 @@
                 "description": null,
                 "type": {
                   "kind": "INPUT_OBJECT",
-                  "name": "TopSessionsResultBoolExp",
+                  "name": "TopPeriodsResultBoolExp",
                   "ofType": null
                 },
                 "defaultValue": null,
@@ -4493,7 +4493,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "OBJECT",
-                  "name": "TopSessionsResult",
+                  "name": "TopPeriodsResult",
                   "ofType": null
                 }
               }
@@ -4502,7 +4502,7 @@
             "deprecationReason": null
           },
           {
-            "name": "topSessionsByMetricAggregate",
+            "name": "topPeriodsByMetricAggregate",
             "description": null,
             "args": [
               {
@@ -4513,7 +4513,7 @@
                   "name": null,
                   "ofType": {
                     "kind": "INPUT_OBJECT",
-                    "name": "TopSessionsByMetricArguments",
+                    "name": "TopPeriodsByMetricArguments",
                     "ofType": null
                   }
                 },
@@ -4526,7 +4526,7 @@
                 "description": null,
                 "type": {
                   "kind": "INPUT_OBJECT",
-                  "name": "TopSessionsResultFilterInput",
+                  "name": "TopPeriodsResultFilterInput",
                   "ofType": null
                 },
                 "defaultValue": null,
@@ -4536,7 +4536,7 @@
             ],
             "type": {
               "kind": "OBJECT",
-              "name": "TopSessionsResultAggExp",
+              "name": "TopPeriodsResultAggExp",
               "ofType": null
             },
             "isDeprecated": false,
@@ -6306,7 +6306,7 @@
             "deprecationReason": null
           },
           {
-            "name": "topSessionsByMetric",
+            "name": "topPeriodsByMetric",
             "description": null,
             "args": [
               {
@@ -6317,7 +6317,7 @@
                   "name": null,
                   "ofType": {
                     "kind": "INPUT_OBJECT",
-                    "name": "TopSessionsByMetricArguments",
+                    "name": "TopPeriodsByMetricArguments",
                     "ofType": null
                   }
                 },
@@ -6360,7 +6360,7 @@
                     "name": null,
                     "ofType": {
                       "kind": "INPUT_OBJECT",
-                      "name": "TopSessionsResultOrderByExp",
+                      "name": "TopPeriodsResultOrderByExp",
                       "ofType": null
                     }
                   }
@@ -6374,7 +6374,7 @@
                 "description": null,
                 "type": {
                   "kind": "INPUT_OBJECT",
-                  "name": "TopSessionsResultBoolExp",
+                  "name": "TopPeriodsResultBoolExp",
                   "ofType": null
                 },
                 "defaultValue": null,
@@ -6390,7 +6390,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "OBJECT",
-                  "name": "TopSessionsResult",
+                  "name": "TopPeriodsResult",
                   "ofType": null
                 }
               }
@@ -6399,7 +6399,7 @@
             "deprecationReason": null
           },
           {
-            "name": "topSessionsByMetricAggregate",
+            "name": "topPeriodsByMetricAggregate",
             "description": null,
             "args": [
               {
@@ -6410,7 +6410,7 @@
                   "name": null,
                   "ofType": {
                     "kind": "INPUT_OBJECT",
-                    "name": "TopSessionsByMetricArguments",
+                    "name": "TopPeriodsByMetricArguments",
                     "ofType": null
                   }
                 },
@@ -6423,7 +6423,7 @@
                 "description": null,
                 "type": {
                   "kind": "INPUT_OBJECT",
-                  "name": "TopSessionsResultFilterInput",
+                  "name": "TopPeriodsResultFilterInput",
                   "ofType": null
                 },
                 "defaultValue": null,
@@ -6433,7 +6433,7 @@
             ],
             "type": {
               "kind": "OBJECT",
-              "name": "TopSessionsResultAggExp",
+              "name": "TopPeriodsResultAggExp",
               "ofType": null
             },
             "isDeprecated": false,
@@ -7063,11 +7063,23 @@
       },
       {
         "kind": "INPUT_OBJECT",
-        "name": "TopSessionsByMetricArguments",
+        "name": "TopPeriodsByMetricArguments",
         "description": null,
         "isOneOf": false,
         "fields": null,
         "inputFields": [
+          {
+            "name": "metricName",
+            "description": "'Default: ''encounters'''",
+            "type": {
+              "kind": "SCALAR",
+              "name": "String1",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
           {
             "name": "resultLimit",
             "description": "Default: 5",
@@ -7081,8 +7093,8 @@
             "deprecationReason": null
           },
           {
-            "name": "sortBy",
-            "description": "'Default: ''encounters'''",
+            "name": "temporalUnit",
+            "description": "'Default: ''day'''",
             "type": {
               "kind": "SCALAR",
               "name": "String1",
@@ -7099,7 +7111,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "TopSessionsResult",
+        "name": "TopPeriodsResult",
         "description": null,
         "isOneOf": null,
         "fields": [
@@ -7135,7 +7147,7 @@
       },
       {
         "kind": "OBJECT",
-        "name": "TopSessionsResultAggExp",
+        "name": "TopPeriodsResultAggExp",
         "description": null,
         "isOneOf": null,
         "fields": [
@@ -7195,7 +7207,7 @@
       },
       {
         "kind": "INPUT_OBJECT",
-        "name": "TopSessionsResultBoolExp",
+        "name": "TopPeriodsResultBoolExp",
         "description": null,
         "isOneOf": false,
         "fields": null,
@@ -7211,7 +7223,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "INPUT_OBJECT",
-                  "name": "TopSessionsResultBoolExp",
+                  "name": "TopPeriodsResultBoolExp",
                   "ofType": null
                 }
               }
@@ -7225,7 +7237,7 @@
             "description": null,
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "TopSessionsResultBoolExp",
+              "name": "TopPeriodsResultBoolExp",
               "ofType": null
             },
             "defaultValue": null,
@@ -7243,7 +7255,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "INPUT_OBJECT",
-                  "name": "TopSessionsResultBoolExp",
+                  "name": "TopPeriodsResultBoolExp",
                   "ofType": null
                 }
               }
@@ -7283,7 +7295,7 @@
       },
       {
         "kind": "INPUT_OBJECT",
-        "name": "TopSessionsResultFilterInput",
+        "name": "TopPeriodsResultFilterInput",
         "description": null,
         "isOneOf": false,
         "fields": null,
@@ -7323,7 +7335,7 @@
                 "name": null,
                 "ofType": {
                   "kind": "INPUT_OBJECT",
-                  "name": "TopSessionsResultOrderByExp",
+                  "name": "TopPeriodsResultOrderByExp",
                   "ofType": null
                 }
               }
@@ -7337,7 +7349,7 @@
             "description": null,
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "TopSessionsResultBoolExp",
+              "name": "TopPeriodsResultBoolExp",
               "ofType": null
             },
             "defaultValue": null,
@@ -7351,7 +7363,7 @@
       },
       {
         "kind": "INPUT_OBJECT",
-        "name": "TopSessionsResultOrderByExp",
+        "name": "TopPeriodsResultOrderByExp",
         "description": null,
         "isOneOf": false,
         "fields": null,
