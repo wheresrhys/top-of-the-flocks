@@ -13,12 +13,14 @@ import formatDate from 'intl-dateformat';
 
 import { graphqlRequest } from '../../lib/graphql-client';
 const LEAGUE_TABLE_QUERY = gql`
-	query LeagueTable($temporalUnit: String1, $numberOfEntries: Int64) {
+	query LeagueTable($temporalUnit: String1, $numberOfEntries: Int64, $monthFilter: Int64, $yearFilter: Int64) {
 		byEncounter: topPeriodsByMetric(
 			args: {
 				metricName: "encounters"
 				temporalUnit: $temporalUnit
 				resultLimit: $numberOfEntries
+				monthFilter: $monthFilter
+				yearFilter: $yearFilter
 			}
 		) {
 			metricValue
@@ -29,6 +31,8 @@ const LEAGUE_TABLE_QUERY = gql`
 				metricName: "individuals"
 				temporalUnit: $temporalUnit
 				resultLimit: $numberOfEntries
+				monthFilter: $monthFilter
+				yearFilter: $yearFilter
 			}
 		) {
 			metricValue
@@ -39,6 +43,8 @@ const LEAGUE_TABLE_QUERY = gql`
 				metricName: "species"
 				temporalUnit: $temporalUnit
 				resultLimit: $numberOfEntries
+				monthFilter: $monthFilter
+				yearFilter: $yearFilter
 			}
 		) {
 			metricValue
@@ -58,6 +64,8 @@ export type LeagueTableConfig = {
 	temporalUnit: TemporalUnit;
 	connectingVerb: 'in' | 'on';
 	dateFormat: string;
+	monthFilter?: number;
+	yearFilter?: number;
 };
 
 function LeagueTableEntry({

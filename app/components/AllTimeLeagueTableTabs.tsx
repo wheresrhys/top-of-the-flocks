@@ -56,7 +56,7 @@ function a11yProps(index: number) {
 	};
 }
 
-export default function LeagueTableTabs({
+export default function AllTimeLeagueTableTabs({
 	initialData,
 	numberOfEntries
 }: {

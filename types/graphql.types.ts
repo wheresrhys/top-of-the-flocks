@@ -816,6 +816,8 @@ export type TopPeriodsResultOrderByExp = {
 export type LeagueTableQueryVariables = Exact<{
   temporalUnit?: InputMaybe<Scalars['String1']['input']>;
   numberOfEntries?: InputMaybe<Scalars['Int64']['input']>;
+  monthFilter?: InputMaybe<Scalars['Int64']['input']>;
+  yearFilter?: InputMaybe<Scalars['Int64']['input']>;
 }>;
 
 
