@@ -1,4 +1,5 @@
 import type { DocumentNode } from 'graphql';
+import { pRateLimit } from 'p-ratelimit';
 import { hasuraConfig, hasuraHeaders } from './hasura';
 
 export interface GraphQLResponse<T = unknown> {
@@ -8,6 +9,13 @@ export interface GraphQLResponse<T = unknown> {
     extensions?: Record<string, unknown>;
   }>;
 }
+
+/**
+ * Rate limiter to limit concurrent GraphQL requests to 5
+ */
+const limit = pRateLimit({
+  concurrency: 5, // Maximum 5 concurrent requests
+});
 
 /**
  * Extract query string from graphql-tag DocumentNode
@@ -35,24 +43,27 @@ export async function graphqlRequest<T = unknown>(
 
   const queryString = extractQueryString(query);
 
-  try {
-    const response = await fetch(hasuraConfig.endpoint, {
-      method: 'POST',
-      headers: hasuraHeaders,
-      body: JSON.stringify({
-        query: queryString,
-        variables,
-      }),
-    });
+  // Wrap the request in the rate limiter to enforce concurrency limit
+  return limit(async () => {
+    try {
+      const response = await fetch(hasuraConfig.endpoint, {
+        method: 'POST',
+        headers: hasuraHeaders,
+        body: JSON.stringify({
+          query: queryString,
+          variables,
+        }),
+      });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result: GraphQLResponse<T> = await response.json();
+      return result;
+    } catch (error) {
+      console.error('GraphQL request failed:', error);
+      throw error;
     }
-
-    const result: GraphQLResponse<T> = await response.json();
-    return result;
-  } catch (error) {
-    console.error('GraphQL request failed:', error);
-    throw error;
-  }
+  });
 }
