@@ -60,45 +60,91 @@ const LEAGUE_TABLE_QUERY = gql`
 
 import type {
 	TopPeriodsResult,
-	LeagueTableQuery
+	LeagueTableQuery,
+	LeagueTableQueryVariables
 } from '../../types/graphql.types';
 
 export type TemporalUnit = 'day' | 'month' | 'year';
 
+const connectingVerbMap: Record<TemporalUnit, 'in' | 'on'> = {
+	day: 'on',
+	month: 'in',
+	year: 'in'
+};
+
+const dateFormatMap: Record<TemporalUnit, string> = {
+	day: 'DD MMMM YYYY',
+	month: 'MMMM YYYY',
+	year: 'YYYY'
+};
+
 export type LeagueTableConfig = {
 	temporalUnit: TemporalUnit;
-	connectingVerb: 'in' | 'on';
-	dateFormat: string;
-	monthFilter?: number;
-	yearFilter?: number;
 };
+
+type NullableTopPeriodsResult = TopPeriodsResult | null | undefined;
 
 function LeagueTableEntry({
 	config,
 	entry
 }: {
 	config: LeagueTableConfig;
-	entry: TopPeriodsResult | null | undefined;
+	entry: NullableTopPeriodsResult;
 }) {
 	if (!entry) return null;
 	return (
 		<Typography variant="body2">
-			<b>{entry.metricValue}</b> {config.connectingVerb}{' '}
-			{formatDate(new Date(entry.visitDate as string), config.dateFormat)}
+			<b>{entry.metricValue}</b> {connectingVerbMap[config.temporalUnit]}{' '}
+			{formatDate(
+				new Date(entry.visitDate as string),
+				dateFormatMap[config.temporalUnit]
+			)}
 		</Typography>
 	);
+}
+
+function dataToMatrix(
+	data: LeagueTableQuery
+): [
+	number,
+	NullableTopPeriodsResult,
+	NullableTopPeriodsResult,
+	NullableTopPeriodsResult
+][] {
+	const matrix: [
+		number,
+		NullableTopPeriodsResult,
+		NullableTopPeriodsResult,
+		NullableTopPeriodsResult
+	][] = [];
+	for (
+		let i = 0;
+		i < (data.byEncounter || data.byIndividual || data.bySpecies)?.length || 0;
+		i++
+	) {
+		matrix.push([
+			i + 1,
+			data.byEncounter?.[i],
+			data.byIndividual?.[i],
+			data.bySpecies?.[i]
+		]);
+	}
+	return matrix;
 }
 
 // Pure presentation component - no data fetching logic
 export function LeagueTableDisplay({
 	data,
-	config,
-	numberOfEntries
+	config
 }: {
 	data: LeagueTableQuery;
 	config: LeagueTableConfig;
-	numberOfEntries: number;
 }) {
+	const matrix = dataToMatrix(data);
+
+	if (!matrix.length) {
+		return <Typography variant="body2">No data available</Typography>;
+	}
 	return (
 		<TableContainer component={Paper} elevation={2}>
 			<Table size="small">
@@ -132,43 +178,24 @@ export function LeagueTableDisplay({
 					</TableRow>
 				</TableHead>
 				<TableBody>
-					{[...Array(numberOfEntries)].map((_, index) => (
+					{matrix.map(([rank, byEncounter, byIndividual, bySpecies]) => (
 						<TableRow
-							key={index}
+							key={rank}
 							sx={{
 								'&:nth-of-type(odd)': {
 									backgroundColor: 'action.hover'
 								}
 							}}
 						>
-							<TableCell component="th" scope="row">
-								<Typography
-									variant="body1"
-									sx={{
-										color: 'primary.main',
-										fontWeight: 'bold'
-									}}
-								>
-									{index + 1}
-								</Typography>
+							<TableCell>{rank}</TableCell>
+							<TableCell>
+								<LeagueTableEntry entry={byEncounter} config={config} />
 							</TableCell>
 							<TableCell>
-								<LeagueTableEntry
-									entry={data.byEncounter?.[index]}
-									config={config}
-								/>
+								<LeagueTableEntry entry={byIndividual} config={config} />
 							</TableCell>
 							<TableCell>
-								<LeagueTableEntry
-									entry={data.byIndividual?.[index]}
-									config={config}
-								/>
-							</TableCell>
-							<TableCell>
-								<LeagueTableEntry
-									entry={data.bySpecies?.[index]}
-									config={config}
-								/>
+								<LeagueTableEntry entry={bySpecies} config={config} />
 							</TableCell>
 						</TableRow>
 					))}
@@ -179,13 +206,12 @@ export function LeagueTableDisplay({
 }
 
 export async function getLeagueTableData(
-	temporalUnit: TemporalUnit,
-	numberOfEntries: number
+	variables: LeagueTableQueryVariables
 ): Promise<LeagueTableQuery> {
-	const response = await graphqlRequest<LeagueTableQuery>(LEAGUE_TABLE_QUERY, {
-		temporalUnit: temporalUnit as string,
-		numberOfEntries: numberOfEntries
-	});
+	const response = await graphqlRequest<LeagueTableQuery>(
+		LEAGUE_TABLE_QUERY,
+		variables
+	);
 
 	if (response.errors) {
 		throw new Error(

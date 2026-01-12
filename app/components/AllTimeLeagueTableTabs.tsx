@@ -17,19 +17,13 @@ interface TabPanelProps {
 
 export const leagueTableTabConfigs: LeagueTableConfig[] = [
 	{
-		temporalUnit: 'day',
-		connectingVerb: 'on',
-		dateFormat: 'DD MMMM YYYY'
+		temporalUnit: 'day'
 	},
 	{
-		temporalUnit: 'month',
-		connectingVerb: 'in',
-		dateFormat: 'MMMM YYYY'
+		temporalUnit: 'month'
 	},
 	{
-		temporalUnit: 'year',
-		connectingVerb: 'in',
-		dateFormat: 'YYYY'
+		temporalUnit: 'year'
 	}
 ];
 
@@ -80,10 +74,10 @@ export default function AllTimeLeagueTableTabs({
 		if (!dataCache[newValue]) {
 			setLoading((prev) => ({ ...prev, [newValue]: true }));
 			try {
-				const data = await getLeagueTableData(
-					tabConfig.temporalUnit,
-					numberOfEntries
-				);
+				const data = await getLeagueTableData({
+					temporalUnit: tabConfig.temporalUnit as TemporalUnit,
+					numberOfEntries: numberOfEntries
+				});
 				setDataCache((prev) => ({ ...prev, [newValue]: data }));
 			} catch (error) {
 				console.error('Failed to fetch data:', error);
@@ -94,18 +88,7 @@ export default function AllTimeLeagueTableTabs({
 	};
 
 	return (
-		<Box sx={{ width: { xs: '100%', md: '50%' } }}>
-			<Typography
-				variant="h3"
-				component="h2"
-				sx={{
-					mb: 4,
-					textAlign: 'left'
-				}}
-			>
-				Top {numberOfEntries}
-			</Typography>
-
+		<Box>
 			<Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
 				<Tabs
 					value={activeTab}
