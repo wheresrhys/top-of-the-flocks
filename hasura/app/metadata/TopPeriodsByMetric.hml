@@ -8,19 +8,27 @@ definition:
     - name: metricName
       type: String_1
       description: "'Default: ''encounters'''"
+    - name: monthFilter
+      type: Int64
+      description: "'Default: NULL'"
     - name: resultLimit
       type: Int64
-      description: "Default: 5"
+      description: "'Default: 5'"
     - name: temporalUnit
       type: String_1
       description: "'Default: ''day'''"
+    - name: yearFilter
+      type: Int64
+      description: "Default: NULL"
   source:
     dataConnectorName: totf
     collection: topPeriodsByMetric
     argumentMapping:
       metricName: metric_name
+      monthFilter: month_filter
       resultLimit: result_limit
       temporalUnit: temporal_unit
+      yearFilter: year_filter
   filterExpressionType: TopPeriodsResultBoolExp
   aggregateExpression: TopPeriodsResultAggExp
   orderByExpression: TopPeriodsResultOrderByExp

@@ -5609,7 +5609,7 @@
       "queries": {
         "topPeriodsByMetric": {
           "sql": {
-            "inline": "SELECT * FROM top_periods_by_metric(COALESCE({{temporal_unit}}, 'day'), COALESCE({{metric_name}}, 'encounters'), COALESCE({{result_limit}}, 5))"
+            "inline": "SELECT * FROM top_periods_by_metric(COALESCE({{temporal_unit}}, 'day'), COALESCE({{metric_name}}, 'encounters'), COALESCE({{result_limit}}, 5), {{month_filter}}, {{year_filter}})"
           },
           "columns": {
             "visit_date": {
@@ -5652,7 +5652,23 @@
                 "scalarType": "int4"
               },
               "nullable": "nullable",
-              "description": "Default: 5\n"
+              "description": "Default: 5"
+            },
+            "month_filter": {
+              "name": "month_filter",
+              "type": {
+                "scalarType": "int4"
+              },
+              "nullable": "nullable",
+              "description": "Default: NULL"
+            },
+            "year_filter": {
+              "name": "year_filter",
+              "type": {
+                "scalarType": "int4"
+              },
+              "nullable": "nullable",
+              "description": "Default: NULL\n"
             }
           },
           "description": null

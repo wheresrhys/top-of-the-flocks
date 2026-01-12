@@ -770,10 +770,14 @@ export type TimeBoolExp = {
 export type TopPeriodsByMetricArguments = {
   /** 'Default: ''encounters''' */
   metricName?: InputMaybe<Scalars['String1']['input']>;
-  /** Default: 5 */
+  /** 'Default: NULL' */
+  monthFilter?: InputMaybe<Scalars['Int64']['input']>;
+  /** 'Default: 5' */
   resultLimit?: InputMaybe<Scalars['Int64']['input']>;
   /** 'Default: ''day''' */
   temporalUnit?: InputMaybe<Scalars['String1']['input']>;
+  /** Default: NULL */
+  yearFilter?: InputMaybe<Scalars['Int64']['input']>;
 };
 
 export type TopPeriodsResult = {
