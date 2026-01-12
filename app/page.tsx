@@ -162,6 +162,10 @@ export default async function Home() {
 						/>
 
 
+						<MonthStats
+							{...getLastMonthAndYear(today)}
+							heading="Last month's records"
+						/>
 
 				</Grid>
 				<Grid size={{ xs: 12, md: 6 }}>
