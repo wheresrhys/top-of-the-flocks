@@ -72,83 +72,43 @@ export default async function Home() {
 								textAlign: 'left'
 							}}
 						>
-							This month's records
-						</Typography>
-						<Typography
-							variant="h4"
-							component="h3"
-							sx={{
-								mb: 4,
-								textAlign: 'left'
-							}}
-						>
-							Best days this month
+							This month&apos;s records
 						</Typography>
 						<LeagueTableDisplay
 							data={bestDaysThisMonth}
+							heading="Best days this month"
 							config={
 								{
 									temporalUnit: 'day'
 								} as LeagueTableConfig
 							}
-							numberOfEntries={5}
 						/>
-						<Typography
-							variant="h4"
-							component="h3"
-							sx={{
-								mb: 4,
-								textAlign: 'left'
-							}}
-						>
-							Best days this month in any year
-						</Typography>
 						<LeagueTableDisplay
 							data={bestDaysThisMonthInAnyYear}
+							heading="Best days this month in any year"
 							config={
 								{
 									temporalUnit: 'day'
 								} as LeagueTableConfig
 							}
-							numberOfEntries={5}
 						/>
-						<Typography
-							variant="h4"
-							component="h3"
-							sx={{
-								mb: 4,
-								textAlign: 'left'
-							}}
-						>
-							Best days this year
-						</Typography>
 						<LeagueTableDisplay
 							data={bestDaysThisYear}
+							heading="Best days this year"
 							config={
 								{
 									temporalUnit: 'day'
 								} as LeagueTableConfig
 							}
-							numberOfEntries={5}
 						/>
-						<Typography
-							variant="h4"
-							component="h3"
-							sx={{
-								mb: 4,
-								textAlign: 'left'
-							}}
-						>
-							Best this months in any year
-						</Typography>
 						<LeagueTableDisplay
 							data={bestThisMonthInAnyYear}
+							heading="Best this months in any year"
 							config={
 								{
 									temporalUnit: 'month'
 								} as LeagueTableConfig
 							}
-							numberOfEntries={5}
 						/>
 					</Box>
 				</Grid>

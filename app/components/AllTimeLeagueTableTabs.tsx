@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, SyntheticEvent } from 'react';
-import { Box, Typography, Tab, Tabs, CircularProgress } from '@mui/material';
+import { Box, Tab, Tabs, CircularProgress } from '@mui/material';
 import {
 	LeagueTableDisplay,
 	LeagueTableConfig,
@@ -75,7 +75,7 @@ export default function AllTimeLeagueTableTabs({
 			setLoading((prev) => ({ ...prev, [newValue]: true }));
 			try {
 				const data = await getLeagueTableData({
-					temporalUnit: tabConfig.temporalUnit as TemporalUnit,
+					temporalUnit: tabConfig.temporalUnit,
 					numberOfEntries: numberOfEntries
 				});
 				setDataCache((prev) => ({ ...prev, [newValue]: data }));
@@ -109,7 +109,6 @@ export default function AllTimeLeagueTableTabs({
 					<LeagueTableDisplay
 						config={leagueTableTabConfigs[0]}
 						data={dataCache[0]}
-						numberOfEntries={numberOfEntries}
 					/>
 				)}
 			</CustomTabPanel>
@@ -122,7 +121,6 @@ export default function AllTimeLeagueTableTabs({
 					<LeagueTableDisplay
 						config={leagueTableTabConfigs[1]}
 						data={dataCache[1]}
-						numberOfEntries={numberOfEntries}
 					/>
 				) : null}
 			</CustomTabPanel>
@@ -135,7 +133,6 @@ export default function AllTimeLeagueTableTabs({
 					<LeagueTableDisplay
 						config={leagueTableTabConfigs[2]}
 						data={dataCache[2]}
-						numberOfEntries={numberOfEntries}
 					/>
 				) : null}
 			</CustomTabPanel>

@@ -117,9 +117,14 @@ function dataToMatrix(
 		NullableTopPeriodsResult,
 		NullableTopPeriodsResult
 	][] = [];
+	const length = (data.byEncounter || data.byIndividual || data.bySpecies)?.length || 0;
+
+	if (length === 0) {
+		return matrix;
+	}
 	for (
 		let i = 0;
-		i < (data.byEncounter || data.byIndividual || data.bySpecies)?.length || 0;
+		i < length;
 		i++
 	) {
 		matrix.push([
@@ -135,17 +140,19 @@ function dataToMatrix(
 // Pure presentation component - no data fetching logic
 export function LeagueTableDisplay({
 	data,
+	heading,
 	config
 }: {
 	data: LeagueTableQuery;
+	heading?: string;
 	config: LeagueTableConfig;
 }) {
 	const matrix = dataToMatrix(data);
 
 	if (!matrix.length) {
-		return <Typography variant="body2">No data available</Typography>;
+		return <><Typography variant="h6" fontWeight="bold" component="span">{heading}</Typography><Typography variant="body2">No data available</Typography></>;
 	}
-	return (
+	return (<><Typography variant="h6" fontWeight="bold" component="span">{heading}</Typography>
 		<TableContainer component={Paper} elevation={2}>
 			<Table size="small">
 				<TableHead>
@@ -201,7 +208,7 @@ export function LeagueTableDisplay({
 					))}
 				</TableBody>
 			</Table>
-		</TableContainer>
+		</TableContainer></>
 	);
 }
 
