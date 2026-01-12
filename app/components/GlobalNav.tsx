@@ -31,7 +31,7 @@ export default function GlobalNav() {
 							textDecoration: 'none'
 						}}
 					>
-						TOTP
+						TOTF
 					</Typography>
 
 					<Box sx={{ flexGrow: 1, display: { xs: 'flex' } }}>
