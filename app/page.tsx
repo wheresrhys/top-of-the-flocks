@@ -1,11 +1,4 @@
-import { Suspense } from 'react';
-import {
-	Container,
-	Box,
-	Typography,
-	Grid,
-	CircularProgress
-} from '@mui/material';
+import { Container, Box, Typography, Grid } from '@mui/material';
 import AllTimeLeagueTableTabs from './components/AllTimeLeagueTableTabs';
 import {
 	getLeagueTableData,
@@ -158,30 +151,15 @@ export default async function Home() {
 
 			<Grid container spacing={2}>
 				<Grid size={{ xs: 12, md: 6 }}>
-					<Suspense
-						fallback={
-							<Box display="flex" justifyContent="center" py={4}>
-								<CircularProgress />
-							</Box>
-						}
-					>
-						<MonthStats
-							{...getMonthAndYear(today)}
-							heading="This month's records"
-						/>
-					</Suspense>
-					<Suspense
-						fallback={
-							<Box display="flex" justifyContent="center" py={4}>
-								<CircularProgress />
-							</Box>
-						}
-					>
-						<MonthStats
-							{...getLastMonthAndYear(today)}
-							heading="Last month's records"
-						/>
-					</Suspense>
+					<MonthStats
+						{...getMonthAndYear(today)}
+						heading="This month's records"
+					/>
+
+					<MonthStats
+						{...getLastMonthAndYear(today)}
+						heading="Last month's records"
+					/>
 				</Grid>
 				<Grid size={{ xs: 12, md: 6 }}>
 					<Box>
