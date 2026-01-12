@@ -13,12 +13,19 @@ import formatDate from 'intl-dateformat';
 
 import { graphqlRequest } from '../../lib/graphql-client';
 const LEAGUE_TABLE_QUERY = gql`
-	query LeagueTable($temporalUnit: String1, $numberOfEntries: Int64) {
+	query LeagueTable(
+		$temporalUnit: String1
+		$numberOfEntries: Int64
+		$monthFilter: Int64
+		$yearFilter: Int64
+	) {
 		byEncounter: topPeriodsByMetric(
 			args: {
 				metricName: "encounters"
 				temporalUnit: $temporalUnit
 				resultLimit: $numberOfEntries
+				monthFilter: $monthFilter
+				yearFilter: $yearFilter
 			}
 		) {
 			metricValue
@@ -29,6 +36,8 @@ const LEAGUE_TABLE_QUERY = gql`
 				metricName: "individuals"
 				temporalUnit: $temporalUnit
 				resultLimit: $numberOfEntries
+				monthFilter: $monthFilter
+				yearFilter: $yearFilter
 			}
 		) {
 			metricValue
@@ -39,6 +48,8 @@ const LEAGUE_TABLE_QUERY = gql`
 				metricName: "species"
 				temporalUnit: $temporalUnit
 				resultLimit: $numberOfEntries
+				monthFilter: $monthFilter
+				yearFilter: $yearFilter
 			}
 		) {
 			metricValue
@@ -49,130 +60,174 @@ const LEAGUE_TABLE_QUERY = gql`
 
 import type {
 	TopPeriodsResult,
-	LeagueTableQuery
+	LeagueTableQuery,
+	LeagueTableQueryVariables
 } from '../../types/graphql.types';
 
 export type TemporalUnit = 'day' | 'month' | 'year';
 
+const connectingVerbMap: Record<TemporalUnit, 'in' | 'on'> = {
+	day: 'on',
+	month: 'in',
+	year: 'in'
+};
+
+const dateFormatMap: Record<TemporalUnit, string> = {
+	day: 'DD MMMM YYYY',
+	month: 'MMMM YYYY',
+	year: 'YYYY'
+};
+
 export type LeagueTableConfig = {
 	temporalUnit: TemporalUnit;
-	connectingVerb: 'in' | 'on';
-	dateFormat: string;
 };
+
+type NullableTopPeriodsResult = TopPeriodsResult | null | undefined;
 
 function LeagueTableEntry({
 	config,
 	entry
 }: {
 	config: LeagueTableConfig;
-	entry: TopPeriodsResult | null | undefined;
+	entry: NullableTopPeriodsResult;
 }) {
 	if (!entry) return null;
 	return (
 		<Typography variant="body2">
-			<b>{entry.metricValue}</b> {config.connectingVerb}{' '}
-			{formatDate(new Date(entry.visitDate as string), config.dateFormat)}
+			<b>{entry.metricValue}</b> {connectingVerbMap[config.temporalUnit]}{' '}
+			{formatDate(
+				new Date(entry.visitDate as string),
+				dateFormatMap[config.temporalUnit]
+			)}
 		</Typography>
 	);
+}
+
+function dataToMatrix(
+	data: LeagueTableQuery
+): [
+	number,
+	NullableTopPeriodsResult,
+	NullableTopPeriodsResult,
+	NullableTopPeriodsResult
+][] {
+	const matrix: [
+		number,
+		NullableTopPeriodsResult,
+		NullableTopPeriodsResult,
+		NullableTopPeriodsResult
+	][] = [];
+	const length =
+		(data.byEncounter || data.byIndividual || data.bySpecies)?.length || 0;
+
+	if (length === 0) {
+		return matrix;
+	}
+	for (let i = 0; i < length; i++) {
+		matrix.push([
+			i + 1,
+			data.byEncounter?.[i],
+			data.byIndividual?.[i],
+			data.bySpecies?.[i]
+		]);
+	}
+	return matrix;
 }
 
 // Pure presentation component - no data fetching logic
 export function LeagueTableDisplay({
 	data,
-	config,
-	numberOfEntries
+	heading,
+	config
 }: {
 	data: LeagueTableQuery;
+	heading?: string;
 	config: LeagueTableConfig;
-	numberOfEntries: number;
 }) {
+	const matrix = dataToMatrix(data);
+
+	if (!matrix.length) {
+		return (
+			<>
+				<Typography variant="h6" fontWeight="bold" component="span">
+					{heading}
+				</Typography>
+				<Typography variant="body2">No data available</Typography>
+			</>
+		);
+	}
 	return (
-		<TableContainer component={Paper} elevation={2}>
-			<Table size="small">
-				<TableHead>
-					<TableRow>
-						<TableCell component="th" scope="column">
-							<Typography
-								variant="h6"
-								fontWeight="bold"
-								component="span"
-								sx={{ display: 'none' }}
-							>
-								Rank
-							</Typography>
-						</TableCell>
-						<TableCell component="th" scope="column">
-							<Typography variant="h6" fontWeight="bold" component="span">
-								Encounters
-							</Typography>
-						</TableCell>
-						<TableCell component="th" scope="column">
-							<Typography variant="h6" fontWeight="bold" component="span">
-								Individuals
-							</Typography>
-						</TableCell>
-						<TableCell component="th" scope="column">
-							<Typography variant="h6" fontWeight="bold" component="span">
-								Species
-							</Typography>
-						</TableCell>
-					</TableRow>
-				</TableHead>
-				<TableBody>
-					{[...Array(numberOfEntries)].map((_, index) => (
-						<TableRow
-							key={index}
-							sx={{
-								'&:nth-of-type(odd)': {
-									backgroundColor: 'action.hover'
-								}
-							}}
-						>
-							<TableCell component="th" scope="row">
+		<>
+			<Typography variant="h6" fontWeight="bold" component="span">
+				{heading}
+			</Typography>
+			<TableContainer component={Paper} elevation={2}>
+				<Table size="small">
+					<TableHead>
+						<TableRow>
+							<TableCell component="th" scope="column">
 								<Typography
-									variant="body1"
-									sx={{
-										color: 'primary.main',
-										fontWeight: 'bold'
-									}}
+									variant="h6"
+									fontWeight="bold"
+									component="span"
+									sx={{ display: 'none' }}
 								>
-									{index + 1}
+									Rank
 								</Typography>
 							</TableCell>
-							<TableCell>
-								<LeagueTableEntry
-									entry={data.byEncounter?.[index]}
-									config={config}
-								/>
+							<TableCell component="th" scope="column">
+								<Typography variant="h6" fontWeight="bold" component="span">
+									Encounters
+								</Typography>
 							</TableCell>
-							<TableCell>
-								<LeagueTableEntry
-									entry={data.byIndividual?.[index]}
-									config={config}
-								/>
+							<TableCell component="th" scope="column">
+								<Typography variant="h6" fontWeight="bold" component="span">
+									Individuals
+								</Typography>
 							</TableCell>
-							<TableCell>
-								<LeagueTableEntry
-									entry={data.bySpecies?.[index]}
-									config={config}
-								/>
+							<TableCell component="th" scope="column">
+								<Typography variant="h6" fontWeight="bold" component="span">
+									Species
+								</Typography>
 							</TableCell>
 						</TableRow>
-					))}
-				</TableBody>
-			</Table>
-		</TableContainer>
+					</TableHead>
+					<TableBody>
+						{matrix.map(([rank, byEncounter, byIndividual, bySpecies]) => (
+							<TableRow
+								key={rank}
+								sx={{
+									'&:nth-of-type(odd)': {
+										backgroundColor: 'action.hover'
+									}
+								}}
+							>
+								<TableCell>{rank}</TableCell>
+								<TableCell>
+									<LeagueTableEntry entry={byEncounter} config={config} />
+								</TableCell>
+								<TableCell>
+									<LeagueTableEntry entry={byIndividual} config={config} />
+								</TableCell>
+								<TableCell>
+									<LeagueTableEntry entry={bySpecies} config={config} />
+								</TableCell>
+							</TableRow>
+						))}
+					</TableBody>
+				</Table>
+			</TableContainer>
+		</>
 	);
 }
 
 export async function getLeagueTableData(
-	temporalUnit: TemporalUnit,
-	numberOfEntries: number
+	variables: LeagueTableQueryVariables
 ): Promise<LeagueTableQuery> {
-	const response = await graphqlRequest<LeagueTableQuery>(LEAGUE_TABLE_QUERY, {
-		temporalUnit: temporalUnit as string,
-		numberOfEntries: numberOfEntries
-	});
+	const response = await graphqlRequest<LeagueTableQuery>(
+		LEAGUE_TABLE_QUERY,
+		variables
+	);
 
 	if (response.errors) {
 		throw new Error(

@@ -9,7 +9,9 @@ DROP FUNCTION IF EXISTS top_periods_by_metric(TEXT, TEXT, INTEGER);
 CREATE OR REPLACE FUNCTION top_periods_by_metric(
   temporal_unit TEXT DEFAULT 'day',
   metric_name TEXT DEFAULT 'encounters',
-  result_limit INTEGER DEFAULT 5
+  result_limit INTEGER DEFAULT 5,
+  month_filter INTEGER DEFAULT NULL,
+  year_filter INTEGER DEFAULT NULL
 )
 RETURNS SETOF top_periods_result
 LANGUAGE plpgsql
@@ -30,6 +32,8 @@ BEGIN
     LEFT JOIN "Encounters" e ON b.ring_no = e.ring_no
   WHERE
     e.visit_date IS NOT NULL
+    AND (month_filter IS NULL OR EXTRACT(MONTH FROM e.visit_date) = month_filter)
+    AND (year_filter IS NULL OR EXTRACT(YEAR FROM e.visit_date) = year_filter)
   GROUP BY
     date_trunc(temporal_unit, e.visit_date)
   ORDER BY

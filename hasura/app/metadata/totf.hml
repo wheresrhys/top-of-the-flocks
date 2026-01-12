@@ -359,9 +359,15 @@ definition:
                 underlying_type:
                   name: text
                   type: named
+            month_filter:
+              description: 'Default: NULL'
+              type:
+                type: nullable
+                underlying_type:
+                  name: int4
+                  type: named
             result_limit:
-              description: |
-                Default: 5
+              description: 'Default: 5'
               type:
                 type: nullable
                 underlying_type:
@@ -373,6 +379,14 @@ definition:
                 type: nullable
                 underlying_type:
                   name: text
+                  type: named
+            year_filter:
+              description: |
+                Default: NULL
+              type:
+                type: nullable
+                underlying_type:
+                  name: int4
                   type: named
           name: topPeriodsByMetric
           type: topPeriodsByMetric

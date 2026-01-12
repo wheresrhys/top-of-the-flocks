@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, SyntheticEvent } from 'react';
-import { Box, Typography, Tab, Tabs, CircularProgress } from '@mui/material';
+import { Box, Tab, Tabs, CircularProgress } from '@mui/material';
 import {
 	LeagueTableDisplay,
 	LeagueTableConfig,
@@ -17,19 +17,13 @@ interface TabPanelProps {
 
 export const leagueTableTabConfigs: LeagueTableConfig[] = [
 	{
-		temporalUnit: 'day',
-		connectingVerb: 'on',
-		dateFormat: 'DD MMMM YYYY'
+		temporalUnit: 'day'
 	},
 	{
-		temporalUnit: 'month',
-		connectingVerb: 'in',
-		dateFormat: 'MMMM YYYY'
+		temporalUnit: 'month'
 	},
 	{
-		temporalUnit: 'year',
-		connectingVerb: 'in',
-		dateFormat: 'YYYY'
+		temporalUnit: 'year'
 	}
 ];
 
@@ -56,7 +50,7 @@ function a11yProps(index: number) {
 	};
 }
 
-export default function LeagueTableTabs({
+export default function AllTimeLeagueTableTabs({
 	initialData,
 	numberOfEntries
 }: {
@@ -80,10 +74,10 @@ export default function LeagueTableTabs({
 		if (!dataCache[newValue]) {
 			setLoading((prev) => ({ ...prev, [newValue]: true }));
 			try {
-				const data = await getLeagueTableData(
-					tabConfig.temporalUnit,
-					numberOfEntries
-				);
+				const data = await getLeagueTableData({
+					temporalUnit: tabConfig.temporalUnit,
+					numberOfEntries: numberOfEntries
+				});
 				setDataCache((prev) => ({ ...prev, [newValue]: data }));
 			} catch (error) {
 				console.error('Failed to fetch data:', error);
@@ -94,18 +88,7 @@ export default function LeagueTableTabs({
 	};
 
 	return (
-		<Box sx={{ width: { xs: '100%', md: '50%' } }}>
-			<Typography
-				variant="h3"
-				component="h2"
-				sx={{
-					mb: 4,
-					textAlign: 'left'
-				}}
-			>
-				Top {numberOfEntries}
-			</Typography>
-
+		<Box>
 			<Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
 				<Tabs
 					value={activeTab}
@@ -126,7 +109,6 @@ export default function LeagueTableTabs({
 					<LeagueTableDisplay
 						config={leagueTableTabConfigs[0]}
 						data={dataCache[0]}
-						numberOfEntries={numberOfEntries}
 					/>
 				)}
 			</CustomTabPanel>
@@ -139,7 +121,6 @@ export default function LeagueTableTabs({
 					<LeagueTableDisplay
 						config={leagueTableTabConfigs[1]}
 						data={dataCache[1]}
-						numberOfEntries={numberOfEntries}
 					/>
 				) : null}
 			</CustomTabPanel>
@@ -152,7 +133,6 @@ export default function LeagueTableTabs({
 					<LeagueTableDisplay
 						config={leagueTableTabConfigs[2]}
 						data={dataCache[2]}
-						numberOfEntries={numberOfEntries}
 					/>
 				) : null}
 			</CustomTabPanel>

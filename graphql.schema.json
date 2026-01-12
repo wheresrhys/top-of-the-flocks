@@ -7081,8 +7081,20 @@
             "deprecationReason": null
           },
           {
+            "name": "monthFilter",
+            "description": "'Default: NULL'",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int64",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "resultLimit",
-            "description": "Default: 5",
+            "description": "'Default: 5'",
             "type": {
               "kind": "SCALAR",
               "name": "Int64",
@@ -7098,6 +7110,18 @@
             "type": {
               "kind": "SCALAR",
               "name": "String1",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "yearFilter",
+            "description": "Default: NULL",
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int64",
               "ofType": null
             },
             "defaultValue": null,
