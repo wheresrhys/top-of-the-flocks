@@ -122,6 +122,9 @@ function generateNativeOperationConfig(funcInfo: FunctionInfo): any {
       } else if (defaultValue.match(/^\d+$/)) {
         // Numeric default
         return `COALESCE({{${arg.name}}}, ${defaultValue})`;
+      } else if (defaultValue.match(/^null$/i)) {
+        // Null default
+        return `{{${arg.name}}}`;
       } else {
         // String default without quotes - add quotes and escape
         defaultValue = defaultValue.replace(/'/g, "''");
