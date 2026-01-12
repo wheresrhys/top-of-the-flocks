@@ -1,5 +1,11 @@
 import { Suspense } from 'react';
-import { Container, Box, Typography, Grid, CircularProgress } from '@mui/material';
+import {
+	Container,
+	Box,
+	Typography,
+	Grid,
+	CircularProgress
+} from '@mui/material';
 import AllTimeLeagueTableTabs from './components/AllTimeLeagueTableTabs';
 import {
 	getLeagueTableData,
@@ -7,7 +13,6 @@ import {
 	type LeagueTableConfig,
 	LeagueTableDisplay
 } from './components/LeagueTable';
-
 
 const monthNameMap = [
 	null,
@@ -25,8 +30,15 @@ const monthNameMap = [
 	'December'
 ];
 
-async function MonthStats({ month, year, heading }: { month: number, year: number, heading: string }) {
-
+async function MonthStats({
+	month,
+	year,
+	heading
+}: {
+	month: number;
+	year: number;
+	heading: string;
+}) {
 	const [
 		bestDaysThisMonth,
 		bestDaysThisMonthInAnyYear,
@@ -106,15 +118,15 @@ async function MonthStats({ month, year, heading }: { month: number, year: numbe
 				}
 			/>
 		</Box>
-	)
+	);
 }
 
-function getMonthAndYear(date: Date): { month: number, year: number } {
+function getMonthAndYear(date: Date): { month: number; year: number } {
 	return { month: date.getMonth() + 1, year: date.getFullYear() };
 }
 
-function getLastMonthAndYear(date: Date): { month: number, year: number } {
-	const {month, year} = getMonthAndYear(date);
+function getLastMonthAndYear(date: Date): { month: number; year: number } {
+	const { month, year } = getMonthAndYear(date);
 	const lastMonth = month - 1;
 	if (lastMonth === 0) {
 		return { month: 12, year: year - 1 };
@@ -153,7 +165,10 @@ export default async function Home() {
 							</Box>
 						}
 					>
-						<MonthStats {...getMonthAndYear(today)} heading="This month's records" />
+						<MonthStats
+							{...getMonthAndYear(today)}
+							heading="This month's records"
+						/>
 					</Suspense>
 					<Suspense
 						fallback={
@@ -162,7 +177,10 @@ export default async function Home() {
 							</Box>
 						}
 					>
-						<MonthStats {...getLastMonthAndYear(today)} heading="Last month's records" />
+						<MonthStats
+							{...getLastMonthAndYear(today)}
+							heading="Last month's records"
+						/>
 					</Suspense>
 				</Grid>
 				<Grid size={{ xs: 12, md: 6 }}>

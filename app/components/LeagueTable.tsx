@@ -117,16 +117,13 @@ function dataToMatrix(
 		NullableTopPeriodsResult,
 		NullableTopPeriodsResult
 	][] = [];
-	const length = (data.byEncounter || data.byIndividual || data.bySpecies)?.length || 0;
+	const length =
+		(data.byEncounter || data.byIndividual || data.bySpecies)?.length || 0;
 
 	if (length === 0) {
 		return matrix;
 	}
-	for (
-		let i = 0;
-		i < length;
-		i++
-	) {
+	for (let i = 0; i < length; i++) {
 		matrix.push([
 			i + 1,
 			data.byEncounter?.[i],
@@ -150,65 +147,77 @@ export function LeagueTableDisplay({
 	const matrix = dataToMatrix(data);
 
 	if (!matrix.length) {
-		return <><Typography variant="h6" fontWeight="bold" component="span">{heading}</Typography><Typography variant="body2">No data available</Typography></>;
+		return (
+			<>
+				<Typography variant="h6" fontWeight="bold" component="span">
+					{heading}
+				</Typography>
+				<Typography variant="body2">No data available</Typography>
+			</>
+		);
 	}
-	return (<><Typography variant="h6" fontWeight="bold" component="span">{heading}</Typography>
-		<TableContainer component={Paper} elevation={2}>
-			<Table size="small">
-				<TableHead>
-					<TableRow>
-						<TableCell component="th" scope="column">
-							<Typography
-								variant="h6"
-								fontWeight="bold"
-								component="span"
-								sx={{ display: 'none' }}
-							>
-								Rank
-							</Typography>
-						</TableCell>
-						<TableCell component="th" scope="column">
-							<Typography variant="h6" fontWeight="bold" component="span">
-								Encounters
-							</Typography>
-						</TableCell>
-						<TableCell component="th" scope="column">
-							<Typography variant="h6" fontWeight="bold" component="span">
-								Individuals
-							</Typography>
-						</TableCell>
-						<TableCell component="th" scope="column">
-							<Typography variant="h6" fontWeight="bold" component="span">
-								Species
-							</Typography>
-						</TableCell>
-					</TableRow>
-				</TableHead>
-				<TableBody>
-					{matrix.map(([rank, byEncounter, byIndividual, bySpecies]) => (
-						<TableRow
-							key={rank}
-							sx={{
-								'&:nth-of-type(odd)': {
-									backgroundColor: 'action.hover'
-								}
-							}}
-						>
-							<TableCell>{rank}</TableCell>
-							<TableCell>
-								<LeagueTableEntry entry={byEncounter} config={config} />
+	return (
+		<>
+			<Typography variant="h6" fontWeight="bold" component="span">
+				{heading}
+			</Typography>
+			<TableContainer component={Paper} elevation={2}>
+				<Table size="small">
+					<TableHead>
+						<TableRow>
+							<TableCell component="th" scope="column">
+								<Typography
+									variant="h6"
+									fontWeight="bold"
+									component="span"
+									sx={{ display: 'none' }}
+								>
+									Rank
+								</Typography>
 							</TableCell>
-							<TableCell>
-								<LeagueTableEntry entry={byIndividual} config={config} />
+							<TableCell component="th" scope="column">
+								<Typography variant="h6" fontWeight="bold" component="span">
+									Encounters
+								</Typography>
 							</TableCell>
-							<TableCell>
-								<LeagueTableEntry entry={bySpecies} config={config} />
+							<TableCell component="th" scope="column">
+								<Typography variant="h6" fontWeight="bold" component="span">
+									Individuals
+								</Typography>
+							</TableCell>
+							<TableCell component="th" scope="column">
+								<Typography variant="h6" fontWeight="bold" component="span">
+									Species
+								</Typography>
 							</TableCell>
 						</TableRow>
-					))}
-				</TableBody>
-			</Table>
-		</TableContainer></>
+					</TableHead>
+					<TableBody>
+						{matrix.map(([rank, byEncounter, byIndividual, bySpecies]) => (
+							<TableRow
+								key={rank}
+								sx={{
+									'&:nth-of-type(odd)': {
+										backgroundColor: 'action.hover'
+									}
+								}}
+							>
+								<TableCell>{rank}</TableCell>
+								<TableCell>
+									<LeagueTableEntry entry={byEncounter} config={config} />
+								</TableCell>
+								<TableCell>
+									<LeagueTableEntry entry={byIndividual} config={config} />
+								</TableCell>
+								<TableCell>
+									<LeagueTableEntry entry={bySpecies} config={config} />
+								</TableCell>
+							</TableRow>
+						))}
+					</TableBody>
+				</Table>
+			</TableContainer>
+		</>
 	);
 }
 
