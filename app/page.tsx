@@ -4,7 +4,10 @@ import { getLeagueTableData, TemporalUnit } from './components/LeagueTable';
 
 export default async function Home() {
 	// Fetch the first tab's data server-side
-	const allTimeInitialData = await getLeagueTableData('day' as TemporalUnit, 10);
+	const allTimeInitialData = await getLeagueTableData(
+		'day' as TemporalUnit,
+		10
+	);
 	return (
 		<Container maxWidth="xl">
 			<Box
@@ -24,7 +27,10 @@ export default async function Home() {
 					Top of the Flocks
 				</Typography>
 
-				<AllTimeLeagueTableTabs initialData={allTimeInitialData} numberOfEntries={10} />
+				<AllTimeLeagueTableTabs
+					initialData={allTimeInitialData}
+					numberOfEntries={10}
+				/>
 			</Box>
 		</Container>
 	);

@@ -13,7 +13,12 @@ import formatDate from 'intl-dateformat';
 
 import { graphqlRequest } from '../../lib/graphql-client';
 const LEAGUE_TABLE_QUERY = gql`
-	query LeagueTable($temporalUnit: String1, $numberOfEntries: Int64, $monthFilter: Int64, $yearFilter: Int64) {
+	query LeagueTable(
+		$temporalUnit: String1
+		$numberOfEntries: Int64
+		$monthFilter: Int64
+		$yearFilter: Int64
+	) {
 		byEncounter: topPeriodsByMetric(
 			args: {
 				metricName: "encounters"
