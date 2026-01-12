@@ -1,4 +1,5 @@
-import { Container, Box, Typography, Grid } from '@mui/material';
+import { Suspense } from 'react';
+import { Container, Box, Typography, Grid, CircularProgress } from '@mui/material';
 import AllTimeLeagueTableTabs from './components/AllTimeLeagueTableTabs';
 import {
 	getLeagueTableData,
@@ -7,18 +8,25 @@ import {
 	LeagueTableDisplay
 } from './components/LeagueTable';
 
-export default async function Home() {
-	// Fetch the first tab's data server-side
-	const allTimeInitialData = await getLeagueTableData({
-		temporalUnit: 'day' as TemporalUnit,
-		numberOfEntries: 10
-	});
 
-	const today = new Date();
+const monthNameMap = [
+	null,
+	'January',
+	'February',
+	'March',
+	'April',
+	'May',
+	'June',
+	'July',
+	'August',
+	'September',
+	'October',
+	'November',
+	'December'
+];
 
-	const month = today.getMonth() + 1;
-	const year = today.getFullYear();
-	// todo make lots of use fo suspense here
+async function MonthStats({ month, year, heading }: { month: number, year: number, heading: string }) {
+
 	const [
 		bestDaysThisMonth,
 		bestDaysThisMonthInAnyYear,
@@ -49,6 +57,81 @@ export default async function Home() {
 	]);
 
 	return (
+		<Box>
+			<Typography
+				variant="h3"
+				component="h2"
+				sx={{
+					mb: 4,
+					textAlign: 'left'
+				}}
+			>
+				{heading}
+			</Typography>
+			<LeagueTableDisplay
+				data={bestDaysThisMonth}
+				heading="Best days"
+				config={
+					{
+						temporalUnit: 'day'
+					} as LeagueTableConfig
+				}
+			/>
+			<LeagueTableDisplay
+				data={bestDaysThisMonthInAnyYear}
+				heading={`Best ${monthNameMap[month]} days ever`}
+				config={
+					{
+						temporalUnit: 'day'
+					} as LeagueTableConfig
+				}
+			/>
+			{/* TODO: Split the year data out into a separate thing */}
+			<LeagueTableDisplay
+				data={bestDaysThisYear}
+				heading={`Best days this year`}
+				config={
+					{
+						temporalUnit: 'day'
+					} as LeagueTableConfig
+				}
+			/>
+			<LeagueTableDisplay
+				data={bestThisMonthInAnyYear}
+				heading={`Best ever ${monthNameMap[month]}`}
+				config={
+					{
+						temporalUnit: 'month'
+					} as LeagueTableConfig
+				}
+			/>
+		</Box>
+	)
+}
+
+function getMonthAndYear(date: Date): { month: number, year: number } {
+	return { month: date.getMonth() + 1, year: date.getFullYear() };
+}
+
+function getLastMonthAndYear(date: Date): { month: number, year: number } {
+	const {month, year} = getMonthAndYear(date);
+	const lastMonth = month - 1;
+	if (lastMonth === 0) {
+		return { month: 12, year: year - 1 };
+	}
+	return { month: lastMonth, year };
+}
+
+export default async function Home() {
+	// Fetch the first tab's data server-side
+	const allTimeInitialData = await getLeagueTableData({
+		temporalUnit: 'day' as TemporalUnit,
+		numberOfEntries: 10
+	});
+
+	const today = new Date();
+
+	return (
 		<Container maxWidth="xl">
 			<Typography
 				variant="h1"
@@ -63,54 +146,24 @@ export default async function Home() {
 
 			<Grid container spacing={2}>
 				<Grid size={{ xs: 12, md: 6 }}>
-					<Box>
-						<Typography
-							variant="h3"
-							component="h2"
-							sx={{
-								mb: 4,
-								textAlign: 'left'
-							}}
-						>
-							This month&apos;s records
-						</Typography>
-						<LeagueTableDisplay
-							data={bestDaysThisMonth}
-							heading="Best days this month"
-							config={
-								{
-									temporalUnit: 'day'
-								} as LeagueTableConfig
-							}
-						/>
-						<LeagueTableDisplay
-							data={bestDaysThisMonthInAnyYear}
-							heading="Best days this month in any year"
-							config={
-								{
-									temporalUnit: 'day'
-								} as LeagueTableConfig
-							}
-						/>
-						<LeagueTableDisplay
-							data={bestDaysThisYear}
-							heading="Best days this year"
-							config={
-								{
-									temporalUnit: 'day'
-								} as LeagueTableConfig
-							}
-						/>
-						<LeagueTableDisplay
-							data={bestThisMonthInAnyYear}
-							heading="Best this months in any year"
-							config={
-								{
-									temporalUnit: 'month'
-								} as LeagueTableConfig
-							}
-						/>
-					</Box>
+					<Suspense
+						fallback={
+							<Box display="flex" justifyContent="center" py={4}>
+								<CircularProgress />
+							</Box>
+						}
+					>
+						<MonthStats {...getMonthAndYear(today)} heading="This month's records" />
+					</Suspense>
+					<Suspense
+						fallback={
+							<Box display="flex" justifyContent="center" py={4}>
+								<CircularProgress />
+							</Box>
+						}
+					>
+						<MonthStats {...getLastMonthAndYear(today)} heading="Last month's records" />
+					</Suspense>
 				</Grid>
 				<Grid size={{ xs: 12, md: 6 }}>
 					<Box>
