@@ -18,7 +18,9 @@
 		"hasura:dev": "cd hasura && ddn run docker-start --log-level debug",
 		"hasura:deploy": "cd hasura &&  ddn supergraph build create --apply",
 		"hasura:types": "./scripts/load-env.sh npx graphql-codegen --config codegen.ts",
-		"import": "./scripts/load-env.sh tsx scripts/import-csv.ts",
+		"supabase:import": "./scripts/load-env.sh tsx scripts/import-csv.ts",
+		"build:prod": "curl -X POST $(op run --no-masking --env-file=\".env.1password\" -- printenv VERCEL_DEPLOY_HOOK)",
+		"newdata": "./scripts/newdata.sh",
 		"env:load": "./scripts/load-env.sh",
 		"env:check": "op whoami && echo '✅ 1Password CLI authenticated' || echo '❌ Please run: op signin'"
 	},
