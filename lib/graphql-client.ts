@@ -47,7 +47,6 @@ export async function graphqlRequest<T = unknown>(
   return limit(async () => {
     try {
       const response = await fetch(hasuraConfig.endpoint, {
-        cache: 'no-store',
         method: 'POST',
         headers: hasuraHeaders,
         body: JSON.stringify({
