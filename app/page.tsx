@@ -1,4 +1,5 @@
 import { Suspense } from 'react';
+import { cacheLife } from 'next/cache';
 import {
 	Container,
 	Box,
@@ -31,14 +32,15 @@ const monthNameMap = [
 ];
 
 async function MonthStats({
-	month,
-	year,
+	monthOffset,
 	heading
 }: {
-	month: number;
-	year: number;
+	monthOffset: number;
 	heading: string;
 }) {
+	'use cache';
+	cacheLife('hours');
+	const { month, year } = getMonthAndYear(monthOffset);
 	const [
 		bestDaysThisMonth,
 		bestDaysThisMonthInAnyYear,
@@ -121,27 +123,28 @@ async function MonthStats({
 	);
 }
 
-function getMonthAndYear(date: Date): { month: number; year: number } {
+function getMonthAndYear(monthOffset: number): { month: number; year: number } {
+	const date = new Date();
+	date.setMonth(date.getMonth() + monthOffset);
 	return { month: date.getMonth() + 1, year: date.getFullYear() };
 }
 
-function getLastMonthAndYear(date: Date): { month: number; year: number } {
-	const { month, year } = getMonthAndYear(date);
-	const lastMonth = month - 1;
-	if (lastMonth === 0) {
-		return { month: 12, year: year - 1 };
-	}
-	return { month: lastMonth, year };
-}
-
-export default async function Home() {
-	// Fetch the first tab's data server-side
+async function AllTimeLeagueTableTabsWrapper() {
+	'use cache';
+	cacheLife('hours');
 	const allTimeInitialData = await getLeagueTableData({
 		temporalUnit: 'day' as TemporalUnit,
 		numberOfEntries: 10
 	});
+	return (
+		<AllTimeLeagueTableTabs
+			initialData={allTimeInitialData}
+			numberOfEntries={10}
+		/>
+	);
+}
 
-	const today = new Date();
+export default function Home() {
 
 	return (
 		<Container maxWidth="xl">
@@ -166,7 +169,7 @@ export default async function Home() {
 						}
 					>
 						<MonthStats
-							{...getMonthAndYear(today)}
+							monthOffset={0}
 							heading="This month's records"
 						/>
 					</Suspense>
@@ -178,7 +181,7 @@ export default async function Home() {
 						}
 					>
 						<MonthStats
-							{...getLastMonthAndYear(today)}
+							monthOffset={-1}
 							heading="Last month's records"
 						/>
 					</Suspense>
@@ -195,11 +198,15 @@ export default async function Home() {
 						>
 							All time records
 						</Typography>
-
-						<AllTimeLeagueTableTabs
-							initialData={allTimeInitialData}
-							numberOfEntries={10}
-						/>
+						<Suspense
+							fallback={
+								<Box display="flex" justifyContent="center" py={4}>
+									<CircularProgress />
+								</Box>
+							}
+						>
+							<AllTimeLeagueTableTabsWrapper />
+						</Suspense>
 					</Box>
 				</Grid>
 			</Grid>
