@@ -134,12 +134,18 @@ function getLastMonthAndYear(date: Date): { month: number; year: number } {
 	return { month: lastMonth, year };
 }
 
-export default async function Home() {
-	// Fetch the first tab's data server-side
+async function AllTimeLeagueTableTabsWrapper() {
 	const allTimeInitialData = await getLeagueTableData({
 		temporalUnit: 'day' as TemporalUnit,
 		numberOfEntries: 10
 	});
+	return <AllTimeLeagueTableTabs
+		initialData={allTimeInitialData}
+		numberOfEntries={10}
+	/>
+}
+
+export default async function Home() {
 
 	const today = new Date();
 
@@ -195,11 +201,15 @@ export default async function Home() {
 						>
 							All time records
 						</Typography>
-
-						<AllTimeLeagueTableTabs
-							initialData={allTimeInitialData}
-							numberOfEntries={10}
-						/>
+						<Suspense
+							fallback={
+								<Box display="flex" justifyContent="center" py={4}>
+									<CircularProgress />
+								</Box>
+							}
+						>
+							<AllTimeLeagueTableTabsWrapper />
+						</Suspense>
 					</Box>
 				</Grid>
 			</Grid>
