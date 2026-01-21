@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { cacheLife } from 'next/cache'
+import { cacheLife } from 'next/cache';
 import {
 	Container,
 	Box,
@@ -144,14 +144,15 @@ async function AllTimeLeagueTableTabsWrapper() {
 		temporalUnit: 'day' as TemporalUnit,
 		numberOfEntries: 10
 	});
-	return <AllTimeLeagueTableTabs
-		initialData={allTimeInitialData}
-		numberOfEntries={10}
-	/>
+	return (
+		<AllTimeLeagueTableTabs
+			initialData={allTimeInitialData}
+			numberOfEntries={10}
+		/>
+	);
 }
 
 export default function Home() {
-
 	const today = new Date();
 
 	return (

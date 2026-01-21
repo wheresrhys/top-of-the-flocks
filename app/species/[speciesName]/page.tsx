@@ -1,6 +1,12 @@
 import { Suspense } from 'react';
 import { cacheLife } from 'next/cache';
-import { Container, Box, Typography, Paper, CircularProgress } from '@mui/material';
+import {
+	Container,
+	Box,
+	Typography,
+	Paper,
+	CircularProgress
+} from '@mui/material';
 import { graphqlRequest } from '../../../lib/graphql-client';
 import { gql } from 'graphql-tag';
 import type { SpeciesPageQuery } from '../../../types/graphql.types';
@@ -51,7 +57,7 @@ interface PageProps {
 	params: { speciesName: string };
 }
 
-async function SpeciesDetails({params: paramsPromise}: PageProps) {
+async function SpeciesDetails({ params: paramsPromise }: PageProps) {
 	'use cache';
 	cacheLife('hours');
 	const speciesName = decodeURIComponent((await paramsPromise).speciesName);
@@ -147,11 +153,16 @@ async function SpeciesDetails({params: paramsPromise}: PageProps) {
 	);
 }
 
-export default function SpeciesPage({params}: PageProps) {
-	return <Suspense fallback={<Box display="flex" justifyContent="center" py={4}>
-		<CircularProgress />
-	</Box>}>
-		<SpeciesDetails params={params} />
-	</Suspense>
-
+export default function SpeciesPage({ params }: PageProps) {
+	return (
+		<Suspense
+			fallback={
+				<Box display="flex" justifyContent="center" py={4}>
+					<CircularProgress />
+				</Box>
+			}
+		>
+			<SpeciesDetails params={params} />
+		</Suspense>
+	);
 }
