@@ -50,7 +50,8 @@ interface PageProps {
 	params: { speciesName: string };
 }
 
-async function SpeciesDetails({speciesName}: {speciesName: string}) {
+async function SpeciesDetails({params: paramsPromise}: PageProps) {
+	const speciesName = decodeURIComponent((await paramsPromise).speciesName);
 	const data = await getSpeciesDetails(speciesName);
 	if (!data.species || data.species.length === 0) {
 		return (
@@ -143,13 +144,11 @@ async function SpeciesDetails({speciesName}: {speciesName: string}) {
 	);
 }
 
-export default async function SpeciesPage({ params }: PageProps) {
-	const decodedSpeciesName = decodeURIComponent(params.speciesName);
-
+export default function SpeciesPage({params}: PageProps) {
 	return <Suspense fallback={<Box display="flex" justifyContent="center" py={4}>
 		<CircularProgress />
 	</Box>}>
-		<SpeciesDetails speciesName={decodedSpeciesName} />
+		<SpeciesDetails params={params} />
 	</Suspense>
 
 }
