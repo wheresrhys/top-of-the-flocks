@@ -1,4 +1,5 @@
 import { Suspense } from 'react';
+import { cacheLife } from 'next/cache';
 import { Container, Box, Typography, Paper, CircularProgress } from '@mui/material';
 import { graphqlRequest } from '../../../lib/graphql-client';
 import { gql } from 'graphql-tag';
@@ -51,6 +52,8 @@ interface PageProps {
 }
 
 async function SpeciesDetails({params: paramsPromise}: PageProps) {
+	'use cache';
+	cacheLife('hours');
 	const speciesName = decodeURIComponent((await paramsPromise).speciesName);
 	const data = await getSpeciesDetails(speciesName);
 	if (!data.species || data.species.length === 0) {

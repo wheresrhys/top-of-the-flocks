@@ -1,4 +1,5 @@
 import { Suspense } from 'react';
+import { cacheLife } from 'next/cache'
 import {
 	Container,
 	Box,
@@ -39,6 +40,8 @@ async function MonthStats({
 	year: number;
 	heading: string;
 }) {
+	'use cache';
+	cacheLife('hours');
 	const [
 		bestDaysThisMonth,
 		bestDaysThisMonthInAnyYear,
@@ -135,6 +138,8 @@ function getLastMonthAndYear(date: Date): { month: number; year: number } {
 }
 
 async function AllTimeLeagueTableTabsWrapper() {
+	'use cache';
+	cacheLife('hours');
 	const allTimeInitialData = await getLeagueTableData({
 		temporalUnit: 'day' as TemporalUnit,
 		numberOfEntries: 10
@@ -145,7 +150,7 @@ async function AllTimeLeagueTableTabsWrapper() {
 	/>
 }
 
-export default async function Home() {
+export default function Home() {
 
 	const today = new Date();
 

@@ -1,4 +1,5 @@
 import { Suspense } from 'react';
+import { cacheLife } from 'next/cache';
 import { Container, Box, CircularProgress } from '@mui/material';
 import { graphqlRequest } from '../../lib/graphql-client';
 import { gql } from 'graphql-tag';
@@ -44,6 +45,8 @@ async function getSpeciesData(): Promise<AllSpeciesStatsQuery> {
 }
 
 async function SpeciesTableWrapper() {
+	'use cache';
+	cacheLife('hours');
 	const data = await getSpeciesData();
 	return <SortableSpeciesTable data={data.speciesLeagueTable || []} />;
 }
