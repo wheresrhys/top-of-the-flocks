@@ -7,7 +7,7 @@ import Container from '@mui/material/Container';
 const pages = [
 	{
 		text: 'Stats table',
-		path: '/stats'
+		path: '/v1/stats'
 	}
 ];
 

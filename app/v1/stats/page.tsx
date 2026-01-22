@@ -1,9 +1,9 @@
 import { Suspense } from 'react';
 import { cacheLife } from 'next/cache';
 import { Container, Box, CircularProgress } from '@mui/material';
-import { graphqlRequest } from '../../lib/graphql-client';
+import { graphqlRequest } from '../../../lib/graphql-client';
 import { gql } from 'graphql-tag';
-import { type AllSpeciesStatsQuery } from '../../types/graphql.types';
+import { type AllSpeciesStatsQuery } from '../../../types/graphql.types';
 import { SortableSpeciesTable } from '../components/SortableSpeciesTable';
 
 const ALL_SPECIES_STATS_QUERY = gql`
@@ -30,7 +30,7 @@ async function getSpeciesData(): Promise<AllSpeciesStatsQuery> {
 	const response = await graphqlRequest<AllSpeciesStatsQuery>(
 		ALL_SPECIES_STATS_QUERY
 	);
-
+	console.log(response);
 	if (response.errors) {
 		throw new Error(
 			`GraphQL errors: ${response.errors.map((e) => e.message).join(', ')}`

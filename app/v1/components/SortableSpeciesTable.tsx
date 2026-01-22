@@ -13,7 +13,7 @@ import {
 	Paper,
 	TableSortLabel
 } from '@mui/material';
-import { SpeciesLeagueTable } from '../../types/graphql.types';
+import { SpeciesLeagueTable } from '../../../types/graphql.types';
 
 // Define the sortable columns and their types
 type SortableColumn = keyof Pick<
@@ -288,7 +288,7 @@ export function SortableSpeciesTable({ data }: SortableSpeciesTableProps) {
 						>
 							<TableCell component="th" scope="row">
 								<Link
-									href={`/species/${encodeURIComponent(species.speciesName || '')}`}
+									href={`species/${encodeURIComponent(species.speciesName || '')}`}
 									style={{ textDecoration: 'none' }}
 								>
 									<Typography
