@@ -11,6 +11,7 @@ interface FunctionArg {
   name: string;
   type: string;
   default?: string;
+  isArray?: boolean;
 }
 
 interface FunctionInfo {
@@ -38,13 +39,14 @@ function parseFunction(sql: string): FunctionInfo | null {
   const args: FunctionArg[] = [];
   if (argsStr.trim()) {
     // Match arguments like: arg_name TYPE DEFAULT value or arg_name TYPE
-    const argPattern = /(\w+)\s+(\w+(?:\s*\(\d+\))?)(?:\s+DEFAULT\s+([^,]+))?/gi;
+    const argPattern = /(\w+)\s+(\w+(?:\s*\(\d+\))?)(\[\])?(?:\s+DEFAULT\s+([^,]+))?/gi;
     let match;
     while ((match = argPattern.exec(argsStr)) !== null) {
       args.push({
         name: match[1],
         type: match[2].toLowerCase(),
-        default: match[3],
+        default: match[4],
+        isArray: match[3] !== undefined
       });
     }
   }
@@ -103,6 +105,7 @@ function pgTypeToHasuraScalarType(pgType: string): string {
 }
 
 function generateNativeOperationConfig(funcInfo: FunctionInfo): any {
+
   // Generate argument placeholders with COALESCE for defaults
   // PostgreSQL functions only use DEFAULT when arguments are omitted, not when null is passed
   // So we need to handle null values explicitly using COALESCE
@@ -135,7 +138,6 @@ function generateNativeOperationConfig(funcInfo: FunctionInfo): any {
   }).join(', ');
 
   const sqlQuery = `SELECT * FROM ${funcInfo.name}(${argPlaceholders})`;
-
   const columns: Record<string, any> = {};
   for (const field of funcInfo.returnFields) {
     const scalarType = pgTypeToHasuraScalarType(field.type);
@@ -151,12 +153,14 @@ function generateNativeOperationConfig(funcInfo: FunctionInfo): any {
 
   const functionArgs: Record<string, any> = {};
   for (const arg of funcInfo.args) {
-    const scalarType = pgTypeToHasuraScalarType(arg.type);
+    const scalarType = {
+      scalarType: pgTypeToHasuraScalarType(arg.type)
+    };
     functionArgs[arg.name] = {
       name: arg.name,
-      type: {
-        scalarType: scalarType,
-      },
+      type: arg.isArray ? {
+        arrayType: scalarType,
+      } : scalarType,
       nullable: 'nullable',
       description: arg.default ? `Default: ${arg.default}` : null,
     };
