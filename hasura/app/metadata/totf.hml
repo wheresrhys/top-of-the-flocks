@@ -352,6 +352,18 @@ definition:
               unique_columns:
                 - id
         - arguments:
+            exact_months_filter:
+              description: |
+                Default: NULL
+              type:
+                type: nullable
+                underlying_type:
+                  element_type:
+                    type: nullable
+                    underlying_type:
+                      name: text
+                      type: named
+                  type: array
             metric_name:
               description: 'Default: ''encounters'''
               type:
@@ -381,8 +393,7 @@ definition:
                   name: text
                   type: named
             year_filter:
-              description: |
-                Default: NULL
+              description: 'Default: NULL'
               type:
                 type: nullable
                 underlying_type:

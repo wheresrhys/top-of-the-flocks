@@ -6,11 +6,14 @@
 
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join, basename } from 'path';
+import { parseDocument } from 'yaml';
 
 interface CollectionArgument {
   name: string;
   type: string;
   description?: string;
+  isArray?: boolean;
+  elementType?: string;
 }
 
 interface CollectionInfo {
@@ -60,60 +63,101 @@ function pgScalarTypeToHasuraType(pgScalarType: string): string {
   return mapping[normalized] || 'String_1';
 }
 
+/**
+ * Extract type information from HML type structure
+ * Handles nullable wrappers, array types, and scalar types
+ */
+function extractTypeFromHmlType(typeObj: any): { scalarType: string; isArray: boolean; elementType?: string } {
+  if (!typeObj || typeof typeObj !== 'object') {
+    return { scalarType: 'text', isArray: false };
+  }
+
+  // Handle nullable wrapper
+  if (typeObj.type === 'nullable' && typeObj.underlying_type) {
+    return extractTypeFromHmlType(typeObj.underlying_type);
+  }
+
+  // Handle array type
+  if (typeObj.type === 'array' && typeObj.element_type) {
+    const elementInfo = extractTypeFromHmlType(typeObj.element_type);
+    return {
+      scalarType: elementInfo.scalarType,
+      isArray: true,
+      elementType: elementInfo.scalarType,
+    };
+  }
+
+  // Handle named scalar type
+  if (typeObj.type === 'named' && typeObj.name) {
+    return {
+      scalarType: typeObj.name,
+      isArray: false,
+    };
+  }
+
+  // Fallback: try to find name directly
+  if (typeObj.name && typeObj.type === 'named') {
+    return {
+      scalarType: typeObj.name,
+      isArray: false,
+    };
+  }
+
+  // Default fallback
+  return { scalarType: 'text', isArray: false };
+}
+
 function parseCollectionFromTotfHml(totfHmlPath: string, collectionName: string): CollectionInfo | null {
   const content = readFileSync(totfHmlPath, 'utf-8');
 
-  // Find the collection definition - look for the collection name first, then find the arguments block immediately before it
-  // This ensures we match the correct arguments block for this specific collection
-  const collectionNamePattern = new RegExp(
-    `name:\\s+${collectionName}\\s*\\n\\s+type:\\s+(\\w+)`,
-    'm'
-  );
+  // Parse the YAML document
+  // The file contains a single document with kind: DataConnectorLink
+  const doc = parseDocument(content);
+  const data = doc.toJS();
 
-  const nameMatch = content.match(collectionNamePattern);
-  if (!nameMatch) return null;
-
-  const returnType = nameMatch[1];
-
-  // Find the position of the collection name
-  const nameIndex = content.indexOf(`name: ${collectionName}`);
-  if (nameIndex === -1) return null;
-
-  // Look backwards from the collection name to find the immediately preceding arguments block
-  // Find the last occurrence of "- arguments:" before the collection name
-  const beforeName = content.substring(0, nameIndex);
-  const argsStartPattern = /-\s+arguments:/g;
-  let lastArgsStartIndex = -1;
-  let match;
-
-  // Find all "- arguments:" occurrences before the collection name
-  while ((match = argsStartPattern.exec(beforeName)) !== null) {
-    lastArgsStartIndex = match.index;
+  // Navigate to collections: definition.schema.schema.collections[]
+  const collections = data?.definition?.schema?.schema?.collections;
+  if (!Array.isArray(collections)) {
+    return null;
   }
 
-  if (lastArgsStartIndex === -1) return null;
+  // Find the collection by name
+  const collection = collections.find((col: any) => col.name === collectionName);
+  if (!collection) {
+    return null;
+  }
 
-  // Extract the arguments section from the last "- arguments:" until just before "name: ${collectionName}"
-  const argsSection = beforeName.substring(lastArgsStartIndex).replace(/^-\s+arguments:\s*/, '');
+  // Extract return type
+  const returnType = collection.type;
 
-  // Parse arguments from YAML format
-  // Format: arg_name:\n              description: |\n                Default: 5\n              type:\n                type: nullable\n                underlying_type:\n                  name: int4
+  // Extract arguments
   const args: CollectionArgument[] = [];
+  const argumentsObj = collection.arguments;
 
-  // Match each argument block
-  const argBlockPattern = /(\w+):\s*\n\s+description:\s*(?:\|\s*\n\s+)?([\s\S]*?)\s+type:\s*\n\s+type:\s+nullable\s*\n\s+underlying_type:\s*\n\s+name:\s+(\w+)/g;
-  let argMatch;
+  if (argumentsObj && typeof argumentsObj === 'object') {
+    for (const [argName, argData] of Object.entries(argumentsObj)) {
+      if (argData && typeof argData === 'object' && 'type' in argData) {
+        const typeInfo = extractTypeFromHmlType(argData.type);
 
-  while ((argMatch = argBlockPattern.exec(argsSection)) !== null) {
-    const argName = argMatch[1];
-    const description = argMatch[2].trim().replace(/\n\s*/g, ' ').trim();
-    const pgType = argMatch[3];
+        // Extract description - handle both string and multiline formats
+        let description: string | undefined;
+        if ('description' in argData) {
+          const desc = argData.description;
+          if (typeof desc === 'string') {
+            // Clean up multiline strings - replace newlines with spaces, trim
+            description = desc.replace(/\n\s*/g, ' ').trim();
+          }
+        }
 
-    args.push({
-      name: argName,
-      type: pgType,
-      description: description || undefined,
-    });
+        args.push({
+          name: argName,
+          type: typeInfo.scalarType,
+          description: description || undefined,
+          isArray: typeInfo.isArray,
+          elementType: typeInfo.elementType,
+        });
+      }
+    }
   }
 
   return {
@@ -131,9 +175,19 @@ function generateModelHml(collectionInfo: CollectionInfo, returnTypePascal: stri
 
   // Generate arguments section
   const argumentsSection = collectionInfo.arguments.map(arg => {
-    const hasuraType = pgScalarTypeToHasuraType(arg.type);
+    const baseHasuraType = pgScalarTypeToHasuraType(arg.type);
+    // For array types, wrap in brackets and quote to prevent YAML parsing as array literal
+    // YAML will parse [String_1] as an array, so we need "[String_1]" as a string
+    const hasuraType = arg.isArray ? `"[${baseHasuraType}]"` : baseHasuraType;
     const camelArgName = snakeToCamel(arg.name);
-    const description = arg.description ? `description: "${arg.description}"` : '';
+
+    // Description should already be clean from YAML parsing, but normalize whitespace
+    let cleanDescription = arg.description;
+    if (cleanDescription) {
+      // Normalize whitespace - replace multiple spaces/newlines with single space
+      cleanDescription = cleanDescription.replace(/\s+/g, ' ').trim();
+    }
+    const description = cleanDescription ? `description: "${cleanDescription}"` : '';
 
     return `    - name: ${camelArgName}
       type: ${hasuraType}
@@ -231,7 +285,8 @@ function main() {
 
   console.log(`Found collection ${collectionName} with ${collectionInfo.arguments.length} argument(s)`);
   collectionInfo.arguments.forEach(arg => {
-    console.log(`  - ${arg.name}: ${arg.type}${arg.description ? ` (${arg.description})` : ''}`);
+    const typeDisplay = arg.isArray ? `${arg.type}[]` : arg.type;
+    console.log(`  - ${arg.name}: ${typeDisplay}${arg.description ? ` (${arg.description})` : ''}`);
   });
 
   // Generate Model HML
