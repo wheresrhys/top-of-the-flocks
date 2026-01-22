@@ -7,9 +7,9 @@ import {
 	Paper,
 	CircularProgress
 } from '@mui/material';
-import { graphqlRequest } from '../../../lib/graphql-client';
+import { graphqlRequest } from '../../../../lib/graphql-client';
 import { gql } from 'graphql-tag';
-import type { SpeciesPageQuery } from '../../../types/graphql.types';
+import type { SpeciesPageQuery } from '../../../../types/graphql.types';
 
 const SPECIES_DETAILS_QUERY = gql`
 	query SpeciesPage($speciesName: String1) {

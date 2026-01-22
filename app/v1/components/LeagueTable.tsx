@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import formatDate from 'intl-dateformat';
 
-import { graphqlRequest } from '../../lib/graphql-client';
+import { graphqlRequest } from '../../../lib/graphql-client';
 const LEAGUE_TABLE_QUERY = gql`
 	query LeagueTable(
 		$temporalUnit: String1
@@ -62,7 +62,7 @@ import type {
 	TopPeriodsResult,
 	LeagueTableQuery,
 	LeagueTableQueryVariables
-} from '../../types/graphql.types';
+} from '../../../types/graphql.types';
 
 export type TemporalUnit = 'day' | 'month' | 'year';
 
