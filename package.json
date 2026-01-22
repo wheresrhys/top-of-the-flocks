@@ -6,6 +6,7 @@
 	"scripts": {
 		"dev": "./scripts/load-env.sh next dev --turbopack",
 		"build": "./scripts/load-env.sh next build --turbopack",
+		"build:debug": "./scripts/load-env.sh next build --turbopack --debug",
 		"start": "next start",
 		"lint": "npx prettier -w app && npx eslint",
 		"supabase:types": "./scripts/load-env.sh echo 'beginning type generation' && npx supabase gen types typescript --project-id $(op run --no-masking --env-file=\".env.1password\" -- printenv SUPABASE_PROJECT_ID) --schema public > ./types/supabase.types.ts  && echo 'types regenerated ok' || echo 'run `npx supabase login` to sign in to supabase first'",
