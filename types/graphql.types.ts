@@ -768,13 +768,15 @@ export type TimeBoolExp = {
 };
 
 export type TopPeriodsByMetricArguments = {
-  /** 'Default: ''encounters''' */
+  /** Default: NULL */
+  exactMonthsFilter?: InputMaybe<Array<InputMaybe<Scalars['String1']['input']>>>;
+  /** Default: 'encounters' */
   metricName?: InputMaybe<Scalars['String1']['input']>;
-  /** 'Default: NULL' */
+  /** Default: NULL */
   monthFilter?: InputMaybe<Scalars['Int64']['input']>;
-  /** 'Default: 5' */
+  /** Default: 5 */
   resultLimit?: InputMaybe<Scalars['Int64']['input']>;
-  /** 'Default: ''day''' */
+  /** Default: 'day' */
   temporalUnit?: InputMaybe<Scalars['String1']['input']>;
   /** Default: NULL */
   yearFilter?: InputMaybe<Scalars['Int64']['input']>;

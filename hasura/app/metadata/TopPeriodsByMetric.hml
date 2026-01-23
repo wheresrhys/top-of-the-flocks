@@ -5,18 +5,21 @@ definition:
   name: TopPeriodsByMetric
   objectType: TopPeriodsResult
   arguments:
+    - name: exactMonthsFilter
+      type: "[String_1]"
+      description: "Default: NULL"
     - name: metricName
       type: String_1
-      description: "'Default: ''encounters'''"
+      description: "Default: 'encounters'"
     - name: monthFilter
       type: Int64
-      description: "'Default: NULL'"
+      description: "Default: NULL"
     - name: resultLimit
       type: Int64
-      description: "'Default: 5'"
+      description: "Default: 5"
     - name: temporalUnit
       type: String_1
-      description: "'Default: ''day'''"
+      description: "Default: 'day'"
     - name: yearFilter
       type: Int64
       description: "Default: NULL"
@@ -24,6 +27,7 @@ definition:
     dataConnectorName: totf
     collection: topPeriodsByMetric
     argumentMapping:
+      exactMonthsFilter: exact_months_filter
       metricName: metric_name
       monthFilter: month_filter
       resultLimit: result_limit
