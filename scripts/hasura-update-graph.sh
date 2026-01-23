@@ -23,22 +23,37 @@ processed_models=""
 # Track function mappings to add connector mappings later
 function_mappings=""
 
-for sql_file in ../supabase/views/*.sql; do
-    if [ -f "$sql_file" ]; then
-        filename=$(basename "$sql_file" .sql)
+# Get migrations using the utility script
+echo "Retrieving latest migrations..."
+migration_output=$(cd .. && node --import tsx scripts/get-supabase-custom-defs.ts --prefix ALL 2>&1)
+if [ $? -ne 0 ]; then
+    echo "✗ Failed to retrieve migrations: $migration_output"
+    exit 1
+fi
+
+# Process each migration (paths are newline-separated)
+# Use process substitution to avoid subshell issues with variable persistence
+while IFS= read -r migration_path; do
+    if [ -z "$migration_path" ]; then
+        continue
+    fi
+    if [ -f "$migration_path" ]; then
+        # Extract filename without extension for the name
+        migration_file=$(basename "$migration_path")
+        filename=$(echo "$migration_file" | sed -E 's/^[0-9]+_(VIEW|FUNC)_(.+)\.sql$/\2/')
 
         # Check if this SQL file creates a function with RETURNS SETOF
         # Extract the return type table name
-        return_table=$(grep -i "RETURNS SETOF" "$sql_file" | sed -E 's/.*RETURNS SETOF[[:space:]]+([a-zA-Z_][a-zA-Z0-9_]*).*/\1/i' | head -1)
+        return_table=$(grep -i "RETURNS SETOF" "$migration_path" | sed -E 's/.*RETURNS SETOF[[:space:]]+([a-zA-Z_][a-zA-Z0-9_]*).*/\1/i' | head -1)
 
         if [ -n "$return_table" ]; then
             # This file creates a function - track the return type table
-            echo "Detected function in $sql_file returning SETOF $return_table"
+            echo "Detected function in $migration_path returning SETOF $return_table"
             table_to_track="$return_table"
 
             # Also extract function name for native operation
             # Match: CREATE [OR REPLACE] FUNCTION function_name(
-            func_name=$(grep -iE "CREATE\s+(OR\s+REPLACE\s+)?FUNCTION\s+\w+" "$sql_file" | sed -E 's/.*FUNCTION[[:space:]]+([a-zA-Z_][a-zA-Z0-9_]*).*/\1/i' | head -1)
+            func_name=$(grep -iE "CREATE\s+(OR\s+REPLACE\s+)?FUNCTION\s+\w+" "$migration_path" | sed -E 's/.*FUNCTION[[:space:]]+([a-zA-Z_][a-zA-Z0-9_]*).*/\1/i' | head -1)
             echo "  Function name: $func_name"
 
             # Automatically add native operation to configuration.json
@@ -154,11 +169,11 @@ for sql_file in ../supabase/views/*.sql; do
             fi
         fi
     fi
-done
+done < <(echo "$migration_output")
 
 if [ -z "$processed_models" ]; then
-    echo "⚠️  No SQL files found in supabase/views/"
-    echo "   Make sure your views/functions are in supabase/views/*.sql"
+    echo "⚠️  No migrations found with VIEW_ or FUNC_ prefix"
+    echo "   Make sure your migrations follow the naming convention: YYYYMMDDHHMMSS_PREFIX_name.sql"
 fi
 
 # Add connector mappings for functions after all models are added

@@ -4,8 +4,9 @@
  * This script parses Postgres functions and adds them to the nativeOperations.queries section
  */
 
-import { readFileSync, writeFileSync, existsSync, readdirSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join, basename } from 'path';
+import { getMigrations } from './get-supabase-custom-defs.js';
 
 interface FunctionArg {
   name: string;
@@ -202,34 +203,31 @@ function main() {
     process.exit(1);
   }
 
-  // Find SQL file containing the function
-  const viewsDir = join(projectRoot, 'supabase', 'views');
-
-  if (!existsSync(viewsDir)) {
-    console.error(`Views directory not found: ${viewsDir}`);
-    process.exit(1);
-  }
-
-  const files = readdirSync(viewsDir).filter((f: string) => f.endsWith('.sql'));
-
+  // Find SQL file containing the function using migrations
   let funcInfo: FunctionInfo | null = null;
   let sqlFile: string | null = null;
 
-  for (const file of files) {
-    const sqlPath = join(viewsDir, file);
-    const sql = readFileSync(sqlPath, 'utf-8');
+  try {
+    const funcMigrations = getMigrations('FUNC', join(projectRoot, 'supabase', 'migrations'));
 
-    if (sql.includes(funcName)) {
-      funcInfo = parseFunction(sql);
-      if (funcInfo && funcInfo.name === funcName) {
-        sqlFile = file;
-        break;
+    for (const migration of funcMigrations) {
+      const sql = readFileSync(migration.path, 'utf-8');
+
+      if (sql.includes(funcName)) {
+        funcInfo = parseFunction(sql);
+        if (funcInfo && funcInfo.name === funcName) {
+          sqlFile = migration.file;
+          break;
+        }
       }
     }
+  } catch (error) {
+    console.error(`Error retrieving migrations: ${error instanceof Error ? error.message : String(error)}`);
+    process.exit(1);
   }
 
   if (!funcInfo) {
-    console.error(`Function ${funcName} not found in supabase/views/*.sql`);
+    console.error(`Function ${funcName} not found in migrations with FUNC_ prefix`);
     process.exit(1);
   }
 
