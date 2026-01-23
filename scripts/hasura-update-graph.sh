@@ -14,6 +14,27 @@ ddn connector introspect totf
 echo "✓ Hasura connector introspection completed successfully!"
 
 echo ""
+echo "Adding Hasura models for regular tables..."
+
+# Add models for your regular tables
+for table in "Birds" "Encounters" "Sessions" "Species"; do
+    echo "  Adding model for: $table"
+    if ddn model add totf "$table" 2>&1; then
+        echo "  ✓ Successfully added model for: $table"
+    else
+        echo "  ⚠️  Failed to add model for: $table (may already exist)"
+    fi
+done
+
+echo ""
+echo "Adding relationships..."
+if ddn relationship add totf "*" 2>&1; then
+    echo "✓ Successfully added relationships"
+else
+    echo "⚠️  Failed to add relationships (may already exist)"
+fi
+
+echo ""
 echo "Adding/updating Hasura models for database views and functions..."
 
 # Track which models we've processed to avoid duplicates
