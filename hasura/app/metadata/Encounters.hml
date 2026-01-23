@@ -7,12 +7,16 @@ definition:
   fields:
     - name: age
       type: Int16!
+    - name: birdId
+      type: Int64!
     - name: breedingCondition
       type: String_1
     - name: captureTime
       type: String_1!
     - name: extraText
       type: String_1
+    - name: id
+      type: Int64!
     - name: isJuv
       type: Boolean_1!
     - name: moultCode
@@ -21,16 +25,14 @@ definition:
       type: Int16
     - name: recordType
       type: String_1!
-    - name: ringNo
-      type: String_1!
     - name: scheme
       type: String_1!
+    - name: sessionId
+      type: Int64!
     - name: sex
       type: String_1!
     - name: sexingMethod
       type: String_1
-    - name: visitDate
-      type: Date!
     - name: weight
       type: Float32
     - name: wingLength
@@ -45,6 +47,9 @@ definition:
         age:
           column:
             name: age
+        birdId:
+          column:
+            name: bird_id
         breedingCondition:
           column:
             name: breeding_condition
@@ -54,6 +59,9 @@ definition:
         extraText:
           column:
             name: extra_text
+        id:
+          column:
+            name: id
         isJuv:
           column:
             name: is_juv
@@ -66,21 +74,18 @@ definition:
         recordType:
           column:
             name: record_type
-        ringNo:
-          column:
-            name: ring_no
         scheme:
           column:
             name: scheme
+        sessionId:
+          column:
+            name: session_id
         sex:
           column:
             name: sex
         sexingMethod:
           column:
             name: sexing_method
-        visitDate:
-          column:
-            name: visit_date
         weight:
           column:
             name: weight
@@ -98,18 +103,19 @@ definition:
       output:
         allowedFields:
           - age
+          - birdId
           - breedingCondition
           - captureTime
           - extraText
+          - id
           - isJuv
           - moultCode
           - oldGreaterCoverts
           - recordType
-          - ringNo
           - scheme
+          - sessionId
           - sex
           - sexingMethod
-          - visitDate
           - weight
           - wingLength
 
@@ -124,12 +130,16 @@ definition:
       comparableFields:
         - fieldName: age
           booleanExpressionType: Int2BoolExp
+        - fieldName: birdId
+          booleanExpressionType: Int8BoolExp
         - fieldName: breedingCondition
           booleanExpressionType: TextBoolExp
         - fieldName: captureTime
           booleanExpressionType: TimeBoolExp
         - fieldName: extraText
           booleanExpressionType: TextBoolExp
+        - fieldName: id
+          booleanExpressionType: Int8BoolExp
         - fieldName: isJuv
           booleanExpressionType: BoolBoolExp
         - fieldName: moultCode
@@ -138,22 +148,21 @@ definition:
           booleanExpressionType: Int2BoolExp
         - fieldName: recordType
           booleanExpressionType: TextBoolExp
-        - fieldName: ringNo
-          booleanExpressionType: TextBoolExp
         - fieldName: scheme
           booleanExpressionType: TextBoolExp
+        - fieldName: sessionId
+          booleanExpressionType: Int8BoolExp
         - fieldName: sex
           booleanExpressionType: TextBoolExp
         - fieldName: sexingMethod
           booleanExpressionType: TextBoolExp
-        - fieldName: visitDate
-          booleanExpressionType: DateBoolExp
         - fieldName: weight
           booleanExpressionType: Float4BoolExp
         - fieldName: wingLength
           booleanExpressionType: Int2BoolExp
       comparableRelationships:
         - relationshipName: bird
+        - relationshipName: session
   logicalOperators:
     enable: true
   isNull:
@@ -172,12 +181,16 @@ definition:
       aggregatableFields:
         - fieldName: age
           aggregateExpression: Int2AggExp
+        - fieldName: birdId
+          aggregateExpression: Int8AggExp
         - fieldName: breedingCondition
           aggregateExpression: TextAggExp
         - fieldName: captureTime
           aggregateExpression: TimeAggExp
         - fieldName: extraText
           aggregateExpression: TextAggExp
+        - fieldName: id
+          aggregateExpression: Int8AggExp
         - fieldName: isJuv
           aggregateExpression: BoolAggExp
         - fieldName: moultCode
@@ -186,16 +199,14 @@ definition:
           aggregateExpression: Int2AggExp
         - fieldName: recordType
           aggregateExpression: TextAggExp
-        - fieldName: ringNo
-          aggregateExpression: TextAggExp
         - fieldName: scheme
           aggregateExpression: TextAggExp
+        - fieldName: sessionId
+          aggregateExpression: Int8AggExp
         - fieldName: sex
           aggregateExpression: TextAggExp
         - fieldName: sexingMethod
           aggregateExpression: TextAggExp
-        - fieldName: visitDate
-          aggregateExpression: DateAggExp
         - fieldName: weight
           aggregateExpression: Float4AggExp
         - fieldName: wingLength
@@ -217,12 +228,16 @@ definition:
       orderableFields:
         - fieldName: age
           orderByExpression: Int16OrderByExp
+        - fieldName: birdId
+          orderByExpression: Int64OrderByExp
         - fieldName: breedingCondition
           orderByExpression: String1OrderByExp
         - fieldName: captureTime
           orderByExpression: String1OrderByExp
         - fieldName: extraText
           orderByExpression: String1OrderByExp
+        - fieldName: id
+          orderByExpression: Int64OrderByExp
         - fieldName: isJuv
           orderByExpression: Boolean1OrderByExp
         - fieldName: moultCode
@@ -231,22 +246,21 @@ definition:
           orderByExpression: Int16OrderByExp
         - fieldName: recordType
           orderByExpression: String1OrderByExp
-        - fieldName: ringNo
-          orderByExpression: String1OrderByExp
         - fieldName: scheme
           orderByExpression: String1OrderByExp
+        - fieldName: sessionId
+          orderByExpression: Int64OrderByExp
         - fieldName: sex
           orderByExpression: String1OrderByExp
         - fieldName: sexingMethod
           orderByExpression: String1OrderByExp
-        - fieldName: visitDate
-          orderByExpression: DateOrderByExp
         - fieldName: weight
           orderByExpression: Float32OrderByExp
         - fieldName: wingLength
           orderByExpression: Int16OrderByExp
       orderableRelationships:
         - relationshipName: bird
+        - relationshipName: session
   graphql:
     expressionTypeName: EncountersOrderByExp
 
@@ -268,12 +282,17 @@ definition:
       subscription:
         rootField: encounters
     selectUniques:
-      - queryRootField: encountersByEncountersPkey
+      - queryRootField: encountersById
         uniqueIdentifier:
-          - ringNo
-          - visitDate
+          - id
         subscription:
-          rootField: encountersByEncountersPkey
+          rootField: encountersById
+      - queryRootField: encountersByEncountersBirdIdSessionIdUnique
+        uniqueIdentifier:
+          - birdId
+          - sessionId
+        subscription:
+          rootField: encountersByEncountersBirdIdSessionIdUnique
     filterInputTypeName: EncountersFilterInput
     aggregate:
       queryRootField: encountersAggregate
@@ -305,8 +324,26 @@ definition:
   mapping:
     - source:
         fieldPath:
-          - fieldName: ringNo
+          - fieldName: birdId
       target:
         modelField:
-          - fieldName: ringNo
+          - fieldName: id
+
+---
+kind: Relationship
+version: v1
+definition:
+  name: session
+  sourceType: Encounters
+  target:
+    model:
+      name: Sessions
+      relationshipType: Object
+  mapping:
+    - source:
+        fieldPath:
+          - fieldName: sessionId
+      target:
+        modelField:
+          - fieldName: id
 
