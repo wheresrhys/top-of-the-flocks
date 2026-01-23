@@ -137,6 +137,22 @@
             "deprecationReason": null
           },
           {
+            "name": "id",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Int64",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "ringNo",
             "description": null,
             "args": [],
@@ -165,7 +181,7 @@
             "deprecationReason": null
           },
           {
-            "name": "speciesName",
+            "name": "speciesId",
             "description": null,
             "args": [],
             "type": {
@@ -173,7 +189,7 @@
               "name": null,
               "ofType": {
                 "kind": "SCALAR",
-                "name": "String1",
+                "name": "Int64",
                 "ofType": null
               }
             },
@@ -209,6 +225,22 @@
             "deprecationReason": null
           },
           {
+            "name": "id",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Int8AggExp",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "ringNo",
             "description": null,
             "args": [],
@@ -225,7 +257,7 @@
             "deprecationReason": null
           },
           {
-            "name": "speciesName",
+            "name": "speciesId",
             "description": null,
             "args": [],
             "type": {
@@ -233,7 +265,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "TextAggExp",
+                "name": "Int8AggExp",
                 "ofType": null
               }
             },
@@ -318,6 +350,18 @@
             "deprecationReason": null
           },
           {
+            "name": "id",
+            "description": null,
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "Int8BoolExp",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "ringNo",
             "description": null,
             "type": {
@@ -342,11 +386,11 @@
             "deprecationReason": null
           },
           {
-            "name": "speciesName",
+            "name": "speciesId",
             "description": null,
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "TextBoolExp",
+              "name": "Int8BoolExp",
               "ofType": null
             },
             "defaultValue": null,
@@ -434,6 +478,18 @@
         "fields": null,
         "inputFields": [
           {
+            "name": "id",
+            "description": null,
+            "type": {
+              "kind": "ENUM",
+              "name": "OrderBy",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "ringNo",
             "description": null,
             "type": {
@@ -458,7 +514,7 @@
             "deprecationReason": null
           },
           {
-            "name": "speciesName",
+            "name": "speciesId",
             "description": null,
             "type": {
               "kind": "ENUM",
@@ -1026,6 +1082,22 @@
             "deprecationReason": null
           },
           {
+            "name": "birdId",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Int64",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "breedingCondition",
             "description": null,
             "args": [],
@@ -1061,6 +1133,22 @@
               "kind": "SCALAR",
               "name": "String1",
               "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "id",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Int64",
+                "ofType": null
+              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -1122,7 +1210,7 @@
             "deprecationReason": null
           },
           {
-            "name": "ringNo",
+            "name": "scheme",
             "description": null,
             "args": [],
             "type": {
@@ -1138,7 +1226,19 @@
             "deprecationReason": null
           },
           {
-            "name": "scheme",
+            "name": "session",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Sessions",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "sessionId",
             "description": null,
             "args": [],
             "type": {
@@ -1146,7 +1246,7 @@
               "name": null,
               "ofType": {
                 "kind": "SCALAR",
-                "name": "String1",
+                "name": "Int64",
                 "ofType": null
               }
             },
@@ -1177,22 +1277,6 @@
               "kind": "SCALAR",
               "name": "String1",
               "ofType": null
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "visitDate",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "SCALAR",
-                "name": "Date",
-                "ofType": null
-              }
             },
             "isDeprecated": false,
             "deprecationReason": null
@@ -1266,6 +1350,22 @@
             "deprecationReason": null
           },
           {
+            "name": "birdId",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Int8AggExp",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "breedingCondition",
             "description": null,
             "args": [],
@@ -1307,6 +1407,22 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "TextAggExp",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "id",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Int8AggExp",
                 "ofType": null
               }
             },
@@ -1378,7 +1494,7 @@
             "deprecationReason": null
           },
           {
-            "name": "ringNo",
+            "name": "scheme",
             "description": null,
             "args": [],
             "type": {
@@ -1394,7 +1510,7 @@
             "deprecationReason": null
           },
           {
-            "name": "scheme",
+            "name": "sessionId",
             "description": null,
             "args": [],
             "type": {
@@ -1402,7 +1518,7 @@
               "name": null,
               "ofType": {
                 "kind": "OBJECT",
-                "name": "TextAggExp",
+                "name": "Int8AggExp",
                 "ofType": null
               }
             },
@@ -1435,22 +1551,6 @@
               "ofType": {
                 "kind": "OBJECT",
                 "name": "TextAggExp",
-                "ofType": null
-              }
-            },
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "visitDate",
-            "description": null,
-            "args": [],
-            "type": {
-              "kind": "NON_NULL",
-              "name": null,
-              "ofType": {
-                "kind": "OBJECT",
-                "name": "DateAggExp",
                 "ofType": null
               }
             },
@@ -1579,6 +1679,18 @@
             "deprecationReason": null
           },
           {
+            "name": "birdId",
+            "description": null,
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "Int8BoolExp",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "breedingCondition",
             "description": null,
             "type": {
@@ -1608,6 +1720,18 @@
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "TextBoolExp",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "id",
+            "description": null,
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "Int8BoolExp",
               "ofType": null
             },
             "defaultValue": null,
@@ -1663,7 +1787,7 @@
             "deprecationReason": null
           },
           {
-            "name": "ringNo",
+            "name": "scheme",
             "description": null,
             "type": {
               "kind": "INPUT_OBJECT",
@@ -1675,11 +1799,23 @@
             "deprecationReason": null
           },
           {
-            "name": "scheme",
+            "name": "session",
             "description": null,
             "type": {
               "kind": "INPUT_OBJECT",
-              "name": "TextBoolExp",
+              "name": "SessionsBoolExp",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "sessionId",
+            "description": null,
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "Int8BoolExp",
               "ofType": null
             },
             "defaultValue": null,
@@ -1704,18 +1840,6 @@
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "TextBoolExp",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "visitDate",
-            "description": null,
-            "type": {
-              "kind": "INPUT_OBJECT",
-              "name": "DateBoolExp",
               "ofType": null
             },
             "defaultValue": null,
@@ -1851,6 +1975,18 @@
             "deprecationReason": null
           },
           {
+            "name": "birdId",
+            "description": null,
+            "type": {
+              "kind": "ENUM",
+              "name": "OrderBy",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "breedingCondition",
             "description": null,
             "type": {
@@ -1876,6 +2012,18 @@
           },
           {
             "name": "extraText",
+            "description": null,
+            "type": {
+              "kind": "ENUM",
+              "name": "OrderBy",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "id",
             "description": null,
             "type": {
               "kind": "ENUM",
@@ -1935,7 +2083,7 @@
             "deprecationReason": null
           },
           {
-            "name": "ringNo",
+            "name": "scheme",
             "description": null,
             "type": {
               "kind": "ENUM",
@@ -1947,7 +2095,19 @@
             "deprecationReason": null
           },
           {
-            "name": "scheme",
+            "name": "session",
+            "description": null,
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "SessionsOrderByExp",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "sessionId",
             "description": null,
             "type": {
               "kind": "ENUM",
@@ -1972,18 +2132,6 @@
           },
           {
             "name": "sexingMethod",
-            "description": null,
-            "type": {
-              "kind": "ENUM",
-              "name": "OrderBy",
-              "ofType": null
-            },
-            "defaultValue": null,
-            "isDeprecated": false,
-            "deprecationReason": null
-          },
-          {
-            "name": "visitDate",
             "description": null,
             "type": {
               "kind": "ENUM",
@@ -3978,6 +4126,35 @@
             "deprecationReason": null
           },
           {
+            "name": "birdsById",
+            "description": "Selects a single object from the model. Model description: @graphql({\"aggregate\": {\"enabled\": true}})",
+            "args": [
+              {
+                "name": "id",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Int64",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Birds",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "birdsByRingNo",
             "description": "Selects a single object from the model. Model description: @graphql({\"aggregate\": {\"enabled\": true}})",
             "args": [
@@ -4109,18 +4286,18 @@
             "deprecationReason": null
           },
           {
-            "name": "encountersByEncountersPkey",
+            "name": "encountersByEncountersBirdIdSessionIdUnique",
             "description": "Selects a single object from the model. Model description: Encounters with individual birds",
             "args": [
               {
-                "name": "ringNo",
+                "name": "birdId",
                 "description": null,
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
                   "ofType": {
                     "kind": "SCALAR",
-                    "name": "String1",
+                    "name": "Int64",
                     "ofType": null
                   }
                 },
@@ -4128,6 +4305,195 @@
                 "isDeprecated": false,
                 "deprecationReason": null
               },
+              {
+                "name": "sessionId",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Int64",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Encounters",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "encountersById",
+            "description": "Selects a single object from the model. Model description: Encounters with individual birds",
+            "args": [
+              {
+                "name": "id",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Int64",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Encounters",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "sessions",
+            "description": null,
+            "args": [
+              {
+                "name": "limit",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "offset",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "order_by",
+                "description": null,
+                "type": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "SessionsOrderByExp",
+                      "ofType": null
+                    }
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "where",
+                "description": null,
+                "type": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "SessionsBoolExp",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "Sessions",
+                  "ofType": null
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "sessionsAggregate",
+            "description": null,
+            "args": [
+              {
+                "name": "filter_input",
+                "description": null,
+                "type": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "SessionsFilterInput",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "SessionsAggExp",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "sessionsById",
+            "description": null,
+            "args": [
+              {
+                "name": "id",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Int64",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Sessions",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "sessionsByVisitDate",
+            "description": null,
+            "args": [
               {
                 "name": "visitDate",
                 "description": null,
@@ -4147,7 +4513,7 @@
             ],
             "type": {
               "kind": "OBJECT",
-              "name": "Encounters",
+              "name": "Sessions",
               "ofType": null
             },
             "isDeprecated": false,
@@ -4250,6 +4616,35 @@
             "type": {
               "kind": "OBJECT",
               "name": "SpeciesAggExp",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "speciesById",
+            "description": "Selects a single object from the model. Model description: Bird Species",
+            "args": [
+              {
+                "name": "id",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Int64",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Species",
               "ofType": null
             },
             "isDeprecated": false,
@@ -4528,6 +4923,420 @@
       },
       {
         "kind": "OBJECT",
+        "name": "Sessions",
+        "description": null,
+        "isOneOf": null,
+        "fields": [
+          {
+            "name": "encounters",
+            "description": null,
+            "args": [
+              {
+                "name": "limit",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "offset",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "order_by",
+                "description": null,
+                "type": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "EncountersOrderByExp",
+                      "ofType": null
+                    }
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "where",
+                "description": null,
+                "type": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "EncountersBoolExp",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "Encounters",
+                  "ofType": null
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "encountersAggregate",
+            "description": null,
+            "args": [
+              {
+                "name": "filter_input",
+                "description": null,
+                "type": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "EncountersFilterInput",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "EncountersAggExp",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "id",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Int64",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "visitDate",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Date",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
+        "name": "SessionsAggExp",
+        "description": null,
+        "isOneOf": null,
+        "fields": [
+          {
+            "name": "_count",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Int64",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "id",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Int8AggExp",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "visitDate",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "DateAggExp",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "inputFields": null,
+        "interfaces": [],
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "SessionsBoolExp",
+        "description": null,
+        "isOneOf": false,
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "_and",
+            "description": null,
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "SessionsBoolExp",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "_not",
+            "description": null,
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "SessionsBoolExp",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "_or",
+            "description": null,
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "SessionsBoolExp",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "encounters",
+            "description": null,
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "EncountersBoolExp",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "id",
+            "description": null,
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "Int8BoolExp",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "visitDate",
+            "description": null,
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "DateBoolExp",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "SessionsFilterInput",
+        "description": null,
+        "isOneOf": false,
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "limit",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "offset",
+            "description": null,
+            "type": {
+              "kind": "SCALAR",
+              "name": "Int",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "order_by",
+            "description": null,
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "SessionsOrderByExp",
+                  "ofType": null
+                }
+              }
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "where",
+            "description": null,
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "SessionsBoolExp",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "INPUT_OBJECT",
+        "name": "SessionsOrderByExp",
+        "description": null,
+        "isOneOf": false,
+        "fields": null,
+        "inputFields": [
+          {
+            "name": "id",
+            "description": null,
+            "type": {
+              "kind": "ENUM",
+              "name": "OrderBy",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "visitDate",
+            "description": null,
+            "type": {
+              "kind": "ENUM",
+              "name": "OrderBy",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          }
+        ],
+        "interfaces": null,
+        "enumValues": null,
+        "possibleTypes": null
+      },
+      {
+        "kind": "OBJECT",
         "name": "Species",
         "description": "Bird Species",
         "isOneOf": null,
@@ -4639,6 +5448,22 @@
             "deprecationReason": null
           },
           {
+            "name": "id",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "SCALAR",
+                "name": "Int64",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "speciesName",
             "description": null,
             "args": [],
@@ -4676,6 +5501,22 @@
               "ofType": {
                 "kind": "SCALAR",
                 "name": "Int64",
+                "ofType": null
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "id",
+            "description": null,
+            "args": [],
+            "type": {
+              "kind": "NON_NULL",
+              "name": null,
+              "ofType": {
+                "kind": "OBJECT",
+                "name": "Int8AggExp",
                 "ofType": null
               }
             },
@@ -4769,6 +5610,18 @@
             "type": {
               "kind": "INPUT_OBJECT",
               "name": "BirdsBoolExp",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "id",
+            "description": null,
+            "type": {
+              "kind": "INPUT_OBJECT",
+              "name": "Int8BoolExp",
               "ofType": null
             },
             "defaultValue": null,
@@ -5728,6 +6581,18 @@
         "fields": null,
         "inputFields": [
           {
+            "name": "id",
+            "description": null,
+            "type": {
+              "kind": "ENUM",
+              "name": "OrderBy",
+              "ofType": null
+            },
+            "defaultValue": null,
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "speciesName",
             "description": null,
             "type": {
@@ -5875,6 +6740,35 @@
             "deprecationReason": null
           },
           {
+            "name": "birdsById",
+            "description": null,
+            "args": [
+              {
+                "name": "id",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Int64",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Birds",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
             "name": "birdsByRingNo",
             "description": null,
             "args": [
@@ -6006,18 +6900,18 @@
             "deprecationReason": null
           },
           {
-            "name": "encountersByEncountersPkey",
+            "name": "encountersByEncountersBirdIdSessionIdUnique",
             "description": null,
             "args": [
               {
-                "name": "ringNo",
+                "name": "birdId",
                 "description": null,
                 "type": {
                   "kind": "NON_NULL",
                   "name": null,
                   "ofType": {
                     "kind": "SCALAR",
-                    "name": "String1",
+                    "name": "Int64",
                     "ofType": null
                   }
                 },
@@ -6025,6 +6919,195 @@
                 "isDeprecated": false,
                 "deprecationReason": null
               },
+              {
+                "name": "sessionId",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Int64",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Encounters",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "encountersById",
+            "description": null,
+            "args": [
+              {
+                "name": "id",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Int64",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Encounters",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "sessions",
+            "description": null,
+            "args": [
+              {
+                "name": "limit",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "offset",
+                "description": null,
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Int",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "order_by",
+                "description": null,
+                "type": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "SessionsOrderByExp",
+                      "ofType": null
+                    }
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              },
+              {
+                "name": "where",
+                "description": null,
+                "type": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "SessionsBoolExp",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "LIST",
+              "name": null,
+              "ofType": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "OBJECT",
+                  "name": "Sessions",
+                  "ofType": null
+                }
+              }
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "sessionsAggregate",
+            "description": null,
+            "args": [
+              {
+                "name": "filter_input",
+                "description": null,
+                "type": {
+                  "kind": "INPUT_OBJECT",
+                  "name": "SessionsFilterInput",
+                  "ofType": null
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "SessionsAggExp",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "sessionsById",
+            "description": null,
+            "args": [
+              {
+                "name": "id",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Int64",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Sessions",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "sessionsByVisitDate",
+            "description": null,
+            "args": [
               {
                 "name": "visitDate",
                 "description": null,
@@ -6044,7 +7127,7 @@
             ],
             "type": {
               "kind": "OBJECT",
-              "name": "Encounters",
+              "name": "Sessions",
               "ofType": null
             },
             "isDeprecated": false,
@@ -6147,6 +7230,35 @@
             "type": {
               "kind": "OBJECT",
               "name": "SpeciesAggExp",
+              "ofType": null
+            },
+            "isDeprecated": false,
+            "deprecationReason": null
+          },
+          {
+            "name": "speciesById",
+            "description": null,
+            "args": [
+              {
+                "name": "id",
+                "description": null,
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Int64",
+                    "ofType": null
+                  }
+                },
+                "defaultValue": null,
+                "isDeprecated": false,
+                "deprecationReason": null
+              }
+            ],
+            "type": {
+              "kind": "OBJECT",
+              "name": "Species",
               "ofType": null
             },
             "isDeprecated": false,

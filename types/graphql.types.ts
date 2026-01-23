@@ -28,9 +28,10 @@ export type Birds = {
   __typename?: 'Birds';
   encounters?: Maybe<Array<Encounters>>;
   encountersAggregate: EncountersAggExp;
+  id: Scalars['Int64']['output'];
   ringNo: Scalars['String1']['output'];
   species?: Maybe<Species>;
-  speciesName: Scalars['String1']['output'];
+  speciesId: Scalars['Int64']['output'];
 };
 
 
@@ -51,8 +52,9 @@ export type BirdsEncountersAggregateArgs = {
 export type BirdsAggExp = {
   __typename?: 'BirdsAggExp';
   _count: Scalars['Int64']['output'];
+  id: Int8AggExp;
   ringNo: TextAggExp;
-  speciesName: TextAggExp;
+  speciesId: Int8AggExp;
 };
 
 export type BirdsBoolExp = {
@@ -60,9 +62,10 @@ export type BirdsBoolExp = {
   _not?: InputMaybe<BirdsBoolExp>;
   _or?: InputMaybe<Array<BirdsBoolExp>>;
   encounters?: InputMaybe<EncountersBoolExp>;
+  id?: InputMaybe<Int8BoolExp>;
   ringNo?: InputMaybe<TextBoolExp>;
   species?: InputMaybe<SpeciesBoolExp>;
-  speciesName?: InputMaybe<TextBoolExp>;
+  speciesId?: InputMaybe<Int8BoolExp>;
 };
 
 export type BirdsFilterInput = {
@@ -73,9 +76,10 @@ export type BirdsFilterInput = {
 };
 
 export type BirdsOrderByExp = {
+  id?: InputMaybe<OrderBy>;
   ringNo?: InputMaybe<OrderBy>;
   species?: InputMaybe<SpeciesOrderByExp>;
-  speciesName?: InputMaybe<OrderBy>;
+  speciesId?: InputMaybe<OrderBy>;
 };
 
 export type BoolAggExp = {
@@ -128,18 +132,20 @@ export type Encounters = {
   __typename?: 'Encounters';
   age: Scalars['Int16']['output'];
   bird?: Maybe<Birds>;
+  birdId: Scalars['Int64']['output'];
   breedingCondition?: Maybe<Scalars['String1']['output']>;
   captureTime: Scalars['String1']['output'];
   extraText?: Maybe<Scalars['String1']['output']>;
+  id: Scalars['Int64']['output'];
   isJuv: Scalars['Boolean1']['output'];
   moultCode?: Maybe<Scalars['String1']['output']>;
   oldGreaterCoverts?: Maybe<Scalars['Int16']['output']>;
   recordType: Scalars['String1']['output'];
-  ringNo: Scalars['String1']['output'];
   scheme: Scalars['String1']['output'];
+  session?: Maybe<Sessions>;
+  sessionId: Scalars['Int64']['output'];
   sex: Scalars['String1']['output'];
   sexingMethod?: Maybe<Scalars['String1']['output']>;
-  visitDate: Scalars['Date']['output'];
   weight?: Maybe<Scalars['Float32']['output']>;
   wingLength?: Maybe<Scalars['Int16']['output']>;
 };
@@ -148,18 +154,19 @@ export type EncountersAggExp = {
   __typename?: 'EncountersAggExp';
   _count: Scalars['Int64']['output'];
   age: Int2AggExp;
+  birdId: Int8AggExp;
   breedingCondition: TextAggExp;
   captureTime: TimeAggExp;
   extraText: TextAggExp;
+  id: Int8AggExp;
   isJuv: BoolAggExp;
   moultCode: TextAggExp;
   oldGreaterCoverts: Int2AggExp;
   recordType: TextAggExp;
-  ringNo: TextAggExp;
   scheme: TextAggExp;
+  sessionId: Int8AggExp;
   sex: TextAggExp;
   sexingMethod: TextAggExp;
-  visitDate: DateAggExp;
   weight: Float4AggExp;
   wingLength: Int2AggExp;
 };
@@ -170,18 +177,20 @@ export type EncountersBoolExp = {
   _or?: InputMaybe<Array<EncountersBoolExp>>;
   age?: InputMaybe<Int2BoolExp>;
   bird?: InputMaybe<BirdsBoolExp>;
+  birdId?: InputMaybe<Int8BoolExp>;
   breedingCondition?: InputMaybe<TextBoolExp>;
   captureTime?: InputMaybe<TimeBoolExp>;
   extraText?: InputMaybe<TextBoolExp>;
+  id?: InputMaybe<Int8BoolExp>;
   isJuv?: InputMaybe<BoolBoolExp>;
   moultCode?: InputMaybe<TextBoolExp>;
   oldGreaterCoverts?: InputMaybe<Int2BoolExp>;
   recordType?: InputMaybe<TextBoolExp>;
-  ringNo?: InputMaybe<TextBoolExp>;
   scheme?: InputMaybe<TextBoolExp>;
+  session?: InputMaybe<SessionsBoolExp>;
+  sessionId?: InputMaybe<Int8BoolExp>;
   sex?: InputMaybe<TextBoolExp>;
   sexingMethod?: InputMaybe<TextBoolExp>;
-  visitDate?: InputMaybe<DateBoolExp>;
   weight?: InputMaybe<Float4BoolExp>;
   wingLength?: InputMaybe<Int2BoolExp>;
 };
@@ -196,18 +205,20 @@ export type EncountersFilterInput = {
 export type EncountersOrderByExp = {
   age?: InputMaybe<OrderBy>;
   bird?: InputMaybe<BirdsOrderByExp>;
+  birdId?: InputMaybe<OrderBy>;
   breedingCondition?: InputMaybe<OrderBy>;
   captureTime?: InputMaybe<OrderBy>;
   extraText?: InputMaybe<OrderBy>;
+  id?: InputMaybe<OrderBy>;
   isJuv?: InputMaybe<OrderBy>;
   moultCode?: InputMaybe<OrderBy>;
   oldGreaterCoverts?: InputMaybe<OrderBy>;
   recordType?: InputMaybe<OrderBy>;
-  ringNo?: InputMaybe<OrderBy>;
   scheme?: InputMaybe<OrderBy>;
+  session?: InputMaybe<SessionsOrderByExp>;
+  sessionId?: InputMaybe<OrderBy>;
   sex?: InputMaybe<OrderBy>;
   sexingMethod?: InputMaybe<OrderBy>;
-  visitDate?: InputMaybe<OrderBy>;
   weight?: InputMaybe<OrderBy>;
   wingLength?: InputMaybe<OrderBy>;
 };
@@ -386,15 +397,25 @@ export type Query = {
   birds?: Maybe<Array<Birds>>;
   birdsAggregate?: Maybe<BirdsAggExp>;
   /** Selects a single object from the model. Model description: @graphql({"aggregate": {"enabled": true}}) */
+  birdsById?: Maybe<Birds>;
+  /** Selects a single object from the model. Model description: @graphql({"aggregate": {"enabled": true}}) */
   birdsByRingNo?: Maybe<Birds>;
   /** Selects multiple objects from the model. Model description: Encounters with individual birds */
   encounters?: Maybe<Array<Encounters>>;
   encountersAggregate?: Maybe<EncountersAggExp>;
   /** Selects a single object from the model. Model description: Encounters with individual birds */
-  encountersByEncountersPkey?: Maybe<Encounters>;
+  encountersByEncountersBirdIdSessionIdUnique?: Maybe<Encounters>;
+  /** Selects a single object from the model. Model description: Encounters with individual birds */
+  encountersById?: Maybe<Encounters>;
+  sessions?: Maybe<Array<Sessions>>;
+  sessionsAggregate?: Maybe<SessionsAggExp>;
+  sessionsById?: Maybe<Sessions>;
+  sessionsByVisitDate?: Maybe<Sessions>;
   /** Selects multiple objects from the model. Model description: Bird Species */
   species?: Maybe<Array<Species>>;
   speciesAggregate?: Maybe<SpeciesAggExp>;
+  /** Selects a single object from the model. Model description: Bird Species */
+  speciesById?: Maybe<Species>;
   /** Selects a single object from the model. Model description: Bird Species */
   speciesBySpeciesName?: Maybe<Species>;
   speciesLeagueTable?: Maybe<Array<SpeciesLeagueTable>>;
@@ -417,6 +438,11 @@ export type QueryBirdsAggregateArgs = {
 };
 
 
+export type QueryBirdsByIdArgs = {
+  id: Scalars['Int64']['input'];
+};
+
+
 export type QueryBirdsByRingNoArgs = {
   ringNo: Scalars['String1']['input'];
 };
@@ -435,8 +461,36 @@ export type QueryEncountersAggregateArgs = {
 };
 
 
-export type QueryEncountersByEncountersPkeyArgs = {
-  ringNo: Scalars['String1']['input'];
+export type QueryEncountersByEncountersBirdIdSessionIdUniqueArgs = {
+  birdId: Scalars['Int64']['input'];
+  sessionId: Scalars['Int64']['input'];
+};
+
+
+export type QueryEncountersByIdArgs = {
+  id: Scalars['Int64']['input'];
+};
+
+
+export type QuerySessionsArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<SessionsOrderByExp>>;
+  where?: InputMaybe<SessionsBoolExp>;
+};
+
+
+export type QuerySessionsAggregateArgs = {
+  filter_input?: InputMaybe<SessionsFilterInput>;
+};
+
+
+export type QuerySessionsByIdArgs = {
+  id: Scalars['Int64']['input'];
+};
+
+
+export type QuerySessionsByVisitDateArgs = {
   visitDate: Scalars['Date']['input'];
 };
 
@@ -451,6 +505,11 @@ export type QuerySpeciesArgs = {
 
 export type QuerySpeciesAggregateArgs = {
   filter_input?: InputMaybe<SpeciesFilterInput>;
+};
+
+
+export type QuerySpeciesByIdArgs = {
+  id: Scalars['Int64']['input'];
 };
 
 
@@ -486,11 +545,61 @@ export type QueryTopPeriodsByMetricAggregateArgs = {
   filter_input?: InputMaybe<TopPeriodsResultFilterInput>;
 };
 
+export type Sessions = {
+  __typename?: 'Sessions';
+  encounters?: Maybe<Array<Encounters>>;
+  encountersAggregate: EncountersAggExp;
+  id: Scalars['Int64']['output'];
+  visitDate: Scalars['Date']['output'];
+};
+
+
+export type SessionsEncountersArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<EncountersOrderByExp>>;
+  where?: InputMaybe<EncountersBoolExp>;
+};
+
+
+export type SessionsEncountersAggregateArgs = {
+  filter_input?: InputMaybe<EncountersFilterInput>;
+};
+
+export type SessionsAggExp = {
+  __typename?: 'SessionsAggExp';
+  _count: Scalars['Int64']['output'];
+  id: Int8AggExp;
+  visitDate: DateAggExp;
+};
+
+export type SessionsBoolExp = {
+  _and?: InputMaybe<Array<SessionsBoolExp>>;
+  _not?: InputMaybe<SessionsBoolExp>;
+  _or?: InputMaybe<Array<SessionsBoolExp>>;
+  encounters?: InputMaybe<EncountersBoolExp>;
+  id?: InputMaybe<Int8BoolExp>;
+  visitDate?: InputMaybe<DateBoolExp>;
+};
+
+export type SessionsFilterInput = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<SessionsOrderByExp>>;
+  where?: InputMaybe<SessionsBoolExp>;
+};
+
+export type SessionsOrderByExp = {
+  id?: InputMaybe<OrderBy>;
+  visitDate?: InputMaybe<OrderBy>;
+};
+
 /** Bird Species */
 export type Species = {
   __typename?: 'Species';
   birds?: Maybe<Array<Birds>>;
   birdsAggregate: BirdsAggExp;
+  id: Scalars['Int64']['output'];
   speciesName: Scalars['String1']['output'];
 };
 
@@ -512,6 +621,7 @@ export type SpeciesBirdsAggregateArgs = {
 export type SpeciesAggExp = {
   __typename?: 'SpeciesAggExp';
   _count: Scalars['Int64']['output'];
+  id: Int8AggExp;
   speciesName: TextAggExp;
 };
 
@@ -520,6 +630,7 @@ export type SpeciesBoolExp = {
   _not?: InputMaybe<SpeciesBoolExp>;
   _or?: InputMaybe<Array<SpeciesBoolExp>>;
   birds?: InputMaybe<BirdsBoolExp>;
+  id?: InputMaybe<Int8BoolExp>;
   speciesName?: InputMaybe<TextBoolExp>;
 };
 
@@ -608,6 +719,7 @@ export type SpeciesLeagueTableOrderByExp = {
 };
 
 export type SpeciesOrderByExp = {
+  id?: InputMaybe<OrderBy>;
   speciesName?: InputMaybe<OrderBy>;
 };
 
@@ -615,12 +727,19 @@ export type Subscription = {
   __typename?: 'Subscription';
   birds?: Maybe<Array<Birds>>;
   birdsAggregate?: Maybe<BirdsAggExp>;
+  birdsById?: Maybe<Birds>;
   birdsByRingNo?: Maybe<Birds>;
   encounters?: Maybe<Array<Encounters>>;
   encountersAggregate?: Maybe<EncountersAggExp>;
-  encountersByEncountersPkey?: Maybe<Encounters>;
+  encountersByEncountersBirdIdSessionIdUnique?: Maybe<Encounters>;
+  encountersById?: Maybe<Encounters>;
+  sessions?: Maybe<Array<Sessions>>;
+  sessionsAggregate?: Maybe<SessionsAggExp>;
+  sessionsById?: Maybe<Sessions>;
+  sessionsByVisitDate?: Maybe<Sessions>;
   species?: Maybe<Array<Species>>;
   speciesAggregate?: Maybe<SpeciesAggExp>;
+  speciesById?: Maybe<Species>;
   speciesBySpeciesName?: Maybe<Species>;
   speciesLeagueTable?: Maybe<Array<SpeciesLeagueTable>>;
   speciesLeagueTableAggregate?: Maybe<SpeciesLeagueTableAggExp>;
@@ -642,6 +761,11 @@ export type SubscriptionBirdsAggregateArgs = {
 };
 
 
+export type SubscriptionBirdsByIdArgs = {
+  id: Scalars['Int64']['input'];
+};
+
+
 export type SubscriptionBirdsByRingNoArgs = {
   ringNo: Scalars['String1']['input'];
 };
@@ -660,8 +784,36 @@ export type SubscriptionEncountersAggregateArgs = {
 };
 
 
-export type SubscriptionEncountersByEncountersPkeyArgs = {
-  ringNo: Scalars['String1']['input'];
+export type SubscriptionEncountersByEncountersBirdIdSessionIdUniqueArgs = {
+  birdId: Scalars['Int64']['input'];
+  sessionId: Scalars['Int64']['input'];
+};
+
+
+export type SubscriptionEncountersByIdArgs = {
+  id: Scalars['Int64']['input'];
+};
+
+
+export type SubscriptionSessionsArgs = {
+  limit?: InputMaybe<Scalars['Int']['input']>;
+  offset?: InputMaybe<Scalars['Int']['input']>;
+  order_by?: InputMaybe<Array<SessionsOrderByExp>>;
+  where?: InputMaybe<SessionsBoolExp>;
+};
+
+
+export type SubscriptionSessionsAggregateArgs = {
+  filter_input?: InputMaybe<SessionsFilterInput>;
+};
+
+
+export type SubscriptionSessionsByIdArgs = {
+  id: Scalars['Int64']['input'];
+};
+
+
+export type SubscriptionSessionsByVisitDateArgs = {
   visitDate: Scalars['Date']['input'];
 };
 
@@ -676,6 +828,11 @@ export type SubscriptionSpeciesArgs = {
 
 export type SubscriptionSpeciesAggregateArgs = {
   filter_input?: InputMaybe<SpeciesFilterInput>;
+};
+
+
+export type SubscriptionSpeciesByIdArgs = {
+  id: Scalars['Int64']['input'];
 };
 
 
@@ -830,7 +987,7 @@ export type SpeciesPageQueryVariables = Exact<{
 }>;
 
 
-export type SpeciesPageQuery = { __typename?: 'Query', species?: Array<{ __typename?: 'Species', speciesName: string, birdsAggregate: { __typename?: 'BirdsAggExp', _count: number }, birds?: Array<{ __typename?: 'Birds', encounters?: Array<{ __typename?: 'Encounters', visitDate: string }> | null, encountersAggregate: { __typename?: 'EncountersAggExp', _count: number } }> | null }> | null };
+export type SpeciesPageQuery = { __typename?: 'Query', species?: Array<{ __typename?: 'Species', speciesName: string, birdsAggregate: { __typename?: 'BirdsAggExp', _count: number }, birds?: Array<{ __typename?: 'Birds', encounters?: Array<{ __typename?: 'Encounters', session?: { __typename?: 'Sessions', visitDate: string } | null }> | null, encountersAggregate: { __typename?: 'EncountersAggExp', _count: number } }> | null }> | null };
 
 export type AllSpeciesStatsQueryVariables = Exact<{ [key: string]: never; }>;
 
