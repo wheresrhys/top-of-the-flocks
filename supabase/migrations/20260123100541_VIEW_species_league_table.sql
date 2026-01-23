@@ -49,7 +49,7 @@ FROM
       1
   ) u ON true
 GROUP BY
-  s.species_name,
+  sp.species_name,
   u.id,
   u.cnt,
   u.longest_stay;
