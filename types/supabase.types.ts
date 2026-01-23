@@ -16,107 +16,189 @@ export type Database = {
     Tables: {
       Birds: {
         Row: {
+          id: number
           ring_no: string
-          species_name: string
+          species_id: number
         }
         Insert: {
+          id?: number
           ring_no: string
-          species_name: string
+          species_id: number
         }
         Update: {
+          id?: number
           ring_no?: string
-          species_name?: string
+          species_id?: number
         }
         Relationships: [
           {
-            foreignKeyName: "Birds_species_name_fkey"
-            columns: ["species_name"]
+            foreignKeyName: "birds_species_id_fkey"
+            columns: ["species_id"]
             isOneToOne: false
             referencedRelation: "Species"
-            referencedColumns: ["species_name"]
+            referencedColumns: ["id"]
           },
         ]
       }
       Encounters: {
         Row: {
           age: number
+          bird_id: number
           breeding_condition: string | null
           capture_time: string
           extra_text: string | null
+          id: number
           is_juv: boolean
           moult_code: string | null
           old_greater_coverts: number | null
           record_type: string
-          ring_no: string
           scheme: string
+          session_id: number
           sex: string
           sexing_method: string | null
-          visit_date: string
           weight: number | null
           wing_length: number | null
         }
         Insert: {
           age: number
+          bird_id: number
           breeding_condition?: string | null
           capture_time: string
           extra_text?: string | null
+          id?: number
           is_juv?: boolean
           moult_code?: string | null
           old_greater_coverts?: number | null
           record_type: string
-          ring_no: string
           scheme: string
+          session_id: number
           sex: string
           sexing_method?: string | null
-          visit_date: string
           weight?: number | null
           wing_length?: number | null
         }
         Update: {
           age?: number
+          bird_id?: number
           breeding_condition?: string | null
           capture_time?: string
           extra_text?: string | null
+          id?: number
           is_juv?: boolean
           moult_code?: string | null
           old_greater_coverts?: number | null
           record_type?: string
-          ring_no?: string
           scheme?: string
+          session_id?: number
           sex?: string
           sexing_method?: string | null
-          visit_date?: string
           weight?: number | null
           wing_length?: number | null
         }
         Relationships: [
           {
-            foreignKeyName: "Encounters_ring_no_fkey"
-            columns: ["ring_no"]
+            foreignKeyName: "encounters_bird_id_fkey"
+            columns: ["bird_id"]
             isOneToOne: false
             referencedRelation: "Birds"
-            referencedColumns: ["ring_no"]
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "encounters_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "Sessions"
+            referencedColumns: ["id"]
           },
         ]
       }
+      Sessions: {
+        Row: {
+          id: number
+          visit_date: string
+        }
+        Insert: {
+          id?: number
+          visit_date: string
+        }
+        Update: {
+          id?: number
+          visit_date?: string
+        }
+        Relationships: []
+      }
       Species: {
         Row: {
+          id: number
           species_name: string
         }
         Insert: {
+          id?: number
           species_name: string
         }
         Update: {
+          id?: number
           species_name?: string
+        }
+        Relationships: []
+      }
+      top_periods_result: {
+        Row: {
+          metric_value: number | null
+          visit_date: string | null
+        }
+        Insert: {
+          metric_value?: number | null
+          visit_date?: string | null
+        }
+        Update: {
+          metric_value?: number | null
+          visit_date?: string | null
         }
         Relationships: []
       }
     }
     Views: {
-      [_ in never]: never
+      species_league_table: {
+        Row: {
+          average_weight: number | null
+          average_wing_length: number | null
+          encounters: number | null
+          heaviest: number | null
+          individuals: number | null
+          lightest: number | null
+          longest_stay: number | null
+          longest_winged: number | null
+          session_count: number | null
+          shortest_winged: number | null
+          species_name: string | null
+          total_weight: number | null
+          unluckiest: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      top_periods_by_metric: {
+        Args: {
+          exact_months_filter?: string[]
+          metric_name?: string
+          month_filter?: number
+          result_limit?: number
+          temporal_unit?: string
+          year_filter?: number
+        }
+        Returns: {
+          metric_value: number | null
+          visit_date: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "top_periods_result"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
     }
     Enums: {
       [_ in never]: never
