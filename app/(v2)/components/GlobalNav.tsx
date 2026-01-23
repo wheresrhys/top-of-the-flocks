@@ -10,6 +10,10 @@ const pages = [
   //   text: 'Stats table',
   //   path: '/v1/stats'
   // }
+  {
+    text: 'v1',
+    path: '/v1'
+  }
 ];
 
 export default function GlobalNav() {
