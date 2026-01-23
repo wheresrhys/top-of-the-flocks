@@ -26,6 +26,9 @@ definition:
           uniqueness_constraints:
             Birds_pkey:
               unique_columns:
+                - id
+            birds_ring_no_unique:
+              unique_columns:
                 - ring_no
         - arguments: {}
           description: Encounters with individual birds
@@ -34,7 +37,20 @@ definition:
           uniqueness_constraints:
             Encounters_pkey:
               unique_columns:
-                - ring_no
+                - id
+            encounters_bird_id_session_id_unique:
+              unique_columns:
+                - bird_id
+                - session_id
+        - arguments: {}
+          name: Sessions
+          type: Sessions
+          uniqueness_constraints:
+            Sessions_pkey:
+              unique_columns:
+                - id
+            Sessions_visit_date_key:
+              unique_columns:
                 - visit_date
         - arguments: {}
           description: Bird Species
@@ -42,6 +58,9 @@ definition:
           type: Species
           uniqueness_constraints:
             Species_pkey:
+              unique_columns:
+                - id
+            species_species_name_unique:
               unique_columns:
                 - species_name
         - arguments: {}
@@ -407,19 +426,23 @@ definition:
         Birds:
           description: '@graphql({"aggregate": {"enabled": true}})'
           fields:
+            id:
+              type:
+                name: int8
+                type: named
             ring_no:
               type:
                 name: text
                 type: named
-            species_name:
+            species_id:
               type:
-                name: text
+                name: int8
                 type: named
           foreign_keys:
-            Birds_species_name_fkey:
+            birds_species_id_fkey:
               column_mapping:
-                species_name:
-                  - species_name
+                species_id:
+                  - id
               foreign_collection: Species
         Encounters:
           description: Encounters with individual birds
@@ -427,6 +450,10 @@ definition:
             age:
               type:
                 name: int2
+                type: named
+            bird_id:
+              type:
+                name: int8
                 type: named
             breeding_condition:
               type:
@@ -444,6 +471,10 @@ definition:
                 underlying_type:
                   name: text
                   type: named
+            id:
+              type:
+                name: int8
+                type: named
             is_juv:
               type:
                 name: bool
@@ -464,13 +495,13 @@ definition:
               type:
                 name: text
                 type: named
-            ring_no:
-              type:
-                name: text
-                type: named
             scheme:
               type:
                 name: text
+                type: named
+            session_id:
+              type:
+                name: int8
                 type: named
             sex:
               type:
@@ -482,10 +513,6 @@ definition:
                 underlying_type:
                   name: text
                   type: named
-            visit_date:
-              type:
-                name: date
-                type: named
             weight:
               type:
                 type: nullable
@@ -499,14 +526,34 @@ definition:
                   name: int2
                   type: named
           foreign_keys:
-            Encounters_ring_no_fkey:
+            encounters_bird_id_fkey:
               column_mapping:
-                ring_no:
-                  - ring_no
+                bird_id:
+                  - id
               foreign_collection: Birds
+            encounters_session_id_fkey:
+              column_mapping:
+                session_id:
+                  - id
+              foreign_collection: Sessions
+        Sessions:
+          fields:
+            id:
+              type:
+                name: int8
+                type: named
+            visit_date:
+              type:
+                name: date
+                type: named
+          foreign_keys: {}
         Species:
           description: Bird Species
           fields:
+            id:
+              type:
+                name: int8
+                type: named
             species_name:
               type:
                 name: text
@@ -1653,6 +1700,22 @@ definition:
                   name: timestamptz
                   type: named
           foreign_keys: {}
+        delete_Birds_by_id_response:
+          description: Responses from the 'delete_Birds_by_id' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: Birds
+                  type: named
+                type: array
+          foreign_keys: {}
         delete_Birds_by_ring_no_response:
           description: Responses from the 'delete_Birds_by_ring_no' procedure
           fields:
@@ -1669,8 +1732,8 @@ definition:
                   type: named
                 type: array
           foreign_keys: {}
-        delete_Encounters_by_ring_no_and_visit_date_response:
-          description: Responses from the 'delete_Encounters_by_ring_no_and_visit_date' procedure
+        delete_Encounters_by_bird_id_and_session_id_response:
+          description: Responses from the 'delete_Encounters_by_bird_id_and_session_id' procedure
           fields:
             affected_rows:
               description: The number of rows affected by the mutation
@@ -1682,6 +1745,70 @@ definition:
               type:
                 element_type:
                   name: Encounters
+                  type: named
+                type: array
+          foreign_keys: {}
+        delete_Encounters_by_id_response:
+          description: Responses from the 'delete_Encounters_by_id' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: Encounters
+                  type: named
+                type: array
+          foreign_keys: {}
+        delete_Sessions_by_id_response:
+          description: Responses from the 'delete_Sessions_by_id' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: Sessions
+                  type: named
+                type: array
+          foreign_keys: {}
+        delete_Sessions_by_visit_date_response:
+          description: Responses from the 'delete_Sessions_by_visit_date' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: Sessions
+                  type: named
+                type: array
+          foreign_keys: {}
+        delete_Species_by_id_response:
+          description: Responses from the 'delete_Species_by_id' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: Species
                   type: named
                 type: array
           foreign_keys: {}
@@ -2422,13 +2549,19 @@ definition:
           foreign_keys: {}
         insert_Birds_object:
           fields:
+            id:
+              type:
+                type: nullable
+                underlying_type:
+                  name: int8
+                  type: named
             ring_no:
               type:
                 name: text
                 type: named
-            species_name:
+            species_id:
               type:
-                name: text
+                name: int8
                 type: named
           foreign_keys: {}
         insert_Birds_response:
@@ -2453,6 +2586,10 @@ definition:
               type:
                 name: int2
                 type: named
+            bird_id:
+              type:
+                name: int8
+                type: named
             breeding_condition:
               type:
                 type: nullable
@@ -2468,6 +2605,12 @@ definition:
                 type: nullable
                 underlying_type:
                   name: text
+                  type: named
+            id:
+              type:
+                type: nullable
+                underlying_type:
+                  name: int8
                   type: named
             is_juv:
               type:
@@ -2491,13 +2634,13 @@ definition:
               type:
                 name: text
                 type: named
-            ring_no:
-              type:
-                name: text
-                type: named
             scheme:
               type:
                 name: text
+                type: named
+            session_id:
+              type:
+                name: int8
                 type: named
             sex:
               type:
@@ -2509,10 +2652,6 @@ definition:
                 underlying_type:
                   name: text
                   type: named
-            visit_date:
-              type:
-                name: date
-                type: named
             weight:
               type:
                 type: nullable
@@ -2542,8 +2681,43 @@ definition:
                   type: named
                 type: array
           foreign_keys: {}
+        insert_Sessions_object:
+          fields:
+            id:
+              type:
+                type: nullable
+                underlying_type:
+                  name: int8
+                  type: named
+            visit_date:
+              type:
+                name: date
+                type: named
+          foreign_keys: {}
+        insert_Sessions_response:
+          description: Responses from the 'insert_Sessions' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: Sessions
+                  type: named
+                type: array
+          foreign_keys: {}
         insert_Species_object:
           fields:
+            id:
+              type:
+                type: nullable
+                underlying_type:
+                  name: int8
+                  type: named
             species_name:
               type:
                 name: text
@@ -5580,6 +5754,47 @@ definition:
                   name: date
                   type: named
           foreign_keys: {}
+        update_Birds_by_id_response:
+          description: Responses from the 'update_Birds_by_id' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: Birds
+                  type: named
+                type: array
+          foreign_keys: {}
+        update_Birds_by_id_update_columns:
+          description: Update the columns of the 'Birds' collection
+          fields:
+            id:
+              description: Update the 'id' column in the 'Birds' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_Birds_id
+                  type: named
+            ring_no:
+              description: Update the 'ring_no' column in the 'Birds' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_Birds_ring_no
+                  type: named
+            species_id:
+              description: Update the 'species_id' column in the 'Birds' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_Birds_species_id
+                  type: named
+          foreign_keys: {}
         update_Birds_by_ring_no_response:
           description: Responses from the 'update_Birds_by_ring_no' procedure
           fields:
@@ -5599,6 +5814,13 @@ definition:
         update_Birds_by_ring_no_update_columns:
           description: Update the columns of the 'Birds' collection
           fields:
+            id:
+              description: Update the 'id' column in the 'Birds' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_Birds_id
+                  type: named
             ring_no:
               description: Update the 'ring_no' column in the 'Birds' collection.
               type:
@@ -5606,16 +5828,16 @@ definition:
                 underlying_type:
                   name: update_column_Birds_ring_no
                   type: named
-            species_name:
-              description: Update the 'species_name' column in the 'Birds' collection.
+            species_id:
+              description: Update the 'species_id' column in the 'Birds' collection.
               type:
                 type: nullable
                 underlying_type:
-                  name: update_column_Birds_species_name
+                  name: update_column_Birds_species_id
                   type: named
           foreign_keys: {}
-        update_Encounters_by_ring_no_and_visit_date_response:
-          description: Responses from the 'update_Encounters_by_ring_no_and_visit_date' procedure
+        update_Encounters_by_bird_id_and_session_id_response:
+          description: Responses from the 'update_Encounters_by_bird_id_and_session_id' procedure
           fields:
             affected_rows:
               description: The number of rows affected by the mutation
@@ -5630,7 +5852,7 @@ definition:
                   type: named
                 type: array
           foreign_keys: {}
-        update_Encounters_by_ring_no_and_visit_date_update_columns:
+        update_Encounters_by_bird_id_and_session_id_update_columns:
           description: Update the columns of the 'Encounters' collection
           fields:
             age:
@@ -5639,6 +5861,13 @@ definition:
                 type: nullable
                 underlying_type:
                   name: update_column_Encounters_age
+                  type: named
+            bird_id:
+              description: Update the 'bird_id' column in the 'Encounters' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_Encounters_bird_id
                   type: named
             breeding_condition:
               description: Update the 'breeding_condition' column in the 'Encounters' collection.
@@ -5660,6 +5889,13 @@ definition:
                 type: nullable
                 underlying_type:
                   name: update_column_Encounters_extra_text
+                  type: named
+            id:
+              description: Update the 'id' column in the 'Encounters' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_Encounters_id
                   type: named
             is_juv:
               description: Update the 'is_juv' column in the 'Encounters' collection.
@@ -5689,19 +5925,19 @@ definition:
                 underlying_type:
                   name: update_column_Encounters_record_type
                   type: named
-            ring_no:
-              description: Update the 'ring_no' column in the 'Encounters' collection.
-              type:
-                type: nullable
-                underlying_type:
-                  name: update_column_Encounters_ring_no
-                  type: named
             scheme:
               description: Update the 'scheme' column in the 'Encounters' collection.
               type:
                 type: nullable
                 underlying_type:
                   name: update_column_Encounters_scheme
+                  type: named
+            session_id:
+              description: Update the 'session_id' column in the 'Encounters' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_Encounters_session_id
                   type: named
             sex:
               description: Update the 'sex' column in the 'Encounters' collection.
@@ -5717,12 +5953,137 @@ definition:
                 underlying_type:
                   name: update_column_Encounters_sexing_method
                   type: named
-            visit_date:
-              description: Update the 'visit_date' column in the 'Encounters' collection.
+            weight:
+              description: Update the 'weight' column in the 'Encounters' collection.
               type:
                 type: nullable
                 underlying_type:
-                  name: update_column_Encounters_visit_date
+                  name: update_column_Encounters_weight
+                  type: named
+            wing_length:
+              description: Update the 'wing_length' column in the 'Encounters' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_Encounters_wing_length
+                  type: named
+          foreign_keys: {}
+        update_Encounters_by_id_response:
+          description: Responses from the 'update_Encounters_by_id' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: Encounters
+                  type: named
+                type: array
+          foreign_keys: {}
+        update_Encounters_by_id_update_columns:
+          description: Update the columns of the 'Encounters' collection
+          fields:
+            age:
+              description: Update the 'age' column in the 'Encounters' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_Encounters_age
+                  type: named
+            bird_id:
+              description: Update the 'bird_id' column in the 'Encounters' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_Encounters_bird_id
+                  type: named
+            breeding_condition:
+              description: Update the 'breeding_condition' column in the 'Encounters' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_Encounters_breeding_condition
+                  type: named
+            capture_time:
+              description: Update the 'capture_time' column in the 'Encounters' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_Encounters_capture_time
+                  type: named
+            extra_text:
+              description: Update the 'extra_text' column in the 'Encounters' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_Encounters_extra_text
+                  type: named
+            id:
+              description: Update the 'id' column in the 'Encounters' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_Encounters_id
+                  type: named
+            is_juv:
+              description: Update the 'is_juv' column in the 'Encounters' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_Encounters_is_juv
+                  type: named
+            moult_code:
+              description: Update the 'moult_code' column in the 'Encounters' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_Encounters_moult_code
+                  type: named
+            old_greater_coverts:
+              description: Update the 'old_greater_coverts' column in the 'Encounters' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_Encounters_old_greater_coverts
+                  type: named
+            record_type:
+              description: Update the 'record_type' column in the 'Encounters' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_Encounters_record_type
+                  type: named
+            scheme:
+              description: Update the 'scheme' column in the 'Encounters' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_Encounters_scheme
+                  type: named
+            session_id:
+              description: Update the 'session_id' column in the 'Encounters' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_Encounters_session_id
+                  type: named
+            sex:
+              description: Update the 'sex' column in the 'Encounters' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_Encounters_sex
+                  type: named
+            sexing_method:
+              description: Update the 'sexing_method' column in the 'Encounters' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_Encounters_sexing_method
                   type: named
             weight:
               description: Update the 'weight' column in the 'Encounters' collection.
@@ -5737,6 +6098,108 @@ definition:
                 type: nullable
                 underlying_type:
                   name: update_column_Encounters_wing_length
+                  type: named
+          foreign_keys: {}
+        update_Sessions_by_id_response:
+          description: Responses from the 'update_Sessions_by_id' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: Sessions
+                  type: named
+                type: array
+          foreign_keys: {}
+        update_Sessions_by_id_update_columns:
+          description: Update the columns of the 'Sessions' collection
+          fields:
+            id:
+              description: Update the 'id' column in the 'Sessions' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_Sessions_id
+                  type: named
+            visit_date:
+              description: Update the 'visit_date' column in the 'Sessions' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_Sessions_visit_date
+                  type: named
+          foreign_keys: {}
+        update_Sessions_by_visit_date_response:
+          description: Responses from the 'update_Sessions_by_visit_date' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: Sessions
+                  type: named
+                type: array
+          foreign_keys: {}
+        update_Sessions_by_visit_date_update_columns:
+          description: Update the columns of the 'Sessions' collection
+          fields:
+            id:
+              description: Update the 'id' column in the 'Sessions' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_Sessions_id
+                  type: named
+            visit_date:
+              description: Update the 'visit_date' column in the 'Sessions' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_Sessions_visit_date
+                  type: named
+          foreign_keys: {}
+        update_Species_by_id_response:
+          description: Responses from the 'update_Species_by_id' procedure
+          fields:
+            affected_rows:
+              description: The number of rows affected by the mutation
+              type:
+                name: int4
+                type: named
+            returning:
+              description: Data from rows affected by the mutation
+              type:
+                element_type:
+                  name: Species
+                  type: named
+                type: array
+          foreign_keys: {}
+        update_Species_by_id_update_columns:
+          description: Update the columns of the 'Species' collection
+          fields:
+            id:
+              description: Update the 'id' column in the 'Species' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_Species_id
+                  type: named
+            species_name:
+              description: Update the 'species_name' column in the 'Species' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_Species_species_name
                   type: named
           foreign_keys: {}
         update_Species_by_species_name_response:
@@ -5758,6 +6221,13 @@ definition:
         update_Species_by_species_name_update_columns:
           description: Update the columns of the 'Species' collection
           fields:
+            id:
+              description: Update the 'id' column in the 'Species' collection.
+              type:
+                type: nullable
+                underlying_type:
+                  name: update_column_Species_id
+                  type: named
             species_name:
               description: Update the 'species_name' column in the 'Species' collection.
               type:
@@ -8481,6 +8951,15 @@ definition:
                   name: update_column_auth_users_updated_at
                   type: named
           foreign_keys: {}
+        update_column_Birds_id:
+          description: Update the 'id' column in the 'Birds' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: int8
+                type: named
+          foreign_keys: {}
         update_column_Birds_ring_no:
           description: Update the 'ring_no' column in the 'Birds' collection
           fields:
@@ -8490,13 +8969,13 @@ definition:
                 name: text
                 type: named
           foreign_keys: {}
-        update_column_Birds_species_name:
-          description: Update the 'species_name' column in the 'Birds' collection
+        update_column_Birds_species_id:
+          description: Update the 'species_id' column in the 'Birds' collection
           fields:
             _set:
               description: Set the column to this value
               type:
-                name: text
+                name: int8
                 type: named
           foreign_keys: {}
         update_column_Encounters_age:
@@ -8506,6 +8985,15 @@ definition:
               description: Set the column to this value
               type:
                 name: int2
+                type: named
+          foreign_keys: {}
+        update_column_Encounters_bird_id:
+          description: Update the 'bird_id' column in the 'Encounters' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: int8
                 type: named
           foreign_keys: {}
         update_column_Encounters_breeding_condition:
@@ -8538,6 +9026,15 @@ definition:
                 underlying_type:
                   name: text
                   type: named
+          foreign_keys: {}
+        update_column_Encounters_id:
+          description: Update the 'id' column in the 'Encounters' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: int8
+                type: named
           foreign_keys: {}
         update_column_Encounters_is_juv:
           description: Update the 'is_juv' column in the 'Encounters' collection
@@ -8579,15 +9076,6 @@ definition:
                 name: text
                 type: named
           foreign_keys: {}
-        update_column_Encounters_ring_no:
-          description: Update the 'ring_no' column in the 'Encounters' collection
-          fields:
-            _set:
-              description: Set the column to this value
-              type:
-                name: text
-                type: named
-          foreign_keys: {}
         update_column_Encounters_scheme:
           description: Update the 'scheme' column in the 'Encounters' collection
           fields:
@@ -8595,6 +9083,15 @@ definition:
               description: Set the column to this value
               type:
                 name: text
+                type: named
+          foreign_keys: {}
+        update_column_Encounters_session_id:
+          description: Update the 'session_id' column in the 'Encounters' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: int8
                 type: named
           foreign_keys: {}
         update_column_Encounters_sex:
@@ -8617,15 +9114,6 @@ definition:
                   name: text
                   type: named
           foreign_keys: {}
-        update_column_Encounters_visit_date:
-          description: Update the 'visit_date' column in the 'Encounters' collection
-          fields:
-            _set:
-              description: Set the column to this value
-              type:
-                name: date
-                type: named
-          foreign_keys: {}
         update_column_Encounters_weight:
           description: Update the 'weight' column in the 'Encounters' collection
           fields:
@@ -8647,6 +9135,33 @@ definition:
                 underlying_type:
                   name: int2
                   type: named
+          foreign_keys: {}
+        update_column_Sessions_id:
+          description: Update the 'id' column in the 'Sessions' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: int8
+                type: named
+          foreign_keys: {}
+        update_column_Sessions_visit_date:
+          description: Update the 'visit_date' column in the 'Sessions' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: date
+                type: named
+          foreign_keys: {}
+        update_column_Species_id:
+          description: Update the 'id' column in the 'Species' collection
+          fields:
+            _set:
+              description: Set the column to this value
+              type:
+                name: int8
+                type: named
           foreign_keys: {}
         update_column_Species_species_name:
           description: Update the 'species_name' column in the 'Species' collection
@@ -12555,6 +13070,23 @@ definition:
           foreign_keys: {}
       procedures:
         - arguments:
+            key_id:
+              type:
+                name: int8
+                type: named
+            pre_check:
+              description: Delete permission predicate over the 'Birds' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: Birds
+                  type: predicate
+          description: Delete any row on the 'Birds' collection using the 'id' key
+          name: delete_Birds_by_id
+          result_type:
+            name: delete_Birds_by_id_response
+            type: named
+        - arguments:
             key_ring_no:
               type:
                 name: text
@@ -12572,13 +13104,13 @@ definition:
             name: delete_Birds_by_ring_no_response
             type: named
         - arguments:
-            key_ring_no:
+            key_bird_id:
               type:
-                name: text
+                name: int8
                 type: named
-            key_visit_date:
+            key_session_id:
               type:
-                name: date
+                name: int8
                 type: named
             pre_check:
               description: Delete permission predicate over the 'Encounters' collection
@@ -12587,10 +13119,78 @@ definition:
                 underlying_type:
                   object_type_name: Encounters
                   type: predicate
-          description: Delete any row on the 'Encounters' collection using the 'ring_no' and 'visit_date' keys
-          name: delete_Encounters_by_ring_no_and_visit_date
+          description: Delete any row on the 'Encounters' collection using the 'bird_id' and 'session_id' keys
+          name: delete_Encounters_by_bird_id_and_session_id
           result_type:
-            name: delete_Encounters_by_ring_no_and_visit_date_response
+            name: delete_Encounters_by_bird_id_and_session_id_response
+            type: named
+        - arguments:
+            key_id:
+              type:
+                name: int8
+                type: named
+            pre_check:
+              description: Delete permission predicate over the 'Encounters' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: Encounters
+                  type: predicate
+          description: Delete any row on the 'Encounters' collection using the 'id' key
+          name: delete_Encounters_by_id
+          result_type:
+            name: delete_Encounters_by_id_response
+            type: named
+        - arguments:
+            key_id:
+              type:
+                name: int8
+                type: named
+            pre_check:
+              description: Delete permission predicate over the 'Sessions' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: Sessions
+                  type: predicate
+          description: Delete any row on the 'Sessions' collection using the 'id' key
+          name: delete_Sessions_by_id
+          result_type:
+            name: delete_Sessions_by_id_response
+            type: named
+        - arguments:
+            key_visit_date:
+              type:
+                name: date
+                type: named
+            pre_check:
+              description: Delete permission predicate over the 'Sessions' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: Sessions
+                  type: predicate
+          description: Delete any row on the 'Sessions' collection using the 'visit_date' key
+          name: delete_Sessions_by_visit_date
+          result_type:
+            name: delete_Sessions_by_visit_date_response
+            type: named
+        - arguments:
+            key_id:
+              type:
+                name: int8
+                type: named
+            pre_check:
+              description: Delete permission predicate over the 'Species' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: Species
+                  type: predicate
+          description: Delete any row on the 'Species' collection using the 'id' key
+          name: delete_Species_by_id
+          result_type:
+            name: delete_Species_by_id_response
             type: named
         - arguments:
             key_species_name:
@@ -13431,6 +14031,25 @@ definition:
             objects:
               type:
                 element_type:
+                  name: insert_Sessions_object
+                  type: named
+                type: array
+            post_check:
+              description: Insert permission predicate over the 'Sessions' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: Sessions
+                  type: predicate
+          description: Insert into the Sessions table
+          name: insert_Sessions
+          result_type:
+            name: insert_Sessions_response
+            type: named
+        - arguments:
+            objects:
+              type:
+                element_type:
                   name: insert_Species_object
                   type: named
                 type: array
@@ -14169,6 +14788,34 @@ definition:
             name: insert_vault_secrets_response
             type: named
         - arguments:
+            key_id:
+              type:
+                name: int8
+                type: named
+            post_check:
+              description: Update permission post-condition predicate over the 'Birds' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: Birds
+                  type: predicate
+            pre_check:
+              description: Update permission pre-condition predicate over the 'Birds' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: Birds
+                  type: predicate
+            update_columns:
+              type:
+                name: update_Birds_by_id_update_columns
+                type: named
+          description: Update any row on the 'Birds' collection using the 'id' key
+          name: update_Birds_by_id
+          result_type:
+            name: update_Birds_by_id_response
+            type: named
+        - arguments:
             key_ring_no:
               type:
                 name: text
@@ -14197,13 +14844,13 @@ definition:
             name: update_Birds_by_ring_no_response
             type: named
         - arguments:
-            key_ring_no:
+            key_bird_id:
               type:
-                name: text
+                name: int8
                 type: named
-            key_visit_date:
+            key_session_id:
               type:
-                name: date
+                name: int8
                 type: named
             post_check:
               description: Update permission post-condition predicate over the 'Encounters' collection
@@ -14221,12 +14868,124 @@ definition:
                   type: predicate
             update_columns:
               type:
-                name: update_Encounters_by_ring_no_and_visit_date_update_columns
+                name: update_Encounters_by_bird_id_and_session_id_update_columns
                 type: named
-          description: Update any row on the 'Encounters' collection using the 'ring_no' and 'visit_date' keys
-          name: update_Encounters_by_ring_no_and_visit_date
+          description: Update any row on the 'Encounters' collection using the 'bird_id' and 'session_id' keys
+          name: update_Encounters_by_bird_id_and_session_id
           result_type:
-            name: update_Encounters_by_ring_no_and_visit_date_response
+            name: update_Encounters_by_bird_id_and_session_id_response
+            type: named
+        - arguments:
+            key_id:
+              type:
+                name: int8
+                type: named
+            post_check:
+              description: Update permission post-condition predicate over the 'Encounters' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: Encounters
+                  type: predicate
+            pre_check:
+              description: Update permission pre-condition predicate over the 'Encounters' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: Encounters
+                  type: predicate
+            update_columns:
+              type:
+                name: update_Encounters_by_id_update_columns
+                type: named
+          description: Update any row on the 'Encounters' collection using the 'id' key
+          name: update_Encounters_by_id
+          result_type:
+            name: update_Encounters_by_id_response
+            type: named
+        - arguments:
+            key_id:
+              type:
+                name: int8
+                type: named
+            post_check:
+              description: Update permission post-condition predicate over the 'Sessions' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: Sessions
+                  type: predicate
+            pre_check:
+              description: Update permission pre-condition predicate over the 'Sessions' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: Sessions
+                  type: predicate
+            update_columns:
+              type:
+                name: update_Sessions_by_id_update_columns
+                type: named
+          description: Update any row on the 'Sessions' collection using the 'id' key
+          name: update_Sessions_by_id
+          result_type:
+            name: update_Sessions_by_id_response
+            type: named
+        - arguments:
+            key_visit_date:
+              type:
+                name: date
+                type: named
+            post_check:
+              description: Update permission post-condition predicate over the 'Sessions' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: Sessions
+                  type: predicate
+            pre_check:
+              description: Update permission pre-condition predicate over the 'Sessions' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: Sessions
+                  type: predicate
+            update_columns:
+              type:
+                name: update_Sessions_by_visit_date_update_columns
+                type: named
+          description: Update any row on the 'Sessions' collection using the 'visit_date' key
+          name: update_Sessions_by_visit_date
+          result_type:
+            name: update_Sessions_by_visit_date_response
+            type: named
+        - arguments:
+            key_id:
+              type:
+                name: int8
+                type: named
+            post_check:
+              description: Update permission post-condition predicate over the 'Species' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: Species
+                  type: predicate
+            pre_check:
+              description: Update permission pre-condition predicate over the 'Species' collection
+              type:
+                type: nullable
+                underlying_type:
+                  object_type_name: Species
+                  type: predicate
+            update_columns:
+              type:
+                name: update_Species_by_id_update_columns
+                type: named
+          description: Update any row on the 'Species' collection using the 'id' key
+          name: update_Species_by_id
+          result_type:
+            name: update_Species_by_id_response
             type: named
         - arguments:
             key_species_name:

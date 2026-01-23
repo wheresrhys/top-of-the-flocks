@@ -2,137 +2,135 @@
 kind: ObjectType
 version: v1
 definition:
-  name: Species
-  description: Bird Species
+  name: Sessions
   fields:
     - name: id
       type: Int64!
-    - name: speciesName
-      type: String_1!
+    - name: visitDate
+      type: Date!
   graphql:
-    typeName: Species
-    inputTypeName: SpeciesInput
+    typeName: Sessions
+    inputTypeName: SessionsInput
   dataConnectorTypeMapping:
     - dataConnectorName: totf
-      dataConnectorObjectType: Species
+      dataConnectorObjectType: Sessions
       fieldMapping:
         id:
           column:
             name: id
-        speciesName:
+        visitDate:
           column:
-            name: species_name
+            name: visit_date
 
 ---
 kind: TypePermissions
 version: v1
 definition:
-  typeName: Species
+  typeName: Sessions
   permissions:
     - role: admin
       output:
         allowedFields:
           - id
-          - speciesName
+          - visitDate
 
 ---
 kind: BooleanExpressionType
 version: v1
 definition:
-  name: SpeciesBoolExp
+  name: SessionsBoolExp
   operand:
     object:
-      type: Species
+      type: Sessions
       comparableFields:
         - fieldName: id
           booleanExpressionType: Int8BoolExp
-        - fieldName: speciesName
-          booleanExpressionType: TextBoolExp
+        - fieldName: visitDate
+          booleanExpressionType: DateBoolExp
       comparableRelationships:
-        - relationshipName: birds
+        - relationshipName: encounters
   logicalOperators:
     enable: true
   isNull:
     enable: true
   graphql:
-    typeName: SpeciesBoolExp
+    typeName: SessionsBoolExp
 
 ---
 kind: AggregateExpression
 version: v1
 definition:
-  name: SpeciesAggExp
+  name: SessionsAggExp
   operand:
     object:
-      aggregatedType: Species
+      aggregatedType: Sessions
       aggregatableFields:
         - fieldName: id
           aggregateExpression: Int8AggExp
-        - fieldName: speciesName
-          aggregateExpression: TextAggExp
+        - fieldName: visitDate
+          aggregateExpression: DateAggExp
   count:
     enable: true
     returnType: Int64
   graphql:
-    selectTypeName: SpeciesAggExp
+    selectTypeName: SessionsAggExp
 
 ---
 kind: OrderByExpression
 version: v1
 definition:
-  name: SpeciesOrderByExp
+  name: SessionsOrderByExp
   operand:
     object:
-      orderedType: Species
+      orderedType: Sessions
       orderableFields:
         - fieldName: id
           orderByExpression: Int64OrderByExp
-        - fieldName: speciesName
-          orderByExpression: String1OrderByExp
+        - fieldName: visitDate
+          orderByExpression: DateOrderByExp
       orderableRelationships: []
   graphql:
-    expressionTypeName: SpeciesOrderByExp
+    expressionTypeName: SessionsOrderByExp
 
 ---
 kind: Model
 version: v2
 definition:
-  name: Species
-  objectType: Species
+  name: Sessions
+  objectType: Sessions
   source:
     dataConnectorName: totf
-    collection: Species
-  filterExpressionType: SpeciesBoolExp
-  aggregateExpression: SpeciesAggExp
-  orderByExpression: SpeciesOrderByExp
+    collection: Sessions
+  filterExpressionType: SessionsBoolExp
+  aggregateExpression: SessionsAggExp
+  orderByExpression: SessionsOrderByExp
   graphql:
     selectMany:
-      queryRootField: species
+      queryRootField: sessions
       subscription:
-        rootField: species
+        rootField: sessions
     selectUniques:
-      - queryRootField: speciesById
+      - queryRootField: sessionsById
         uniqueIdentifier:
           - id
         subscription:
-          rootField: speciesById
-      - queryRootField: speciesBySpeciesName
+          rootField: sessionsById
+      - queryRootField: sessionsByVisitDate
         uniqueIdentifier:
-          - speciesName
+          - visitDate
         subscription:
-          rootField: speciesBySpeciesName
-    filterInputTypeName: SpeciesFilterInput
+          rootField: sessionsByVisitDate
+    filterInputTypeName: SessionsFilterInput
     aggregate:
-      queryRootField: speciesAggregate
+      queryRootField: sessionsAggregate
       subscription:
-        rootField: speciesAggregate
-  description: Bird Species
+        rootField: sessionsAggregate
 
 ---
 kind: ModelPermissions
 version: v1
 definition:
-  modelName: Species
+  modelName: Sessions
   permissions:
     - role: admin
       select:
@@ -143,21 +141,21 @@ definition:
 kind: Relationship
 version: v1
 definition:
-  name: birds
-  sourceType: Species
+  name: encounters
+  sourceType: Sessions
   target:
     model:
-      name: Birds
+      name: Encounters
       relationshipType: Array
       aggregate:
-        aggregateExpression: BirdsAggExp
+        aggregateExpression: EncountersAggExp
   mapping:
     - source:
         fieldPath:
           - fieldName: id
       target:
         modelField:
-          - fieldName: speciesId
+          - fieldName: sessionId
   graphql:
-    aggregateFieldName: birdsAggregate
+    aggregateFieldName: encountersAggregate
 

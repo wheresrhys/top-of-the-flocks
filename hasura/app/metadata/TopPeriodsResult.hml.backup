@@ -1,3 +1,4 @@
+---
 kind: ObjectType
 version: v1
 definition:
@@ -30,6 +31,8 @@ definition:
         visitDate:
           column:
             name: visit_date
+
+
 ---
 kind: TypePermissions
 version: v1
@@ -41,6 +44,7 @@ definition:
         allowedFields:
           - metricValue
           - visitDate
+
 ---
 kind: BooleanExpressionType
 version: v1
@@ -61,6 +65,7 @@ definition:
     enable: true
   graphql:
     typeName: TopPeriodsResultBoolExp
+
 ---
 kind: AggregateExpression
 version: v1
@@ -79,6 +84,7 @@ definition:
     returnType: Int64
   graphql:
     selectTypeName: TopPeriodsResultAggExp
+
 ---
 kind: OrderByExpression
 version: v1
@@ -95,3 +101,39 @@ definition:
       orderableRelationships: []
   graphql:
     expressionTypeName: TopPeriodsResultOrderByExp
+
+---
+kind: Model
+version: v2
+definition:
+  name: TopPeriodsResult
+  objectType: TopPeriodsResult
+  source:
+    dataConnectorName: totf
+    collection: top_periods_result
+  filterExpressionType: TopPeriodsResultBoolExp
+  aggregateExpression: TopPeriodsResultAggExp
+  orderByExpression: TopPeriodsResultOrderByExp
+  graphql:
+    selectMany:
+      queryRootField: topPeriodsResult
+      subscription:
+        rootField: topPeriodsResult
+    selectUniques: []
+    filterInputTypeName: TopPeriodsResultFilterInput
+    aggregate:
+      queryRootField: topPeriodsResultAggregate
+      subscription:
+        rootField: topPeriodsResultAggregate
+
+---
+kind: ModelPermissions
+version: v1
+definition:
+  modelName: TopPeriodsResult
+  permissions:
+    - role: admin
+      select:
+        filter: null
+        allowSubscriptions: true
+

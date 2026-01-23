@@ -6,12 +6,55 @@
 # Use set -e but handle errors gracefully for non-critical steps
 set -e
 
+# Function to remove Model and ModelPermissions sections from HML file for function return tables
+# This prevents conflicts when the function model is generated
+remove_model_sections_from_hml() {
+    local hml_file="$1"
+    local model_name="$2"
+
+    if [ ! -f "$hml_file" ]; then
+        return 0
+    fi
+
+    # Use TypeScript script with proper YAML parsing
+    # Run from project root (we're currently in hasura directory)
+    # hml_file is relative to hasura directory, so we need to pass it as hasura/$hml_file from project root
+    local hml_path_from_root="hasura/$hml_file"
+    if (cd .. && node --import tsx scripts/remove-model-sections.ts "$hml_path_from_root" "$model_name" 2>&1); then
+        return 0
+    else
+        echo "  ⚠️  Failed to remove model sections from $hml_file"
+        return 1
+    fi
+}
+
 echo "Introspecting Hasura database connector..."
 
 cd hasura
 ddn connector introspect totf
 
 echo "✓ Hasura connector introspection completed successfully!"
+
+echo ""
+echo "Adding Hasura models for regular tables..."
+
+# Add models for your regular tables
+for table in "Birds" "Encounters" "Sessions" "Species"; do
+    echo "  Adding model for: $table"
+    if ddn model add totf "$table" 2>&1; then
+        echo "  ✓ Successfully added model for: $table"
+    else
+        echo "  ⚠️  Failed to add model for: $table (may already exist)"
+    fi
+done
+
+echo ""
+echo "Adding relationships..."
+if ddn relationship add totf "*" 2>&1; then
+    echo "✓ Successfully added relationships"
+else
+    echo "⚠️  Failed to add relationships (may already exist)"
+fi
 
 echo ""
 echo "Adding/updating Hasura models for database views and functions..."
@@ -107,10 +150,18 @@ while IFS= read -r migration_path; do
             echo "  Ensuring return table Model exists: $table_to_track"
             if [ -f "$hml_file" ]; then
                 echo "  Return table Model already exists: $table_to_track"
+                # Still clean up any conflicting Model sections that might exist
+                echo "  Removing conflicting Model sections from return table HML..."
+                remove_model_sections_from_hml "$hml_file" "$hml_filename"
+                echo "  ✓ Cleaned up return table HML file"
             else
                 echo "  Creating return table Model: $table_to_track"
                 if ddn model add totf "$table_to_track" 2>&1; then
                     echo "  ✓ Successfully created return table Model for: $table_to_track"
+                    # Remove conflicting Model and ModelPermissions sections for function return tables
+                    echo "  Removing conflicting Model sections from return table HML..."
+                    remove_model_sections_from_hml "$hml_file" "$hml_filename"
+                    echo "  ✓ Cleaned up return table HML file"
                 else
                     echo "  ⚠️  Failed to create return table Model, continuing anyway..."
                 fi

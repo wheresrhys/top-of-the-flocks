@@ -20,6 +20,15 @@
         "schemaName": "public",
         "tableName": "Birds",
         "columns": {
+          "id": {
+            "name": "id",
+            "type": {
+              "scalarType": "int8"
+            },
+            "nullable": "nonNullable",
+            "hasDefault": "hasDefault",
+            "description": null
+          },
           "ring_no": {
             "name": "ring_no",
             "type": {
@@ -28,10 +37,10 @@
             "nullable": "nonNullable",
             "description": null
           },
-          "species_name": {
-            "name": "species_name",
+          "species_id": {
+            "name": "species_id",
             "type": {
-              "scalarType": "text"
+              "scalarType": "int8"
             },
             "nullable": "nonNullable",
             "description": null
@@ -39,15 +48,18 @@
         },
         "uniquenessConstraints": {
           "Birds_pkey": [
+            "id"
+          ],
+          "birds_ring_no_unique": [
             "ring_no"
           ]
         },
         "foreignRelations": {
-          "Birds_species_name_fkey": {
+          "birds_species_id_fkey": {
             "foreignSchema": "public",
             "foreignTable": "Species",
             "columnMapping": {
-              "species_name": "species_name"
+              "species_id": "id"
             }
           }
         },
@@ -61,6 +73,14 @@
             "name": "age",
             "type": {
               "scalarType": "int2"
+            },
+            "nullable": "nonNullable",
+            "description": null
+          },
+          "bird_id": {
+            "name": "bird_id",
+            "type": {
+              "scalarType": "int8"
             },
             "nullable": "nonNullable",
             "description": null
@@ -87,6 +107,15 @@
               "scalarType": "text"
             },
             "nullable": "nullable",
+            "description": null
+          },
+          "id": {
+            "name": "id",
+            "type": {
+              "scalarType": "int8"
+            },
+            "nullable": "nonNullable",
+            "hasDefault": "hasDefault",
             "description": null
           },
           "is_juv": {
@@ -122,18 +151,18 @@
             "nullable": "nonNullable",
             "description": null
           },
-          "ring_no": {
-            "name": "ring_no",
+          "scheme": {
+            "name": "scheme",
             "type": {
               "scalarType": "text"
             },
             "nullable": "nonNullable",
             "description": null
           },
-          "scheme": {
-            "name": "scheme",
+          "session_id": {
+            "name": "session_id",
             "type": {
-              "scalarType": "text"
+              "scalarType": "int8"
             },
             "nullable": "nonNullable",
             "description": null
@@ -152,14 +181,6 @@
               "scalarType": "text"
             },
             "nullable": "nullable",
-            "description": null
-          },
-          "visit_date": {
-            "name": "visit_date",
-            "type": {
-              "scalarType": "date"
-            },
-            "nullable": "nonNullable",
             "description": null
           },
           "weight": {
@@ -181,25 +202,77 @@
         },
         "uniquenessConstraints": {
           "Encounters_pkey": [
-            "ring_no",
-            "visit_date"
+            "id"
+          ],
+          "encounters_bird_id_session_id_unique": [
+            "bird_id",
+            "session_id"
           ]
         },
         "foreignRelations": {
-          "Encounters_ring_no_fkey": {
+          "encounters_bird_id_fkey": {
             "foreignSchema": "public",
             "foreignTable": "Birds",
             "columnMapping": {
-              "ring_no": "ring_no"
+              "bird_id": "id"
+            }
+          },
+          "encounters_session_id_fkey": {
+            "foreignSchema": "public",
+            "foreignTable": "Sessions",
+            "columnMapping": {
+              "session_id": "id"
             }
           }
         },
         "description": "Encounters with individual birds"
       },
+      "Sessions": {
+        "schemaName": "public",
+        "tableName": "Sessions",
+        "columns": {
+          "id": {
+            "name": "id",
+            "type": {
+              "scalarType": "int8"
+            },
+            "nullable": "nonNullable",
+            "hasDefault": "hasDefault",
+            "description": null
+          },
+          "visit_date": {
+            "name": "visit_date",
+            "type": {
+              "scalarType": "date"
+            },
+            "nullable": "nonNullable",
+            "description": null
+          }
+        },
+        "uniquenessConstraints": {
+          "Sessions_pkey": [
+            "id"
+          ],
+          "Sessions_visit_date_key": [
+            "visit_date"
+          ]
+        },
+        "foreignRelations": {},
+        "description": null
+      },
       "Species": {
         "schemaName": "public",
         "tableName": "Species",
         "columns": {
+          "id": {
+            "name": "id",
+            "type": {
+              "scalarType": "int8"
+            },
+            "nullable": "nonNullable",
+            "hasDefault": "hasDefault",
+            "description": null
+          },
           "species_name": {
             "name": "species_name",
             "type": {
@@ -211,6 +284,9 @@
         },
         "uniquenessConstraints": {
           "Species_pkey": [
+            "id"
+          ],
+          "species_species_name_unique": [
             "species_name"
           ]
         },

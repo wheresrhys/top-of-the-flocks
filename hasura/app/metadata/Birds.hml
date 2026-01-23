@@ -5,10 +5,12 @@ definition:
   name: Birds
   description: '@graphql({"aggregate": {"enabled": true}})'
   fields:
+    - name: id
+      type: Int64!
     - name: ringNo
       type: String_1!
-    - name: speciesName
-      type: String_1!
+    - name: speciesId
+      type: Int64!
   graphql:
     typeName: Birds
     inputTypeName: BirdsInput
@@ -16,12 +18,15 @@ definition:
     - dataConnectorName: totf
       dataConnectorObjectType: Birds
       fieldMapping:
+        id:
+          column:
+            name: id
         ringNo:
           column:
             name: ring_no
-        speciesName:
+        speciesId:
           column:
-            name: species_name
+            name: species_id
 
 ---
 kind: TypePermissions
@@ -32,8 +37,9 @@ definition:
     - role: admin
       output:
         allowedFields:
+          - id
           - ringNo
-          - speciesName
+          - speciesId
 
 ---
 kind: BooleanExpressionType
@@ -44,10 +50,12 @@ definition:
     object:
       type: Birds
       comparableFields:
+        - fieldName: id
+          booleanExpressionType: Int8BoolExp
         - fieldName: ringNo
           booleanExpressionType: TextBoolExp
-        - fieldName: speciesName
-          booleanExpressionType: TextBoolExp
+        - fieldName: speciesId
+          booleanExpressionType: Int8BoolExp
       comparableRelationships:
         - relationshipName: species
         - relationshipName: encounters
@@ -67,10 +75,12 @@ definition:
     object:
       aggregatedType: Birds
       aggregatableFields:
+        - fieldName: id
+          aggregateExpression: Int8AggExp
         - fieldName: ringNo
           aggregateExpression: TextAggExp
-        - fieldName: speciesName
-          aggregateExpression: TextAggExp
+        - fieldName: speciesId
+          aggregateExpression: Int8AggExp
   count:
     enable: true
     returnType: Int64
@@ -86,10 +96,12 @@ definition:
     object:
       orderedType: Birds
       orderableFields:
+        - fieldName: id
+          orderByExpression: Int64OrderByExp
         - fieldName: ringNo
           orderByExpression: String1OrderByExp
-        - fieldName: speciesName
-          orderByExpression: String1OrderByExp
+        - fieldName: speciesId
+          orderByExpression: Int64OrderByExp
       orderableRelationships:
         - relationshipName: species
   graphql:
@@ -113,6 +125,11 @@ definition:
       subscription:
         rootField: birds
     selectUniques:
+      - queryRootField: birdsById
+        uniqueIdentifier:
+          - id
+        subscription:
+          rootField: birdsById
       - queryRootField: birdsByRingNo
         uniqueIdentifier:
           - ringNo
@@ -149,10 +166,10 @@ definition:
   mapping:
     - source:
         fieldPath:
-          - fieldName: speciesName
+          - fieldName: speciesId
       target:
         modelField:
-          - fieldName: speciesName
+          - fieldName: id
 
 ---
 kind: Relationship
@@ -169,10 +186,10 @@ definition:
   mapping:
     - source:
         fieldPath:
-          - fieldName: ringNo
+          - fieldName: id
       target:
         modelField:
-          - fieldName: ringNo
+          - fieldName: birdId
   graphql:
     aggregateFieldName: encountersAggregate
 

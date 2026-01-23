@@ -20,7 +20,9 @@ const SPECIES_DETAILS_QUERY = gql`
 			}
 			birds {
 				encounters {
-					visitDate
+					session {
+						visitDate
+					}
 				}
 				encountersAggregate {
 					_count
