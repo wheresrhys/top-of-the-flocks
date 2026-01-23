@@ -16,6 +16,7 @@ import { Database, Tables } from '../types/supabase.types';
 type SpeciesInsert = Database['public']['Tables']['Species']['Insert'];
 type BirdsInsert = Database['public']['Tables']['Birds']['Insert'];
 type EncountersInsert = Database['public']['Tables']['Encounters']['Insert'];
+type SessionsInsert = Database['public']['Tables']['Sessions']['Insert'];
 // Environment variables are loaded via 1Password CLI when running with npm run import
 
 // CSV Import Type Definitions
@@ -153,56 +154,80 @@ async function importCSV(options: ImportOptions): Promise<void> {
       if (!row.ring_no) {
         throw new Error('Casualty encounters are not to be imported')
       }
-      const speciesData: SpeciesInsert = {
-        species_name: row.species_name as string
-      };
-      const birdData: BirdsInsert = {
-        species_name: row.species_name as string,
-        ring_no: row.ring_no as string
-      };
-      const encounterData: EncountersInsert = {
-        age: Number(String(row.age).replace('J', '')),
-        breeding_condition: row.breeding_condition as string | null,
-        capture_time: row.capture_time as string,
-        extra_text: row.extra_text as string | null,
-        is_juv: String(row.age).endsWith('J') as boolean,
-        moult_code: row.moult_code as string | null,
-        old_greater_coverts: row.old_greater_coverts as number | null,
-        record_type: row.record_type as string,
-        ring_no: row.ring_no as string,
-        scheme: row.scheme as string,
-        sex: row.sex as string,
-        sexing_method: row.sexing_method as string | null,
-        visit_date: convertDateFormat(row.visit_date as string),
-        weight: row.weight as number | null,
-        wing_length: row.wing_length as number | null
-      };
       try {
-        // 1. Upsert Species (create if doesn't exist)
-        const { error: speciesError } = await supabase
+        // 1. Upsert Species (create if doesn't exist) and get ID
+        const speciesData: SpeciesInsert = {
+          species_name: row.species_name as string
+        };
+        const { data: speciesResult, error: speciesError } = await supabase
           .from('Species')
           .upsert(speciesData, {
             onConflict: 'species_name',
-            ignoreDuplicates: true
-          });
+            ignoreDuplicates: false
+          })
+          .select('id')
+          .single();
 
         if (speciesError) throw speciesError;
+        const speciesId = speciesResult.id;
 
-        // 2. Upsert Bird (create if doesn't exist)
-        const { error: birdError } = await supabase
+        // 2. Upsert Bird (create if doesn't exist) and get ID
+        const birdData: BirdsInsert = {
+          ring_no: row.ring_no as string,
+          species_id: speciesId
+        };
+        const { data: birdResult, error: birdError } = await supabase
           .from('Birds')
           .upsert(birdData, {
             onConflict: 'ring_no',
-            ignoreDuplicates: true
-          });
+            ignoreDuplicates: false
+          })
+          .select('id')
+          .single();
 
         if (birdError) throw birdError;
+        const birdId = birdResult.id;
 
-        // 3. Insert Encounter (always create new)
+        // 3. Upsert Session (create if doesn't exist) and get ID
+        const visitDate = convertDateFormat(row.visit_date as string);
+        const sessionData: SessionsInsert = {
+          visit_date: visitDate
+        };
+
+        const { data: sessionResult, error: sessionError } = await supabase
+          .from('Sessions')
+          .upsert(sessionData, {
+            onConflict: 'visit_date',
+            ignoreDuplicates: false
+          })
+          .select('id')
+          .single();
+
+        if (sessionError) throw sessionError;
+        const sessionId = sessionResult.id;
+
+        // 4. Insert Encounter (always create new)
+        const encounterData: EncountersInsert = {
+          age: Number(String(row.age).replace('J', '')),
+          breeding_condition: row.breeding_condition as string | null,
+          capture_time: row.capture_time as string,
+          extra_text: row.extra_text as string | null,
+          is_juv: String(row.age).endsWith('J') as boolean,
+          moult_code: row.moult_code as string | null,
+          old_greater_coverts: row.old_greater_coverts as number | null,
+          record_type: row.record_type as string,
+          bird_id: birdId,
+          session_id: sessionId,
+          scheme: row.scheme as string,
+          sex: row.sex as string,
+          sexing_method: row.sexing_method as string | null,
+          weight: row.weight as number | null,
+          wing_length: row.wing_length as number | null
+        };
         const { data: encounterResult, error: encounterError } = await supabase
           .from('Encounters')
           .upsert(encounterData, {
-            onConflict: 'ring_no,visit_date',
+            onConflict: 'bird_id,session_id',
             ignoreDuplicates: true
           })
           .select();

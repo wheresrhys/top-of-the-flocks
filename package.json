@@ -13,7 +13,7 @@
 		"supabase:migrate": "supabase migration up --linked --debug",
 		"hasura:update-graph": "./scripts/hasura-update-graph.sh",
 		"hasura:restart": "./scripts/hasura-restart.sh",
-		"supabase:sync": "npm run supabase:migrate && npm run hasura:update-graph && npm run hasura:restart && npm run hasura:types",
+		"supabase:sync": "npm run supabase:migrate && npm run supabase:types",
 		"hasura:build": "cd hasura && ddn supergraph build local",
 		"hasura:sync": "npm run hasura:update-graph && npm run hasura:restart && npm run hasura:types",
 		"hasura:dev": "cd hasura && ddn run docker-start --log-level debug",
