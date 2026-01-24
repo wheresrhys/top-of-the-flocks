@@ -1,87 +1,14 @@
-"use client"
-import Accordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import Typography from '@mui/material/Typography';
-import type { TopPeriodsResult } from '@/types/graphql.types';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemText from '@mui/material/ListItemText';
-import { useState } from 'react';
-import formatDate from 'intl-dateformat';
 
+import type { TopPeriodsResult} from '@/types/graphql.types';
+import { Suspense } from 'react';
+import { gql } from 'graphql-tag';
+import { graphqlRequest } from '@/lib/graphql-client';
+import { cacheTag, cacheLife } from 'next/cache'
+import {StatsAccordion, type HeadlineStat, PanelDefinition} from './components/StatsAccordion';
+import type { GraphQLResponse } from '@/lib/graphql-client';
 
-type TemporalUnit = 'day' | 'month' | 'year';
-
-type PanelDefinition = {
-	id: string;
-	category: string;
-	unit: string;
-	temporalUnit?: TemporalUnit;
-}
-type HeadlineStat = {
-	definition: PanelDefinition;
-	data: TopPeriodsResult;
-}
-
-const connectingVerbMap: Record<TemporalUnit, 'in' | 'on'> = {
-	day: 'on',
-	month: 'in',
-	year: 'in'
-};
-
-const dateFormatMap: Record<TemporalUnit, string> = {
-	day: 'DD MMMM YYYY',
-	month: 'MMMM YYYY',
-	year: 'YYYY'
-};
-
-function StatOutput({
-	definition,
-	data,
-	showUnit
-}: HeadlineStat & { showUnit: boolean }) {
-	return (
-		<Typography variant="body2">
-			<b>{data.metricValue}{showUnit ? ` ${definition.unit}` : ''}</b> {connectingVerbMap[definition.temporalUnit]}{' '}
-			{formatDate(
-				new Date(data.visitDate as string),
-				dateFormatMap[definition.temporalUnit as TemporalUnit]
-			)}
-		</Typography>
-	);
-}
-
-function AccordionItem({ headlineStat, onExpanded, expandedId }: { headlineStat: HeadlineStat, onExpanded: (id: string) => void, expandedId: string }) {
-	function onChange(event: React.SyntheticEvent, isExpanded: boolean) {
-		if (isExpanded) {
-			onExpanded(headlineStat.definition.id);
-		}
-	}
-	return (
-		<Accordion onChange={onChange} expanded={expandedId === headlineStat.definition.id}>
-			<AccordionSummary
-				expandIcon={<ExpandMoreIcon />}
-				aria-controls={`${headlineStat.definition.id}-content`}
-				id={`${headlineStat.definition.id}-header`}
-			>
-					<Typography component="span" sx={{
-						fontWeight: 700,
-					}}>{headlineStat.definition.category}:</Typography>
-				<Typography component="span">{headlineStat.data.metricValue}</Typography>
-			</AccordionSummary>
-			<AccordionDetails id={`${headlineStat.definition.id}-content`}>
-				<List component="ol">
-					<ListItem disablePadding>
-						<ListItemText>
-							<StatOutput {...headlineStat} showUnit={true} />
-						</ListItemText>
-					</ListItem>
-				</List>
-			</AccordionDetails>
-		</Accordion>
-	);
+function kebabToCamel(str: string): string {
+	return str.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
 }
 
 const panelDefinitions: PanelDefinition[] = [
@@ -90,65 +17,102 @@ const panelDefinitions: PanelDefinition[] = [
 		category: 'Busiest session ever',
 		unit: 'Birds',
 		temporalUnit: 'day',
+		metricName: 'encounters'
 	},
 	{
 		id: 'most-varied-session-ever',
 		category: 'Most varied session ever',
 		unit: 'Species',
 		temporalUnit: 'day',
+		metricName: 'species'
 	},
 	{
 		id: 'busiest-winter-session-ever',
-		category: 'Busiest winter session ever',
+		category: 'Busiest winter session ever (TODO: need multiple months filter)',
 		unit: 'Birds',
 		temporalUnit: 'day',
+		metricName: 'encounters',
+		monthFilter: 1
 	},
-	{
-		id: 'most-of-one-species-ever',
-		category: 'Most of one species in a day ever',
-		unit: 'Birds',
-		temporalUnit: 'day',
-	},
+	// {
+	// TODO: need an additional metric qualifier of "bySpecies"
+	// TODO: could also do with a species filter
+	// 	id: 'most-of-one-species-ever',
+	// 	category: 'Most of one species in a day ever',
+	// 	unit: 'Birds',
+	// 	temporalUnit: 'day',
+	// },
 	{
 		id: 'best-month-ever',
 		category: 'Best month ever',
 		unit: 'Birds',
 		temporalUnit: 'month',
+		metricName: 'encounters'
 	},
 	{
 		id: 'Busiest-session-this-winter',
 		category: 'Busiest session this winter',
 		unit: 'Birds',
 		temporalUnit: 'day',
+		metricName: 'encounters',
+		// TODO need to generate dynamically
+		exactMonthsFilter: ['2025-11', '2025-12', '2026-01']
 	},
 	{
 		id: 'most-varied-session-this-winter',
 		category: 'Most varied session this winter',
 		unit: 'Species',
 		temporalUnit: 'day',
+		metricName: 'species',
+		exactMonthsFilter: ['2025-11', '2025-12', '2026-01']
 	},
 
 ]
 
-function fetchInitialData (panels: PanelDefinition[]): HeadlineStat[] {
+async function fetchInitialData(panels: PanelDefinition[]): Promise<HeadlineStat[]> {
+	const gqlQuery = gql`
+		query {
+			${panels.map((panel) => `${kebabToCamel(panel.id)}: topPeriodsByMetric(
+			args: {
+				metricName: "${panel.metricName}"
+				temporalUnit: "${panel.temporalUnit}"
+				resultLimit: 1
+				monthFilter: ${panel.monthFilter || null}
+				yearFilter: ${panel.yearFilter || null}
+				exactMonthsFilter: ${panel.exactMonthsFilter ? JSON.stringify(panel.exactMonthsFilter) : null}
+			}
+		) {
+			metricValue
+			visitDate
+		}`).join('\n\n')}
+		}
+	`;
+
+	const {data}: GraphQLResponse<Record<string,TopPeriodsResult[]>> = await graphqlRequest<Record<string,TopPeriodsResult[]>>(gqlQuery);
 	return panels.map((panel) => ({
 		definition: panel,
-		data: {
-			metricValue: 100,
-			visitDate: '2026-01-01',
-		}
+		data: data?.[kebabToCamel(panel.id)]?.[0]
 	}))
 }
 
-export default function Home() {
-	const [expanded, setExpanded] = useState<string | false>(false);
 
-	return <div>
 
-		{fetchInitialData(panelDefinitions).map((item) => (
-				<AccordionItem key={item.id} headlineStat={item} onExpanded={(id) => setExpanded(id)} expandedId={expanded} />
-			))}
-	</div>;
+async function lazilyFetchInitialData() {
+	"use cache"
+	// This cache can be revalidated by webhook or server action
+	// when you call revalidateTag("articles")
+	cacheTag("home")
+	// This cache will revalidate after an hour even if no explicit
+	// revalidate instruction was received
+	cacheLife('hours')
+	return fetchInitialData(panelDefinitions);
+}
+
+export default async function Home() {
+	const initialData = await lazilyFetchInitialData();
+	return <Suspense fallback={<div>Loading...</div>}>
+		<StatsAccordion data={initialData} />
+	</Suspense>;
 }
 
 
