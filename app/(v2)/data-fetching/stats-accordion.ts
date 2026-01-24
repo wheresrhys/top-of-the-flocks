@@ -4,9 +4,10 @@ import { gql } from 'graphql-tag';
 import { graphqlRequest } from '@/lib/graphql-client';
 import type { GraphQLResponse } from '@/lib/graphql-client';
 import type { HeadlineStat } from '../components/StatsAccordion';
+import type { CamelCase, KebabCase } from 'type-fest';
 
-function kebabToCamel(str: string): string {
-	return str.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
+function kebabToCamel(str: KebabCase<string>): CamelCase<string> {
+	return str.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
 }
 
 function getTopPeriodsByMetricFragment(

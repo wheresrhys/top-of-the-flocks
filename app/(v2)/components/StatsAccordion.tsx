@@ -9,6 +9,7 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import formatDate from 'intl-dateformat';
+import { KebabCase } from 'type-fest';
 import type {
 	TopPeriodsResult,
 	TopPeriodsByMetricArguments
@@ -22,7 +23,7 @@ export type HeadlineStat = {
 	data: TopPeriodsResult | undefined;
 };
 export type PanelDefinition = TopPeriodsByMetricArguments & {
-	id: string;
+	id: KebabCase<string>;
 	category: string;
 	unit: string;
 	temporalUnit: TemporalUnit;
