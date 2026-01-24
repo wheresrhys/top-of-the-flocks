@@ -1,7 +1,7 @@
 import { Suspense } from 'react';
-import { cacheTag, cacheLife } from 'next/cache';
 import { StatsAccordion, PanelDefinition } from './components/StatsAccordion';
 import { fetchInitialData } from './data-fetching/stats-accordion';
+import { unstable_cache } from 'next/cache';
 
 const panelDefinitions: PanelDefinition[] = [
 	{
@@ -60,22 +60,28 @@ const panelDefinitions: PanelDefinition[] = [
 	}
 ];
 
-async function lazilyFetchInitialData() {
-	'use cache';
-	// This cache can be revalidated by webhook or server action
-	// when you call revalidateTag("articles")
-	cacheTag('home');
-	// This cache will revalidate after an hour even if no explicit
-	// revalidate instruction was received
-	cacheLife('hours');
-	return fetchInitialData(panelDefinitions);
+
+
+async function fetchInitialDataWithCache() {
+	return unstable_cache(
+		async () => fetchInitialData(panelDefinitions),
+		['home-stats'],
+		{
+			revalidate: 3600 * 24 * 7,
+			tags: ['home']
+		}
+	)();
+}
+
+async function DisplayInitialData() {
+	const initialData = await fetchInitialDataWithCache();
+	return <StatsAccordion data={initialData} />;
 }
 
 export default async function Home() {
-	const initialData = await lazilyFetchInitialData();
 	return (
 		<Suspense fallback={<div>Loading...</div>}>
-			<StatsAccordion data={initialData} />
+			<DisplayInitialData />
 		</Suspense>
 	);
 }
