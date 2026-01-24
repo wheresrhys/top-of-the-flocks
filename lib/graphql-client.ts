@@ -53,6 +53,7 @@ export async function graphqlRequest<T = unknown>(
           query: queryString,
           variables,
         }),
+        cache: 'no-store' // Prevent build-time evaluation
       });
 
       if (!response.ok) {
