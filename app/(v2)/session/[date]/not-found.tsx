@@ -1,3 +1,3 @@
-export default async function NotFound(props) {
+export default async function NotFound() {
 	return <div>Session on this date not found</div>;
 }
