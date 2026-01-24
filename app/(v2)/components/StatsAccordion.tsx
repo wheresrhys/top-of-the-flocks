@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import Link from '@mui/material/Link';
 import CircularProgress from '@mui/material/CircularProgress';
 import Stack from '@mui/material/Stack';
 import Accordion from '@mui/material/Accordion';
@@ -54,10 +55,17 @@ function StatOutput({
 				{showUnit ? ` ${definition.unit}` : ''}
 			</b>{' '}
 			{connectingVerbMap[definition.temporalUnit] as string}{' '}
-			{formatDate(
-				new Date(data.visitDate as string),
-				dateFormatMap[definition.temporalUnit as TemporalUnit]
-			)}
+      {(definition.temporalUnit === 'day') ? (
+        <Link href={`/session/${data.visitDate}`}>{formatDate(
+          new Date(data.visitDate as string),
+          dateFormatMap[definition.temporalUnit as TemporalUnit]
+        )}</Link>
+      ) : (
+        formatDate(
+          new Date(data.visitDate as string),
+          dateFormatMap[definition.temporalUnit as TemporalUnit]
+        )
+      )}
 		</Typography>
 	);
 }
