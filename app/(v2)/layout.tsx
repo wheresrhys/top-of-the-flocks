@@ -1,14 +1,14 @@
 import GlobalNav from './components/GlobalNav';
 
 export default function RootLayout({
-  children
+	children
 }: Readonly<{
-  children: React.ReactNode;
+	children: React.ReactNode;
 }>) {
-  return (
-    <>
-      <GlobalNav />
-      {children}
-    </>
-  );
+	return (
+		<>
+			<GlobalNav />
+			{children}
+		</>
+	);
 }

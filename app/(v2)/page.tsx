@@ -1,10 +1,13 @@
-
-import type { TopPeriodsResult} from '@/types/graphql.types';
+import type { TopPeriodsResult } from '@/types/graphql.types';
 import { Suspense } from 'react';
 import { gql } from 'graphql-tag';
 import { graphqlRequest } from '@/lib/graphql-client';
-import { cacheTag, cacheLife } from 'next/cache'
-import {StatsAccordion, type HeadlineStat, PanelDefinition} from './components/StatsAccordion';
+import { cacheTag, cacheLife } from 'next/cache';
+import {
+	StatsAccordion,
+	type HeadlineStat,
+	PanelDefinition
+} from './components/StatsAccordion';
 import type { GraphQLResponse } from '@/lib/graphql-client';
 
 function kebabToCamel(str: string): string {
@@ -65,14 +68,17 @@ const panelDefinitions: PanelDefinition[] = [
 		temporalUnit: 'day',
 		metricName: 'species',
 		exactMonthsFilter: ['2025-11', '2025-12', '2026-01']
-	},
+	}
+];
 
-]
-
-async function fetchInitialData(panels: PanelDefinition[]): Promise<HeadlineStat[]> {
+async function fetchInitialData(
+	panels: PanelDefinition[]
+): Promise<HeadlineStat[]> {
 	const gqlQuery = gql`
 		query {
-			${panels.map((panel) => `${kebabToCamel(panel.id)}: topPeriodsByMetric(
+			${panels
+				.map(
+					(panel) => `${kebabToCamel(panel.id)}: topPeriodsByMetric(
 			args: {
 				metricName: "${panel.metricName}"
 				temporalUnit: "${panel.temporalUnit}"
@@ -84,42 +90,36 @@ async function fetchInitialData(panels: PanelDefinition[]): Promise<HeadlineStat
 		) {
 			metricValue
 			visitDate
-		}`).join('\n\n')}
+		}`
+				)
+				.join('\n\n')}
 		}
 	`;
 
-	const {data}: GraphQLResponse<Record<string,TopPeriodsResult[]>> = await graphqlRequest<Record<string,TopPeriodsResult[]>>(gqlQuery);
+	const { data }: GraphQLResponse<Record<string, TopPeriodsResult[]>> =
+		await graphqlRequest<Record<string, TopPeriodsResult[]>>(gqlQuery);
 	return panels.map((panel) => ({
 		definition: panel,
 		data: data?.[kebabToCamel(panel.id)]?.[0]
-	}))
+	}));
 }
 
-
-
 async function lazilyFetchInitialData() {
-	"use cache"
+	'use cache';
 	// This cache can be revalidated by webhook or server action
 	// when you call revalidateTag("articles")
-	cacheTag("home")
+	cacheTag('home');
 	// This cache will revalidate after an hour even if no explicit
 	// revalidate instruction was received
-	cacheLife('hours')
+	cacheLife('hours');
 	return fetchInitialData(panelDefinitions);
 }
 
 export default async function Home() {
 	const initialData = await lazilyFetchInitialData();
-	return <Suspense fallback={<div>Loading...</div>}>
-		<StatsAccordion data={initialData} />
-	</Suspense>;
+	return (
+		<Suspense fallback={<div>Loading...</div>}>
+			<StatsAccordion data={initialData} />
+		</Suspense>
+	);
 }
-
-
-
-
-
-
-
-
-

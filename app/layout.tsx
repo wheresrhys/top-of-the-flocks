@@ -4,24 +4,22 @@ import ThemeProvider from './components/ThemeProvider';
 import EmotionRegistry from '../lib/emotion-registry';
 
 export const metadata: Metadata = {
-  title: 'Top of the Flocks',
-  description: 'Leaderboard for bird ringing data'
+	title: 'Top of the Flocks',
+	description: 'Leaderboard for bird ringing data'
 };
 
 export default function RootLayout({
-  children
+	children
 }: Readonly<{
-  children: React.ReactNode;
+	children: React.ReactNode;
 }>) {
-  return (
-    <html lang="en">
-      <body>
-        <EmotionRegistry>
-          <ThemeProvider>
-            {children}
-          </ThemeProvider>
-        </EmotionRegistry>
-      </body>
-    </html>
-  );
+	return (
+		<html lang="en">
+			<body>
+				<EmotionRegistry>
+					<ThemeProvider>{children}</ThemeProvider>
+				</EmotionRegistry>
+			</body>
+		</html>
+	);
 }
