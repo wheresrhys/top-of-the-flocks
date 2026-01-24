@@ -1,18 +1,7 @@
-import type { TopPeriodsResult } from '@/types/graphql.types';
 import { Suspense } from 'react';
-import { gql } from 'graphql-tag';
-import { graphqlRequest } from '@/lib/graphql-client';
 import { cacheTag, cacheLife } from 'next/cache';
-import {
-	StatsAccordion,
-	type HeadlineStat,
-	PanelDefinition
-} from './components/StatsAccordion';
-import type { GraphQLResponse } from '@/lib/graphql-client';
-
-function kebabToCamel(str: string): string {
-	return str.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase());
-}
+import { StatsAccordion, PanelDefinition } from './components/StatsAccordion';
+import { fetchInitialData } from './data-fetching/stats-accordion';
 
 const panelDefinitions: PanelDefinition[] = [
 	{
@@ -70,39 +59,6 @@ const panelDefinitions: PanelDefinition[] = [
 		exactMonthsFilter: ['2025-11', '2025-12', '2026-01']
 	}
 ];
-
-async function fetchInitialData(
-	panels: PanelDefinition[]
-): Promise<HeadlineStat[]> {
-	const gqlQuery = gql`
-		query {
-			${panels
-				.map(
-					(panel) => `${kebabToCamel(panel.id)}: topPeriodsByMetric(
-			args: {
-				metricName: "${panel.metricName}"
-				temporalUnit: "${panel.temporalUnit}"
-				resultLimit: 1
-				monthFilter: ${panel.monthFilter || null}
-				yearFilter: ${panel.yearFilter || null}
-				exactMonthsFilter: ${panel.exactMonthsFilter ? JSON.stringify(panel.exactMonthsFilter) : null}
-			}
-		) {
-			metricValue
-			visitDate
-		}`
-				)
-				.join('\n\n')}
-		}
-	`;
-
-	const { data }: GraphQLResponse<Record<string, TopPeriodsResult[]>> =
-		await graphqlRequest<Record<string, TopPeriodsResult[]>>(gqlQuery);
-	return panels.map((panel) => ({
-		definition: panel,
-		data: data?.[kebabToCamel(panel.id)]?.[0]
-	}));
-}
 
 async function lazilyFetchInitialData() {
 	'use cache';
