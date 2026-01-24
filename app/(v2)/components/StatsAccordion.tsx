@@ -1,5 +1,7 @@
 'use client';
 import { useState } from 'react';
+import CircularProgress from '@mui/material/CircularProgress';
+import Stack from '@mui/material/Stack';
 import Accordion from '@mui/material/Accordion';
 import AccordionSummary from '@mui/material/AccordionSummary';
 import AccordionDetails from '@mui/material/AccordionDetails';
@@ -77,13 +79,16 @@ function AccordionItem({
 	const [data, setData] = useState<TopPeriodsResult[] | undefined>(
 		headlineStat.data ? [headlineStat.data] : undefined
 	);
-	const [isFullyLoaded, setFullyLoaded] = useState(false);
+	const [isLoading, setLoading] = useState(false);
+	const [isLoaded, setLoaded] = useState(false);
 	async function onChange(event: React.SyntheticEvent, isExpanded: boolean) {
 		if (isExpanded) {
 			onExpanded(headlineStat.definition.id);
-			if (!isFullyLoaded) {
+			if (!isLoaded) {
+				setLoading(true);
 				await fetchDrillDownData(headlineStat.definition).then(setData);
-				setFullyLoaded(true);
+				setLoaded(true);
+				setLoading(false);
 			}
 		} else {
 			onExpanded(false);
@@ -125,6 +130,11 @@ function AccordionItem({
 								</ListItemText>
 							</ListItem>
 						))}
+						{isLoading && (
+							<Stack alignItems="center">
+								<CircularProgress size={20} />
+							</Stack>
+						)}
 					</List>
 				) : (
 					<Typography component="span">No data available</Typography>
