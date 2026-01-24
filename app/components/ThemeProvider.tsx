@@ -6,12 +6,14 @@ import {
 } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { useMediaQuery } from '@mui/material';
-import { ReactNode, useState, useEffect, forwardRef } from 'react';
+import { ReactNode, useState, useEffect, forwardRef, ComponentPropsWithoutRef } from 'react';
 import NextLink from 'next/link';
 
-const LinkBehaviour = forwardRef(function LinkBehaviour(props, ref) {
-	return <NextLink ref={ref} {...props} />;
-});
+const LinkBehaviour = forwardRef<HTMLAnchorElement, ComponentPropsWithoutRef<typeof NextLink>>(
+	function LinkBehaviour(props, ref) {
+		return <NextLink ref={ref} {...props} />;
+	}
+);
 
 interface ThemeProviderProps {
 	children: ReactNode;
