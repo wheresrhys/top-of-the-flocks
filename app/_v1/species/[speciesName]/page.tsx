@@ -87,7 +87,8 @@ async function SpeciesDetails({ params: paramsPromise }: PageProps) {
 	// Calculate unique session dates
 	const uniqueDates = new Set(
 		species.birds?.flatMap(
-			(bird) => bird.encounters?.map((encounter) => encounter.visitDate) || []
+			(bird) =>
+				bird.encounters?.map((encounter) => encounter.session?.visitDate) || []
 		) || []
 	);
 	const sessionCount = uniqueDates.size;

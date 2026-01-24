@@ -7,8 +7,8 @@ export default function RootLayout({
 }>) {
 	return (
 		<>
-						<GlobalNav />
-						{children}
-					</>
+			<GlobalNav />
+			{children}
+		</>
 	);
 }

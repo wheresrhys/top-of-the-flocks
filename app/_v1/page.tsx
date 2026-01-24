@@ -145,7 +145,6 @@ async function AllTimeLeagueTableTabsWrapper() {
 }
 
 export default function Home() {
-
 	return (
 		<Container maxWidth="xl">
 			<Typography
@@ -168,10 +167,7 @@ export default function Home() {
 							</Box>
 						}
 					>
-						<MonthStats
-							monthOffset={0}
-							heading="This month's records"
-						/>
+						<MonthStats monthOffset={0} heading="This month's records" />
 					</Suspense>
 					<Suspense
 						fallback={
@@ -180,10 +176,7 @@ export default function Home() {
 							</Box>
 						}
 					>
-						<MonthStats
-							monthOffset={-1}
-							heading="Last month's records"
-						/>
+						<MonthStats monthOffset={-1} heading="Last month's records" />
 					</Suspense>
 				</Grid>
 				<Grid size={{ xs: 12, md: 6 }}>
