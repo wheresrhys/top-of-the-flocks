@@ -55,11 +55,11 @@ async function getSpeciesDetails(
 	return response.data;
 }
 
-interface PageProps {
+async function SpeciesDetails({
+	params: paramsPromise
+}: {
 	params: { speciesName: string };
-}
-
-async function SpeciesDetails({ params: paramsPromise }: PageProps) {
+}) {
 	'use cache';
 	cacheLife('hours');
 	const speciesName = decodeURIComponent((await paramsPromise).speciesName);
