@@ -9,10 +9,12 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import formatDate from 'intl-dateformat';
+import { KebabCase } from 'type-fest';
 import type {
 	TopPeriodsResult,
 	TopPeriodsByMetricArguments
 } from '@/types/graphql.types';
+import { fetchDrillDownData } from '../data-fetching/stats-accordion';
 
 type TemporalUnit = 'day' | 'month' | 'year';
 
@@ -21,7 +23,7 @@ export type HeadlineStat = {
 	data: TopPeriodsResult | undefined;
 };
 export type PanelDefinition = TopPeriodsByMetricArguments & {
-	id: string;
+	id: KebabCase<string>;
 	category: string;
 	unit: string;
 	temporalUnit: TemporalUnit;
@@ -59,9 +61,9 @@ function StatOutput({
 }
 
 function hasData(
-	headlineStat: HeadlineStat
-): headlineStat is HeadlineStat & { data: TopPeriodsResult } {
-	return headlineStat.data !== undefined;
+	data: TopPeriodsResult[] | undefined
+): data is TopPeriodsResult[] {
+	return data !== undefined;
 }
 function AccordionItem({
 	headlineStat,
@@ -72,9 +74,17 @@ function AccordionItem({
 	onExpanded: (id: string | false) => void;
 	expandedId: string | false;
 }) {
-	function onChange(event: React.SyntheticEvent, isExpanded: boolean) {
+	const [data, setData] = useState<TopPeriodsResult[] | undefined>(
+		headlineStat.data ? [headlineStat.data] : undefined
+	);
+	const [isFullyLoaded, setFullyLoaded] = useState(false);
+	async function onChange(event: React.SyntheticEvent, isExpanded: boolean) {
 		if (isExpanded) {
 			onExpanded(headlineStat.definition.id);
+			if (!isFullyLoaded) {
+				await fetchDrillDownData(headlineStat.definition).then(setData);
+				setFullyLoaded(true);
+			}
 		} else {
 			onExpanded(false);
 		}
@@ -98,21 +108,23 @@ function AccordionItem({
 					{headlineStat.definition.category}:
 				</Typography>
 				<Typography component="span">
-					{headlineStat.data?.metricValue}
+					{data?.[0].metricValue} {headlineStat.definition.unit}
 				</Typography>
 			</AccordionSummary>
 			<AccordionDetails id={`${headlineStat.definition.id}-content`}>
-				{hasData(headlineStat) ? (
+				{hasData(data) ? (
 					<List component="ol">
-						<ListItem disablePadding>
-							<ListItemText>
-								<StatOutput
-									data={headlineStat.data}
-									definition={headlineStat.definition}
-									showUnit={true}
-								/>
-							</ListItemText>
-						</ListItem>
+						{data.map((item) => (
+							<ListItem disablePadding key={item.visitDate}>
+								<ListItemText>
+									<StatOutput
+										data={item}
+										definition={headlineStat.definition}
+										showUnit={true}
+									/>
+								</ListItemText>
+							</ListItem>
+						))}
 					</List>
 				) : (
 					<Typography component="span">No data available</Typography>
