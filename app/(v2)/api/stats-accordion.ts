@@ -1,14 +1,15 @@
 import type { PanelDefinition } from '../components/StatsAccordion';
-import type { HeadlineStat } from '../components/StatsAccordion';
+import type { StatsAccordionModel } from '../components/StatsAccordion';
 import { supabase } from '@/lib/supabase';
 import type { Database } from '@/types/supabase.types';
-type DataArguments =
+
+export type StatsAccordionArguments =
 	Database['public']['Functions']['top_periods_by_metric']['Args'];
-type TopPeriodsResult =
+export type TopPeriodsResult =
 	Database['public']['Functions']['top_periods_by_metric']['Returns'][number];
 
 async function getTopPeriodsByMetric(
-	options: DataArguments
+	options: StatsAccordionArguments
 ): Promise<TopPeriodsResult[] | null> {
 	const { data, error } = await supabase.rpc('top_periods_by_metric', options);
 	return data;
@@ -16,7 +17,7 @@ async function getTopPeriodsByMetric(
 
 export async function fetchInitialData(
 	panels: PanelDefinition[]
-): Promise<HeadlineStat[]> {
+): Promise<StatsAccordionModel[]> {
 	const topPeriodsByMetric = await Promise.all(
 		panels.map(async (panel) => {
 			const data = await getTopPeriodsByMetric({
@@ -25,7 +26,7 @@ export async function fetchInitialData(
 			});
 			return {
 				definition: panel,
-				data: data?.[0] ?? null
+				data: data ?? []
 			};
 		})
 	);

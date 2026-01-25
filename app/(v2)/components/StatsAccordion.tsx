@@ -14,22 +14,27 @@ import ListItemText from '@mui/material/ListItemText';
 import formatDate from 'intl-dateformat';
 
 import { fetchDrillDownData } from '../api/stats-accordion';
-import type { Database } from '@/types/supabase.types';
-type DataArguments =
-	Database['public']['Functions']['top_periods_by_metric']['Args'];
-type TopPeriodsResult =
-	Database['public']['Functions']['top_periods_by_metric']['Returns'][number];
+import type {
+	StatsAccordionArguments,
+	TopPeriodsResult
+} from '../api/stats-accordion';
 type TemporalUnit = 'day' | 'month' | 'year';
 
-export type HeadlineStat = {
+export type StatsAccordionModel = {
 	definition: PanelDefinition;
-	data: TopPeriodsResult | null;
+	data: TopPeriodsResult[] | null;
+};
+
+export type SingleStatModel = {
+	definition: PanelDefinition;
+	data: TopPeriodsResult;
+	showUnit: boolean;
 };
 export type PanelDefinition = {
 	id: string;
 	category: string;
 	unit: string;
-	dataArguments: DataArguments;
+	dataArguments: StatsAccordionArguments;
 };
 const connectingVerbMap: Record<TemporalUnit, 'in' | 'on'> = {
 	day: 'on',
@@ -43,11 +48,7 @@ const dateFormatMap: Record<TemporalUnit, string> = {
 	year: 'YYYY'
 };
 
-function StatOutput({
-	definition,
-	data,
-	showUnit
-}: HeadlineStat & { showUnit: boolean; data: TopPeriodsResult }) {
+function StatOutput({ definition, data, showUnit }: SingleStatModel) {
 	return (
 		<Typography variant="body2">
 			<b>
@@ -82,25 +83,23 @@ function hasData(data: TopPeriodsResult[] | null): data is TopPeriodsResult[] {
 	return data !== null;
 }
 function AccordionItem({
-	headlineStat,
+	model,
 	onExpanded,
 	expandedId
 }: {
-	headlineStat: HeadlineStat;
+	model: StatsAccordionModel;
 	onExpanded: (id: string | false) => void;
 	expandedId: string | false;
 }) {
-	const [data, setData] = useState<TopPeriodsResult[] | null>(
-		headlineStat.data ? [headlineStat.data] : null
-	);
+	const [data, setData] = useState<TopPeriodsResult[] | null>(model.data);
 	const [isLoading, setLoading] = useState(false);
 	const [isLoaded, setLoaded] = useState(false);
 	async function onChange(event: React.SyntheticEvent, isExpanded: boolean) {
 		if (isExpanded) {
-			onExpanded(headlineStat.definition.id);
+			onExpanded(model.definition.id);
 			if (!isLoaded) {
 				setLoading(true);
-				await fetchDrillDownData(headlineStat.definition).then(setData);
+				await fetchDrillDownData(model.definition).then(setData);
 				setLoaded(true);
 				setLoading(false);
 			}
@@ -111,12 +110,12 @@ function AccordionItem({
 	return (
 		<Accordion
 			onChange={onChange}
-			expanded={expandedId === headlineStat.definition.id}
+			expanded={expandedId === model.definition.id}
 		>
 			<AccordionSummary
 				expandIcon={<ExpandMoreIcon />}
-				aria-controls={`${headlineStat.definition.id}-content`}
-				id={`${headlineStat.definition.id}-header`}
+				aria-controls={`${model.definition.id}-content`}
+				id={`${model.definition.id}-header`}
 			>
 				<Typography
 					component="span"
@@ -124,13 +123,13 @@ function AccordionItem({
 						fontWeight: 700
 					}}
 				>
-					{headlineStat.definition.category}:
+					{model.definition.category}:
 				</Typography>
 				<Typography component="span">
-					{data?.[0].metric_value} {headlineStat.definition.unit}
+					{data?.[0].metric_value} {model.definition.unit}
 				</Typography>
 			</AccordionSummary>
-			<AccordionDetails id={`${headlineStat.definition.id}-content`}>
+			<AccordionDetails id={`${model.definition.id}-content`}>
 				{hasData(data) ? (
 					<List component="ol">
 						{data.map((item) => (
@@ -138,7 +137,7 @@ function AccordionItem({
 								<ListItemText>
 									<StatOutput
 										data={item}
-										definition={headlineStat.definition}
+										definition={model.definition}
 										showUnit={true}
 									/>
 								</ListItemText>
@@ -157,7 +156,11 @@ function AccordionItem({
 		</Accordion>
 	);
 }
-export function StatsAccordion({ data }: { data: HeadlineStat[] | null }) {
+export function StatsAccordion({
+	data
+}: {
+	data: StatsAccordionModel[];
+}) {
 	const [expanded, setExpanded] = useState<string | false>(false);
 	return (
 		<>
@@ -165,7 +168,7 @@ export function StatsAccordion({ data }: { data: HeadlineStat[] | null }) {
 				data.map((item) => (
 					<AccordionItem
 						key={item.definition.id}
-						headlineStat={item}
+						model={item}
 						onExpanded={(id) => setExpanded(id)}
 						expandedId={expanded}
 					/>
