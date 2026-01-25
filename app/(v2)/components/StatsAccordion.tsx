@@ -13,23 +13,24 @@ import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import formatDate from 'intl-dateformat';
 import { KebabCase } from 'type-fest';
-import type {
-	TopPeriodsResult,
-	TopPeriodsByMetricArguments
-} from '@/types/graphql.types';
-import { fetchDrillDownData } from '../data-fetching/stats-accordion';
 
+import { fetchDrillDownData } from '../api/stats-accordion';
+import type { Database } from '@/types/supabase.types';
+type DataArguments =
+	Database['public']['Functions']['top_periods_by_metric']['Args'];
+type TopPeriodsResult =
+	Database['public']['Functions']['top_periods_by_metric']['Returns'][number];
 type TemporalUnit = 'day' | 'month' | 'year';
 
 export type HeadlineStat = {
 	definition: PanelDefinition;
-	data: TopPeriodsResult | undefined;
+	data: TopPeriodsResult | null;
 };
-export type PanelDefinition = TopPeriodsByMetricArguments & {
+export type PanelDefinition = {
 	id: KebabCase<string>;
 	category: string;
 	unit: string;
-	temporalUnit: TemporalUnit;
+	dataArguments: DataArguments;
 };
 const connectingVerbMap: Record<TemporalUnit, 'in' | 'on'> = {
 	day: 'on',
@@ -51,29 +52,35 @@ function StatOutput({
 	return (
 		<Typography variant="body2">
 			<b>
-				{data.metricValue}
+				{data.metric_value}
 				{showUnit ? ` ${definition.unit}` : ''}
 			</b>{' '}
-			{connectingVerbMap[definition.temporalUnit] as string}{' '}
-      {(definition.temporalUnit === 'day') ? (
-        <Link href={`/session/${data.visitDate}`}>{formatDate(
-          new Date(data.visitDate as string),
-          dateFormatMap[definition.temporalUnit as TemporalUnit]
-        )}</Link>
-      ) : (
-        formatDate(
-          new Date(data.visitDate as string),
-          dateFormatMap[definition.temporalUnit as TemporalUnit]
-        )
-      )}
+			{
+				connectingVerbMap[
+					definition.dataArguments.temporal_unit as TemporalUnit
+				] as string
+			}{' '}
+			{definition.dataArguments.temporal_unit === 'day' ? (
+				<Link href={`/session/${data.visit_date}`}>
+					{formatDate(
+						new Date(data.visit_date as string),
+						dateFormatMap[
+							definition.dataArguments.temporal_unit as TemporalUnit
+						]
+					)}
+				</Link>
+			) : (
+				formatDate(
+					new Date(data.visit_date as string),
+					dateFormatMap[definition.dataArguments.temporal_unit as TemporalUnit]
+				)
+			)}
 		</Typography>
 	);
 }
 
-function hasData(
-	data: TopPeriodsResult[] | undefined
-): data is TopPeriodsResult[] {
-	return data !== undefined;
+function hasData(data: TopPeriodsResult[] | null): data is TopPeriodsResult[] {
+	return data !== null;
 }
 function AccordionItem({
 	headlineStat,
@@ -84,8 +91,8 @@ function AccordionItem({
 	onExpanded: (id: string | false) => void;
 	expandedId: string | false;
 }) {
-	const [data, setData] = useState<TopPeriodsResult[] | undefined>(
-		headlineStat.data ? [headlineStat.data] : undefined
+	const [data, setData] = useState<TopPeriodsResult[] | null>(
+		headlineStat.data ? [headlineStat.data] : null
 	);
 	const [isLoading, setLoading] = useState(false);
 	const [isLoaded, setLoaded] = useState(false);
@@ -121,14 +128,14 @@ function AccordionItem({
 					{headlineStat.definition.category}:
 				</Typography>
 				<Typography component="span">
-					{data?.[0].metricValue} {headlineStat.definition.unit}
+					{data?.[0].metric_value} {headlineStat.definition.unit}
 				</Typography>
 			</AccordionSummary>
 			<AccordionDetails id={`${headlineStat.definition.id}-content`}>
 				{hasData(data) ? (
 					<List component="ol">
 						{data.map((item) => (
-							<ListItem disablePadding key={item.visitDate}>
+							<ListItem disablePadding key={item.visit_date}>
 								<ListItemText>
 									<StatOutput
 										data={item}
@@ -151,11 +158,11 @@ function AccordionItem({
 		</Accordion>
 	);
 }
-export function StatsAccordion({ data }: { data: HeadlineStat[] | undefined }) {
+export function StatsAccordion({ data }: { data: HeadlineStat[] | null }) {
 	const [expanded, setExpanded] = useState<string | false>(false);
 	return (
 		<>
-			{data ? (
+			{data !== null ? (
 				data.map((item) => (
 					<AccordionItem
 						key={item.definition.id}
