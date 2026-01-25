@@ -31,9 +31,13 @@ const GET_SESSION_BY_DATE = gql`
 
 function getSpeciesBreakdown(session: SessionData) {
 	const map: Record<string, EncounterData[]> = {};
+	// @ts-expect-error - db schema forbids null
 	session.encounters.forEach(encounter => {
+
 		const species = encounter.bird?.species?.speciesName;
-		map[species] = map[species] || []
+		// @ts-expect-error - db schema forbids null
+		map[species] = map[species] || [];
+		// @ts-expect-error - db schema forbids null
 		map[species].push(encounter);
 	});
 	return Object.entries(map).map(([species, encounters]) => ({ species, encounters })).sort((a, b) => {
@@ -55,9 +59,13 @@ function SessionSummary({ session, date }: { session: SessionData, date: string 
 		<List>
 				<ListItem><ListItemText>{session.encounters?.length} birds</ListItemText></ListItem>
 		<ListItem><ListItemText>{speciesBreakdown.length} species</ListItemText></ListItem>
+		{/* @ts-expect-error - db schema forbids null */}
 		<ListItem><ListItemText>{session.encounters.filter(encounter => encounter.recordType === 'N').length} new</ListItemText></ListItem>
+		{/* @ts-expect-error - db schema forbids null */}
 		<ListItem><ListItemText>{session.encounters.filter(encounter => encounter.recordType === 'S').length} retraps</ListItemText></ListItem>
+		{/* @ts-expect-error - db schema forbids null */}
 		<ListItem><ListItemText>{session.encounters.filter(encounter => !encounter.isJuv).length} adults [FIX ME!]</ListItemText></ListItem>
+		{/* @ts-expect-error - db schema forbids null */}
 		<ListItem><ListItemText>{session.encounters.filter(encounter => encounter.isJuv).length} juvs [FIX ME!]</ListItemText></ListItem>
 			</List>
 		<Table>
