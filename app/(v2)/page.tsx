@@ -8,23 +8,23 @@ const panelDefinitions: PanelDefinition[] = [
 		id: 'busiest-session-ever',
 		category: 'Busiest session ever',
 		unit: 'Birds',
-		temporalUnit: 'day',
-		metricName: 'encounters'
+		dataArguments: { temporal_unit: 'day', metric_name: 'encounters' }
 	},
 	{
 		id: 'most-varied-session-ever',
 		category: 'Most varied session ever',
 		unit: 'Species',
-		temporalUnit: 'day',
-		metricName: 'species'
+		dataArguments: { temporal_unit: 'day', metric_name: 'species' }
 	},
 	{
 		id: 'busiest-winter-session-ever',
 		category: 'Busiest winter session ever (TODO: need multiple months filter)',
 		unit: 'Birds',
-		temporalUnit: 'day',
-		metricName: 'encounters',
-		monthFilter: 1
+		dataArguments: {
+			temporal_unit: 'day',
+			metric_name: 'encounters',
+			month_filter: 1
+		}
 	},
 	// {
 	// TODO: need an additional metric qualifier of "bySpecies"
@@ -38,25 +38,29 @@ const panelDefinitions: PanelDefinition[] = [
 		id: 'best-month-ever',
 		category: 'Best month ever',
 		unit: 'Birds',
-		temporalUnit: 'month',
-		metricName: 'encounters'
+		dataArguments: { temporal_unit: 'month', metric_name: 'encounters' }
 	},
 	{
 		id: 'Busiest-session-this-winter',
 		category: 'Busiest session this winter',
 		unit: 'Birds',
-		temporalUnit: 'day',
-		metricName: 'encounters',
-		// TODO need to generate dynamically
-		exactMonthsFilter: ['2025-11', '2025-12', '2026-01']
+		dataArguments: {
+			temporal_unit: 'day',
+			metric_name: 'encounters',
+			// TODO need to generate dynamically
+			exact_months_filter: ['2025-11', '2025-12', '2026-01']
+		}
 	},
 	{
 		id: 'most-varied-session-this-winter',
 		category: 'Most varied session this winter',
 		unit: 'Species',
-		temporalUnit: 'day',
-		metricName: 'species',
-		exactMonthsFilter: ['2025-11', '2025-12', '2026-01']
+		dataArguments: {
+			temporal_unit: 'day',
+			metric_name: 'species',
+			// TODO need to generate dynamically
+			exact_months_filter: ['2025-11', '2025-12', '2026-01']
+		}
 	}
 ];
 
@@ -72,7 +76,7 @@ async function fetchInitialDataWithCache() {
 }
 
 async function DisplayInitialData() {
-	const initialData = await fetchInitialDataWithCache();
+	const initialData = await fetchInitialData(panelDefinitions);
 	return <StatsAccordion data={initialData} />;
 }
 

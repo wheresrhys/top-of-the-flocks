@@ -1,68 +1,43 @@
-import { TopPeriodsResult } from '@/types/graphql.types';
 import type { PanelDefinition } from '../components/StatsAccordion';
-import { gql } from 'graphql-tag';
-import { graphqlRequest } from '@/lib/graphql-client';
-import type { GraphQLResponse } from '@/lib/graphql-client';
 import type { HeadlineStat } from '../components/StatsAccordion';
-import type { CamelCase, KebabCase } from 'type-fest';
+import { supabase } from '@/lib/supabase';
+import type { Database } from '@/types/supabase.types';
+type DataArguments =
+	Database['public']['Functions']['top_periods_by_metric']['Args'];
+type TopPeriodsResult =
+	Database['public']['Functions']['top_periods_by_metric']['Returns'][number];
 
-function kebabToCamel(str: KebabCase<string>): CamelCase<string> {
-	return str.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
-}
-
-function getTopPeriodsByMetricFragment(
-	panel: PanelDefinition,
-	results: number
-): string {
-	return `
-    topPeriodsByMetric(
-      args: {
-        metricName: "${panel.metricName}"
-        temporalUnit: "${panel.temporalUnit}"
-        resultLimit: ${results}
-        monthFilter: ${panel.monthFilter || null}
-				yearFilter: ${panel.yearFilter || null}
-				exactMonthsFilter: ${panel.exactMonthsFilter ? JSON.stringify(panel.exactMonthsFilter) : null}
-      }
-    ) {
-      metricValue
-      visitDate
-    }
-  `;
+async function getTopPeriodsByMetric(
+	options: DataArguments
+): Promise<TopPeriodsResult[] | null> {
+	const { data, error } = await supabase.rpc('top_periods_by_metric', options);
+	return data;
 }
 
 export async function fetchInitialData(
 	panels: PanelDefinition[]
 ): Promise<HeadlineStat[]> {
-	const gqlQuery = gql`
-		query {
-			${panels
-				.map(
-					(panel) =>
-						`${kebabToCamel(panel.id)}: ${getTopPeriodsByMetricFragment(panel, 1)}`
-				)
-				.join('\n\n')}
-		}
-	`;
-
-	const { data }: GraphQLResponse<Record<string, TopPeriodsResult[]>> =
-		await graphqlRequest<Record<string, TopPeriodsResult[]>>(gqlQuery);
-	return panels.map((panel) => ({
-		definition: panel,
-		data: data?.[kebabToCamel(panel.id)]?.[0]
-	}));
+	const topPeriodsByMetric = await Promise.all(
+		panels.map(async (panel) => {
+			const data = await getTopPeriodsByMetric({
+				...panel.dataArguments,
+				result_limit: 1
+			});
+			return {
+				definition: panel,
+				data: data?.[0] ?? null
+			};
+		})
+	);
+	return topPeriodsByMetric;
 }
 
 export async function fetchDrillDownData(
 	panel: PanelDefinition
-): Promise<TopPeriodsResult[] | undefined> {
-	const gqlQuery = gql`
-		query {
-			${getTopPeriodsByMetricFragment(panel, 5)}
-		}
-	`;
-
-	const { data }: GraphQLResponse<{ topPeriodsByMetric: TopPeriodsResult[] }> =
-		await graphqlRequest<{ topPeriodsByMetric: TopPeriodsResult[] }>(gqlQuery);
-	return data?.topPeriodsByMetric;
+): Promise<TopPeriodsResult[] | null> {
+	const data = await getTopPeriodsByMetric({
+		...panel.dataArguments,
+		result_limit: 5
+	});
+	return data;
 }
