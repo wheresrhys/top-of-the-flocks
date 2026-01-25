@@ -184,6 +184,7 @@ export type Database = {
           exact_months_filter?: string[]
           metric_name?: string
           month_filter?: number
+          months_filter?: number[]
           result_limit?: number
           temporal_unit?: string
           year_filter?: number
