@@ -156,11 +156,7 @@ function AccordionItem({
 		</Accordion>
 	);
 }
-export function StatsAccordion({
-	data
-}: {
-	data: StatsAccordionModel[];
-}) {
+export function StatsAccordion({ data }: { data: StatsAccordionModel[] }) {
 	const [expanded, setExpanded] = useState<string | false>(false);
 	return (
 		<>
