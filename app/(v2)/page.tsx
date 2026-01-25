@@ -60,8 +60,6 @@ const panelDefinitions: PanelDefinition[] = [
 	}
 ];
 
-
-
 async function fetchInitialDataWithCache() {
 	return unstable_cache(
 		async () => fetchInitialData(panelDefinitions),

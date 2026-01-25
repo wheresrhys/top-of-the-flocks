@@ -55,11 +55,11 @@ async function getSpeciesDetails(
 	return response.data;
 }
 
-interface PageProps {
+async function SpeciesDetails({
+	params: paramsPromise
+}: {
 	params: { speciesName: string };
-}
-
-async function SpeciesDetails({ params: paramsPromise }: PageProps) {
+}) {
 	'use cache';
 	cacheLife('hours');
 	const speciesName = decodeURIComponent((await paramsPromise).speciesName);
@@ -156,7 +156,9 @@ async function SpeciesDetails({ params: paramsPromise }: PageProps) {
 	);
 }
 
-export default function SpeciesPage({ params }: PageProps) {
+export default async function SpeciesPage({ params: paramsPromise }: {params: Promise<{ speciesName: string }>}) {
+	const params = await paramsPromise
+	const speciesName = decodeURIComponent(params.speciesName);
 	return (
 		<Suspense
 			fallback={

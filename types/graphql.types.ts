@@ -972,6 +972,13 @@ export type TopPeriodsResultOrderByExp = {
   visitDate?: InputMaybe<OrderBy>;
 };
 
+export type GetSessionByDateQueryVariables = Exact<{
+  date?: InputMaybe<Scalars['Date']['input']>;
+}>;
+
+
+export type GetSessionByDateQuery = { __typename?: 'Query', sessions?: Array<{ __typename?: 'Sessions', encounters?: Array<{ __typename?: 'Encounters', age: number, captureTime: string, isJuv: boolean, recordType: string, sex: string, weight?: number | null, wingLength?: number | null, bird?: { __typename?: 'Birds', ringNo: string, species?: { __typename?: 'Species', speciesName: string } | null } | null }> | null }> | null };
+
 export type LeagueTableQueryVariables = Exact<{
   temporalUnit?: InputMaybe<Scalars['String1']['input']>;
   numberOfEntries?: InputMaybe<Scalars['Int64']['input']>;
