@@ -12,7 +12,6 @@ import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemText from '@mui/material/ListItemText';
 import formatDate from 'intl-dateformat';
-import { KebabCase } from 'type-fest';
 
 import { fetchDrillDownData } from '../api/stats-accordion';
 import type { Database } from '@/types/supabase.types';
@@ -27,7 +26,7 @@ export type HeadlineStat = {
 	data: TopPeriodsResult | null;
 };
 export type PanelDefinition = {
-	id: KebabCase<string>;
+	id: string;
 	category: string;
 	unit: string;
 	dataArguments: DataArguments;
