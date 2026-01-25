@@ -76,7 +76,7 @@ async function fetchInitialDataWithCache() {
 }
 
 async function DisplayInitialData() {
-	const initialData = await fetchInitialData(panelDefinitions);
+	const initialData = await fetchInitialDataWithCache();
 	return <StatsAccordion data={initialData} />;
 }
 

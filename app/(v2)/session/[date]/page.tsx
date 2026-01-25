@@ -124,7 +124,7 @@ function SessionSummary({
 	);
 }
 
-async function fetchInitialDataWithCache(date: string) {
+async function fetchSessionDataWithCache(date: string) {
 	return unstable_cache(
 		async () => fetchSessionDataByDate(date),
 		['session', date],
@@ -141,7 +141,7 @@ async function DisplayInitialData({
 	paramsPromise: Promise<{ date: string }>;
 }) {
 	const { date } = await paramsPromise;
-	const initialData = await fetchSessionDataByDate(date);
+	const initialData = await fetchSessionDataWithCache(date);
 	if (!initialData) {
 		notFound();
 	}
