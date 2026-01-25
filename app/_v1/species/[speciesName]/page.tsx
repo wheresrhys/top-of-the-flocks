@@ -156,8 +156,12 @@ async function SpeciesDetails({
 	);
 }
 
-export default async function SpeciesPage({ params: paramsPromise }: {params: Promise<{ speciesName: string }>}) {
-	const params = await paramsPromise
+export default async function SpeciesPage({
+	params: paramsPromise
+}: {
+	params: Promise<{ speciesName: string }>;
+}) {
+	const params = await paramsPromise;
 	const speciesName = decodeURIComponent(params.speciesName);
 	return (
 		<Suspense

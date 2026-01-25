@@ -55,17 +55,19 @@ function StatOutput({
 				{showUnit ? ` ${definition.unit}` : ''}
 			</b>{' '}
 			{connectingVerbMap[definition.temporalUnit] as string}{' '}
-      {(definition.temporalUnit === 'day') ? (
-        <Link href={`/session/${data.visitDate}`}>{formatDate(
-          new Date(data.visitDate as string),
-          dateFormatMap[definition.temporalUnit as TemporalUnit]
-        )}</Link>
-      ) : (
-        formatDate(
-          new Date(data.visitDate as string),
-          dateFormatMap[definition.temporalUnit as TemporalUnit]
-        )
-      )}
+			{definition.temporalUnit === 'day' ? (
+				<Link href={`/session/${data.visitDate}`}>
+					{formatDate(
+						new Date(data.visitDate as string),
+						dateFormatMap[definition.temporalUnit as TemporalUnit]
+					)}
+				</Link>
+			) : (
+				formatDate(
+					new Date(data.visitDate as string),
+					dateFormatMap[definition.temporalUnit as TemporalUnit]
+				)
+			)}
 		</Typography>
 	);
 }
