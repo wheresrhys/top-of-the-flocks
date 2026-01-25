@@ -17,7 +17,7 @@ import type {
 	TopPeriodsResult,
 	TopPeriodsByMetricArguments
 } from '@/types/graphql.types';
-import { fetchDrillDownData } from '../data-fetching/stats-accordion';
+import { fetchDrillDownData } from '../api/stats-accordion';
 
 type TemporalUnit = 'day' | 'month' | 'year';
 

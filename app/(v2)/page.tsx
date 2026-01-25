@@ -1,6 +1,6 @@
 import { Suspense } from 'react';
 import { StatsAccordion, PanelDefinition } from './components/StatsAccordion';
-import { fetchInitialData } from './data-fetching/stats-accordion';
+import { fetchInitialData } from './api/stats-accordion';
 import { unstable_cache } from 'next/cache';
 
 const panelDefinitions: PanelDefinition[] = [
