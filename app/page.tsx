@@ -1,6 +1,10 @@
 import { Suspense } from 'react';
-import { StatsAccordion, PanelDefinition } from './components/StatsAccordion';
-import { fetchInitialData } from './api/stats-accordion';
+import {
+	StatsAccordion,
+	PanelDefinition,
+	type StatsAccordionModel
+} from './components/StatsAccordion';
+import { fetchPanelData } from './api/stats-accordion';
 import { unstable_cache } from 'next/cache';
 import { getSeasonMonths, getSeasonName } from './lib/season-month-mapping';
 import formatDate from 'intl-dateformat';
@@ -83,13 +87,24 @@ function getPanelDefinitions(date: Date): PanelDefinition[] {
 		}
 	];
 }
-// TODO ditch the fetch multiple items from the data library
-// jiust keep taht as a pure single postgres function call, and blend
-// it with teh rest of the view model in here
+
+async function fetchInitialData(): Promise<StatsAccordionModel[]> {
+	const panelDefinitions = getPanelDefinitions(new Date());
+	return Promise.all(
+		panelDefinitions.map(async (panel) => {
+			const data = await fetchPanelData(panel, 1);
+			return {
+				definition: panel,
+				data: data ?? []
+			};
+		})
+	);
+}
+
 async function fetchInitialDataWithCache() {
 	return unstable_cache(
 		async () => {
-			return fetchInitialData(getPanelDefinitions(new Date()));
+			return fetchInitialData();
 		},
 		['home-stats'],
 		{
