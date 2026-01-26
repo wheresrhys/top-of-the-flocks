@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import ThemeProvider from './components/ThemeProvider';
-import EmotionRegistry from '../lib/emotion-registry';
+import GlobalNav from './components/GlobalNav';
 
 export const metadata: Metadata = {
 	title: 'Top of the Flocks',
@@ -16,9 +15,8 @@ export default function RootLayout({
 	return (
 		<html lang="en">
 			<body>
-				<EmotionRegistry>
-					<ThemeProvider>{children}</ThemeProvider>
-				</EmotionRegistry>
+				<GlobalNav />
+				{children}
 			</body>
 		</html>
 	);
