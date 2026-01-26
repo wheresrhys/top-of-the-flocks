@@ -6,6 +6,12 @@ import formatDate from 'intl-dateformat';
 import { usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 
+import { fetchPanelData } from '../api/stats-accordion';
+import type {
+	StatsAccordionArguments,
+	TopPeriodsResult
+} from '../api/stats-accordion';
+
 async function loadFlyonUI() {
 	return import('flyonui/dist/accordion.js');
 }
@@ -35,11 +41,6 @@ export default function FlyonuiScript() {
 	return null;
 }
 
-import { fetchDrillDownData } from '../api/stats-accordion';
-import type {
-	StatsAccordionArguments,
-	TopPeriodsResult
-} from '../api/stats-accordion';
 type TemporalUnit = 'day' | 'month' | 'year';
 
 export type StatsAccordionModel = {
@@ -132,7 +133,7 @@ function AccordionItem({
 						setLoading(true);
 					}
 				}, 100);
-				await fetchDrillDownData(model.definition).then(setData);
+				await fetchPanelData(model.definition, 5).then(setData);
 				setLoaded(true);
 				cancelSetLoading = true;
 				setLoading(false);

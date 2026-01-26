@@ -32,7 +32,6 @@
     "next-env.d.ts",
     "app/**/*.ts",
     "app/**/*.tsx",
-    "!app/_v1/**",
     "!app/_v1/**/*.ts",
     "!app/_v1/**/*.tsx",
     ".next/types/**/*.ts",
