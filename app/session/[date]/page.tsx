@@ -2,19 +2,9 @@ import { Suspense } from 'react';
 import { unstable_cache } from 'next/cache';
 import { notFound } from 'next/navigation';
 import {
-	List,
-	ListItem,
-	ListItemText,
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableRow
-} from '@mui/material';
-import {
 	fetchSessionDataByDate,
 	type EncounterWithRelations
-} from '@/app/(v2)/api/session';
+} from '@/app/api/session';
 
 function getSpeciesBreakdown(encounters: EncounterWithRelations[]) {
 	const map: Record<string, EncounterWithRelations[]> = {};
@@ -41,85 +31,53 @@ function SessionSummary({
 	date: string;
 }) {
 	const speciesBreakdown = getSpeciesBreakdown(session);
+
 	return (
 		<div>
-			<h1>Session on {date}</h1>
-			<List>
-				<ListItem>
-					<ListItemText>{session.length} birds</ListItemText>
-				</ListItem>
-				<ListItem>
-					<ListItemText>{speciesBreakdown.length} species</ListItemText>
-				</ListItem>
-				<ListItem>
-					<ListItemText>
-						{
+			<h1 className="text-base-content text-4xl p-5">Session on {date}</h1>
+			<ul className="border-base-content/25 divide-base-content/25 w-full divide-y rounded-md border *:p-3 *:first:rounded-t-md *:last:rounded-b-md mb-5">
+				<li>{session.length} birds</li>
+				<li>{speciesBreakdown.length} species</li>
+				<li>{
 							session.filter((encounter) => encounter.record_type === 'N')
 								.length
 						}{' '}
-						new
-					</ListItemText>
-				</ListItem>
-				<ListItem>
-					<ListItemText>
-						{
+						new</li>
+				<li>{
 							session.filter((encounter) => encounter.record_type === 'S')
 								.length
 						}{' '}
-						retraps
-					</ListItemText>
-				</ListItem>
-				<ListItem>
-					<ListItemText>
-						{session.filter((encounter) => !encounter.is_juv).length} adults
-						[FIX ME!]
-					</ListItemText>
-				</ListItem>
-				<ListItem>
-					<ListItemText>
-						{session.filter((encounter) => encounter.is_juv).length} juvs [FIX
-						ME!]
-					</ListItemText>
-				</ListItem>
-			</List>
-			<Table>
-				<TableHead>
-					<TableRow>
-						<TableCell>Species</TableCell>
-						<TableCell>New</TableCell>
-						<TableCell>Retraps</TableCell>
-						<TableCell>Adults</TableCell>
-						<TableCell>Juvs</TableCell>
-					</TableRow>
-				</TableHead>
-				<TableBody>
-					{speciesBreakdown.map(({ species, encounters }) => (
-						<TableRow key={species}>
-							<TableCell>{species}</TableCell>
-							<TableCell>
-								{
-									encounters.filter(
-										(encounter) => encounter.record_type === 'N'
-									).length
-								}
-							</TableCell>
-							<TableCell>
-								{
-									encounters.filter(
-										(encounter) => encounter.record_type === 'S'
-									).length
-								}
-							</TableCell>
-							<TableCell>
-								{encounters.filter((encounter) => !encounter.is_juv).length}
-							</TableCell>
-							<TableCell>
-								{encounters.filter((encounter) => encounter.is_juv).length}
-							</TableCell>
-						</TableRow>
-					))}
-				</TableBody>
-			</Table>
+						retraps</li>
+				<li>{session.filter((encounter) => !encounter.is_juv).length} adults
+						[FIX ME!]</li>
+				<li>{session.filter((encounter) => encounter.is_juv).length} juvs [FIX
+						ME!]</li>
+			</ul>
+
+			<div className="w-full overflow-x-auto">
+				<table className="table">
+					<thead>
+						<tr>
+							<th>Species</th>
+							<th>New</th>
+							<th>Retraps</th>
+							<th>Adults</th>
+							<th>Juvs</th>
+						</tr>
+					</thead>
+					<tbody>
+						{speciesBreakdown.map(({ species, encounters }) => (
+							<tr key={species}>
+								<td>{species}</td>
+								<td>{encounters.filter((encounter) => encounter.record_type === 'N').length}</td>
+								<td>{encounters.filter((encounter) => encounter.record_type === 'S').length}</td>
+								<td>{encounters.filter((encounter) => !encounter.is_juv).length}</td>
+								<td>{encounters.filter((encounter) => encounter.is_juv).length}</td>
+							</tr>
+						))}
+					</tbody>
+				</table>
+			</div>
 		</div>
 	);
 }
