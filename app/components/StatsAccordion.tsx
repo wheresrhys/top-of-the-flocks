@@ -1,8 +1,43 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import Stack from '@mui/material/Stack';
 import formatDate from 'intl-dateformat';
+
+
+
+
+import { usePathname } from 'next/navigation';
+import { useEffect } from 'react';
+
+async function loadFlyonUI() {
+	return import('flyonui/dist/accordion.js');
+}
+
+export default function FlyonuiScript() {
+	const path = usePathname();
+
+	useEffect(() => {
+		const initFlyonUI = async () => {
+			await loadFlyonUI();
+		};
+
+		initFlyonUI();
+	}, []);
+
+	useEffect(() => {
+		setTimeout(() => {
+			if (
+				window.HSAccordion &&
+				typeof window.HSAccordion.autoInit === 'function'
+			) {
+				window.HSAccordion.autoInit();
+			}
+		}, 100);
+	}, [path]);
+
+	return null;
+}
+
 
 import { fetchDrillDownData } from '../api/stats-accordion';
 import type {
@@ -116,7 +151,7 @@ function AccordionItem({
 				<div className="px-5 pb-4">
 					{hasData(data) ? (
 
-						<ol class="list-inside list-decimal">
+						<ol className="list-inside list-decimal">
 							{data.map((item) => (
 								<li className="mb-2" key={item.visit_date}>
 										<StatOutput
@@ -127,9 +162,7 @@ function AccordionItem({
 								</li>
 							))}
 							{isLoading && (
-								<Stack alignItems="center">
-									<span className="loading loading-spinner loading-xl"></span>
-								</Stack>
+								<span className="loading loading-spinner loading-xl"></span>
 							)}
 						</ol>
 					) : (
@@ -159,6 +192,7 @@ export function StatsAccordion({ data }: { data: StatsAccordionModel[] }) {
 			) : (
 				<span>No data available</span>
 			)}
+			<FlyonuiScript />
 		</>
 	);
 }
