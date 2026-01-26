@@ -94,8 +94,10 @@ function AccordionItem({
 	const [data, setData] = useState<TopPeriodsResult[] | null>(model.data);
 	const [isLoading, setLoading] = useState(false);
 	const [isLoaded, setLoaded] = useState(false);
-	async function onChange(event: React.SyntheticEvent, isExpanded: boolean) {
-		if (isExpanded) {
+	async function onChange(event: React.SyntheticEvent, isAlreadyExpanded: boolean) {
+		if (isAlreadyExpanded) {
+			onExpanded(false);
+		} else {
 			onExpanded(model.definition.id);
 			if (!isLoaded) {
 				setLoading(true);
@@ -103,20 +105,12 @@ function AccordionItem({
 				setLoaded(true);
 				setLoading(false);
 			}
-		} else {
-			onExpanded(false);
 		}
 	}
+
 	return (
-		<Accordion
-			onChange={onChange}
-			expanded={expandedId === model.definition.id}
-		>
-			<AccordionSummary
-				expandIcon={<ExpandMoreIcon />}
-				aria-controls={`${model.definition.id}-content`}
-				id={`${model.definition.id}-header`}
-			>
+		<div className={`accordion-item ${expandedId === model.definition.id ? 'active' : ''}`} id={model.definition.id}>
+			<button onClick={(event) => onChange(event, expandedId === model.definition.id)} className="accordion-toggle inline-flex items-center justify-between text-start" aria-controls={`${model.definition.id}-content`} aria-expanded={expandedId === model.definition.id} id={`${model.definition.id}-header`}>
 				<Typography
 					component="span"
 					sx={{
@@ -128,50 +122,58 @@ function AccordionItem({
 				<Typography component="span">
 					{data?.[0].metric_value} {model.definition.unit}
 				</Typography>
-			</AccordionSummary>
-			<AccordionDetails id={`${model.definition.id}-content`}>
-				{hasData(data) ? (
-					<List component="ol">
-						{data.map((item) => (
-							<ListItem disablePadding key={item.visit_date}>
-								<ListItemText>
-									<StatOutput
-										data={item}
-										definition={model.definition}
-										showUnit={true}
-									/>
-								</ListItemText>
-							</ListItem>
-						))}
-						{isLoading && (
-							<Stack alignItems="center">
-								<CircularProgress size={20} />
-							</Stack>
-						)}
-					</List>
-				) : (
-					<Typography component="span">No data available</Typography>
-				)}
-			</AccordionDetails>
-		</Accordion>
-	);
+				<span className="icon-[tabler--chevron-left] accordion-item-active:-rotate-90 size-5 shrink-0 transition-transform duration-300 rtl:-rotate-180" ></span>
+			</button>
+			<div id={`${model.definition.id}-content`} className={`accordion-content w-full ${expandedId === model.definition.id ? '' : 'hidden'} overflow-hidden transition-[height] duration-300`} aria-labelledby={`${model.definition.id}-header`} role="region">
+				<div className="px-5 pb-4">
+					{hasData(data) ? (
+						<List component="ol">
+							{data.map((item) => (
+								<ListItem disablePadding key={item.visit_date}>
+									<ListItemText>
+										<StatOutput
+											data={item}
+											definition={model.definition}
+											showUnit={true}
+										/>
+									</ListItemText>
+								</ListItem>
+							))}
+							{isLoading && (
+								<Stack alignItems="center">
+									<CircularProgress size={20} />
+								</Stack>
+							)}
+						</List>
+					) : (
+						<Typography component="span">No data available</Typography>
+					)}
+				</div>
+			</div>
+		</div>
+	)
 }
+
 export function StatsAccordion({ data }: { data: StatsAccordionModel[] }) {
 	const [expanded, setExpanded] = useState<string | false>(false);
 	return (
 		<>
 			{data !== null ? (
-				data.map((item) => (
+				<div className="accordion divide-neutral/20 divide-y">
+				{data.map((item) => (
 					<AccordionItem
 						key={item.definition.id}
 						model={item}
 						onExpanded={(id) => setExpanded(id)}
 						expandedId={expanded}
 					/>
-				))
+				))}
+			</div>
 			) : (
 				<Typography component="span">No data available</Typography>
 			)}
 		</>
 	);
 }
+
+
