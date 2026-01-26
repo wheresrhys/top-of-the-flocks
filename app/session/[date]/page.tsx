@@ -5,8 +5,9 @@ import {
 	fetchSessionDataByDate,
 	type EncounterWithRelations
 } from '@/app/api/session';
+import {SessionTable, type SpeciesBreakdown} from '@/app/components/SessionTable';
 
-function getSpeciesBreakdown(encounters: EncounterWithRelations[]) {
+function getSpeciesBreakdown(encounters: EncounterWithRelations[]): SpeciesBreakdown {
 	const map: Record<string, EncounterWithRelations[]> = {};
 	encounters.forEach((encounter) => {
 		const species = encounter.species_name;
@@ -55,47 +56,8 @@ function SessionSummary({
 					ME!]
 				</li>
 			</ul>
+			<SessionTable date={date} speciesBreakdown={speciesBreakdown} />
 
-			<div className="w-full overflow-x-auto">
-				<table className="table">
-					<thead>
-						<tr>
-							<th>Species</th>
-							<th>New</th>
-							<th>Retraps</th>
-							<th>Adults</th>
-							<th>Juvs</th>
-						</tr>
-					</thead>
-					<tbody>
-						{speciesBreakdown.map(({ species, encounters }) => (
-							<tr key={species}>
-								<td>{species}</td>
-								<td>
-									{
-										encounters.filter(
-											(encounter) => encounter.record_type === 'N'
-										).length
-									}
-								</td>
-								<td>
-									{
-										encounters.filter(
-											(encounter) => encounter.record_type === 'S'
-										).length
-									}
-								</td>
-								<td>
-									{encounters.filter((encounter) => !encounter.is_juv).length}
-								</td>
-								<td>
-									{encounters.filter((encounter) => encounter.is_juv).length}
-								</td>
-							</tr>
-						))}
-					</tbody>
-				</table>
-			</div>
 		</div>
 	);
 }
