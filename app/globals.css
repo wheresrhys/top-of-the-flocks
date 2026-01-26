@@ -1,5 +1,5 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 @plugin "flyonui";
 @plugin "@iconify/tailwind4";
-@import "flyonui/variants.css";
+@import 'flyonui/variants.css';
 @source "./node_modules/flyonui/dist/accordion.js";

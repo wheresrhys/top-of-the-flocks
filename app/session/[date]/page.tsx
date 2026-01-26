@@ -38,20 +38,22 @@ function SessionSummary({
 			<ul className="border-base-content/25 divide-base-content/25 w-full divide-y rounded-md border *:p-3 *:first:rounded-t-md *:last:rounded-b-md mb-5">
 				<li>{session.length} birds</li>
 				<li>{speciesBreakdown.length} species</li>
-				<li>{
-							session.filter((encounter) => encounter.record_type === 'N')
-								.length
-						}{' '}
-						new</li>
-				<li>{
-							session.filter((encounter) => encounter.record_type === 'S')
-								.length
-						}{' '}
-						retraps</li>
-				<li>{session.filter((encounter) => !encounter.is_juv).length} adults
-						[FIX ME!]</li>
-				<li>{session.filter((encounter) => encounter.is_juv).length} juvs [FIX
-						ME!]</li>
+				<li>
+					{session.filter((encounter) => encounter.record_type === 'N').length}{' '}
+					new
+				</li>
+				<li>
+					{session.filter((encounter) => encounter.record_type === 'S').length}{' '}
+					retraps
+				</li>
+				<li>
+					{session.filter((encounter) => !encounter.is_juv).length} adults [FIX
+					ME!]
+				</li>
+				<li>
+					{session.filter((encounter) => encounter.is_juv).length} juvs [FIX
+					ME!]
+				</li>
 			</ul>
 
 			<div className="w-full overflow-x-auto">
@@ -69,10 +71,26 @@ function SessionSummary({
 						{speciesBreakdown.map(({ species, encounters }) => (
 							<tr key={species}>
 								<td>{species}</td>
-								<td>{encounters.filter((encounter) => encounter.record_type === 'N').length}</td>
-								<td>{encounters.filter((encounter) => encounter.record_type === 'S').length}</td>
-								<td>{encounters.filter((encounter) => !encounter.is_juv).length}</td>
-								<td>{encounters.filter((encounter) => encounter.is_juv).length}</td>
+								<td>
+									{
+										encounters.filter(
+											(encounter) => encounter.record_type === 'N'
+										).length
+									}
+								</td>
+								<td>
+									{
+										encounters.filter(
+											(encounter) => encounter.record_type === 'S'
+										).length
+									}
+								</td>
+								<td>
+									{encounters.filter((encounter) => !encounter.is_juv).length}
+								</td>
+								<td>
+									{encounters.filter((encounter) => encounter.is_juv).length}
+								</td>
 							</tr>
 						))}
 					</tbody>

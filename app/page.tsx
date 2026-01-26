@@ -80,7 +80,7 @@ function getPanelDefinitions(date: Date): PanelDefinition[] {
 				metric_name: 'encounters',
 				month_filter: date.getMonth() + 1
 			}
-		},
+		}
 	];
 }
 // TODO ditch the fetch multiple items from the data library
