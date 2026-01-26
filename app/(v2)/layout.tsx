@@ -1,3 +1,4 @@
+import FlyonUIScript from './components/FlyonUIScript';
 import GlobalNav from './components/GlobalNav';
 
 export default function RootLayout({
@@ -9,6 +10,7 @@ export default function RootLayout({
 		<>
 			<GlobalNav />
 			{children}
+			<FlyonUIScript />
 		</>
 	);
 }
