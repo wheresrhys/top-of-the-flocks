@@ -1,16 +1,7 @@
 'use client';
 import { useState } from 'react';
-import Link from '@mui/material/Link';
-import CircularProgress from '@mui/material/CircularProgress';
+import Link from 'next/link';
 import Stack from '@mui/material/Stack';
-import Accordion from '@mui/material/Accordion';
-import AccordionSummary from '@mui/material/AccordionSummary';
-import AccordionDetails from '@mui/material/AccordionDetails';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import Typography from '@mui/material/Typography';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemText from '@mui/material/ListItemText';
 import formatDate from 'intl-dateformat';
 
 import { fetchDrillDownData } from '../api/stats-accordion';
@@ -50,7 +41,7 @@ const dateFormatMap: Record<TemporalUnit, string> = {
 
 function StatOutput({ definition, data, showUnit }: SingleStatModel) {
 	return (
-		<Typography variant="body2">
+		<>
 			<b>
 				{data.metric_value}
 				{showUnit ? ` ${definition.unit}` : ''}
@@ -61,7 +52,7 @@ function StatOutput({ definition, data, showUnit }: SingleStatModel) {
 				] as string
 			}{' '}
 			{definition.dataArguments.temporal_unit === 'day' ? (
-				<Link href={`/session/${data.visit_date}`}>
+				<Link className="link" href={`/session/${data.visit_date}`}>
 					{formatDate(
 						new Date(data.visit_date as string),
 						dateFormatMap[
@@ -75,7 +66,7 @@ function StatOutput({ definition, data, showUnit }: SingleStatModel) {
 					dateFormatMap[definition.dataArguments.temporal_unit as TemporalUnit]
 				)
 			)}
-		</Typography>
+		</>
 	);
 }
 
@@ -95,14 +86,21 @@ function AccordionItem({
 	const [isLoading, setLoading] = useState(false);
 	const [isLoaded, setLoaded] = useState(false);
 	async function onChange(event: React.SyntheticEvent, isAlreadyExpanded: boolean) {
+		let cancelSetLoading = false;
 		if (isAlreadyExpanded) {
 			onExpanded(false);
 		} else {
 			onExpanded(model.definition.id);
 			if (!isLoaded) {
-				setLoading(true);
+				// avoid the annoying microsecond flash of a spinner
+				setTimeout(() => {
+					if (!cancelSetLoading) {
+						setLoading(true);
+					}
+				}, 100);
 				await fetchDrillDownData(model.definition).then(setData);
 				setLoaded(true);
+				cancelSetLoading = true;
 				setLoading(false);
 			}
 		}
@@ -111,42 +109,31 @@ function AccordionItem({
 	return (
 		<div className={`accordion-item ${expandedId === model.definition.id ? 'active' : ''}`} id={model.definition.id}>
 			<button onClick={(event) => onChange(event, expandedId === model.definition.id)} className="accordion-toggle inline-flex items-center justify-between text-start" aria-controls={`${model.definition.id}-content`} aria-expanded={expandedId === model.definition.id} id={`${model.definition.id}-header`}>
-				<Typography
-					component="span"
-					sx={{
-						fontWeight: 700
-					}}
-				>
-					{model.definition.category}:
-				</Typography>
-				<Typography component="span">
-					{data?.[0].metric_value} {model.definition.unit}
-				</Typography>
+				<span><b>{model.definition.category}:</b>{' '}<span>{data?.[0].metric_value} {model.definition.unit}</span></span>
 				<span className="icon-[tabler--chevron-left] accordion-item-active:-rotate-90 size-5 shrink-0 transition-transform duration-300 rtl:-rotate-180" ></span>
 			</button>
 			<div id={`${model.definition.id}-content`} className={`accordion-content w-full ${expandedId === model.definition.id ? '' : 'hidden'} overflow-hidden transition-[height] duration-300`} aria-labelledby={`${model.definition.id}-header`} role="region">
 				<div className="px-5 pb-4">
 					{hasData(data) ? (
-						<List component="ol">
+
+						<ol class="list-inside list-decimal">
 							{data.map((item) => (
-								<ListItem disablePadding key={item.visit_date}>
-									<ListItemText>
+								<li className="mb-2" key={item.visit_date}>
 										<StatOutput
 											data={item}
 											definition={model.definition}
 											showUnit={true}
 										/>
-									</ListItemText>
-								</ListItem>
+								</li>
 							))}
 							{isLoading && (
 								<Stack alignItems="center">
-									<CircularProgress size={20} />
+									<span className="loading loading-spinner loading-xl"></span>
 								</Stack>
 							)}
-						</List>
+						</ol>
 					) : (
-						<Typography component="span">No data available</Typography>
+						<span>No data available</span>
 					)}
 				</div>
 			</div>
@@ -170,7 +157,7 @@ export function StatsAccordion({ data }: { data: StatsAccordionModel[] }) {
 				))}
 			</div>
 			) : (
-				<Typography component="span">No data available</Typography>
+				<span>No data available</span>
 			)}
 		</>
 	);

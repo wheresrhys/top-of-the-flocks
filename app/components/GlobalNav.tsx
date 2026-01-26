@@ -17,8 +17,8 @@ export default function GlobalNav() {
 		<nav className="navbar rounded-box shadow-base-300/20 shadow-sm">
 			<div className="w-full md:flex md:items-center md:gap-2">
 				<div className="flex items-center justify-between">
-					<div className="navbar-start items-center justify-between max-md:w-full">
-						<Link className="link text-base-content link-neutral text-xl font-bold no-underline" href="/">TOTF</Link>
+					<div className="navbar-start items-center justify-between w-full">
+						<Link className="link text-base-content link-neutral text-xl font-bold no-underline" href="/">Top of the Flocks</Link>
 						{/* <div className="md:hidden">
 							<button type="button" className="collapse-toggle btn btn-outline btn-secondary btn-sm btn-square" data-collapse="#default-navbar-collapse" aria-controls="default-navbar-collapse" aria-label="Toggle navigation" >
 								<span className="icon-[tabler--menu-2] collapse-open:hidden size-4"></span>
