@@ -3,6 +3,11 @@ import { StatsAccordion, PanelDefinition } from './components/StatsAccordion';
 import { fetchInitialData } from './api/stats-accordion';
 import { unstable_cache } from 'next/cache';
 import { getSeasonMonths, getSeasonName } from './lib/season-month-mapping';
+import formatDate from 'intl-dateformat';
+
+function getMonthName(date: Date): string {
+	return formatDate(date, 'MMMM');
+}
 function getPanelDefinitions(date: Date): PanelDefinition[] {
 	return [
 		{
@@ -27,6 +32,16 @@ function getPanelDefinitions(date: Date): PanelDefinition[] {
 				months_filter: getSeasonMonths(date, false) as number[]
 			}
 		},
+		{
+			id: `most-varied-${getSeasonName(date)}-session-ever`,
+			category: `Most varied ${getSeasonName(date)} session ever`,
+			unit: 'Species',
+			dataArguments: {
+				temporal_unit: 'day',
+				metric_name: 'species',
+				months_filter: getSeasonMonths(date, false) as number[]
+			}
+		},
 		// {
 		// TODO: need an additional metric qualifier of "bySpecies"
 		// TODO: could also do with a species filter
@@ -35,16 +50,7 @@ function getPanelDefinitions(date: Date): PanelDefinition[] {
 		// 	unit: 'Birds',
 		// 	temporalUnit: 'day',
 		// },
-		{
-			id: 'best-month-ever',
-			category: 'Best month {TODO print month name} ever',
-			unit: 'Birds',
-			dataArguments: {
-				temporal_unit: 'month',
-				metric_name: 'encounters',
-				month_filter: date.getMonth() + 1
-			}
-		},
+
 		{
 			id: `busiest-session-this-${getSeasonName(date)}`,
 			category: `Busiest session this ${getSeasonName(date)}`,
@@ -64,10 +70,22 @@ function getPanelDefinitions(date: Date): PanelDefinition[] {
 				metric_name: 'species',
 				exact_months_filter: getSeasonMonths(date, true) as string[]
 			}
-		}
+		},
+		{
+			id: `best-${getMonthName(date)}-ever`,
+			category: `Best ${getMonthName(date)} ever`,
+			unit: 'Birds',
+			dataArguments: {
+				temporal_unit: 'month',
+				metric_name: 'encounters',
+				month_filter: date.getMonth() + 1
+			}
+		},
 	];
 }
-
+// TODO ditch the fetch multiple items from the data library
+// jiust keep taht as a pure single postgres function call, and blend
+// it with teh rest of the view model in here
 async function fetchInitialDataWithCache() {
 	return unstable_cache(
 		async () => {
@@ -75,7 +93,7 @@ async function fetchInitialDataWithCache() {
 		},
 		['home-stats'],
 		{
-			revalidate: 3600 * 24 * 7,
+			revalidate: process.env.VERCEL_ENV === 'production' ? 3600 * 24 * 7 : 1,
 			tags: ['home']
 		}
 	)();
