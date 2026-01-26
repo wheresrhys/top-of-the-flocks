@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-
+import type { Database } from '@/types/supabase.types';
 export type EncounterWithRelations = {
 	age: number;
 	capture_time: string;
@@ -18,7 +18,14 @@ export type EncounterWithRelations = {
 	species_name: string;
 };
 
-function flattenEncounter(encounter: Database['public']['Tables']['Encounters']['Row']): EncounterWithRelations {
+type RawEncounter = Database['public']['Tables']['Encounters']['Row'] & {
+	bird: {
+		ring_no: string;
+		species: { species_name: string };
+	};
+};
+
+function flattenEncounter(encounter: RawEncounter): EncounterWithRelations {
 		const { bird, ...flattenedEncounter } = encounter;
 		// This is a workaround to type the bird object correctly
 		// supabase does not return arrays for many to one relationships
@@ -86,45 +93,5 @@ export async function fetchSessionDataByDate(
 		return [] as EncounterWithRelations[];
 	}
 	// Return empty array if no encounters found, otherwise return the data
-	return data.map(flattenEncounter) as EncounterWithRelations[];
-}
-
-export async function fetchSessionDataForSpeciesByDate(
-	date: string,
-	species: string
-): Promise<EncounterWithRelations[] | null> {
-	const { data, error } = await supabase
-		.from('Encounters')
-		.select(`id,
-      session_id,
-			age,
-      bird_id,
-			capture_time,
-			is_juv,
-			record_type,
-			sex,
-			weight,
-			wing_length,
-			breeding_condition,
-			extra_text,
-			moult_code,
-			old_greater_coverts,
-			scheme,
-			sexing_method,
-			bird:Birds (
-        id,
-        species_id,
-				ring_no,
-				species:Species (
-          id,
-					species_name
-				)
-			)
-		`)
-		.eq('session_id', session.id)
-		.eq('species_name', species);
-	if (error) {
-		throw new Error(`Failed to fetch session data: ${error.message}`);
-	}
 	return data.map(flattenEncounter) as EncounterWithRelations[];
 }

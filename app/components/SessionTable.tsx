@@ -3,12 +3,12 @@
 import { type EncounterWithRelations } from '@/app/api/session';
 
 import { useState } from 'react';
-type SpeciesBreakdown = {
+export type SpeciesBreakdown = {
   species: string;
   encounters: EncounterWithRelations[];
 }[];
 
-function SpeciesDetails({ encounters }: { encounters: EncounterWithRelations[] }) {
+function SpeciesDetails({ encounters }: { encounters: EncounterWithRelations[] |null }) {
   return (
     <table className="table table-xs ">
       <thead>
@@ -24,7 +24,7 @@ function SpeciesDetails({ encounters }: { encounters: EncounterWithRelations[] }
         </tr>
       </thead>
       <tbody>
-        {encounters.map(( encounter ) => (
+        {encounters?.map(( encounter ) => (
           <tr key={encounter.ring_no}>
             <td>{encounter.capture_time}</td>
             <td>{encounter.ring_no}</td>
@@ -40,7 +40,7 @@ function SpeciesDetails({ encounters }: { encounters: EncounterWithRelations[] }
   )
 }
 
-function SpeciesRow({ species, encounters, onExpand, expandedSpecies }: { species: string, encounters: EncounterWithRelations[] }) {
+function SpeciesRow({ species, encounters, onExpand, expandedSpecies }: { species: string, encounters: EncounterWithRelations[], onExpand: (species: string | null) => void, expandedSpecies: string | null }) {
   const [speciesDetail, setSpeciesDetail] = useState<EncounterWithRelations[] | null>(expandedSpecies === species ? encounters : null);
   function toggleSpeciesDetail() {
     if (expandedSpecies == species) {
