@@ -33,14 +33,14 @@ export default function GlobalNav() {
 				>
 					<ul className="menu md:menu-horizontal gap-2 p-0 text-base max-md:mt-2">
 						<li>
-							<a href="#">Home</a>
+							<a href="/sessions">Sessions</a>
 						</li>
-						<li>
+						{/* <li>
 							<a href="#">Services</a>
 						</li>
 						<li>
 							<a href="#">Contact us</a>
-						</li>
+						</li> */}
 					</ul>
 				</div>
 			</div>

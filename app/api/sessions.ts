@@ -27,7 +27,6 @@ export async function fetchAllSessions(): Promise<Session[] | null> {
 		.from('Sessions')
 		.select('id, visit_date, encounters:Encounters(count)')
 		.order('visit_date', { ascending: false });
-
 	if (error || !data) {
 		return null;
 	}

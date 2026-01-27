@@ -2,5 +2,4 @@
 @plugin "flyonui";
 @plugin "@iconify/tailwind4";
 @import 'flyonui/variants.css';
-@source "./node_modules/flyonui/dist/accordion.js";
-@source "./node_modules/flyonui/dist/navbar.js";
+@source "./node_modules/flyonui/flyonui.js";

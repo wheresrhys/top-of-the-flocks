@@ -29,15 +29,15 @@ function groupByDateMethod(methodName: string) {
 const groupByYear = groupByDateMethod('getFullYear');
 const groupByMonth = groupByDateMethod('getMonth');
 
-async function fetchSessionsDataWithCache() {
-	return unstable_cache(async () => fetchAllSessions(), ['session'], {
+async function fetchAllSessionsWithCache() {
+	return unstable_cache(async () => fetchAllSessions(), ['sessions'], {
 		revalidate: 3600 * 24 * 7,
-		tags: ['session']
+		tags: ['sessions']
 	})();
 }
 
 async function ListAllSessions() {
-	const sessions = await fetchSessionsDataWithCache();
+	const sessions = await fetchAllSessionsWithCache();
 	const calendar = groupByYear(sessions || []).map(groupByMonth);
 	return (
 		<div className="m-5">
@@ -45,7 +45,7 @@ async function ListAllSessions() {
 			<ol className="border-base-content/25 divide-base-content/25 w-full divide-y rounded-md border *:p-3 *:first:rounded-t-md *:last:rounded-b-md mb-5 mt-5">
 				{calendar.flatMap((year) =>
 					year.flatMap((month) => (
-						<li key={formatDate(new Date(month[0].visit_date), 'yyyy-MM')}>
+						<li key={formatDate(new Date(month[0].visit_date), 'YYYY-MM')}>
 							{formatDate(new Date(month[0].visit_date), 'MMMM YYYY')}
 							<ol>
 								{month.flatMap((session) => (
@@ -54,8 +54,9 @@ async function ListAllSessions() {
 											className="link"
 											href={`/session/${session.visit_date}`}
 										>
-											{session.visit_date}: {session.encounters[0].count} birds
-										</Link>
+											{session.visit_date}:
+										</Link>{' '}
+										{session.encounters[0].count} birds
 									</li>
 								))}
 							</ol>
