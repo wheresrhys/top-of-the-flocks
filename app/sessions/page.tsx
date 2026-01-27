@@ -5,13 +5,13 @@ import { unstable_cache } from 'next/cache';
 import { Suspense } from 'react';
 import formatDate from 'intl-dateformat';
 
-function groupByDateMethod(methodName: string) {
+function groupByDateMethod(methodName: 'getFullYear' | 'getMonth') {
 	return function (sessions: Session[] | null): Session[][] {
 		if (!sessions) return [];
 		return Object.entries(
 			sessions.reduce((acc: Record<string, Session[]>, session) => {
 				const date = new Date(session.visit_date);
-				const groupByValue = String(date[methodName as keyof Date]());
+				const groupByValue = String(date[methodName]());
 				acc[groupByValue] = acc[groupByValue] || [];
 				acc[groupByValue].push(session);
 				return acc;

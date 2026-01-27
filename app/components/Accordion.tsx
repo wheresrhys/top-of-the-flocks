@@ -1,6 +1,15 @@
 'use client';
 import { useState } from 'react';
 
+type HeadingComponent<ItemModel> = React.ComponentType<{
+	model: ItemModel;
+	expandedId: string | false;
+}>;
+type ContentComponent<ItemModel> = React.ComponentType<{
+	model: ItemModel;
+	expandedId: string | false;
+}>;
+
 function AccordionItem<ItemModel>({
 	id,
 	model,
@@ -13,8 +22,8 @@ function AccordionItem<ItemModel>({
 	model: ItemModel;
 	onToggle: (id: string | false) => void;
 	expandedId: string | false;
-	HeadingComponent: React.ReactNode;
-	ContentComponent: React.ReactNode;
+	HeadingComponent: HeadingComponent<ItemModel>;
+	ContentComponent: ContentComponent<ItemModel>;
 }) {
 	async function onClick(isAlreadyExpanded: boolean) {
 		if (isAlreadyExpanded) {
@@ -55,14 +64,11 @@ export function Accordion<ItemModel>({
 	data,
 	ContentComponent,
 	HeadingComponent,
-	getKey,
-	onExpand = () => {
-		return;
-	}
+	getKey
 }: {
 	data: ItemModel[];
-	HeadingComponent: React.ReactNode;
-	ContentComponent: React.ReactNode;
+	HeadingComponent: HeadingComponent<ItemModel>;
+	ContentComponent: ContentComponent<ItemModel>;
 	getKey: (item: ItemModel) => string;
 }) {
 	const [expanded, setExpanded] = useState<string | false>(false);
