@@ -35,8 +35,11 @@ function SessionSummary({
 
 	return (
 		<div>
-			<h1 className="text-base-content text-4xl p-5">Session on {date}</h1>
-			<ul className="border-base-content/25 divide-base-content/25 w-full divide-y rounded-md border *:p-3 *:first:rounded-t-md *:last:rounded-b-md mb-5">
+			<div className="m-5">
+
+
+			<h1 className="text-base-content text-4xl">Session on {date}</h1>
+			<ul className="border-base-content/25 divide-base-content/25 w-full divide-y rounded-md border *:p-3 *:first:rounded-t-md *:last:rounded-b-md mb-5 mt-5">
 				<li>{session.length} birds</li>
 				<li>{speciesBreakdown.length} species</li>
 				<li>
@@ -56,6 +59,7 @@ function SessionSummary({
 					ME!]
 				</li>
 			</ul>
+			</div>
 			<SessionTable date={date} speciesBreakdown={speciesBreakdown} />
 
 		</div>
