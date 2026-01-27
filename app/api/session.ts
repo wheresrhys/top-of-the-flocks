@@ -26,20 +26,20 @@ type RawEncounter = Database['public']['Tables']['Encounters']['Row'] & {
 };
 
 function flattenEncounter(encounter: RawEncounter): EncounterWithRelations {
-		const { bird, ...flattenedEncounter } = encounter;
-		// This is a workaround to type the bird object correctly
-		// supabase does not return arrays for many to one relationships
-		// even though the type definitions suggest it does
-		const correctlyTypedBird = bird as unknown as {
-			ring_no: string;
-			species: { species_name: string };
-		};
-		return {
-			...flattenedEncounter,
-			ring_no: correctlyTypedBird.ring_no,
-			species_name: correctlyTypedBird.species.species_name
-		};
-	}
+	const { bird, ...flattenedEncounter } = encounter;
+	// This is a workaround to type the bird object correctly
+	// supabase does not return arrays for many to one relationships
+	// even though the type definitions suggest it does
+	const correctlyTypedBird = bird as unknown as {
+		ring_no: string;
+		species: { species_name: string };
+	};
+	return {
+		...flattenedEncounter,
+		ring_no: correctlyTypedBird.ring_no,
+		species_name: correctlyTypedBird.species.species_name
+	};
+}
 
 export async function fetchSessionDataByDate(
 	date: string
