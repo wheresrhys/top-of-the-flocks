@@ -1,6 +1,6 @@
 'use client';
 
-import { type EncounterWithRelations } from '@/app/api/session';
+import { type EncounterWithRelations } from '@/app/session/[date]/session';
 
 import { useState } from 'react';
 export type SpeciesBreakdown = {

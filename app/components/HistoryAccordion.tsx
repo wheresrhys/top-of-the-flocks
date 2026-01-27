@@ -1,5 +1,5 @@
 'use client';
-import { type Session } from '@/app/api/sessions';
+import { type Session } from '@/app/sessions/sessions';
 import Link from 'next/link';
 import formatDate from 'intl-dateformat';
 import { Accordion } from '@/app/components/Accordion';

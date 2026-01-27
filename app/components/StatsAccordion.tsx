@@ -3,11 +3,11 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import formatDate from 'intl-dateformat';
 import { Accordion } from './Accordion';
-import { fetchPanelData } from '../api/stats-accordion';
+import { fetchPanelData } from '../lib/stats-accordion';
 import type {
 	StatsAccordionArguments,
 	TopPeriodsResult
-} from '../api/stats-accordion';
+} from '../lib/stats-accordion';
 
 type TemporalUnit = 'day' | 'month' | 'year';
 

@@ -1,4 +1,4 @@
-import { fetchAllSessions } from '@/app/api/sessions';
+import { fetchAllSessions } from '@/app/sessions/sessions';
 import { unstable_cache } from 'next/cache';
 import { Suspense } from 'react';
 import { HistoryAccordion } from '@/app/components/HistoryAccordion';

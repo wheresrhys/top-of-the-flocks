@@ -4,7 +4,7 @@ import {
 	PanelDefinition,
 	type StatsAccordionModel
 } from './components/StatsAccordion';
-import { fetchPanelData } from './api/stats-accordion';
+import { fetchPanelData } from './lib/stats-accordion';
 import { unstable_cache } from 'next/cache';
 import { getSeasonMonths, getSeasonName } from './lib/season-month-mapping';
 import formatDate from 'intl-dateformat';

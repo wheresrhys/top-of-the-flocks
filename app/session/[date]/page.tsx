@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import {
 	fetchSessionDataByDate,
 	type EncounterWithRelations
-} from '@/app/api/session';
+} from '@/app/session/[date]/session';
 import {
 	SessionTable,
 	type SpeciesBreakdown
