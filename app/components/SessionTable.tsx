@@ -1,17 +1,17 @@
 'use client';
 
-import { type EncounterWithRelations } from '@/app/session/[date]/session';
+import { type Encounter } from '@/app/session/[date]/page';
 
 import { useState } from 'react';
 export type SpeciesBreakdown = {
 	species: string;
-	encounters: EncounterWithRelations[];
+	encounters: Encounter[];
 }[];
 
 function SpeciesDetails({
 	encounters
 }: {
-	encounters: EncounterWithRelations[] | null;
+	encounters: Encounter[] | null;
 }) {
 	return (
 		<table className="table table-xs ">
@@ -28,9 +28,9 @@ function SpeciesDetails({
 			</thead>
 			<tbody>
 				{encounters?.map((encounter) => (
-					<tr key={encounter.ring_no}>
+					<tr key={encounter.id}>
 						<td>{encounter.capture_time}</td>
-						<td>{encounter.ring_no}</td>
+						<td>{encounter.bird.ring_no}</td>
 						<td>{encounter.record_type}</td>
 						<td>{encounter.age}</td>
 						<td>{encounter.sex}</td>
@@ -50,12 +50,12 @@ function SpeciesRow({
 	expandedSpecies
 }: {
 	species: string;
-	encounters: EncounterWithRelations[];
+	encounters: Encounter[];
 	onExpand: (species: string | null) => void;
 	expandedSpecies: string | null;
 }) {
 	const [speciesDetail, setSpeciesDetail] = useState<
-		EncounterWithRelations[] | null
+		Encounter[] | null
 	>(expandedSpecies === species ? encounters : null);
 	function toggleSpeciesDetail() {
 		if (expandedSpecies == species) {
