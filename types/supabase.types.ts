@@ -42,13 +42,14 @@ export type Database = {
       }
       Encounters: {
         Row: {
-          age: number
+          age_code: number | null
           bird_id: number
           breeding_condition: string | null
           capture_time: string
           extra_text: string | null
           id: number
           is_juv: boolean
+          minimum_years: number | null
           moult_code: string | null
           old_greater_coverts: number | null
           record_type: string
@@ -60,13 +61,14 @@ export type Database = {
           wing_length: number | null
         }
         Insert: {
-          age: number
+          age_code?: number | null
           bird_id: number
           breeding_condition?: string | null
           capture_time: string
           extra_text?: string | null
           id?: number
           is_juv?: boolean
+          minimum_years?: number | null
           moult_code?: string | null
           old_greater_coverts?: number | null
           record_type: string
@@ -78,13 +80,14 @@ export type Database = {
           wing_length?: number | null
         }
         Update: {
-          age?: number
+          age_code?: number | null
           bird_id?: number
           breeding_condition?: string | null
           capture_time?: string
           extra_text?: string | null
           id?: number
           is_juv?: boolean
+          minimum_years?: number | null
           moult_code?: string | null
           old_greater_coverts?: number | null
           record_type?: string
