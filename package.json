@@ -15,7 +15,8 @@
 		"supabase:import": "./scripts/load-env.sh tsx scripts/import-csv.ts",
 		"build:prod": "curl -X POST $(op run --no-masking --env-file=\".env.1password\" -- printenv VERCEL_DEPLOY_HOOK)",
 		"env:load": "./scripts/load-env.sh",
-		"env:check": "op whoami && echo '✅ 1Password CLI authenticated' || echo '❌ Please run: op signin'"
+		"env:check": "op whoami && echo '✅ 1Password CLI authenticated' || echo '❌ Please run: op signin'",
+		"prepare": "husky"
 	},
 	"dependencies": {
 		"@supabase/supabase-js": "^2.75.1",
@@ -40,6 +41,7 @@
 		"csv-parser": "^3.2.0",
 		"eslint": "^9",
 		"eslint-config-next": "15.5.6",
+		"husky": "^9.1.7",
 		"supabase": "^2.72.8",
 		"tsx": "^4.20.6",
 		"typescript": "^5",
