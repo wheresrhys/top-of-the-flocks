@@ -9,7 +9,7 @@ export type TopPeriodsResult =
 export type TopSpeciesResult =
 	Database['public']['Functions']['top_species_by_metric']['Returns'][number];
 
-async function getTopPeriodsByMetric(
+export async function getTopPeriodsByMetric(
 	options: StatsAccordionArguments
 ): Promise<TopPeriodsResult[] | null> {
 	return supabase
@@ -17,7 +17,7 @@ async function getTopPeriodsByMetric(
 		.then(catchSupabaseErrors);
 }
 
-async function getTopSpeciesByMetric(
+export async function getTopSpeciesByMetric(
 	options: StatsAccordionArguments
 ): Promise<TopSpeciesResult[] | null> {
 	return supabase
