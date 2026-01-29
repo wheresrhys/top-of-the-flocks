@@ -1,31 +1,32 @@
 import { BootstrapPageData } from '@/app/components/BootstrapPageData';
-import { querySupabaseForTable } from '@/app/lib/supabase-query';
 import type { Database } from '@/types/supabase.types';
 import Link from 'next/link';
+import { supabase, catchSupabaseErrors } from '@/lib/supabase';
 type SpeciesLeagueTableRow =
 	Database['public']['Views']['species_league_table']['Row'];
 
 export async function fetchSpeciesData(): Promise<SpeciesLeagueTableRow[]> {
-	return querySupabaseForTable<SpeciesLeagueTableRow>({
-		rootTable: 'species_league_table',
-		orderByField: 'encounters',
-		orderByDirection: 'desc',
-		query: `
-			species_name,
-			individuals,
-			encounters,
-			session_count,
-			longest_stay,
-			unluckiest,
-			longest_winged,
-			average_wing_length,
-			shortest_winged,
-			heaviest,
-			average_weight,
-			lightest,
-			total_weight
-		`
-	});
+	return supabase
+		.from('species_league_table')
+		.select(
+			`
+		species_name,
+		individuals,
+		encounters,
+		session_count,
+		longest_stay,
+		unluckiest,
+		longest_winged,
+		average_wing_length,
+		shortest_winged,
+		heaviest,
+		average_weight,
+		lightest,
+		total_weight
+	`
+		)
+		.order('encounters', { ascending: false })
+		.then(catchSupabaseErrors) as Promise<SpeciesLeagueTableRow[]>;
 }
 
 function SpeciesLeagueTable({ data }: { data: SpeciesLeagueTableRow[] }) {

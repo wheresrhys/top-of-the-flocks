@@ -1,6 +1,6 @@
 import { HistoryAccordion } from '@/app/components/HistoryAccordion';
 import { BootstrapPageData } from '@/app/components/BootstrapPageData';
-import { querySupabaseForTable } from '@/app/lib/supabase-query';
+import { supabase, catchSupabaseErrors } from '@/lib/supabase';
 
 export type Session = {
 	id: number;
@@ -12,13 +12,12 @@ export type SessionWithEncounters = Session & {
 	encounters: { count: number }[];
 };
 
-export async function fetchAllSessions(): Promise<Session[] | null> {
-	return querySupabaseForTable({
-		rootTable: 'Sessions',
-		query: 'id, visit_date, encounters:Encounters(count)',
-		orderByField: 'visit_date',
-		orderByDirection: 'desc'
-	});
+export async function fetchAllSessions(): Promise<Session[]> {
+	return supabase
+		.from('Sessions')
+		.select('id, visit_date, encounters:Encounters(count)')
+		.order('visit_date', { ascending: false })
+		.then(catchSupabaseErrors) as Promise<Session[]>;
 }
 
 async function ListAllSessions({ data }: { data: Session[] }) {
