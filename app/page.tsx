@@ -1,13 +1,12 @@
-import { Suspense } from 'react';
 import {
 	StatsAccordion,
 	PanelDefinition,
 	type StatsAccordionModel
 } from './components/StatsAccordion';
-import { fetchPanelData } from './api/stats-accordion';
-import { unstable_cache } from 'next/cache';
+import { fetchPanelData } from './lib/stats-accordion';
 import { getSeasonMonths, getSeasonName } from './lib/season-month-mapping';
 import formatDate from 'intl-dateformat';
+import { BootstrapPageData } from './components/BootstrapPageData';
 
 function getMonthName(date: Date): string {
 	return formatDate(date, 'MMMM');
@@ -101,28 +100,12 @@ async function fetchInitialData(): Promise<StatsAccordionModel[]> {
 	);
 }
 
-async function fetchInitialDataWithCache() {
-	return unstable_cache(
-		async () => {
-			return fetchInitialData();
-		},
-		['home-stats'],
-		{
-			revalidate: process.env.VERCEL_ENV === 'production' ? 3600 * 24 * 7 : 1,
-			tags: ['home']
-		}
-	)();
-}
-
-async function DisplayInitialData() {
-	const initialData = await fetchInitialDataWithCache();
-	return <StatsAccordion data={initialData} />;
-}
-
 export default async function Home() {
 	return (
-		<Suspense fallback={<div>Loading...</div>}>
-			<DisplayInitialData />
-		</Suspense>
+		<BootstrapPageData<StatsAccordionModel[]>
+			getCacheKeys={() => ['home-stats']}
+			dataFetcher={fetchInitialData}
+			PageComponent={StatsAccordion}
+		/>
 	);
 }

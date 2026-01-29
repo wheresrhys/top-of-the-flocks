@@ -1,21 +1,66 @@
-import { Suspense } from 'react';
-import { unstable_cache } from 'next/cache';
-import { notFound } from 'next/navigation';
-import {
-	fetchSessionDataByDate,
-	type EncounterWithRelations
-} from '@/app/api/session';
 import {
 	SessionTable,
 	type SpeciesBreakdown
 } from '@/app/components/SessionTable';
+import { querySupabaseForNestedList } from '@/app/lib/supabase-query';
+import type { Database } from '@/types/supabase.types';
+import { BootstrapPageData } from '@/app/components/BootstrapPageData';
 
-function getSpeciesBreakdown(
-	encounters: EncounterWithRelations[]
-): SpeciesBreakdown {
-	const map: Record<string, EncounterWithRelations[]> = {};
+type PageParams = { date: string };
+type PageProps = { params: Promise<PageParams> };
+
+export type Encounter = Database['public']['Tables']['Encounters']['Row'] & {
+	bird: {
+		ring_no: string;
+		species: { species_name: string };
+	};
+};
+
+async function fetchSessionData({
+	date
+}: PageParams): Promise<Encounter[] | null> {
+	return querySupabaseForNestedList<Encounter>({
+		rootTable: 'Sessions',
+		identityField: 'visit_date',
+		identityValue: date,
+		identityOperator: 'eq',
+		listProperty: 'encounters',
+		query: `
+			id,
+			encounters: Encounters(
+				id,
+				session_id,
+				age,
+				bird_id,
+				capture_time,
+				is_juv,
+				record_type,
+				sex,
+				weight,
+				wing_length,
+				breeding_condition,
+				extra_text,
+				moult_code,
+				old_greater_coverts,
+				scheme,
+				sexing_method,
+				bird:Birds (
+					id,
+					species_id,
+					ring_no,
+					species:Species (
+						id,
+						species_name
+					)
+				)
+			)`
+	});
+}
+
+function getSpeciesBreakdown(encounters: Encounter[]): SpeciesBreakdown {
+	const map: Record<string, Encounter[]> = {};
 	encounters.forEach((encounter) => {
-		const species = encounter.species_name;
+		const species = encounter.bird.species.species_name;
 		map[species] = map[species] || [];
 		map[species].push(encounter);
 	});
@@ -30,11 +75,11 @@ function getSpeciesBreakdown(
 }
 
 function SessionSummary({
-	session,
-	date
+	data: session,
+	params: { date }
 }: {
-	session: EncounterWithRelations[];
-	date: string;
+	data: Encounter[];
+	params: { date: string };
 }) {
 	const speciesBreakdown = getSpeciesBreakdown(session);
 
@@ -74,38 +119,13 @@ function SessionSummary({
 	);
 }
 
-async function fetchSessionDataWithCache(date: string) {
-	return unstable_cache(
-		async () => fetchSessionDataByDate(date),
-		['session', date],
-		{
-			revalidate: 3600 * 24 * 7,
-			tags: ['session', date]
-		}
-	)();
-}
-
-async function DisplayInitialData({
-	paramsPromise
-}: {
-	paramsPromise: Promise<{ date: string }>;
-}) {
-	const { date } = await paramsPromise;
-	const initialData = await fetchSessionDataWithCache(date);
-	if (!initialData) {
-		notFound();
-	}
-	return <SessionSummary session={initialData} date={date} />;
-}
-
-export default async function SessionPage({
-	params: paramsPromise
-}: {
-	params: Promise<{ date: string }>;
-}) {
+export default async function SessionPage(props: PageProps) {
 	return (
-		<Suspense fallback={<div>Loading...</div>}>
-			<DisplayInitialData paramsPromise={paramsPromise} />
-		</Suspense>
+		<BootstrapPageData<Encounter[], PageProps, PageParams>
+			pageProps={props}
+			getCacheKeys={(params) => ['session', params.date as string]}
+			dataFetcher={fetchSessionData}
+			PageComponent={SessionSummary}
+		/>
 	);
 }
