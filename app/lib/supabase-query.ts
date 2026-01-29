@@ -12,6 +12,13 @@ type QueryInput = {
 	identityOperator: FilterOperator;
 };
 
+type TableQueryInput = {
+	query: string;
+	rootTable: keyof Database['public']['Tables'];
+	orderByField: string;
+	orderByDirection: 'asc' | 'desc';
+};
+
 function buildSelect({
 	query,
 	rootTable,
@@ -92,4 +99,24 @@ export async function querySupabaseForNestedList<ReturnType>(
 		return null;
 	}
 	return result as ReturnType[];
+}
+
+export async function querySupabaseForTable<ReturnType>(
+	queryInput: TableQueryInput
+): Promise<ReturnType[] | null> {
+	const { data, error } = await supabase
+		.from(queryInput.rootTable)
+		.select(queryInput.query)
+		.order(queryInput.orderByField, { ascending: queryInput.orderByDirection === 'asc' });
+
+	if (error) {
+		throw new Error(
+			`Failed to fetch ${queryInput.rootTable}: ${error.message}`
+		);
+	}
+
+	if (!data || !data.length) {
+		return null;
+	}
+	return data as ReturnType[];
 }

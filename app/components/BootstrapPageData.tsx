@@ -36,7 +36,16 @@ async function fetchDataWithCache<DataType, ParamsType>(
 async function LoadWithData<DataType, PagePropsType, ParamsType>(
 	bootstrapProps: BootstrapPageDataProps<DataType, PagePropsType, ParamsType>
 ) {
-	const params = (bootstrapProps.getParams ? await bootstrapProps.getParams(bootstrapProps.pageProps as PagePropsType) : await getParams(bootstrapProps.pageProps as DefaultPageProps)) as ParamsType;
+
+	let params: ParamsType;
+	if (bootstrapProps.getParams) {
+		params = await bootstrapProps.getParams(bootstrapProps.pageProps as PagePropsType)
+	} else if (bootstrapProps.pageProps) {
+		params = await getParams(bootstrapProps.pageProps)
+	} else {
+		params = {} as ParamsType;
+	}
+
 	const data = await fetchDataWithCache<DataType, ParamsType>(
 		params,
 		bootstrapProps.dataFetcher,

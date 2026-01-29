@@ -117,15 +117,10 @@ function SessionSummary({
 	);
 }
 
-async function getParams(pageProps: PageProps) : Promise<PageParams> {
-	return await pageProps.params;
-}
-
 export default async function SessionPage(props: PageProps ) {
 	return (
 		<BootstrapPageData<Encounter[], PageProps, PageParams>
 			pageProps={props}
-			getParams={getParams}
 			getCacheKeys={params => ['session', params.date as string]}
 			dataFetcher={fetchSessionData}
 			PageComponent={SessionSummary}
