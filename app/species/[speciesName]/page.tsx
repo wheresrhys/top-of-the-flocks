@@ -1,97 +1,79 @@
-import { Suspense } from 'react';
-import { unstable_cache } from 'next/cache';
-import { notFound } from 'next/navigation';
 import {
-	fetchSpeciesData,
-	type BirdWithRelations
-} from '@/app/species/[speciesName]/species';
-import {
-	SpeciesTable,
-	type IndividualBirdHistory
-} from '@/app/components/SpeciesTable';
+	SpeciesTable
+} from '@/app/components/SingleSpeciesTable';
+import { BootstrapPageData } from '@/app/components/BootstrapPageData';
+import {querySupabaseForNestedList} from '@/app/lib/supabase-query';
+import type { Database } from '@/types/supabase.types';
 
-function getIndividualBirds(birds: BirdWithRelations[]): Record<string, IndividualBirdHistory> {
+type PageParams = { speciesName: string }
+type PageProps = { params: Promise<PageParams> }
 
-	const map: Record<string, BirdWithRelations[]> = {};
-	birds.forEach((bird) => {
-		const ring_no = bird.ring_no;
-		map[ring_no] = map[ring_no] || [];
-		map[ring_no].push(...bird.encounters);
-	});
-	console.log(map)
-	return map;
+type Encounter = (Database['public']['Tables']['Encounters']['Row'] & {
+	session: Database['public']['Tables']['Sessions']['Row'];
+})
+
+export type BirdWithEncounters = Database['public']['Tables']['Birds']['Row'] & {
+	encounters: Encounter[];
+};
+
+export async function fetchSpeciesData(params: PageParams) {
+	return querySupabaseForNestedList<BirdWithEncounters>({
+		rootTable: 'Species',
+		identityField: 'species_name',
+		identityValue: params.speciesName,
+		identityOperator: 'ilike',
+		listProperty: 'birds',
+		query: `
+		birds:Birds (
+			id,
+			ring_no,
+			encounters:Encounters (
+				id,
+				age,
+				capture_time,
+				record_type,
+				sex,
+				weight,
+				wing_length,
+				session:Sessions(
+				visit_date
+				)
+			)
+		)
+		`,
+	})
 }
 
-function SpeciesSummary({ speciesName, birds }: { speciesName: string, birds: BirdWithRelations[] }) {
-	const individualBirds = getIndividualBirds(birds);
+function SpeciesSummary({
+	params: { speciesName },
+	data:birds
+}: {
+	params: PageParams;
+	data: BirdWithEncounters[];
+}) {
 	return (
 		<div>
 			<div className="m-5">
-				<h1 className="text-base-content text-4xl">{speciesName}: all records</h1>
+				<h1 className="text-base-content text-4xl">
+					{speciesName}: all records
+				</h1>
 				<ul className="border-base-content/25 divide-base-content/25 w-full divide-y rounded-md border *:p-3 *:first:rounded-t-md *:last:rounded-b-md mb-5 mt-5">
-					{/* <li>{session.length} birds</li>
-					<li>{speciesBreakdown.length} species</li>
-					<li>
-						{
-							session.filter((encounter) => encounter.record_type === 'N')
-								.length
-						}{' '}
-						new
-					</li>
-					<li>
-						{
-							session.filter((encounter) => encounter.record_type === 'S')
-								.length
-						}{' '}
-						retraps
-					</li>
-					<li>
-						{session.filter((encounter) => !encounter.is_juv).length} adults
-						[FIX ME!]
-					</li>
-					<li>
-						{session.filter((encounter) => encounter.is_juv).length} juvs [FIX
-						ME!]
-					</li> */}
+					<li>{birds.length} individuals</li>
 				</ul>
 			</div>
-			<SpeciesTable birds={individualBirds} speciesName={speciesName} />
+			<SpeciesTable birds={birds} />
 		</div>
 	);
 }
 
-// async function fetchSpeciesDataWithCache(speciesName: string) {
-// 	return unstable_cache(
-// 		async () => fetchSpeciesData(speciesName),
-// 		['species', speciesName],
-// 		{
-// 			revalidate: 3600 * 24 * 7,
-// 			tags: ['species', speciesName]
-// 		}
-// 	)();
-// }
 
-async function DisplayInitialData({
-	paramsPromise
-}: {
-	paramsPromise: Promise<{ speciesName: string }>;
-}) {
-	const { speciesName } = await paramsPromise;
-	const initialData = await fetchSpeciesData(speciesName);
-	if (!initialData) {
-		notFound();
-	}
-	return <SpeciesSummary birds={initialData} speciesName={speciesName} />;
-}
-
-export default async function SpeciesPage({
-	params: paramsPromise
-}: {
-	params: Promise<{ speciesName: string }>;
-}) {
+export default async function SpeciesPage(props: PageProps) {
 	return (
-		<Suspense fallback={<div>Loading...</div>}>
-			<DisplayInitialData paramsPromise={paramsPromise} />
-		</Suspense>
+		<BootstrapPageData<BirdWithEncounters[], PageProps, PageParams>
+			pageProps={props}
+			getCacheKeys={(params: PageParams) => ['species', params.speciesName]}
+			dataFetcher={fetchSpeciesData}
+			PageComponent={SpeciesSummary}
+		/>
 	);
 }

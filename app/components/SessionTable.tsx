@@ -102,7 +102,6 @@ export function SessionTable({
 	speciesBreakdown: SpeciesBreakdown;
 }) {
 	const [expandedSpecies, setExpandedSpecies] = useState<string | null>(null);
-	console.log(expandedSpecies);
 	return (
 		<div className="w-full overflow-x-auto">
 			<table className="table">

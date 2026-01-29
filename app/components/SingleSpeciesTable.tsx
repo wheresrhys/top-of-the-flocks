@@ -1,20 +1,15 @@
 'use client';
 
-import { type BirdWithEncounters } from '@/app/species/[speciesName]/species';
+import { type BirdWithEncounters, Encounter } from '@/app/species/[speciesName]/page';
 
 import { useState } from 'react';
-export type SpeciesBreakdown = {
-	species: string;
-	encounters: BirdWithEncounters[];
-}[];
 
 function BirdDetail({
 	encounters
 }: {
-	encounters: BirdWithEncounters[] | null;
+		encounters: Encounter[];
 }) {
-	console.log(encounters);
-  return (
+	return (
 		<table className="table table-xs ">
 			<thead>
 				<tr>
@@ -29,9 +24,9 @@ function BirdDetail({
 			</thead>
 			<tbody>
 				{encounters?.map((encounter) => (
-					<tr key={encounter.session.visit_date}>
+					<tr key={encounter.id}>
+						<td>{encounter.session.visit_date}</td>
 						<td>{encounter.capture_time}</td>
-						<td>{encounter.ring_no}</td>
 						<td>{encounter.record_type}</td>
 						<td>{encounter.age}</td>
 						<td>{encounter.sex}</td>
@@ -51,17 +46,17 @@ function BirdRow({
 	expandedBird
 }: {
 	ring_no: string;
-	encounters: EncounterWithRelations[];
+	encounters: Encounter[];
 	onExpand: (ring_no: string | null) => void;
 	expandedBird: string | null;
 }) {
-	const [birdDetail, setBirdDetail] = useState<
-		EncounterWithRelations[] | null
-	>(expandedBird === ring_no ? encounters : null);
+	const [birdDetail, setBirdDetail] = useState<Encounter[]>(
+		expandedBird === ring_no ? encounters : []
+	);
 	function toggleBirdDetail() {
-		if (expandedBird == ring_no) {
+		if (expandedBird === ring_no) {
 			onExpand(null);
-			setBirdDetail(null);
+			setBirdDetail([]);
 		} else {
 			onExpand(ring_no);
 			setBirdDetail(encounters);
@@ -71,18 +66,14 @@ function BirdRow({
 		<>
 			<tr>
 				<td onClick={toggleBirdDetail}>{ring_no}</td>
-				<td>
-					{encounters.length}
-				</td>
-				<td>
-					TD
-				</td>
+				<td>{encounters.length}</td>
+				<td>TD</td>
 				<td>TD</td>
 			</tr>
 			{expandedBird === ring_no ? (
 				<tr>
 					<td colSpan={5}>
-            <BirdDetail encounters={birdDetail} />
+						<BirdDetail encounters={birdDetail} />
 					</td>
 				</tr>
 			) : (
@@ -93,11 +84,9 @@ function BirdRow({
 }
 
 export function SpeciesTable({
-	speciesName,
-  birds
+	birds
 }: {
-	speciesName: string;
-  birds: Record<string, IndividualBirdHistory>;
+	birds: BirdWithEncounters[];
 }) {
 	const [expandedBird, setExpandedBird] = useState<string | null>(null);
 	return (
@@ -112,7 +101,7 @@ export function SpeciesTable({
 					</tr>
 				</thead>
 				<tbody>
-          {Object.entries(birds || {}).map(([ ring_no, encounters ]) => (
+					{birds.map(({ring_no, encounters}) => (
 						<BirdRow
 							key={ring_no}
 							ring_no={ring_no}
