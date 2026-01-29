@@ -1,6 +1,6 @@
 import { SpeciesTable } from '@/app/components/SingleSpeciesTable';
 import { BootstrapPageData } from '@/app/components/BootstrapPageData';
-import { querySupabaseForNestedList } from '@/app/lib/supabase-query';
+import { supabase, catchSupabaseErrors } from '@/lib/supabase';
 import type { Database } from '@/types/supabase.types';
 
 type PageParams = { speciesName: string };
@@ -16,13 +16,9 @@ export type BirdWithEncounters =
 	};
 
 export async function fetchSpeciesData(params: PageParams) {
-	return querySupabaseForNestedList<BirdWithEncounters>({
-		rootTable: 'Species',
-		identityField: 'species_name',
-		identityValue: params.speciesName,
-		identityOperator: 'ilike',
-		listProperty: 'birds',
-		query: `
+	const data = await supabase
+	.from('Species')
+	.select(`
 		birds:Birds (
 			id,
 			ring_no,
@@ -35,12 +31,20 @@ export async function fetchSpeciesData(params: PageParams) {
 				weight,
 				wing_length,
 				session:Sessions(
-				visit_date
+					visit_date
 				)
 			)
 		)
-		`
-	});
+	`)
+	.eq('species_name', params.speciesName)
+	.maybeSingle()
+	.then(catchSupabaseErrors) as ({
+		birds: BirdWithEncounters[]
+	} | null);
+	if (!data) {
+		return null;
+	}
+	return data.birds;
 }
 
 function SpeciesSummary({

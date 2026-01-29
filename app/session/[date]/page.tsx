@@ -2,7 +2,7 @@ import {
 	SessionTable,
 	type SpeciesBreakdown
 } from '@/app/components/SessionTable';
-import { querySupabaseForNestedList } from '@/app/lib/supabase-query';
+import { supabase, catchSupabaseErrors } from '@/lib/supabase';
 import type { Database } from '@/types/supabase.types';
 import { BootstrapPageData } from '@/app/components/BootstrapPageData';
 
@@ -19,42 +19,48 @@ export type Encounter = Database['public']['Tables']['Encounters']['Row'] & {
 async function fetchSessionData({
 	date
 }: PageParams): Promise<Encounter[] | null> {
-	return querySupabaseForNestedList<Encounter>({
-		rootTable: 'Sessions',
-		identityField: 'visit_date',
-		identityValue: date,
-		identityOperator: 'eq',
-		listProperty: 'encounters',
-		query: `
+	const data = await supabase
+	.from('Sessions')
+	.select(`
+		id,
+		encounters:Encounters(
 			id,
-			encounters: Encounters(
+			session_id,
+			age,
+			bird_id,
+			capture_time,
+			is_juv,
+			record_type,
+			sex,
+			weight,
+			wing_length,
+			breeding_condition,
+			extra_text,
+			moult_code,
+			old_greater_coverts,
+			scheme,
+			sexing_method,
+			bird:Birds (
 				id,
-				session_id,
-				age,
-				bird_id,
-				capture_time,
-				is_juv,
-				record_type,
-				sex,
-				weight,
-				wing_length,
-				breeding_condition,
-				extra_text,
-				moult_code,
-				old_greater_coverts,
-				scheme,
-				sexing_method,
-				bird:Birds (
+				species_id,
+				ring_no,
+				species:Species (
 					id,
-					species_id,
-					ring_no,
-					species:Species (
-						id,
-						species_name
-					)
+					species_name
 				)
-			)`
-	});
+			)
+		)
+	`)
+	.eq('visit_date', date)
+	.maybeSingle()
+	.then(catchSupabaseErrors) as ({
+		id: number
+		encounters: Encounter[]
+	} | null);
+	if (!data) {
+		return null;
+	}
+	return data.encounters;
 }
 
 function getSpeciesBreakdown(encounters: Encounter[]): SpeciesBreakdown {
