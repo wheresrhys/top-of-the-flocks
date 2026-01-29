@@ -6,25 +6,27 @@ import { Accordion } from './Accordion';
 import { fetchPanelData } from '../lib/stats-accordion';
 import type {
 	StatsAccordionArguments,
-	TopPeriodsResult
+	TopPeriodsResult,
+	TopSpeciesResult
 } from '../lib/stats-accordion';
 
 type TemporalUnit = 'day' | 'month' | 'year';
 
 export type StatsAccordionModel = {
 	definition: PanelDefinition;
-	data: TopPeriodsResult[] | null;
+	data: TopPeriodsResult[] | TopSpeciesResult[] | null;
 };
 
 export type SingleStatModel = {
 	definition: PanelDefinition;
-	data: TopPeriodsResult;
+	data: TopPeriodsResult | TopSpeciesResult;
 	showUnit: boolean;
 };
 export type PanelDefinition = {
 	id: string;
 	category: string;
 	unit: string;
+	bySpecies?: boolean;
 	dataArguments: StatsAccordionArguments;
 };
 const connectingVerbMap: Record<TemporalUnit, 'in' | 'on'> = {
@@ -39,12 +41,23 @@ const dateFormatMap: Record<TemporalUnit, string> = {
 	year: 'YYYY'
 };
 
+function dataIsSpeciesResult(
+	definition: PanelDefinition,
+	data: TopPeriodsResult | TopSpeciesResult
+): data is TopSpeciesResult {
+	return Boolean(definition.bySpecies);
+}
+
 function StatOutput({ definition, data, showUnit }: SingleStatModel) {
 	return (
 		<>
 			<b>
-				{data.metric_value}
-				{showUnit ? ` ${definition.unit}` : ''}
+				{data.metric_value}{' '}
+				{dataIsSpeciesResult(definition, data)
+					? data.species_name
+					: showUnit
+						? ` ${definition.unit}`
+						: ''}
 			</b>{' '}
 			{
 				connectingVerbMap[
@@ -74,7 +87,6 @@ function hasData(data: TopPeriodsResult[] | null): data is TopPeriodsResult[] {
 	return data !== null;
 }
 
-// data,
 function ContentComponent({
 	model,
 	expandedId
@@ -134,18 +146,14 @@ function ContentComponent({
 		</div>
 	);
 }
-function HeadingComponent({
-	model,
-	expandedId
-}: {
-	model: StatsAccordionModel;
-	expandedId: string | false;
-}) {
+// TODO shoudln't need to be so careful with ?. all over the place
+// maybe need to defined things as non-nullable in the SQL
+function HeadingComponent({ model }: { model: StatsAccordionModel }) {
 	return (
 		<span>
 			<b>{model.definition.category}:</b>{' '}
 			<span>
-				{model.data?.[0].metric_value} {model.definition.unit}
+				{model.data?.[0]?.metric_value} {model.definition.unit}
 			</span>
 		</span>
 	);

@@ -160,6 +160,24 @@ export type Database = {
         }
         Relationships: []
       }
+      top_species_result: {
+        Row: {
+          metric_value: number | null
+          species_name: string | null
+          visit_date: string | null
+        }
+        Insert: {
+          metric_value?: number | null
+          species_name?: string | null
+          visit_date?: string | null
+        }
+        Update: {
+          metric_value?: number | null
+          species_name?: string | null
+          visit_date?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       species_league_table: {
@@ -189,6 +207,7 @@ export type Database = {
           month_filter?: number
           months_filter?: number[]
           result_limit?: number
+          species_filter?: string
           temporal_unit?: string
           year_filter?: number
         }
@@ -199,6 +218,28 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "top_periods_result"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      top_species_by_metric: {
+        Args: {
+          exact_months_filter?: string[]
+          metric_name?: string
+          month_filter?: number
+          months_filter?: number[]
+          result_limit?: number
+          temporal_unit?: string
+          year_filter?: number
+        }
+        Returns: {
+          metric_value: number | null
+          species_name: string | null
+          visit_date: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "top_species_result"
           isOneToOne: false
           isSetofReturn: true
         }
