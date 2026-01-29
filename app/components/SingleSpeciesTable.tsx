@@ -27,7 +27,7 @@ function BirdDetail({ encounters }: { encounters: Encounter[] }) {
 						<td>{encounter.session.visit_date}</td>
 						<td>{encounter.capture_time}</td>
 						<td>{encounter.record_type}</td>
-						<td>{encounter.age}</td>
+						<td>{encounter.age_code}</td>
 						<td>{encounter.sex}</td>
 						<td>{encounter.wing_length}</td>
 						<td>{encounter.weight}</td>
