@@ -30,7 +30,7 @@ type AllTableRows<T extends TableNames = TableNames> = T extends TableNames
 
 // Extract all unique property names from all tables
 type AllTableProperties = {
-  [K in TableNames]: keyof Database['public']['Tables'][K]['Row']
+  [K in TableNames]: keyof Database['public']['Tables'][K]['Row'] | "age"
 }[TableNames];
 
 // Create a type that represents all possible CSV columns
@@ -207,8 +207,11 @@ async function importCSV(options: ImportOptions): Promise<void> {
         const sessionId = sessionResult.id;
 
         // 4. Insert Encounter (always create new)
+        const age_code: number = Number(String(row.age).replace('J', ''));
+
         const encounterData: EncountersInsert = {
-          age: Number(String(row.age).replace('J', '')),
+          age_code,
+          minimum_years: Math.max(0, Math.floor((age_code/2) -1)),
           breeding_condition: row.breeding_condition as string | null,
           capture_time: row.capture_time as string,
           extra_text: row.extra_text as string | null,
