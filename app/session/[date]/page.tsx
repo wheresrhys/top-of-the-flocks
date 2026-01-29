@@ -104,10 +104,15 @@ function SessionSummary({
 						retraps
 					</li>
 					<li>
-						{session.filter((encounter) => encounter.minimum_years >= 1).length} adults
+						{session.filter((encounter) => encounter.minimum_years >= 1).length}{' '}
+						adults
 					</li>
 					<li>
-						{session.filter((encounter) => encounter.minimum_years === 0).length} juvs
+						{
+							session.filter((encounter) => encounter.minimum_years === 0)
+								.length
+						}{' '}
+						juvs
 					</li>
 				</ul>
 			</div>

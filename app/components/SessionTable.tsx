@@ -78,8 +78,18 @@ function SpeciesRow({
 							.length
 					}
 				</td>
-				<td>{encounters.filter((encounter) => encounter.minimum_years >= 1).length}</td>
-				<td>{encounters.filter((encounter) => encounter.minimum_years === 0).length}</td>
+				<td>
+					{
+						encounters.filter((encounter) => encounter.minimum_years >= 1)
+							.length
+					}
+				</td>
+				<td>
+					{
+						encounters.filter((encounter) => encounter.minimum_years === 0)
+							.length
+					}
+				</td>
 			</tr>
 			{expandedSpecies === species ? (
 				<tr>
