@@ -7,8 +7,9 @@ type SpeciesLeagueTableRow =
 
 export async function fetchSpeciesData(): Promise<SpeciesLeagueTableRow[]> {
 	return supabase
-	.from('species_league_table')
-	.select(`
+		.from('species_league_table')
+		.select(
+			`
 		species_name,
 		individuals,
 		encounters,
@@ -22,9 +23,10 @@ export async function fetchSpeciesData(): Promise<SpeciesLeagueTableRow[]> {
 		average_weight,
 		lightest,
 		total_weight
-	`).order('encounters', { ascending: false })
+	`
+		)
+		.order('encounters', { ascending: false })
 		.then(catchSupabaseErrors) as Promise<SpeciesLeagueTableRow[]>;
-
 }
 
 function SpeciesLeagueTable({ data }: { data: SpeciesLeagueTableRow[] }) {

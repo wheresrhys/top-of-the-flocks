@@ -19,9 +19,10 @@ export type Encounter = Database['public']['Tables']['Encounters']['Row'] & {
 async function fetchSessionData({
 	date
 }: PageParams): Promise<Encounter[] | null> {
-	const data = await supabase
-	.from('Sessions')
-	.select(`
+	const data = (await supabase
+		.from('Sessions')
+		.select(
+			`
 		id,
 		encounters:Encounters(
 			id,
@@ -50,13 +51,14 @@ async function fetchSessionData({
 				)
 			)
 		)
-	`)
-	.eq('visit_date', date)
-	.maybeSingle()
-	.then(catchSupabaseErrors) as ({
-		id: number
-		encounters: Encounter[]
-	} | null);
+	`
+		)
+		.eq('visit_date', date)
+		.maybeSingle()
+		.then(catchSupabaseErrors)) as {
+		id: number;
+		encounters: Encounter[];
+	} | null;
 	if (!data) {
 		return null;
 	}

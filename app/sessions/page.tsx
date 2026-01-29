@@ -14,10 +14,10 @@ export type SessionWithEncounters = Session & {
 
 export async function fetchAllSessions(): Promise<Session[]> {
 	return supabase
-	.from('Sessions')
-	.select('id, visit_date, encounters:Encounters(count)')
-	.order('visit_date', { ascending: false })
-	.then(catchSupabaseErrors) as Promise<Session[]>;
+		.from('Sessions')
+		.select('id, visit_date, encounters:Encounters(count)')
+		.order('visit_date', { ascending: false })
+		.then(catchSupabaseErrors) as Promise<Session[]>;
 }
 
 async function ListAllSessions({ data }: { data: Session[] }) {

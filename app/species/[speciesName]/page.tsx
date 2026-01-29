@@ -16,9 +16,10 @@ export type BirdWithEncounters =
 	};
 
 export async function fetchSpeciesData(params: PageParams) {
-	const data = await supabase
-	.from('Species')
-	.select(`
+	const data = (await supabase
+		.from('Species')
+		.select(
+			`
 		birds:Birds (
 			id,
 			ring_no,
@@ -35,12 +36,13 @@ export async function fetchSpeciesData(params: PageParams) {
 				)
 			)
 		)
-	`)
-	.eq('species_name', params.speciesName)
-	.maybeSingle()
-	.then(catchSupabaseErrors) as ({
-		birds: BirdWithEncounters[]
-	} | null);
+	`
+		)
+		.eq('species_name', params.speciesName)
+		.maybeSingle()
+		.then(catchSupabaseErrors)) as {
+		birds: BirdWithEncounters[];
+	} | null;
 	if (!data) {
 		return null;
 	}
