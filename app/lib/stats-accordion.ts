@@ -12,26 +12,31 @@ export type TopSpeciesResult =
 async function getTopPeriodsByMetric(
 	options: StatsAccordionArguments
 ): Promise<TopPeriodsResult[] | null> {
-	return supabase.rpc('top_periods_by_metric', options).then(catchSupabaseErrors);
+	return supabase
+		.rpc('top_periods_by_metric', options)
+		.then(catchSupabaseErrors);
 }
 
 async function getTopSpeciesByMetric(
 	options: StatsAccordionArguments
 ): Promise<TopSpeciesResult[] | null> {
-	return supabase.rpc('top_species_by_metric', options).then(catchSupabaseErrors);
+	return supabase
+		.rpc('top_species_by_metric', options)
+		.then(catchSupabaseErrors);
 }
 
 export async function fetchPanelData(
 	panel: PanelDefinition,
 	limit: number
 ): Promise<TopPeriodsResult[] | TopSpeciesResult[] | null> {
-	const data = panel.bySpecies ? await getTopSpeciesByMetric({
-			...panel.dataArguments,
-			result_limit: limit
-		})
+	const data = panel.bySpecies
+		? await getTopSpeciesByMetric({
+				...panel.dataArguments,
+				result_limit: limit
+			})
 		: await getTopPeriodsByMetric({
-			...panel.dataArguments,
-			result_limit: limit
-		});
+				...panel.dataArguments,
+				result_limit: limit
+			});
 	return data;
 }
