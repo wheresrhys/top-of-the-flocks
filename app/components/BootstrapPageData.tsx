@@ -2,6 +2,10 @@ import { Suspense } from 'react';
 import { unstable_cache } from 'next/cache';
 import { notFound } from 'next/navigation';
 
+
+type DefaultPageParams = {}
+type DefaultPageProps = { params: Promise<DefaultPageParams> }
+
 type BootstrapPageDataProps<DataType, PagePropsType, ParamsType> = {
 	pageProps?: PagePropsType;
 	loading?: React.ReactNode;
@@ -13,6 +17,10 @@ type BootstrapPageDataProps<DataType, PagePropsType, ParamsType> = {
 		data: DataType;
 	}) => React.ReactNode;
 };
+
+async function getParams<PagePropsType, ParamsType>(pageProps: PagePropsType): Promise<ParamsType> {
+	return (pageProps as DefaultPageProps).params as ParamsType;
+}
 
 async function fetchDataWithCache<DataType, ParamsType>(
   params: ParamsType,
@@ -28,9 +36,7 @@ async function fetchDataWithCache<DataType, ParamsType>(
 async function LoadWithData<DataType, PagePropsType, ParamsType>(
 	bootstrapProps: BootstrapPageDataProps<DataType, PagePropsType, ParamsType>
 ) {
-	const params = bootstrapProps.getParams
-		? await bootstrapProps.getParams(bootstrapProps.pageProps as PagePropsType)
-		: ({} as ParamsType);
+	const params = (bootstrapProps.getParams ? await bootstrapProps.getParams(bootstrapProps.pageProps as PagePropsType) : await getParams(bootstrapProps.pageProps as DefaultPageProps)) as ParamsType;
 	const data = await fetchDataWithCache<DataType, ParamsType>(
 		params,
 		bootstrapProps.dataFetcher,
@@ -42,7 +48,7 @@ async function LoadWithData<DataType, PagePropsType, ParamsType>(
 	return <bootstrapProps.PageComponent params={params} data={data} />;
 }
 
-export function BootstrapPageData<DataType, PagePropsType, ParamsType>(
+export function BootstrapPageData<DataType, PagePropsType = DefaultPageProps, ParamsType = DefaultPageParams>(
 	bootstrapProps: BootstrapPageDataProps<DataType, PagePropsType, ParamsType>
 ) {
 	return (

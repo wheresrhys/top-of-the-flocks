@@ -8,9 +8,6 @@ import { getSeasonMonths, getSeasonName } from './lib/season-month-mapping';
 import formatDate from 'intl-dateformat';
 import { BootstrapPageData } from './components/BootstrapPageData';
 
-type PageParams = { }
-type PageProps = { params: Promise<PageParams> }
-
 function getMonthName(date: Date): string {
 	return formatDate(date, 'MMMM');
 }
@@ -105,7 +102,7 @@ async function fetchInitialData(): Promise<StatsAccordionModel[]> {
 
 export default async function Home() {
 	return (
-		<BootstrapPageData<StatsAccordionModel[], PageProps, PageParams>
+		<BootstrapPageData<StatsAccordionModel[]>
 			getCacheKeys={() => ['home-stats']}
 			dataFetcher={fetchInitialData}
 			PageComponent={StatsAccordion}
