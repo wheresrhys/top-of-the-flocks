@@ -45,15 +45,26 @@ function getPanelDefinitions(date: Date): PanelDefinition[] {
 				months_filter: getSeasonMonths(date, false) as number[]
 			}
 		},
-		// {
-		// TODO: need an additional metric qualifier of "bySpecies"
-		// TODO: could also do with a species filter
-		// 	id: 'most-of-one-species-ever',
-		// 	category: 'Most of one species in a day ever',
-		// 	unit: 'Birds',
-		// 	temporalUnit: 'day',
-		// },
-
+		{
+			id: 'most-single-day-species-count-ever',
+			category: 'Most single day species count ever',
+			unit: 'Birds',
+			bySpecies: true,
+			dataArguments: {
+				temporal_unit: 'day',
+				metric_name: 'encounters'
+			}
+		},
+		{
+			id: 'most-single-month-species-count-ever',
+			category: 'Most single month species count ever',
+			unit: 'Birds',
+			bySpecies: true,
+			dataArguments: {
+				temporal_unit: 'month',
+				metric_name: 'individuals'
+			}
+		},
 		{
 			id: `busiest-session-this-${getSeasonName(date)}`,
 			category: `Busiest session this ${getSeasonName(date)}`,

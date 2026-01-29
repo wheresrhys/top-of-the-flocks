@@ -10,7 +10,7 @@
 		"start": "next start",
 		"lint": "npx prettier -w app && npx eslint",
 		"supabase:types": "./scripts/load-env.sh echo 'beginning type generation' && npx supabase gen types typescript --project-id $(op run --no-masking --env-file=\".env.1password\" -- printenv SUPABASE_PROJECT_ID) --schema public > ./types/supabase.types.ts  && echo 'types regenerated ok' || echo 'run `npx supabase login` to sign in to supabase first'",
-		"supabase:migrate": "supabase migration up --linked --debug",
+		"supabase:migrate": "supabase migration up --linked --debug --include-all",
 		"supabase:sync": "npm run supabase:migrate && npm run supabase:types",
 		"supabase:import": "./scripts/load-env.sh tsx scripts/import-csv.ts",
 		"build:prod": "curl -X POST $(op run --no-masking --env-file=\".env.1password\" -- printenv VERCEL_DEPLOY_HOOK)",
