@@ -6,7 +6,7 @@ type FilterOperator = 'eq' | 'like' | 'ilike' | 'is' | 'in';
 
 type QueryInput = {
 	query: string;
-	rootTable: keyof Database['public']['Tables'];
+	rootTable: keyof Database['public']['Tables'] | keyof Database['public']['Views'];
 	identityField: string;
 	identityValue: string | number;
 	identityOperator: FilterOperator;
@@ -14,7 +14,7 @@ type QueryInput = {
 
 type TableQueryInput = {
 	query: string;
-	rootTable: keyof Database['public']['Tables'];
+	rootTable: keyof Database['public']['Tables'] | keyof Database['public']['Views'];
 	orderByField: string;
 	orderByDirection: 'asc' | 'desc';
 };
@@ -103,20 +103,21 @@ export async function querySupabaseForNestedList<ReturnType>(
 
 export async function querySupabaseForTable<ReturnType>(
 	queryInput: TableQueryInput
-): Promise<ReturnType[] | null> {
+): Promise<ReturnType[]> {
 	const { data, error } = await supabase
 		.from(queryInput.rootTable)
 		.select(queryInput.query)
 		.order(queryInput.orderByField, { ascending: queryInput.orderByDirection === 'asc' });
 
-	if (error) {
+		if (error) {
+
 		throw new Error(
 			`Failed to fetch ${queryInput.rootTable}: ${error.message}`
 		);
 	}
 
-	if (!data || !data.length) {
-		return null;
+	if (!data) {
+		return [] as ReturnType[];
 	}
 	return data as ReturnType[];
 }

@@ -35,12 +35,9 @@ export default function GlobalNav() {
 						<li>
 							<a href="/sessions">Sessions</a>
 						</li>
-						{/* <li>
-							<a href="#">Services</a>
-						</li>
 						<li>
-							<a href="#">Contact us</a>
-						</li> */}
+							<a href="/species">Species</a>
+						</li>
 					</ul>
 				</div>
 			</div>
