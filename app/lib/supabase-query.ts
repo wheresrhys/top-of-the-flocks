@@ -6,7 +6,9 @@ type FilterOperator = 'eq' | 'like' | 'ilike' | 'is' | 'in';
 
 type QueryInput = {
 	query: string;
-	rootTable: keyof Database['public']['Tables'] | keyof Database['public']['Views'];
+	rootTable:
+		| keyof Database['public']['Tables']
+		| keyof Database['public']['Views'];
 	identityField: string;
 	identityValue: string | number;
 	identityOperator: FilterOperator;
@@ -14,7 +16,9 @@ type QueryInput = {
 
 type TableQueryInput = {
 	query: string;
-	rootTable: keyof Database['public']['Tables'] | keyof Database['public']['Views'];
+	rootTable:
+		| keyof Database['public']['Tables']
+		| keyof Database['public']['Views'];
 	orderByField: string;
 	orderByDirection: 'asc' | 'desc';
 };
@@ -26,7 +30,9 @@ function buildSelect({
 	identityValue,
 	identityOperator
 }: QueryInput) {
-	const selectBuilder = supabase.from(rootTable).select(query);
+	const selectBuilder = supabase
+		.from(rootTable as keyof Database['public']['Tables'])
+		.select(query);
 
 	switch (identityOperator) {
 		case 'eq':
@@ -105,12 +111,13 @@ export async function querySupabaseForTable<ReturnType>(
 	queryInput: TableQueryInput
 ): Promise<ReturnType[]> {
 	const { data, error } = await supabase
-		.from(queryInput.rootTable)
+		.from(queryInput.rootTable as keyof Database['public']['Tables'])
 		.select(queryInput.query)
-		.order(queryInput.orderByField, { ascending: queryInput.orderByDirection === 'asc' });
+		.order(queryInput.orderByField, {
+			ascending: queryInput.orderByDirection === 'asc'
+		});
 
-		if (error) {
-
+	if (error) {
 		throw new Error(
 			`Failed to fetch ${queryInput.rootTable}: ${error.message}`
 		);

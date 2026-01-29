@@ -1,14 +1,13 @@
 'use client';
 
-import { type BirdWithEncounters, Encounter } from '@/app/species/[speciesName]/page';
+import {
+	type BirdWithEncounters,
+	Encounter
+} from '@/app/species/[speciesName]/page';
 
 import { useState } from 'react';
 
-function BirdDetail({
-	encounters
-}: {
-		encounters: Encounter[];
-}) {
+function BirdDetail({ encounters }: { encounters: Encounter[] }) {
 	return (
 		<table className="table table-xs ">
 			<thead>
@@ -83,11 +82,7 @@ function BirdRow({
 	);
 }
 
-export function SpeciesTable({
-	birds
-}: {
-	birds: BirdWithEncounters[];
-}) {
+export function SpeciesTable({ birds }: { birds: BirdWithEncounters[] }) {
 	const [expandedBird, setExpandedBird] = useState<string | null>(null);
 	return (
 		<div className="w-full overflow-x-auto">
@@ -101,7 +96,7 @@ export function SpeciesTable({
 					</tr>
 				</thead>
 				<tbody>
-					{birds.map(({ring_no, encounters}) => (
+					{birds.map(({ ring_no, encounters }) => (
 						<BirdRow
 							key={ring_no}
 							ring_no={ring_no}

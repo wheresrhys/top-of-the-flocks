@@ -6,8 +6,8 @@ import { querySupabaseForNestedList } from '@/app/lib/supabase-query';
 import type { Database } from '@/types/supabase.types';
 import { BootstrapPageData } from '@/app/components/BootstrapPageData';
 
-type PageParams = { date: string }
-type PageProps = { params: Promise<PageParams> }
+type PageParams = { date: string };
+type PageProps = { params: Promise<PageParams> };
 
 export type Encounter = Database['public']['Tables']['Encounters']['Row'] & {
 	bird: {
@@ -16,7 +16,9 @@ export type Encounter = Database['public']['Tables']['Encounters']['Row'] & {
 	};
 };
 
-async function fetchSessionData({ date }: PageParams) : Promise<Encounter[] | null> {
+async function fetchSessionData({
+	date
+}: PageParams): Promise<Encounter[] | null> {
 	return querySupabaseForNestedList<Encounter>({
 		rootTable: 'Sessions',
 		identityField: 'visit_date',
@@ -117,11 +119,11 @@ function SessionSummary({
 	);
 }
 
-export default async function SessionPage(props: PageProps ) {
+export default async function SessionPage(props: PageProps) {
 	return (
 		<BootstrapPageData<Encounter[], PageProps, PageParams>
 			pageProps={props}
-			getCacheKeys={params => ['session', params.date as string]}
+			getCacheKeys={(params) => ['session', params.date as string]}
 			dataFetcher={fetchSessionData}
 			PageComponent={SessionSummary}
 		/>

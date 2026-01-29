@@ -1,20 +1,19 @@
-import {
-	SpeciesTable
-} from '@/app/components/SingleSpeciesTable';
+import { SpeciesTable } from '@/app/components/SingleSpeciesTable';
 import { BootstrapPageData } from '@/app/components/BootstrapPageData';
-import {querySupabaseForNestedList} from '@/app/lib/supabase-query';
+import { querySupabaseForNestedList } from '@/app/lib/supabase-query';
 import type { Database } from '@/types/supabase.types';
 
-type PageParams = { speciesName: string }
-type PageProps = { params: Promise<PageParams> }
+type PageParams = { speciesName: string };
+type PageProps = { params: Promise<PageParams> };
 
-type Encounter = (Database['public']['Tables']['Encounters']['Row'] & {
+export type Encounter = Database['public']['Tables']['Encounters']['Row'] & {
 	session: Database['public']['Tables']['Sessions']['Row'];
-})
-
-export type BirdWithEncounters = Database['public']['Tables']['Birds']['Row'] & {
-	encounters: Encounter[];
 };
+
+export type BirdWithEncounters =
+	Database['public']['Tables']['Birds']['Row'] & {
+		encounters: Encounter[];
+	};
 
 export async function fetchSpeciesData(params: PageParams) {
 	return querySupabaseForNestedList<BirdWithEncounters>({
@@ -40,13 +39,13 @@ export async function fetchSpeciesData(params: PageParams) {
 				)
 			)
 		)
-		`,
-	})
+		`
+	});
 }
 
 function SpeciesSummary({
 	params: { speciesName },
-	data:birds
+	data: birds
 }: {
 	params: PageParams;
 	data: BirdWithEncounters[];
@@ -65,7 +64,6 @@ function SpeciesSummary({
 		</div>
 	);
 }
-
 
 export default async function SpeciesPage(props: PageProps) {
 	return (
