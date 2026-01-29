@@ -8,11 +8,7 @@ export type SpeciesBreakdown = {
 	encounters: Encounter[];
 }[];
 
-function SpeciesDetails({
-	encounters
-}: {
-	encounters: Encounter[] | null;
-}) {
+function SpeciesDetails({ encounters }: { encounters: Encounter[] | null }) {
 	return (
 		<table className="table table-xs ">
 			<thead>
@@ -54,9 +50,9 @@ function SpeciesRow({
 	onExpand: (species: string | null) => void;
 	expandedSpecies: string | null;
 }) {
-	const [speciesDetail, setSpeciesDetail] = useState<
-		Encounter[] | null
-	>(expandedSpecies === species ? encounters : null);
+	const [speciesDetail, setSpeciesDetail] = useState<Encounter[] | null>(
+		expandedSpecies === species ? encounters : null
+	);
 	function toggleSpeciesDetail() {
 		if (expandedSpecies == species) {
 			onExpand(null);
