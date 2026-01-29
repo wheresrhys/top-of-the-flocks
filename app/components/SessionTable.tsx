@@ -28,7 +28,7 @@ function SpeciesDetails({ encounters }: { encounters: Encounter[] | null }) {
 						<td>{encounter.capture_time}</td>
 						<td>{encounter.bird.ring_no}</td>
 						<td>{encounter.record_type}</td>
-						<td>{encounter.age}</td>
+						<td>{encounter.age_code}</td>
 						<td>{encounter.sex}</td>
 						<td>{encounter.wing_length}</td>
 						<td>{encounter.weight}</td>
@@ -78,8 +78,18 @@ function SpeciesRow({
 							.length
 					}
 				</td>
-				<td>{encounters.filter((encounter) => !encounter.is_juv).length}</td>
-				<td>{encounters.filter((encounter) => encounter.is_juv).length}</td>
+				<td>
+					{
+						encounters.filter((encounter) => encounter.minimum_years >= 1)
+							.length
+					}
+				</td>
+				<td>
+					{
+						encounters.filter((encounter) => encounter.minimum_years === 0)
+							.length
+					}
+				</td>
 			</tr>
 			{expandedSpecies === species ? (
 				<tr>

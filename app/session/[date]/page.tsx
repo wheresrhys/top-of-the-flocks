@@ -27,23 +27,14 @@ async function fetchSessionData({
 		encounters:Encounters(
 			id,
 			session_id,
-			age,
-			bird_id,
+			age_code,
+			minimum_years,
 			capture_time,
-			is_juv,
 			record_type,
 			sex,
 			weight,
 			wing_length,
-			breeding_condition,
-			extra_text,
-			moult_code,
-			old_greater_coverts,
-			scheme,
-			sexing_method,
 			bird:Birds (
-				id,
-				species_id,
 				ring_no,
 				species:Species (
 					id,
@@ -113,12 +104,15 @@ function SessionSummary({
 						retraps
 					</li>
 					<li>
-						{session.filter((encounter) => !encounter.is_juv).length} adults
-						[FIX ME!]
+						{session.filter((encounter) => encounter.minimum_years >= 1).length}{' '}
+						adults
 					</li>
 					<li>
-						{session.filter((encounter) => encounter.is_juv).length} juvs [FIX
-						ME!]
+						{
+							session.filter((encounter) => encounter.minimum_years === 0)
+								.length
+						}{' '}
+						juvs
 					</li>
 				</ul>
 			</div>
