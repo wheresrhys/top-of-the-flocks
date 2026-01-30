@@ -167,6 +167,18 @@ export type Database = {
       }
     }
     Functions: {
+      most_caught_birds: {
+        Args: {
+          result_limit?: number
+          species_filter?: string
+          year_filter?: number
+        }
+        Returns: {
+          encounters: number
+          ring_no: string
+          species_name: string
+        }[]
+      }
       top_periods_by_metric: {
         Args: {
           exact_months_filter?: string[]
