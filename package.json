@@ -16,6 +16,8 @@
 		"build:prod": "curl -X POST $(op run --no-masking --env-file=\".env.1password\" -- printenv VERCEL_DEPLOY_HOOK)",
 		"env:load": "./scripts/load-env.sh",
 		"env:check": "op whoami && echo '✅ 1Password CLI authenticated' || echo '❌ Please run: op signin'",
+		"typecheck": "tsc --noEmit",
+		"qa": "npm run lint && npm run typecheck",
 		"prepare": "husky"
 	},
 	"dependencies": {

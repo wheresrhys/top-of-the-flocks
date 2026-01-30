@@ -4,7 +4,7 @@ import formatDate from 'intl-dateformat';
 import {
 	type EnrichedBirdWithEncounters,
 	Encounter
-} from '@/app/species/[speciesName]/page';
+} from '@/app/bird/[ring]/page';
 
 function BirdDetail({ encounters }: { encounters: Encounter[] }) {
 	return (
