@@ -21,7 +21,10 @@ type PageProps = { params: Promise<PageParams> };
 type PageData = {
 	topSessions: TopPeriodsResult[];
 	birds: EnrichedBirdWithEncounters[];
+	mostCaughtBirds: MostCaughtBirdsResult[];
 };
+type MostCaughtBirdsResult =
+	Database['public']['Functions']['most_caught_birds']['Returns'][number];
 
 function getTopSessions(species: string) {
 	return getTopPeriodsByMetric({
@@ -30,6 +33,21 @@ function getTopSessions(species: string) {
 		species_filter: species,
 		result_limit: 5
 	}) as Promise<TopPeriodsResult[]>;
+}
+
+async function getMostCaughtBirds(
+	species: string
+): Promise<MostCaughtBirdsResult[]> {
+	const birds = await supabase
+		.rpc('most_caught_birds', {
+			species_filter: species,
+			result_limit: 5
+		})
+		.then(catchSupabaseErrors);
+
+	return birds?.filter(
+		(bird) => bird.encounters > 1
+	) as MostCaughtBirdsResult[];
 }
 
 async function fetchAllBirds(species: string) {
@@ -85,14 +103,16 @@ function orderBirdsByRecency(
 }
 
 async function fetchSpeciesData(params: PageParams): Promise<PageData | null> {
-	const [topSessions, birds] = await Promise.all([
+	const [topSessions, birds, mostCaughtBirds] = await Promise.all([
 		getTopSessions(params.speciesName),
-		fetchAllBirds(params.speciesName)
+		fetchAllBirds(params.speciesName),
+		getMostCaughtBirds(params.speciesName)
 	]);
 	if (birds.length === 0) return null;
 	return {
 		topSessions,
-		birds
+		birds,
+		mostCaughtBirds
 	};
 }
 
@@ -102,13 +122,54 @@ function addProvenAgeToBirds(
 	return birds.map(addProvenAgeToBird);
 }
 
+function MostCaughtBird({
+	ring,
+	allBirds
+}: {
+	ring: string;
+	allBirds: EnrichedBirdWithEncounters[];
+}) {
+	const bird = allBirds.find(
+		(bird) => bird.ring_no === ring
+	) as EnrichedBirdWithEncounters;
+
+	return (
+		<li>
+			<Link className="link" href={`/bird/${bird.ring_no}`}>
+				{bird.ring_no}
+			</Link>
+			: {bird.encounters.length} encounters,{' '}
+			<span>
+				{formatDate(
+					new Date(bird.encounters[0].session.visit_date as string),
+					'DD MMMM, YYYY'
+				)}{' '}
+				-{' '}
+				{formatDate(
+					new Date(
+						bird.encounters[bird.encounters.length - 1].session
+							.visit_date as string
+					),
+					'DD MMMM, YYYY'
+				)}
+				, proven age: {bird.provenAge} years
+			</span>
+		</li>
+	);
+}
+
 function SpeciesSummary({
 	params: { speciesName },
-	data: { topSessions, birds }
+	data: { topSessions, birds, mostCaughtBirds }
 }: {
 	params: PageParams;
 	data: PageData;
 }) {
+	const oldestBirdAge = Math.max(...birds.map((bird) => bird.provenAge));
+	const oldestBirds =
+		oldestBirdAge > 1
+			? birds.filter((bird) => bird.provenAge === oldestBirdAge)
+			: [];
 	return (
 		<div>
 			<div className="m-5">
@@ -117,6 +178,32 @@ function SpeciesSummary({
 				</h1>
 				<ul className="border-base-content/25 divide-base-content/25 w-full divide-y rounded-md border *:p-3 *:first:rounded-t-md *:last:rounded-b-md mb-5 mt-5">
 					<li>{birds.length} individuals</li>
+					<li>
+						Oldest proven age: {oldestBirdAge} years old:{' '}
+						<ul>
+							{oldestBirds.map((bird) => (
+								<li key={bird.ring_no}>
+									<Link className="link" href={`/bird/${bird.ring_no}`}>
+										{bird.ring_no}
+									</Link>
+								</li>
+							))}
+						</ul>
+					</li>
+					{mostCaughtBirds?.length > 0 ? (
+						<li>
+							Most caught birds:
+							<ol>
+								{mostCaughtBirds.map((bird) => (
+									<MostCaughtBird
+										key={bird.ring_no}
+										ring={bird.ring_no}
+										allBirds={birds}
+									/>
+								))}
+							</ol>
+						</li>
+					) : null}
 					<li>
 						Top 5 sessions by encounters:
 						<ol>
@@ -135,10 +222,6 @@ function SpeciesSummary({
 								</li>
 							))}
 						</ol>
-					</li>
-					<li>
-						Oldest proven bird:{' '}
-						{Math.max(...birds.map((bird) => bird.provenAge))} years old
 					</li>
 				</ul>
 			</div>
