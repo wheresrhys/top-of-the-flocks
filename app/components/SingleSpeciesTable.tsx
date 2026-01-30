@@ -1,11 +1,10 @@
 'use client';
-
+import { useState } from 'react';
+import formatDate from 'intl-dateformat';
 import {
-	type BirdWithEncounters,
+	type EnrichedBirdWithEncounters,
 	Encounter
 } from '@/app/species/[speciesName]/page';
-
-import { useState } from 'react';
 
 function BirdDetail({ encounters }: { encounters: Encounter[] }) {
 	return (
@@ -42,10 +41,12 @@ function BirdRow({
 	ring_no,
 	encounters,
 	onExpand,
-	expandedBird
+	expandedBird,
+	provenAge
 }: {
 	ring_no: string;
 	encounters: Encounter[];
+	provenAge: number;
 	onExpand: (ring_no: string | null) => void;
 	expandedBird: string | null;
 }) {
@@ -66,8 +67,9 @@ function BirdRow({
 			<tr>
 				<td onClick={toggleBirdDetail}>{ring_no}</td>
 				<td>{encounters.length}</td>
-				<td>TD</td>
-				<td>TD</td>
+				<td>{formatDate(new Date(encounters[0].session.visit_date), 'DD MMMM YYYY')}</td>
+				<td>{formatDate(new Date(encounters[encounters.length - 1].session.visit_date), 'DD MMMM YYYY')}</td>
+				<td>{provenAge}</td>
 			</tr>
 			{expandedBird === ring_no ? (
 				<tr>
@@ -82,7 +84,7 @@ function BirdRow({
 	);
 }
 
-export function SpeciesTable({ birds }: { birds: BirdWithEncounters[] }) {
+export function SpeciesTable({ birds }: { birds: EnrichedBirdWithEncounters[] }) {
 	const [expandedBird, setExpandedBird] = useState<string | null>(null);
 	return (
 		<div className="w-full overflow-x-auto">
@@ -93,13 +95,15 @@ export function SpeciesTable({ birds }: { birds: BirdWithEncounters[] }) {
 						<th>Encounters</th>
 						<th>First record</th>
 						<th>Last record</th>
+						<th>Proven age</th>
 					</tr>
 				</thead>
 				<tbody>
-					{birds.map(({ ring_no, encounters }) => (
+					{birds.map(({ ring_no, encounters, provenAge }) => (
 						<BirdRow
 							key={ring_no}
 							ring_no={ring_no}
+							provenAge={provenAge}
 							encounters={encounters}
 							onExpand={setExpandedBird}
 							expandedBird={expandedBird}
