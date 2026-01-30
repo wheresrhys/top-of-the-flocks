@@ -13,7 +13,7 @@ import {
 	pairwiseSortEncounters,
 	orderEncountersByRecency,
 	type BirdWithEncounters,
-	type EnrichedBirdWithEncounters,
+	type EnrichedBirdWithEncounters
 } from '@/app/bird/[ring]/page';
 
 type PageParams = { speciesName: string };

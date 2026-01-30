@@ -1,10 +1,12 @@
 import { BootstrapPageData } from '@/app/components/BootstrapPageData';
 import { supabase, catchSupabaseErrors } from '@/lib/supabase';
 import type { Database } from '@/types/supabase.types';
+import { SingleBirdTable } from '@/app/components/SingleBirdTable';
+import formatDate from 'intl-dateformat';
 
 type PageParams = { ring: string };
 type PageProps = { params: Promise<PageParams> };
-type PageData = EnrichedBirdWithEncounters | null;
+type PageData = EnrichedBirdWithEncounters;
 
 export type Encounter = Database['public']['Tables']['Encounters']['Row'] & {
 	session: Database['public']['Tables']['Sessions']['Row'];
@@ -13,6 +15,9 @@ export type Encounter = Database['public']['Tables']['Encounters']['Row'] & {
 export type BirdWithEncounters =
 	Database['public']['Tables']['Birds']['Row'] & {
 		encounters: Encounter[];
+		species?: {
+			species_name: string;
+		};
 	};
 
 export type EnrichedBirdWithEncounters = BirdWithEncounters & {
@@ -26,6 +31,9 @@ async function fetchBirdData({ ring }: PageParams) {
 			`
 			id,
 			ring_no,
+			species:Species (
+				species_name
+			),
 			encounters:Encounters (
 				id,
 				age_code,
@@ -87,47 +95,37 @@ export function addProvenAgeToBird(
 
 function BirdSummary({
 	params: { ring },
-	data: birds
+	data: bird
 }: {
 	params: PageParams;
 	data: PageData;
 }) {
-	return <div>Bird summary</div>;
-	// <div>
-	//   <div className="m-5">
-	//     <h1 className="text-base-content text-4xl">
-	//       {speciesName}: all records
-	//     </h1>
-	//     <ul className="border-base-content/25 divide-base-content/25 w-full divide-y rounded-md border *:p-3 *:first:rounded-t-md *:last:rounded-b-md mb-5 mt-5">
-	//       <li>{birds.length} individuals</li>
-	//       <li>
-	//         Top 5 sessions by encounters:
-	//         <ol>
-	//           {topSessions.map((session) => (
-	//             <li key={session.visit_date}>
-	//               {session.metric_value} on{' '}
-	//               <Link
-	//                 className="link"
-	//                 href={`/session/${session.visit_date}`}
-	//               >
-	//                 {formatDate(
-	//                   new Date(session.visit_date as string),
-	//                   'DD MMMM, YYYY'
-	//                 )}
-	//               </Link>
-	//             </li>
-	//           ))}
-	//         </ol>
-	//       </li>
-	//       <li>
-	//         Oldest proven bird:{' '}
-	//         {Math.max(...birds.map((bird) => bird.provenAge))} years old
-	//       </li>
-	//     </ul>
-	//   </div>
-	//   <SpeciesTable birds={birds} />
-	// </div>
-	// );
+	return (
+		<div>
+			<h1 className="text-2xl font-bold">
+				{bird?.species?.species_name} {ring}
+			</h1>
+			<ul>
+				<li className="list-item">{bird?.encounters.length}</li>
+				<li className="list-item">
+					{formatDate(
+						new Date(bird?.encounters[0].session.visit_date),
+						'DD MMMM YYYY'
+					)}
+				</li>
+				<li className="list-item">
+					{formatDate(
+						new Date(
+							bird?.encounters[bird?.encounters.length - 1].session.visit_date
+						),
+						'DD MMMM YYYY'
+					)}
+				</li>
+				<li className="list-item">{bird?.provenAge}</li>
+			</ul>
+			<SingleBirdTable encounters={bird?.encounters ?? []} />
+		</div>
+	);
 }
 
 export default async function BirdPage(props: PageProps) {
