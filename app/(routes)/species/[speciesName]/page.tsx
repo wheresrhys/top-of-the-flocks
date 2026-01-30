@@ -14,7 +14,7 @@ import {
 	orderEncountersByRecency,
 	type BirdWithEncounters,
 	type EnrichedBirdWithEncounters
-} from '@/app/bird/[ring]/page';
+} from '@/app/(routes)/bird/[ring]/page';
 
 type PageParams = { speciesName: string };
 type PageProps = { params: Promise<PageParams> };

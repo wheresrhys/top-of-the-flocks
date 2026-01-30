@@ -4,7 +4,7 @@ import formatDate from 'intl-dateformat';
 import {
 	type EnrichedBirdWithEncounters,
 	Encounter
-} from '@/app/bird/[ring]/page';
+} from '@/app/(routes)/bird/[ring]/page';
 import { SingleBirdTable } from '@/app/components/SingleBirdTable';
 import Link from 'next/link';
 function BirdRow({

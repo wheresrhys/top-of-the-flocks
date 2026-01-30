@@ -1,6 +1,6 @@
 'use client';
 
-import { type Encounter } from '@/app/session/[date]/page';
+import { type Encounter } from '@/app/(routes)/session/[date]/page';
 import Link from 'next/link';
 import { useState } from 'react';
 export type SpeciesBreakdown = {
