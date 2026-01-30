@@ -1,25 +1,20 @@
--- Update top_periods_by_metric function to use normalized schema with ID-based joins
-CREATE TABLE IF NOT EXISTS top_periods_result (
-  visit_date DATE,
-  metric_value BIGINT
-);
-
--- Drop the function first to allow changing return type
-DROP FUNCTION IF EXISTS top_periods_by_metric(TEXT, TEXT, INTEGER, INTEGER, INTEGER, TEXT[], INTEGER[]);
+DROP FUNCTION IF EXISTS top_periods_by_metric(TEXT, TEXT, INTEGER, INTEGER, INTEGER, TEXT[], integer[], TEXT);
+DROP FUNCTION IF EXISTS top_species_by_metric(TEXT, TEXT, INTEGER, INTEGER, INTEGER, TEXT[], integer[]);
 
 CREATE OR REPLACE FUNCTION top_periods_by_metric(
   temporal_unit TEXT DEFAULT 'day',
   metric_name TEXT DEFAULT 'encounters',
-  result_limit INTEGER DEFAULT 5,
-  month_filter INTEGER DEFAULT NULL,
-  year_filter INTEGER DEFAULT NULL,
+  result_limit integer DEFAULT 5,
+  month_filter integer DEFAULT NULL,
+  year_filter integer DEFAULT NULL,
   exact_months_filter TEXT[] DEFAULT NULL,
-  months_filter INTEGER[] DEFAULT NULL,
+  months_filter integer[] DEFAULT NULL,
   species_filter TEXT DEFAULT NULL
+) RETURNS TABLE (
+  visit_date DATE,
+  metric_value BIGINT
 )
-RETURNS SETOF top_periods_result
-LANGUAGE plpgsql
-STABLE
+LANGUAGE "plpgsql" STABLE
 AS $$
 BEGIN
   RETURN QUERY
@@ -52,31 +47,20 @@ END;
 $$;
 
 
-
--- Drop the table first to ensure correct structure
-DROP TABLE IF EXISTS top_species_result CASCADE;
--- Update top_periods_by_metric function to use normalized schema with ID-based joins
-CREATE TABLE top_species_result (
-  species_name TEXT,
-  visit_date DATE,
-  metric_value BIGINT
-);
-
--- Drop the function first to allow changing return type
-DROP FUNCTION IF EXISTS top_species_by_metric(TEXT, TEXT, INTEGER, INTEGER, INTEGER, TEXT[]);
-
 CREATE OR REPLACE FUNCTION top_species_by_metric(
   temporal_unit TEXT DEFAULT 'day',
   metric_name TEXT DEFAULT 'encounters',
-  result_limit INTEGER DEFAULT 5,
-  month_filter INTEGER DEFAULT NULL,
-  year_filter INTEGER DEFAULT NULL,
+  result_limit integer DEFAULT 5,
+  month_filter integer DEFAULT NULL,
+  year_filter integer DEFAULT NULL,
   exact_months_filter TEXT[] DEFAULT NULL,
-  months_filter INTEGER[] DEFAULT NULL
+  months_filter integer[] DEFAULT NULL
+) RETURNS TABLE (
+  species_name TEXT,
+  visit_date DATE,
+  metric_value BIGINT
 )
-RETURNS SETOF top_species_result
-LANGUAGE plpgsql
-STABLE
+LANGUAGE "plpgsql" STABLE
 AS $$
 BEGIN
   RETURN QUERY
@@ -108,3 +92,6 @@ BEGIN
   LIMIT result_limit;
 END;
 $$;
+
+DROP TABLE IF EXISTS "public"."top_periods_result";
+DROP TABLE IF EXISTS "public"."top_species_result";

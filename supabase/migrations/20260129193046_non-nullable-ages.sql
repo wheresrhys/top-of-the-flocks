@@ -1,3 +1,0 @@
-ALTER TABLE "Encounters"
-ALTER COLUMN age_code SET NOT NULL,
-ALTER COLUMN minimum_years SET NOT NULL;
