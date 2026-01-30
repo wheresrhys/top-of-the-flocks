@@ -2,11 +2,12 @@ import {
 	StatsAccordion,
 	PanelDefinition,
 	type StatsAccordionModel
-} from './components/StatsAccordion';
-import { fetchPanelData } from './lib/stats-accordion';
-import { getSeasonMonths, getSeasonName } from './lib/season-month-mapping';
+} from '../components/StatsAccordion';
+import { fetchPanelData } from '../lib/stats-accordion';
+import { getSeasonMonths, getSeasonName } from '../lib/season-month-mapping';
 import formatDate from 'intl-dateformat';
-import { BootstrapPageData } from './components/BootstrapPageData';
+import { BootstrapPageData } from '../components/BootstrapPageData';
+import { RingSearchForm } from '../components/RingSearchForm';
 
 function getMonthName(date: Date): string {
 	return formatDate(date, 'MMMM');
@@ -111,12 +112,21 @@ async function fetchInitialData(): Promise<StatsAccordionModel[]> {
 	);
 }
 
+function HomePageContent({ data }: { data: StatsAccordionModel[] }) {
+	return (
+		<div>
+			<RingSearchForm />
+			<StatsAccordion data={data} />
+		</div>
+	);
+}
+
 export default async function Home() {
 	return (
 		<BootstrapPageData<StatsAccordionModel[]>
 			getCacheKeys={() => ['home-stats']}
 			dataFetcher={fetchInitialData}
-			PageComponent={StatsAccordion}
+			PageComponent={HomePageContent}
 		/>
 	);
 }

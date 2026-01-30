@@ -8,24 +8,19 @@ import {
 } from '@/app/lib/stats-accordion';
 import Link from 'next/link';
 import formatDate from 'intl-dateformat';
+import {
+	addProvenAgeToBird,
+	pairwiseSortEncounters,
+	orderEncountersByRecency,
+	type BirdWithEncounters,
+	type EnrichedBirdWithEncounters
+} from '@/app/(routes)/bird/[ring]/page';
+
 type PageParams = { speciesName: string };
 type PageProps = { params: Promise<PageParams> };
 type PageData = {
 	topSessions: TopPeriodsResult[];
 	birds: EnrichedBirdWithEncounters[];
-};
-
-export type Encounter = Database['public']['Tables']['Encounters']['Row'] & {
-	session: Database['public']['Tables']['Sessions']['Row'];
-};
-
-export type BirdWithEncounters =
-	Database['public']['Tables']['Birds']['Row'] & {
-		encounters: Encounter[];
-	};
-
-export type EnrichedBirdWithEncounters = BirdWithEncounters & {
-	provenAge: number;
 };
 
 function getTopSessions(species: string) {
@@ -49,6 +44,7 @@ async function fetchAllBirds(species: string) {
 				id,
 				age_code,
 				capture_time,
+				is_juv,
 				minimum_years,
 				record_type,
 				sex,
@@ -70,25 +66,6 @@ async function fetchAllBirds(species: string) {
 		return [] as EnrichedBirdWithEncounters[];
 	}
 	return addProvenAgeToBirds(orderBirdsByRecency(data.birds, 'desc', 'last'));
-}
-
-function pairwiseSortEncounters(
-	direction: 'asc' | 'desc'
-): (a: Encounter, b: Encounter) => -1 | 0 | 1 {
-	return (a, b) => {
-		const aTime = new Date(a.session.visit_date).getTime();
-		const bTime = new Date(b.session.visit_date).getTime();
-		if (aTime === bTime) return 0;
-		if (direction === 'asc') return aTime > bTime ? 1 : -1;
-		else return aTime < bTime ? 1 : -1;
-	};
-}
-
-function orderEncountersByRecency(
-	encounters: Encounter[],
-	direction: 'asc' | 'desc'
-) {
-	return encounters.sort(pairwiseSortEncounters(direction));
 }
 
 function orderBirdsByRecency(
@@ -122,15 +99,7 @@ async function fetchSpeciesData(params: PageParams): Promise<PageData | null> {
 function addProvenAgeToBirds(
 	birds: BirdWithEncounters[]
 ): EnrichedBirdWithEncounters[] {
-	return birds.map((bird: BirdWithEncounters): EnrichedBirdWithEncounters => {
-		(bird as EnrichedBirdWithEncounters).provenAge =
-			bird.encounters[0].minimum_years +
-			new Date(
-				bird.encounters[bird.encounters.length - 1].session.visit_date
-			).getFullYear() -
-			new Date(bird.encounters[0].session.visit_date).getFullYear();
-		return bird as EnrichedBirdWithEncounters;
-	});
+	return birds.map(addProvenAgeToBird);
 }
 
 function SpeciesSummary({

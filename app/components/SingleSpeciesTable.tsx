@@ -4,39 +4,9 @@ import formatDate from 'intl-dateformat';
 import {
 	type EnrichedBirdWithEncounters,
 	Encounter
-} from '@/app/species/[speciesName]/page';
-
-function BirdDetail({ encounters }: { encounters: Encounter[] }) {
-	return (
-		<table className="table table-xs ">
-			<thead>
-				<tr>
-					<th>Date</th>
-					<th>Time</th>
-					<th>Type</th>
-					<th>Age</th>
-					<th>Sex</th>
-					<th>Wing</th>
-					<th>Weight</th>
-				</tr>
-			</thead>
-			<tbody>
-				{encounters?.map((encounter) => (
-					<tr key={encounter.id}>
-						<td>{encounter.session.visit_date}</td>
-						<td>{encounter.capture_time}</td>
-						<td>{encounter.record_type}</td>
-						<td>{encounter.age_code}</td>
-						<td>{encounter.sex}</td>
-						<td>{encounter.wing_length}</td>
-						<td>{encounter.weight}</td>
-					</tr>
-				))}
-			</tbody>
-		</table>
-	);
-}
-
+} from '@/app/(routes)/bird/[ring]/page';
+import { SingleBirdTable } from '@/app/components/SingleBirdTable';
+import Link from 'next/link';
 function BirdRow({
 	ring_no,
 	encounters,
@@ -65,7 +35,21 @@ function BirdRow({
 	return (
 		<>
 			<tr>
-				<td onClick={toggleBirdDetail}>{ring_no}</td>
+				<td>
+					<div className="flex justify-between">
+						<Link className="link" href={`/bird/${ring_no}`}>
+							{ring_no}
+						</Link>{' '}
+						<button
+							type="button"
+							className="collapse-toggle btn btn-outline btn-secondary btn-xs btn-square self-end"
+							onClick={toggleBirdDetail}
+						>
+							<span className="icon-[tabler--menu-2] collapse-open:hidden size-4"></span>
+							<span className="icon-[tabler--x] collapse-open:block hidden size-4"></span>
+						</button>
+					</div>
+				</td>
 				<td>{encounters.length}</td>
 				<td>
 					{formatDate(
@@ -84,7 +68,7 @@ function BirdRow({
 			{expandedBird === ring_no ? (
 				<tr>
 					<td colSpan={5}>
-						<BirdDetail encounters={birdDetail} />
+						<SingleBirdTable encounters={birdDetail} size="xs" />
 					</td>
 				</tr>
 			) : (
