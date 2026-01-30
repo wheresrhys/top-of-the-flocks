@@ -67,8 +67,18 @@ function BirdRow({
 			<tr>
 				<td onClick={toggleBirdDetail}>{ring_no}</td>
 				<td>{encounters.length}</td>
-				<td>{formatDate(new Date(encounters[0].session.visit_date), 'DD MMMM YYYY')}</td>
-				<td>{formatDate(new Date(encounters[encounters.length - 1].session.visit_date), 'DD MMMM YYYY')}</td>
+				<td>
+					{formatDate(
+						new Date(encounters[0].session.visit_date),
+						'DD MMMM YYYY'
+					)}
+				</td>
+				<td>
+					{formatDate(
+						new Date(encounters[encounters.length - 1].session.visit_date),
+						'DD MMMM YYYY'
+					)}
+				</td>
 				<td>{provenAge}</td>
 			</tr>
 			{expandedBird === ring_no ? (
@@ -84,7 +94,11 @@ function BirdRow({
 	);
 }
 
-export function SpeciesTable({ birds }: { birds: EnrichedBirdWithEncounters[] }) {
+export function SpeciesTable({
+	birds
+}: {
+	birds: EnrichedBirdWithEncounters[];
+}) {
 	const [expandedBird, setExpandedBird] = useState<string | null>(null);
 	return (
 		<div className="w-full overflow-x-auto">
