@@ -17,7 +17,7 @@ type BootstrapPageDataProps<DataType, PagePropsType, ParamsType> = {
 	}) => React.ReactNode;
 };
 
-async function getParams<
+async function defaultGetParams<
 	PagePropsType,
 	ParamsType extends Record<string, string>
 >(pageProps: PagePropsType): Promise<ParamsType> {
@@ -44,29 +44,31 @@ async function fetchDataWithCache<DataType, ParamsType>(
 	})();
 }
 
-async function LoadWithData<DataType, PagePropsType, ParamsType>(
-	bootstrapProps: BootstrapPageDataProps<DataType, PagePropsType, ParamsType>
-) {
+async function LoadWithData<DataType, PagePropsType, ParamsType>({
+	pageProps,
+	getParams,
+	dataFetcher,
+	getCacheKeys,
+	PageComponent
+}: BootstrapPageDataProps<DataType, PagePropsType, ParamsType>) {
 	let params: ParamsType;
-	if (bootstrapProps.getParams) {
-		params = await bootstrapProps.getParams(
-			bootstrapProps.pageProps as PagePropsType
-		);
-	} else if (bootstrapProps.pageProps) {
-		params = (await getParams(bootstrapProps.pageProps)) as ParamsType;
+	if (getParams) {
+		params = await getParams(pageProps as PagePropsType);
+	} else if (pageProps) {
+		params = (await defaultGetParams(pageProps)) as ParamsType;
 	} else {
 		params = {} as ParamsType;
 	}
 
 	const data = await fetchDataWithCache<DataType, ParamsType>(
 		params,
-		bootstrapProps.dataFetcher,
-		bootstrapProps.getCacheKeys(params)
+		dataFetcher,
+		getCacheKeys(params)
 	);
 	if (!data) {
 		notFound();
 	}
-	return <bootstrapProps.PageComponent params={params} data={data} />;
+	return <PageComponent params={params} data={data} />;
 }
 
 export function BootstrapPageData<
