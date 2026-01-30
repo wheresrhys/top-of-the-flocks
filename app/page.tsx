@@ -115,7 +115,6 @@ async function fetchInitialData(): Promise<StatsAccordionModel[]> {
 function HomePageContent({ data }: { data: StatsAccordionModel[] }) {
 	return (
 		<div>
-			<h1>Home</h1>
 			<RingSearchForm />
 			<StatsAccordion data={data} />
 		</div>

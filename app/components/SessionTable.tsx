@@ -1,7 +1,7 @@
 'use client';
 
 import { type Encounter } from '@/app/session/[date]/page';
-
+import Link from 'next/link';
 import { useState } from 'react';
 export type SpeciesBreakdown = {
 	species: string;
@@ -26,7 +26,11 @@ function SpeciesDetails({ encounters }: { encounters: Encounter[] | null }) {
 				{encounters?.map((encounter) => (
 					<tr key={encounter.id}>
 						<td>{encounter.capture_time}</td>
-						<td>{encounter.bird.ring_no}</td>
+						<td>
+							<Link className="link" href={`/bird/${encounter.bird.ring_no}`}>
+								{encounter.bird.ring_no}
+							</Link>
+						</td>
 						<td>{encounter.record_type}</td>
 						<td>{encounter.age_code}</td>
 						<td>{encounter.sex}</td>
@@ -65,7 +69,21 @@ function SpeciesRow({
 	return (
 		<>
 			<tr>
-				<td onClick={toggleSpeciesDetail}>{species}</td>
+				<td>
+					<div className="flex justify-between">
+						<Link className="link" href={`/species/${species}`}>
+							{species}
+						</Link>{' '}
+						<button
+							type="button"
+							className="collapse-toggle btn btn-outline btn-secondary btn-xs btn-square self-end"
+							onClick={toggleSpeciesDetail}
+						>
+							<span className="icon-[tabler--menu-2] collapse-open:hidden size-4"></span>
+							<span className="icon-[tabler--x] collapse-open:block hidden size-4"></span>
+						</button>
+					</div>
+				</td>
 				<td>
 					{
 						encounters.filter((encounter) => encounter.record_type === 'N')

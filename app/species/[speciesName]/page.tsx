@@ -44,6 +44,7 @@ async function fetchAllBirds(species: string) {
 				id,
 				age_code,
 				capture_time,
+				is_juv,
 				minimum_years,
 				record_type,
 				sex,

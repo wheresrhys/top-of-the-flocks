@@ -6,7 +6,7 @@ import {
 	Encounter
 } from '@/app/bird/[ring]/page';
 import { SingleBirdTable } from '@/app/components/SingleBirdTable';
-
+import Link from 'next/link';
 function BirdRow({
 	ring_no,
 	encounters,
@@ -35,7 +35,21 @@ function BirdRow({
 	return (
 		<>
 			<tr>
-				<td onClick={toggleBirdDetail}>{ring_no}</td>
+				<td>
+					<div className="flex justify-between">
+						<Link className="link" href={`/bird/${ring_no}`}>
+							{ring_no}
+						</Link>{' '}
+						<button
+							type="button"
+							className="collapse-toggle btn btn-outline btn-secondary btn-xs btn-square self-end"
+							onClick={toggleBirdDetail}
+						>
+							<span className="icon-[tabler--menu-2] collapse-open:hidden size-4"></span>
+							<span className="icon-[tabler--x] collapse-open:block hidden size-4"></span>
+						</button>
+					</div>
+				</td>
 				<td>{encounters.length}</td>
 				<td>
 					{formatDate(
@@ -54,7 +68,7 @@ function BirdRow({
 			{expandedBird === ring_no ? (
 				<tr>
 					<td colSpan={5}>
-						<SingleBirdTable encounters={birdDetail} />
+						<SingleBirdTable encounters={birdDetail} size="xs" />
 					</td>
 				</tr>
 			) : (

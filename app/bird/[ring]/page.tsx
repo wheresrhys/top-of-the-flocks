@@ -37,6 +37,7 @@ async function fetchBirdData({ ring }: PageParams) {
 			encounters:Encounters (
 				id,
 				age_code,
+				is_juv,
 				capture_time,
 				minimum_years,
 				record_type,
@@ -101,19 +102,21 @@ function BirdSummary({
 	data: PageData;
 }) {
 	return (
-		<div>
+		<div className="m-2">
 			<h1 className="text-2xl font-bold">
 				{bird?.species?.species_name} {ring}
 			</h1>
-			<ul>
-				<li className="list-item">{bird?.encounters.length}</li>
+			<ul className="border-base-content/25 divide-base-content/25 w-full divide-y rounded-md border *:p-3 *:first:rounded-t-md *:last:rounded-b-md mb-5 mt-5">
+				<li className="list-item">Encounters: {bird?.encounters.length}</li>
 				<li className="list-item">
+					Earliest:{' '}
 					{formatDate(
 						new Date(bird?.encounters[0].session.visit_date),
 						'DD MMMM YYYY'
 					)}
 				</li>
 				<li className="list-item">
+					Latest:{' '}
 					{formatDate(
 						new Date(
 							bird?.encounters[bird?.encounters.length - 1].session.visit_date
@@ -121,7 +124,7 @@ function BirdSummary({
 						'DD MMMM YYYY'
 					)}
 				</li>
-				<li className="list-item">{bird?.provenAge}</li>
+				<li className="list-item">Proven Age: {bird?.provenAge}</li>
 			</ul>
 			<SingleBirdTable encounters={bird?.encounters ?? []} />
 		</div>
