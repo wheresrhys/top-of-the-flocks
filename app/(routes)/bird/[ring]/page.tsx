@@ -2,7 +2,7 @@ import { BootstrapPageData } from '@/app/components/BootstrapPageData';
 import { supabase, catchSupabaseErrors } from '@/lib/supabase';
 import type { Database } from '@/types/supabase.types';
 import { SingleBirdTable } from '@/app/components/SingleBirdTable';
-import formatDate from 'intl-dateformat';
+import { format as formatDate } from 'date-fns';
 
 type PageParams = { ring: string };
 type PageProps = { params: Promise<PageParams> };
@@ -112,7 +112,7 @@ function BirdSummary({
 					Earliest:{' '}
 					{formatDate(
 						new Date(bird?.encounters[0].session.visit_date),
-						'DD MMMM YYYY'
+						'dd MMMM yyyy'
 					)}
 				</li>
 				<li className="list-item">
@@ -121,7 +121,7 @@ function BirdSummary({
 						new Date(
 							bird?.encounters[bird?.encounters.length - 1].session.visit_date
 						),
-						'DD MMMM YYYY'
+						'dd MMMM yyyy'
 					)}
 				</li>
 				<li className="list-item">Proven Age: {bird?.provenAge}</li>

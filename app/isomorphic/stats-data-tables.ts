@@ -1,16 +1,20 @@
-import type { PanelDefinition } from '../components/StatsAccordion';
-import { catchSupabaseErrors, supabase } from '@/lib/supabase';
+import { supabase, catchSupabaseErrors } from '@/lib/supabase';
 import type { Database } from '@/types/supabase.types';
 
-export type StatsAccordionArguments =
-	Database['public']['Functions']['top_periods_by_metric']['Args'];
-export type TopPeriodsResult =
+type TopPeriodsResult =
 	Database['public']['Functions']['top_periods_by_metric']['Returns'][number];
-export type TopSpeciesResult =
+type TopSpeciesResult =
 	Database['public']['Functions']['top_species_by_metric']['Returns'][number];
+export type TopStatsResult = TopPeriodsResult | TopSpeciesResult;
+
+type TopPeriodsArgs =
+	Database['public']['Functions']['top_periods_by_metric']['Args'];
+type TopSpeciesArgs =
+	Database['public']['Functions']['top_species_by_metric']['Args'];
+export type TopStatsArguments = TopPeriodsArgs | TopSpeciesArgs;
 
 export async function getTopPeriodsByMetric(
-	options: StatsAccordionArguments
+	options: TopPeriodsArgs
 ): Promise<TopPeriodsResult[] | null> {
 	return supabase
 		.rpc('top_periods_by_metric', options)
@@ -18,25 +22,23 @@ export async function getTopPeriodsByMetric(
 }
 
 export async function getTopSpeciesByMetric(
-	options: StatsAccordionArguments
+	options: TopSpeciesArgs
 ): Promise<TopSpeciesResult[] | null> {
 	return supabase
 		.rpc('top_species_by_metric', options)
 		.then(catchSupabaseErrors);
 }
 
-export async function fetchPanelData(
-	panel: PanelDefinition,
-	limit: number
+export async function getTopStats(
+	isBySpecies: boolean,
+	dataArguments: TopStatsArguments
 ): Promise<TopPeriodsResult[] | TopSpeciesResult[] | null> {
-	const data = panel.bySpecies
+	const data = isBySpecies
 		? await getTopSpeciesByMetric({
-				...panel.dataArguments,
-				result_limit: limit
-			})
+				...dataArguments
+			} as TopSpeciesArgs)
 		: await getTopPeriodsByMetric({
-				...panel.dataArguments,
-				result_limit: limit
-			});
+				...dataArguments
+			} as TopPeriodsArgs);
 	return data;
 }

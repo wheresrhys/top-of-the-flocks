@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-
+import { BoxyList } from './DesignSystem';
 type HeadingComponent<ItemModel> = React.ComponentType<{
 	model: ItemModel;
 	expandedId: string | false;
@@ -10,7 +10,7 @@ type ContentComponent<ItemModel> = React.ComponentType<{
 	expandedId: string | false;
 }>;
 
-function AccordionItem<ItemModel>({
+export function AccordionItem<ItemModel>({
 	id,
 	model,
 	onToggle,
@@ -32,65 +32,32 @@ function AccordionItem<ItemModel>({
 			onToggle(id);
 		}
 	}
+	const isExpanded = expandedId === id;
 
 	return (
-		<div
-			className={`accordion-item ${expandedId === id ? 'active' : ''}`}
-			id={id}
-		>
-			<button
-				onClick={(event) => onClick(expandedId === id)}
-				className="accordion-toggle inline-flex items-center justify-between text-start"
-				aria-controls={`${id}-content`}
-				aria-expanded={expandedId === id}
-				id={`${id}-header`}
-			>
-				<HeadingComponent model={model} expandedId={expandedId} />
-				<span className="icon-[tabler--chevron-left] accordion-item-active:-rotate-90 size-5 shrink-0 transition-transform duration-300 rtl:-rotate-180"></span>
-			</button>
+		<li>
+			<div className="flex basis-full">
+				<button
+					onClick={() => onClick(isExpanded)}
+					aria-controls={`${id}-content`}
+					aria-expanded={isExpanded}
+					id={`${id}-header`}
+					className="flex items-center justify-between cursor-pointer basis-full"
+				>
+					<HeadingComponent model={model} expandedId={expandedId} />
+					<span
+						className={`icon-[tabler--chevron-left] ${isExpanded ? '-rotate-90' : ''} size-5 shrink-0 transition-transform duration-300 rtl:-rotate-180`}
+					></span>
+				</button>
+			</div>
 			<div
 				id={`${id}-content`}
-				className={`accordion-content w-full ${expandedId === id ? '' : 'hidden'} overflow-hidden transition-[height] duration-300`}
+				className={`w-full ${isExpanded ? '' : 'hidden'} overflow-hidden transition-[height] duration-300 py-3`}
 				aria-labelledby={`${id}-header`}
 				role="region"
 			>
 				<ContentComponent model={model} expandedId={expandedId} />
 			</div>
-		</div>
-	);
-}
-
-export function Accordion<ItemModel>({
-	data,
-	ContentComponent,
-	HeadingComponent,
-	getKey
-}: {
-	data: ItemModel[];
-	HeadingComponent: HeadingComponent<ItemModel>;
-	ContentComponent: ContentComponent<ItemModel>;
-	getKey: (item: ItemModel) => string;
-}) {
-	const [expanded, setExpanded] = useState<string | false>(false);
-	return (
-		<>
-			{data !== null ? (
-				<div className="accordion divide-neutral/20 divide-y">
-					{data.map((item) => (
-						<AccordionItem
-							key={getKey(item)}
-							id={getKey(item)}
-							HeadingComponent={HeadingComponent}
-							ContentComponent={ContentComponent}
-							model={item}
-							onToggle={setExpanded}
-							expandedId={expanded}
-						/>
-					))}
-				</div>
-			) : (
-				<span>No data available</span>
-			)}
-		</>
+		</li>
 	);
 }

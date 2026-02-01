@@ -1,7 +1,7 @@
 import { HistoryAccordion } from '@/app/components/HistoryAccordion';
 import { BootstrapPageData } from '@/app/components/BootstrapPageData';
 import { supabase, catchSupabaseErrors } from '@/lib/supabase';
-
+import { PageWrapper, PrimaryHeading } from '@/app/components/DesignSystem';
 export type Session = {
 	id: number;
 	visit_date: string;
@@ -22,10 +22,10 @@ export async function fetchAllSessions(): Promise<Session[]> {
 
 async function ListAllSessions({ data }: { data: Session[] }) {
 	return (
-		<div className="m-5">
-			<h1 className="text-base-content text-4xl">All sessions</h1>
+		<PageWrapper>
+			<PrimaryHeading>Session history</PrimaryHeading>
 			<HistoryAccordion sessions={data} />
-		</div>
+		</PageWrapper>
 	);
 }
 

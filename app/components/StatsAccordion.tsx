@@ -1,87 +1,32 @@
 'use client';
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import formatDate from 'intl-dateformat';
-import { Accordion } from './Accordion';
-import { fetchPanelData } from '../lib/stats-accordion';
-import type {
-	StatsAccordionArguments,
-	TopPeriodsResult,
-	TopSpeciesResult
-} from '../lib/stats-accordion';
+import { AccordionItem } from './Accordion';
+import { SecondaryHeading, BoxyList } from './DesignSystem';
+import { StatOutput } from './StatOutput';
+import type { TopPeriodsResult, TopSpeciesResult } from './StatOutput';
+import {
+	getTopStats,
+	type TopStatsArguments
+} from '@/app/isomorphic/stats-data-tables';
+import type { TemporalUnit } from './StatOutput';
 
-type TemporalUnit = 'day' | 'month' | 'year';
-
-export type StatsAccordionModel = {
-	definition: PanelDefinition;
-	data: TopPeriodsResult[] | TopSpeciesResult[] | null;
-};
-
-export type SingleStatModel = {
-	definition: PanelDefinition;
-	data: TopPeriodsResult | TopSpeciesResult;
-	showUnit: boolean;
-};
-export type PanelDefinition = {
+export type StatConfig = {
 	id: string;
 	category: string;
 	unit: string;
 	bySpecies?: boolean;
-	dataArguments: StatsAccordionArguments;
-};
-const connectingVerbMap: Record<TemporalUnit, 'in' | 'on'> = {
-	day: 'on',
-	month: 'in',
-	year: 'in'
+	dataArguments: TopStatsArguments;
 };
 
-const dateFormatMap: Record<TemporalUnit, string> = {
-	day: 'DD MMMM YYYY',
-	month: 'MMMM YYYY',
-	year: 'YYYY'
+export type AccordionItemModel = {
+	definition: StatConfig;
+	data: TopPeriodsResult[] | TopSpeciesResult[] | null;
 };
 
-function dataIsSpeciesResult(
-	definition: PanelDefinition,
-	data: TopPeriodsResult | TopSpeciesResult
-): data is TopSpeciesResult {
-	return Boolean(definition.bySpecies);
-}
-
-function StatOutput({ definition, data, showUnit }: SingleStatModel) {
-	return (
-		<>
-			<b>
-				{data.metric_value}{' '}
-				{dataIsSpeciesResult(definition, data)
-					? data.species_name
-					: showUnit
-						? ` ${definition.unit}`
-						: ''}
-			</b>{' '}
-			{
-				connectingVerbMap[
-					definition.dataArguments.temporal_unit as TemporalUnit
-				] as string
-			}{' '}
-			{definition.dataArguments.temporal_unit === 'day' ? (
-				<Link className="link" href={`/session/${data.visit_date}`}>
-					{formatDate(
-						new Date(data.visit_date as string),
-						dateFormatMap[
-							definition.dataArguments.temporal_unit as TemporalUnit
-						]
-					)}
-				</Link>
-			) : (
-				formatDate(
-					new Date(data.visit_date as string),
-					dateFormatMap[definition.dataArguments.temporal_unit as TemporalUnit]
-				)
-			)}
-		</>
-	);
-}
+export type StatsAccordionModel = {
+	heading: string;
+	stats: AccordionItemModel[];
+};
 
 function hasData(data: TopPeriodsResult[] | null): data is TopPeriodsResult[] {
 	return data !== null;
@@ -91,7 +36,7 @@ function ContentComponent({
 	model,
 	expandedId
 }: {
-	model: StatsAccordionModel;
+	model: AccordionItemModel;
 	expandedId: string | false;
 }) {
 	const [data, setData] = useState<TopPeriodsResult[] | null>(model.data);
@@ -108,7 +53,10 @@ function ContentComponent({
 						setLoading(true);
 					}
 				}, 100);
-				fetchPanelData(model.definition, 5)
+				getTopStats(Boolean(model.definition.bySpecies), {
+					...model.definition.dataArguments,
+					result_limit: 5
+				})
 					.then((data) => {
 						setData(data);
 					})
@@ -123,35 +71,36 @@ function ContentComponent({
 			}
 		}
 	}, [expandedId]);
-	return (
-		<div className="px-5 pb-4">
-			{hasData(data) ? (
-				<ol className="list-inside list-decimal">
-					{data.map((item) => (
-						<li className="mb-2" key={item.visit_date}>
-							<StatOutput
-								data={item}
-								definition={model.definition}
-								showUnit={true}
-							/>
-						</li>
-					))}
-					{isLoading && (
-						<span className="loading loading-spinner loading-xl"></span>
-					)}
-				</ol>
-			) : (
-				<span>No data available</span>
+	return hasData(data) ? (
+		<ol className="list-inside list-none">
+			{data.map((item) => (
+				<li className="mb-2" key={item.visit_date}>
+					<StatOutput
+						value={item.metric_value}
+						speciesName={(item as TopSpeciesResult).species_name}
+						visitDate={item.visit_date}
+						showUnit={true}
+						unit={model.definition.unit}
+						temporalUnit={
+							model.definition.dataArguments.temporal_unit as TemporalUnit
+						}
+					/>
+				</li>
+			))}
+			{isLoading && (
+				<span className="loading loading-spinner loading-xl"></span>
 			)}
-		</div>
+		</ol>
+	) : (
+		<span>No data available</span>
 	);
 }
 // TODO shoudln't need to be so careful with ?. all over the place
 // maybe need to defined things as non-nullable in the SQL
-function HeadingComponent({ model }: { model: StatsAccordionModel }) {
+function HeadingComponent({ model }: { model: AccordionItemModel }) {
 	return (
 		<span>
-			<b>{model.definition.category}:</b>{' '}
+			<span className="font-bold">{model.definition.category}:</span>{' '}
 			<span>
 				{model.data?.[0]?.metric_value} {model.definition.unit}
 			</span>
@@ -160,12 +109,27 @@ function HeadingComponent({ model }: { model: StatsAccordionModel }) {
 }
 
 export function StatsAccordion({ data }: { data: StatsAccordionModel[] }) {
+	const [expanded, setExpanded] = useState<string | false>(false);
 	return (
-		<Accordion
-			data={data}
-			ContentComponent={ContentComponent}
-			HeadingComponent={HeadingComponent}
-			getKey={(item) => item.definition.id}
-		/>
+		<>
+			{data.map(({ heading, stats }) => (
+				<div key={heading}>
+					<SecondaryHeading>{heading}</SecondaryHeading>
+					<BoxyList>
+						{stats.map((item) => (
+							<AccordionItem
+								key={item.definition.id}
+								id={item.definition.id}
+								HeadingComponent={HeadingComponent}
+								ContentComponent={ContentComponent}
+								model={item}
+								onToggle={setExpanded}
+								expandedId={expanded}
+							/>
+						))}
+					</BoxyList>
+				</div>
+			))}
+		</>
 	);
 }
