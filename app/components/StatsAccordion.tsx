@@ -8,29 +8,24 @@ import {
 	getTopStats,
 	type TopStatsArguments
 } from '@/app/isomorphic/stats-data-tables';
-type TemporalUnit = 'day' | 'month' | 'year';
+import type { TemporalUnit } from './StatOutput';
+
+export type StatConfig = {
+	id: string;
+	category: string;
+	unit: string;
+	bySpecies?: boolean;
+	dataArguments: TopStatsArguments;
+};
 
 export type AccordionItemModel = {
-	definition: PanelDefinition;
+	definition: StatConfig;
 	data: TopPeriodsResult[] | TopSpeciesResult[] | null;
 };
 
 export type StatsAccordionModel = {
 	heading: string;
 	stats: AccordionItemModel[];
-};
-
-export type SingleStatModel = {
-	definition: PanelDefinition;
-	data: TopPeriodsResult | TopSpeciesResult;
-	showUnit: boolean;
-};
-export type PanelDefinition = {
-	id: string;
-	category: string;
-	unit: string;
-	bySpecies?: boolean;
-	dataArguments: TopStatsArguments;
 };
 
 function hasData(data: TopPeriodsResult[] | null): data is TopPeriodsResult[] {

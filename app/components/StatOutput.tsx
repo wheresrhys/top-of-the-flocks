@@ -16,7 +16,7 @@ export type StatOutputModel = {
 	temporalUnit: TemporalUnit;
 	dateFormat?: string;
 };
-type TemporalUnit = 'day' | 'month' | 'year';
+export type TemporalUnit = 'day' | 'month' | 'year';
 const connectingVerbMap: Record<TemporalUnit, 'in' | 'on'> = {
 	day: 'on',
 	month: 'in',

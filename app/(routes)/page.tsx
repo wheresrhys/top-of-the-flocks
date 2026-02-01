@@ -1,6 +1,6 @@
 import {
 	StatsAccordion,
-	PanelDefinition,
+	StatConfig,
 	type StatsAccordionModel
 } from '../components/StatsAccordion';
 
@@ -10,9 +10,9 @@ import { RingSearchForm } from '../components/RingSearchForm';
 import { PageWrapper } from '../components/DesignSystem';
 import { getTopStats } from '../isomorphic/stats-data-tables';
 
-function getPanelDefinitions(
+function getStatConfigs(
 	date: Date
-): { heading: string; stats: PanelDefinition[] }[] {
+): { heading: string; stats: StatConfig[] }[] {
 	return [
 		{
 			heading: 'Busiest sessions:',
@@ -124,9 +124,9 @@ function getPanelDefinitions(
 }
 
 async function fetchInitialData(): Promise<StatsAccordionModel[]> {
-	const panelDefinitions = getPanelDefinitions(new Date());
+	const statConfigs = getStatConfigs(new Date());
 	return Promise.all(
-		panelDefinitions.map(async (panelGroup) => {
+		statConfigs.map(async (panelGroup) => {
 			const panels = await Promise.all(
 				panelGroup.stats.map(async (panel) => {
 					const data = await getTopStats(Boolean(panel.bySpecies), {
