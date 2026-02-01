@@ -4,8 +4,6 @@ import { supabase, catchSupabaseErrors } from '@/lib/supabase';
 import type { Database } from '@/types/supabase.types';
 import { getTopPeriodsByMetric } from '@/app/isomorphic/stats-data-tables';
 import type { TopPeriodsResult } from '@/app/components/StatOutput';
-import Link from 'next/link';
-import { format as formatDate } from 'date-fns';
 import {
 	addProvenAgeToBird,
 	pairwiseSortEncounters,
@@ -13,10 +11,12 @@ import {
 	type BirdWithEncounters,
 	type EnrichedBirdWithEncounters
 } from '@/app/(routes)/bird/[ring]/page';
+import { PageWrapper, PrimaryHeading } from '@/app/components/DesignSystem';
+import { SpeciesHighlightStats } from '@/app/components/SpeciesHighlights';
 
 type PageParams = { speciesName: string };
 type PageProps = { params: Promise<PageParams> };
-type PageData = {
+export type PageData = {
 	topSessions: TopPeriodsResult[];
 	birds: EnrichedBirdWithEncounters[];
 	mostCaughtBirds: MostCaughtBirdsResult[];
@@ -120,111 +120,19 @@ function addProvenAgeToBirds(
 	return birds.map(addProvenAgeToBird);
 }
 
-function MostCaughtBird({
-	ring,
-	allBirds
-}: {
-	ring: string;
-	allBirds: EnrichedBirdWithEncounters[];
-}) {
-	const bird = allBirds.find(
-		(bird) => bird.ring_no === ring
-	) as EnrichedBirdWithEncounters;
-
-	return (
-		<li>
-			<Link className="link" href={`/bird/${bird.ring_no}`}>
-				{bird.ring_no}
-			</Link>
-			: {bird.encounters.length} encounters,{' '}
-			<span>
-				{formatDate(
-					new Date(bird.encounters[0].session.visit_date as string),
-					'dd MMMM, yyyy'
-				)}{' '}
-				-{' '}
-				{formatDate(
-					new Date(
-						bird.encounters[bird.encounters.length - 1].session
-							.visit_date as string
-					),
-					'dd MMMM, yyyy'
-				)}
-				, proven age: {bird.provenAge} years
-			</span>
-		</li>
-	);
-}
-
 function SpeciesSummary({
 	params: { speciesName },
-	data: { topSessions, birds, mostCaughtBirds }
+	data
 }: {
 	params: PageParams;
 	data: PageData;
 }) {
-	const oldestBirdAge = Math.max(...birds.map((bird) => bird.provenAge));
-	const oldestBirds =
-		oldestBirdAge > 1
-			? birds.filter((bird) => bird.provenAge === oldestBirdAge)
-			: [];
 	return (
-		<div>
-			<div className="m-5">
-				<h1 className="text-base-content text-4xl">
-					{speciesName}: all records
-				</h1>
-				<ul className="border-base-content/25 divide-base-content/25 w-full divide-y rounded-md border *:p-3 *:first:rounded-t-md *:last:rounded-b-md mb-5 mt-5">
-					<li>{birds.length} individuals</li>
-					<li>
-						Oldest proven age: {oldestBirdAge} years old:{' '}
-						<ul>
-							{oldestBirds.map((bird) => (
-								<li key={bird.ring_no}>
-									<Link className="link" href={`/bird/${bird.ring_no}`}>
-										{bird.ring_no}
-									</Link>
-								</li>
-							))}
-						</ul>
-					</li>
-					{mostCaughtBirds?.length > 0 ? (
-						<li>
-							Most caught birds:
-							<ol>
-								{mostCaughtBirds.map((bird) => (
-									<MostCaughtBird
-										key={bird.ring_no}
-										ring={bird.ring_no}
-										allBirds={birds}
-									/>
-								))}
-							</ol>
-						</li>
-					) : null}
-					<li>
-						Top 5 sessions by encounters:
-						<ol>
-							{topSessions.map((session) => (
-								<li key={session.visit_date}>
-									{session.metric_value} on{' '}
-									<Link
-										className="link"
-										href={`/session/${session.visit_date}`}
-									>
-										{formatDate(
-											new Date(session.visit_date as string),
-											'dd MMMM, yyyy'
-										)}
-									</Link>
-								</li>
-							))}
-						</ol>
-					</li>
-				</ul>
-			</div>
-			<SpeciesTable birds={birds} />
-		</div>
+		<PageWrapper>
+			<PrimaryHeading>{speciesName}</PrimaryHeading>
+			<SpeciesHighlightStats {...data} />
+			<SpeciesTable birds={data.birds} />
+		</PageWrapper>
 	);
 }
 
