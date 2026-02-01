@@ -1,7 +1,5 @@
 'use client';
 import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import formatDate from 'intl-dateformat';
 import { AccordionItem } from './Accordion';
 import { fetchPanelData } from '../lib/stats-accordion';
 import type {
@@ -10,6 +8,7 @@ import type {
 	TopSpeciesResult
 } from '../lib/stats-accordion';
 import { SecondaryHeading, BoxyList } from './DesignSystem';
+import { StatOutput } from './StatOutput';
 type TemporalUnit = 'day' | 'month' | 'year';
 
 export type AccordionItemModel = {
@@ -34,59 +33,6 @@ export type PanelDefinition = {
 	bySpecies?: boolean;
 	dataArguments: StatsAccordionArguments;
 };
-const connectingVerbMap: Record<TemporalUnit, 'in' | 'on'> = {
-	day: 'on',
-	month: 'in',
-	year: 'in'
-};
-
-const dateFormatMap: Record<TemporalUnit, string> = {
-	day: 'DD MMMM YYYY',
-	month: 'MMMM YYYY',
-	year: 'YYYY'
-};
-
-function dataIsSpeciesResult(
-	definition: PanelDefinition,
-	data: TopPeriodsResult | TopSpeciesResult
-): data is TopSpeciesResult {
-	return Boolean(definition.bySpecies);
-}
-
-function StatOutput({ definition, data, showUnit }: SingleStatModel) {
-	return (
-		<>
-			<b>
-				{data.metric_value}{' '}
-				{dataIsSpeciesResult(definition, data)
-					? data.species_name
-					: showUnit
-						? ` ${definition.unit}`
-						: ''}
-			</b>{' '}
-			{
-				connectingVerbMap[
-					definition.dataArguments.temporal_unit as TemporalUnit
-				] as string
-			}{' '}
-			{definition.dataArguments.temporal_unit === 'day' ? (
-				<Link className="link" href={`/session/${data.visit_date}`}>
-					{formatDate(
-						new Date(data.visit_date as string),
-						dateFormatMap[
-							definition.dataArguments.temporal_unit as TemporalUnit
-						]
-					)}
-				</Link>
-			) : (
-				formatDate(
-					new Date(data.visit_date as string),
-					dateFormatMap[definition.dataArguments.temporal_unit as TemporalUnit]
-				)
-			)}
-		</>
-	);
-}
 
 function hasData(data: TopPeriodsResult[] | null): data is TopPeriodsResult[] {
 	return data !== null;
@@ -129,15 +75,17 @@ function ContentComponent({
 		}
 	}, [expandedId]);
 	return (
-		<div className="px-5 py-4">
-			{hasData(data) ? (
-				<ol className="list-inside list-decimal">
+			hasData(data) ? (
+				<ol className="list-inside list-none">
 					{data.map((item) => (
 						<li className="mb-2" key={item.visit_date}>
 							<StatOutput
-								data={item}
-								definition={model.definition}
+								value={item.metric_value}
+								speciesName={(item as TopSpeciesResult).species_name}
+								visitDate={item.visit_date}
 								showUnit={true}
+								unit={model.definition.unit}
+								temporalUnit={model.definition.dataArguments.temporal_unit as TemporalUnit}
 							/>
 						</li>
 					))}
@@ -147,8 +95,7 @@ function ContentComponent({
 				</ol>
 			) : (
 				<span>No data available</span>
-			)}
-		</div>
+			)
 	);
 }
 // TODO shoudln't need to be so careful with ?. all over the place
@@ -156,7 +103,7 @@ function ContentComponent({
 function HeadingComponent({ model }: { model: AccordionItemModel }) {
 	return (
 		<span>
-			<b>{model.definition.category}:</b>{' '}
+			<span className="font-bold">{model.definition.category}:</span>{' '}
 			<span>
 				{model.data?.[0]?.metric_value} {model.definition.unit}
 			</span>

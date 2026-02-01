@@ -52,7 +52,7 @@ export function AccordionItem<ItemModel>({
 			</div>
 			<div
 				id={`${id}-content`}
-				className={`w-full ${isExpanded ? '' : 'hidden'} overflow-hidden transition-[height] duration-300`}
+				className={`w-full ${isExpanded ? '' : 'hidden'} overflow-hidden transition-[height] duration-300 py-3`}
 				aria-labelledby={`${id}-header`}
 				role="region"
 			>

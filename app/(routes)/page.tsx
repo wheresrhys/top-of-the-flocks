@@ -5,7 +5,7 @@ import {
 } from '../components/StatsAccordion';
 import { fetchPanelData } from '../lib/stats-accordion';
 import { getSeasonMonths, getSeasonName } from '../lib/season-month-mapping';
-import formatDate from 'intl-dateformat';
+import { format as formatDate } from 'date-fns';
 import { BootstrapPageData } from '../components/BootstrapPageData';
 import { RingSearchForm } from '../components/RingSearchForm';
 import { PageWrapper } from '../components/DesignSystem';

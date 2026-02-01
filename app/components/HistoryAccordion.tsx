@@ -1,10 +1,10 @@
 'use client';
 import { type Session } from '@/app/(routes)/sessions/page';
-import Link from 'next/link';
-import formatDate from 'intl-dateformat';
 import { AccordionItem } from '@/app/components/Accordion';
 import { BoxyList, SecondaryHeading } from '@/app/components/DesignSystem';
 import { useState } from 'react';
+import { StatOutput } from './StatOutput';
+import {format as formatDate} from 'date-fns';
 function groupByDateMethod(methodName: 'getFullYear' | 'getMonth') {
 	return function (sessions: Session[] | null): Session[][] {
 		if (!sessions) return [];
@@ -31,13 +31,18 @@ const groupByMonth = groupByDateMethod('getMonth');
 
 function SessionsOfMonth({ model: month }: { model: Session[] }) {
 	return (
-		<ol>
+		<ol className="list-inside list-none">
 			{month.map((session) => (
-				<li key={session.id}>
-					<Link className="link" href={`/session/${session.visit_date}`}>
-						{session.visit_date}:
-					</Link>{' '}
-					{session.encounters[0].count} birds
+				<li className="mb-2" key={session.id}>
+					<StatOutput
+						unit="birds"
+						value={session.encounters[0].count}
+						speciesName={''}
+						visitDate={session.visit_date}
+						showUnit={true}
+						temporalUnit="day"
+						dateFormat="EEEE do"
+					/>
 				</li>
 			))}
 		</ol>
@@ -46,14 +51,14 @@ function SessionsOfMonth({ model: month }: { model: Session[] }) {
 
 function MonthHeading({ model: month }: { model: Session[] }) {
 	return (
-		<span>
-			{formatDate(new Date(month[0].visit_date), 'MMMM')}, {month.length}{' '}
+		<span><span className="font-bold">
+			{formatDate(new Date(month[0].visit_date), 'MMMM')}:</span> {month.length}{' '}
 			sessions,{' '}
 			{month
 				.flatMap((session) => session.encounters)
 				.reduce((acc, encounter) => acc + encounter.count, 0)}{' '}
-			birds
-		</span>
+			birds</span>
+
 	);
 }
 
@@ -63,14 +68,15 @@ export function HistoryAccordion({ sessions }: { sessions: Session[] | null }) {
 	return (
 		<>
 			{calendar.map((year) => {
+				const yearString = new Date(year[0][0].visit_date).getFullYear();
 				return (
-					<>
+					<div key={yearString}>
 						<SecondaryHeading>
-							{new Date(year[0][0].visit_date).getFullYear()}
+							{yearString}
 						</SecondaryHeading>
 						<BoxyList>
 							{year.map((month) => {
-								const id = formatDate(new Date(month[0].visit_date), 'YYYY-MM');
+								const id = formatDate(new Date(month[0].visit_date), 'yyyy-MM');
 								return (
 									<AccordionItem
 										key={id}
@@ -84,7 +90,7 @@ export function HistoryAccordion({ sessions }: { sessions: Session[] | null }) {
 								);
 							})}
 						</BoxyList>
-					</>
+					</div>
 				);
 			})}
 		</>

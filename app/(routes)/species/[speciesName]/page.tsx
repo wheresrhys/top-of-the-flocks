@@ -7,7 +7,7 @@ import {
 	type TopPeriodsResult
 } from '@/app/lib/stats-accordion';
 import Link from 'next/link';
-import formatDate from 'intl-dateformat';
+import { format as formatDate } from 'date-fns';
 import {
 	addProvenAgeToBird,
 	pairwiseSortEncounters,
@@ -142,7 +142,7 @@ function MostCaughtBird({
 			<span>
 				{formatDate(
 					new Date(bird.encounters[0].session.visit_date as string),
-					'DD MMMM, YYYY'
+					'dd MMMM, yyyy'
 				)}{' '}
 				-{' '}
 				{formatDate(
@@ -150,7 +150,7 @@ function MostCaughtBird({
 						bird.encounters[bird.encounters.length - 1].session
 							.visit_date as string
 					),
-					'DD MMMM, YYYY'
+					'dd MMMM, yyyy'
 				)}
 				, proven age: {bird.provenAge} years
 			</span>
@@ -216,7 +216,7 @@ function SpeciesSummary({
 									>
 										{formatDate(
 											new Date(session.visit_date as string),
-											'DD MMMM, YYYY'
+											'dd MMMM, yyyy'
 										)}
 									</Link>
 								</li>

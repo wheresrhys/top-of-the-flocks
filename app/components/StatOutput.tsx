@@ -1,0 +1,57 @@
+import type { TopPeriodsResult, TopSpeciesResult } from '../lib/stats-accordion';
+
+import Link from 'next/link';
+import {format as formatDate} from 'date-fns';
+export type StatOutputModel = {
+  value: number;
+  speciesName: string;
+  visitDate: string;
+  showUnit: boolean;
+  unit: string;
+  temporalUnit: TemporalUnit;
+  dateFormat?: string;
+};
+type TemporalUnit = 'day' | 'month' | 'year';
+const connectingVerbMap: Record<TemporalUnit, 'in' | 'on'> = {
+  day: 'on',
+  month: 'in',
+  year: 'in'
+};
+
+const dateFormatMap: Record<TemporalUnit, string> = {
+  day: 'dd MMMM yyyy',
+  month: 'MMMM yyyy',
+  year: 'yyyy'
+};
+
+export function StatOutput({ dateFormat, unit, value, speciesName, visitDate, showUnit, temporalUnit }: StatOutputModel) {
+  return (
+    <>
+      <span className="font-bold">
+        {value}{' '}
+        {speciesName || ( showUnit
+            ? ` ${unit}`
+            : '')}
+      </span>{' '}
+      {
+        connectingVerbMap[temporalUnit as TemporalUnit
+        ] as string
+      }{' '}
+      {temporalUnit === 'day' ? (
+        <Link className="link" href={`/session/${visitDate}`}>
+          {formatDate(
+            new Date(visitDate as string), dateFormat ||
+            dateFormatMap[
+            temporalUnit as TemporalUnit
+            ]
+          )}
+        </Link>
+      ) : (
+        formatDate(
+          new Date(visitDate as string), dateFormat ||
+          dateFormatMap[temporalUnit as TemporalUnit]
+        )
+      )}
+    </>
+  );
+}

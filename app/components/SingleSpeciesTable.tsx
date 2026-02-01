@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import formatDate from 'intl-dateformat';
+import { format as formatDate } from 'date-fns';
 import {
 	type EnrichedBirdWithEncounters,
 	Encounter
@@ -54,13 +54,13 @@ function BirdRow({
 				<td>
 					{formatDate(
 						new Date(encounters[0].session.visit_date),
-						'DD MMMM YYYY'
+						'dd MMMM yyyy'
 					)}
 				</td>
 				<td>
 					{formatDate(
 						new Date(encounters[encounters.length - 1].session.visit_date),
-						'DD MMMM YYYY'
+						'dd MMMM yyyy'
 					)}
 				</td>
 				<td>{provenAge}</td>
