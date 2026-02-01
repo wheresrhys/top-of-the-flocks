@@ -2,8 +2,9 @@
 import { type Session } from '@/app/(routes)/sessions/page';
 import Link from 'next/link';
 import formatDate from 'intl-dateformat';
-import { Accordion } from '@/app/components/Accordion';
-
+import { AccordionItem } from '@/app/components/Accordion';
+import { BoxyList, SecondaryHeading } from '@/app/components/DesignSystem';
+import { useState } from 'react';
 function groupByDateMethod(methodName: 'getFullYear' | 'getMonth') {
 	return function (sessions: Session[] | null): Session[][] {
 		if (!sessions) return [];
@@ -46,7 +47,7 @@ function SessionsOfMonth({ model: month }: { model: Session[] }) {
 function MonthHeading({ model: month }: { model: Session[] }) {
 	return (
 		<span>
-			{formatDate(new Date(month[0].visit_date), 'MMMM YYYY')}, {month.length}{' '}
+			{formatDate(new Date(month[0].visit_date), 'MMMM')}, {month.length}{' '}
 			sessions,{' '}
 			{month
 				.flatMap((session) => session.encounters)
@@ -58,12 +59,34 @@ function MonthHeading({ model: month }: { model: Session[] }) {
 
 export function HistoryAccordion({ sessions }: { sessions: Session[] | null }) {
 	const calendar = groupByYear(sessions || []).map(groupByMonth);
+	const [expanded, setExpanded] = useState<string | false>(false);
 	return (
-		<Accordion
-			data={calendar.flatMap((year) => year)}
-			ContentComponent={SessionsOfMonth}
-			HeadingComponent={MonthHeading}
-			getKey={(month) => formatDate(new Date(month[0].visit_date), 'YYYY-MM')}
-		/>
+		<>
+			{calendar.map((year) => {
+				return (
+					<>
+						<SecondaryHeading>
+							{new Date(year[0][0].visit_date).getFullYear()}
+						</SecondaryHeading>
+						<BoxyList>
+							{year.map((month) => {
+								const id = formatDate(new Date(month[0].visit_date), 'YYYY-MM');
+								return (
+									<AccordionItem
+										key={id}
+										id={id}
+										HeadingComponent={MonthHeading}
+										ContentComponent={SessionsOfMonth}
+										model={month}
+										onToggle={setExpanded}
+										expandedId={expanded}
+									/>
+								);
+							})}
+						</BoxyList>
+					</>
+				);
+			})}
+		</>
 	);
 }

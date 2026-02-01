@@ -2,19 +2,24 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import formatDate from 'intl-dateformat';
-import { Accordion } from './Accordion';
+import { AccordionItem } from './Accordion';
 import { fetchPanelData } from '../lib/stats-accordion';
 import type {
 	StatsAccordionArguments,
 	TopPeriodsResult,
 	TopSpeciesResult
 } from '../lib/stats-accordion';
-
+import { SecondaryHeading, BoxyList } from './DesignSystem';
 type TemporalUnit = 'day' | 'month' | 'year';
 
-export type StatsAccordionModel = {
+export type AccordionItemModel = {
 	definition: PanelDefinition;
 	data: TopPeriodsResult[] | TopSpeciesResult[] | null;
+};
+
+export type StatsAccordionModel = {
+	heading: string;
+	stats: AccordionItemModel[];
 };
 
 export type SingleStatModel = {
@@ -91,7 +96,7 @@ function ContentComponent({
 	model,
 	expandedId
 }: {
-	model: StatsAccordionModel;
+	model: AccordionItemModel;
 	expandedId: string | false;
 }) {
 	const [data, setData] = useState<TopPeriodsResult[] | null>(model.data);
@@ -124,7 +129,7 @@ function ContentComponent({
 		}
 	}, [expandedId]);
 	return (
-		<div className="px-5 pb-4">
+		<div className="px-5 py-4">
 			{hasData(data) ? (
 				<ol className="list-inside list-decimal">
 					{data.map((item) => (
@@ -148,7 +153,7 @@ function ContentComponent({
 }
 // TODO shoudln't need to be so careful with ?. all over the place
 // maybe need to defined things as non-nullable in the SQL
-function HeadingComponent({ model }: { model: StatsAccordionModel }) {
+function HeadingComponent({ model }: { model: AccordionItemModel }) {
 	return (
 		<span>
 			<b>{model.definition.category}:</b>{' '}
@@ -160,12 +165,27 @@ function HeadingComponent({ model }: { model: StatsAccordionModel }) {
 }
 
 export function StatsAccordion({ data }: { data: StatsAccordionModel[] }) {
+	const [expanded, setExpanded] = useState<string | false>(false);
 	return (
-		<Accordion
-			data={data}
-			ContentComponent={ContentComponent}
-			HeadingComponent={HeadingComponent}
-			getKey={(item) => item.definition.id}
-		/>
+		<>
+			{data.map(({ heading, stats }) => (
+				<div key={heading}>
+					<SecondaryHeading>{heading}</SecondaryHeading>
+					<BoxyList>
+						{stats.map((item) => (
+							<AccordionItem
+								key={item.definition.id}
+								id={item.definition.id}
+								HeadingComponent={HeadingComponent}
+								ContentComponent={ContentComponent}
+								model={item}
+								onToggle={setExpanded}
+								expandedId={expanded}
+							/>
+						))}
+					</BoxyList>
+				</div>
+			))}
+		</>
 	);
 }
