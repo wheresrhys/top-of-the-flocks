@@ -3,6 +3,7 @@ import { supabase, catchSupabaseErrors } from '@/lib/supabase';
 import type { Database } from '@/types/supabase.types';
 import { SingleBirdTable } from '@/app/components/SingleBirdTable';
 import { format as formatDate } from 'date-fns';
+import { PageWrapper, PrimaryHeading } from '@/app/components/DesignSystem';
 
 type PageParams = { ring: string };
 type PageProps = { params: Promise<PageParams> };
@@ -102,21 +103,23 @@ function BirdSummary({
 	data: PageData;
 }) {
 	return (
-		<div className="m-2">
-			<h1 className="text-2xl font-bold">
+		<PageWrapper>
+			<PrimaryHeading>
 				{bird?.species?.species_name} {ring}
-			</h1>
-			<ul className="border-base-content/25 divide-base-content/25 w-full divide-y rounded-md border *:p-3 *:first:rounded-t-md *:last:rounded-b-md mb-5 mt-5">
-				<li className="list-item">Encounters: {bird?.encounters.length}</li>
-				<li className="list-item">
-					Earliest:{' '}
+			</PrimaryHeading>
+			<ul className="flex flex-wrap gap-2">
+				<li className="badge badge-secondary">
+					{bird?.encounters.length} Encounters
+				</li>
+				<li className="badge badge-secondary">
+					First:{' '}
 					{formatDate(
 						new Date(bird?.encounters[0].session.visit_date),
 						'dd MMMM yyyy'
 					)}
 				</li>
-				<li className="list-item">
-					Latest:{' '}
+				<li className="badge badge-secondary">
+					Last:{' '}
 					{formatDate(
 						new Date(
 							bird?.encounters[bird?.encounters.length - 1].session.visit_date
@@ -124,10 +127,10 @@ function BirdSummary({
 						'dd MMMM yyyy'
 					)}
 				</li>
-				<li className="list-item">Proven Age: {bird?.provenAge}</li>
+				<li className="badge badge-secondary">Proven Age: {bird?.provenAge}</li>
 			</ul>
 			<SingleBirdTable encounters={bird?.encounters ?? []} />
-		</div>
+		</PageWrapper>
 	);
 }
 

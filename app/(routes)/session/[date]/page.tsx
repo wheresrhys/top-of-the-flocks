@@ -5,6 +5,8 @@ import {
 import { supabase, catchSupabaseErrors } from '@/lib/supabase';
 import type { Database } from '@/types/supabase.types';
 import { BootstrapPageData } from '@/app/components/BootstrapPageData';
+import { PageWrapper, PrimaryHeading } from '@/app/components/DesignSystem';
+import { format as formatDate } from 'date-fns';
 
 type PageParams = { date: string };
 type PageProps = { params: Promise<PageParams> };
@@ -83,41 +85,34 @@ function SessionSummary({
 	const speciesBreakdown = getSpeciesBreakdown(session);
 
 	return (
-		<div>
-			<div className="m-5">
-				<h1 className="text-base-content text-4xl">Session on {date}</h1>
-				<ul className="border-base-content/25 divide-base-content/25 w-full divide-y rounded-md border *:p-3 *:first:rounded-t-md *:last:rounded-b-md mb-5 mt-5">
-					<li>{session.length} birds</li>
-					<li>{speciesBreakdown.length} species</li>
-					<li>
-						{
-							session.filter((encounter) => encounter.record_type === 'N')
-								.length
-						}{' '}
-						new
-					</li>
-					<li>
-						{
-							session.filter((encounter) => encounter.record_type === 'S')
-								.length
-						}{' '}
-						retraps
-					</li>
-					<li>
-						{session.filter((encounter) => encounter.minimum_years >= 1).length}{' '}
-						adults
-					</li>
-					<li>
-						{
-							session.filter((encounter) => encounter.minimum_years === 0)
-								.length
-						}{' '}
-						juvs
-					</li>
-				</ul>
-			</div>
+		<PageWrapper>
+			<PrimaryHeading>
+				{formatDate(new Date(date), 'EEE do MMMM yyyy')}
+			</PrimaryHeading>
+			<ul className="flex flex-wrap gap-2">
+				<li className="badge badge-secondary">{session.length} birds</li>
+				<li className="badge badge-secondary">
+					{speciesBreakdown.length} species
+				</li>
+				<li className="badge badge-secondary">
+					{session.filter((encounter) => encounter.record_type === 'N').length}{' '}
+					new
+				</li>
+				<li className="badge badge-secondary">
+					{session.filter((encounter) => encounter.record_type === 'S').length}{' '}
+					retraps
+				</li>
+				<li className="badge badge-secondary">
+					{session.filter((encounter) => encounter.minimum_years >= 1).length}{' '}
+					adults
+				</li>
+				<li className="badge badge-secondary">
+					{session.filter((encounter) => encounter.minimum_years === 0).length}{' '}
+					juvs
+				</li>
+			</ul>
 			<SessionTable date={date} speciesBreakdown={speciesBreakdown} />
-		</div>
+		</PageWrapper>
 	);
 }
 

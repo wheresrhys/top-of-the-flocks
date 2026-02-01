@@ -110,6 +110,9 @@ function HeadingComponent({ model }: { model: AccordionItemModel }) {
 
 export function StatsAccordion({ data }: { data: StatsAccordionModel[] }) {
 	const [expanded, setExpanded] = useState<string | false>(false);
+	useEffect(() => {
+		setExpanded(false);
+	}, []);
 	return (
 		<>
 			{data.map(({ heading, stats }) => (

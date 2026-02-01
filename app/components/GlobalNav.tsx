@@ -8,11 +8,13 @@ export default function GlobalNav() {
 				<div className="flex items-center justify-between">
 					<div className="navbar-start items-center justify-between max-md:w-full">
 						<Link
-							className="link text-base-content link-neutral text-xl font-bold no-underline"
+							className="link text-base-content link-neutral text-xl font-bold no-underline flex items-center gap-2 text-nowrap"
 							href="/"
 						>
-							TOTF
+							<span className="icon-[fluent-emoji-flat--blackbird] size-8"></span>
+							Top of the Flocks
 						</Link>
+
 						<div className="md:hidden">
 							<button
 								type="button"
