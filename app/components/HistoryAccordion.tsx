@@ -2,7 +2,7 @@
 import { type Session } from '@/app/(routes)/sessions/page';
 import { AccordionItem } from '@/app/components/Accordion';
 import { BoxyList, SecondaryHeading } from '@/app/components/DesignSystem';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { StatOutput } from './StatOutput';
 import { format as formatDate } from 'date-fns';
 function groupByDateMethod(methodName: 'getFullYear' | 'getMonth') {
@@ -67,6 +67,9 @@ function MonthHeading({ model: month }: { model: Session[] }) {
 export function HistoryAccordion({ sessions }: { sessions: Session[] | null }) {
 	const calendar = groupByYear(sessions || []).map(groupByMonth);
 	const [expanded, setExpanded] = useState<string | false>(false);
+	useEffect(() => {
+		setExpanded(false);
+	}, []);
 	return (
 		<>
 			{calendar.map((year) => {
