@@ -138,6 +138,9 @@ export default async function BirdPage(props: PageProps) {
 	return (
 		<BootstrapPageData<PageData, PageProps, PageParams>
 			pageProps={props}
+			getParams={async (pageProps: PageProps) => ({
+				ring: (await pageProps.params).ring.toUpperCase()
+			})}
 			getCacheKeys={(params: PageParams) => ['bird', params.ring]}
 			dataFetcher={fetchBirdData}
 			PageComponent={BirdSummary}
