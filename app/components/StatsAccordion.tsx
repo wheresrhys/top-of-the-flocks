@@ -1,14 +1,13 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { AccordionItem } from './Accordion';
-import { fetchPanelData } from '../lib/stats-accordion';
-import type {
-	StatsAccordionArguments,
-	TopPeriodsResult,
-	TopSpeciesResult
-} from '../lib/stats-accordion';
 import { SecondaryHeading, BoxyList } from './DesignSystem';
 import { StatOutput } from './StatOutput';
+import type { TopPeriodsResult, TopSpeciesResult } from './StatOutput';
+import {
+	getTopStats,
+	type TopStatsArguments
+} from '@/app/isomorphic/stats-data-tables';
 type TemporalUnit = 'day' | 'month' | 'year';
 
 export type AccordionItemModel = {
@@ -31,7 +30,7 @@ export type PanelDefinition = {
 	category: string;
 	unit: string;
 	bySpecies?: boolean;
-	dataArguments: StatsAccordionArguments;
+	dataArguments: TopStatsArguments;
 };
 
 function hasData(data: TopPeriodsResult[] | null): data is TopPeriodsResult[] {
@@ -59,7 +58,10 @@ function ContentComponent({
 						setLoading(true);
 					}
 				}, 100);
-				fetchPanelData(model.definition, 5)
+				getTopStats(Boolean(model.definition.bySpecies), {
+					...model.definition.dataArguments,
+					result_limit: 5
+				})
 					.then((data) => {
 						setData(data);
 					})

@@ -2,10 +2,8 @@ import { SpeciesTable } from '@/app/components/SingleSpeciesTable';
 import { BootstrapPageData } from '@/app/components/BootstrapPageData';
 import { supabase, catchSupabaseErrors } from '@/lib/supabase';
 import type { Database } from '@/types/supabase.types';
-import {
-	getTopPeriodsByMetric,
-	type TopPeriodsResult
-} from '@/app/lib/stats-accordion';
+import { getTopPeriodsByMetric } from '@/app/isomorphic/stats-data-tables';
+import type { TopPeriodsResult } from '@/app/components/StatOutput';
 import Link from 'next/link';
 import { format as formatDate } from 'date-fns';
 import {

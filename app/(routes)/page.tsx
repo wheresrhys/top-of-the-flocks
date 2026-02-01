@@ -3,11 +3,12 @@ import {
 	PanelDefinition,
 	type StatsAccordionModel
 } from '../components/StatsAccordion';
-import { fetchPanelData } from '../lib/stats-accordion';
+
 import { getSeasonMonths, getSeasonName } from '../lib/season-month-mapping';
 import { BootstrapPageData } from '../components/BootstrapPageData';
 import { RingSearchForm } from '../components/RingSearchForm';
 import { PageWrapper } from '../components/DesignSystem';
+import { getTopStats } from '../isomorphic/stats-data-tables';
 
 function getPanelDefinitions(
 	date: Date
@@ -128,7 +129,10 @@ async function fetchInitialData(): Promise<StatsAccordionModel[]> {
 		panelDefinitions.map(async (panelGroup) => {
 			const panels = await Promise.all(
 				panelGroup.stats.map(async (panel) => {
-					const data = await fetchPanelData(panel, 1);
+					const data = await getTopStats(Boolean(panel.bySpecies), {
+						...panel.dataArguments,
+						result_limit: 1
+					});
 					return {
 						definition: panel,
 						data: data ?? []

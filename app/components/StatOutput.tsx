@@ -1,7 +1,9 @@
-import type {
-	TopPeriodsResult,
-	TopSpeciesResult
-} from '../lib/stats-accordion';
+import type { Database } from '@/types/supabase.types';
+
+export type TopPeriodsResult =
+	Database['public']['Functions']['top_periods_by_metric']['Returns'][number];
+export type TopSpeciesResult =
+	Database['public']['Functions']['top_species_by_metric']['Returns'][number];
 
 import Link from 'next/link';
 import { format as formatDate } from 'date-fns';
