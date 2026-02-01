@@ -5,13 +5,10 @@ import {
 } from '../components/StatsAccordion';
 import { fetchPanelData } from '../lib/stats-accordion';
 import { getSeasonMonths, getSeasonName } from '../lib/season-month-mapping';
-import { format as formatDate } from 'date-fns';
 import { BootstrapPageData } from '../components/BootstrapPageData';
 import { RingSearchForm } from '../components/RingSearchForm';
 import { PageWrapper } from '../components/DesignSystem';
-function getMonthName(date: Date): string {
-	return formatDate(date, 'MMMM');
-}
+
 function getPanelDefinitions(
 	date: Date
 ): { heading: string; stats: PanelDefinition[] }[] {

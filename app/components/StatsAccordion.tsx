@@ -74,28 +74,28 @@ function ContentComponent({
 			}
 		}
 	}, [expandedId]);
-	return (
-			hasData(data) ? (
-				<ol className="list-inside list-none">
-					{data.map((item) => (
-						<li className="mb-2" key={item.visit_date}>
-							<StatOutput
-								value={item.metric_value}
-								speciesName={(item as TopSpeciesResult).species_name}
-								visitDate={item.visit_date}
-								showUnit={true}
-								unit={model.definition.unit}
-								temporalUnit={model.definition.dataArguments.temporal_unit as TemporalUnit}
-							/>
-						</li>
-					))}
-					{isLoading && (
-						<span className="loading loading-spinner loading-xl"></span>
-					)}
-				</ol>
-			) : (
-				<span>No data available</span>
-			)
+	return hasData(data) ? (
+		<ol className="list-inside list-none">
+			{data.map((item) => (
+				<li className="mb-2" key={item.visit_date}>
+					<StatOutput
+						value={item.metric_value}
+						speciesName={(item as TopSpeciesResult).species_name}
+						visitDate={item.visit_date}
+						showUnit={true}
+						unit={model.definition.unit}
+						temporalUnit={
+							model.definition.dataArguments.temporal_unit as TemporalUnit
+						}
+					/>
+				</li>
+			))}
+			{isLoading && (
+				<span className="loading loading-spinner loading-xl"></span>
+			)}
+		</ol>
+	) : (
+		<span>No data available</span>
 	);
 }
 // TODO shoudln't need to be so careful with ?. all over the place
