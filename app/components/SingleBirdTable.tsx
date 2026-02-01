@@ -8,7 +8,7 @@ export function SingleBirdTable({
 	size?: string;
 }) {
 	return (
-		<div className="overflow-x-auto">
+		<div className="overflow-x-auto mt-4 w-full">
 			<table className={`table table-${size}`}>
 				<thead>
 					<tr>

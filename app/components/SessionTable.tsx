@@ -131,7 +131,7 @@ export function SessionTable({
 }) {
 	const [expandedSpecies, setExpandedSpecies] = useState<string | null>(null);
 	return (
-		<div className="w-full overflow-x-auto">
+		<div className="w-full overflow-x-auto mt-4">
 			<table className="table">
 				<thead>
 					<tr>
