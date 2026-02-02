@@ -4,12 +4,25 @@ import { type Encounter } from '@/app/(routes)/session/[date]/page';
 import Link from 'next/link';
 import { useState } from 'react';
 import { InlineTable, Table } from './DesignSystem';
+import { AccordionTableBody } from './AccordionTableBody';
 export type SpeciesBreakdown = {
 	species: string;
 	encounters: Encounter[];
-}[];
+};
 
-function SpeciesDetails({ encounters }: { encounters: Encounter[] | null }) {
+function SpeciesNameCell({ model: { species } }: { model: SpeciesBreakdown }) {
+	return (
+		<Link className="link" href={`/species/${species}`}>
+			{species}
+		</Link>
+	);
+}
+
+function SpeciesDetailsTable({
+	model: { encounters }
+}: {
+	model: SpeciesBreakdown;
+}) {
 	return (
 		<InlineTable>
 			<thead>
@@ -45,92 +58,33 @@ function SpeciesDetails({ encounters }: { encounters: Encounter[] | null }) {
 }
 
 function SpeciesRow({
-	species,
-	encounters,
-	onExpand,
-	expandedSpecies
+	model: { species, encounters }
 }: {
-	species: string;
-	encounters: Encounter[];
-	onExpand: (species: string | null) => void;
-	expandedSpecies: string | null;
+	model: SpeciesBreakdown;
 }) {
-	const [speciesDetail, setSpeciesDetail] = useState<Encounter[] | null>(
-		expandedSpecies === species ? encounters : null
-	);
-	function toggleSpeciesDetail() {
-		if (expandedSpecies == species) {
-			onExpand(null);
-			setSpeciesDetail(null);
-		} else {
-			onExpand(species);
-			setSpeciesDetail(encounters);
-		}
-	}
 	return (
 		<>
-			<tr>
-				<td>
-					<div className="flex justify-between">
-						<Link className="link" href={`/species/${species}`}>
-							{species}
-						</Link>{' '}
-						<button
-							type="button"
-							className="collapse-toggle btn btn-outline btn-secondary btn-xs btn-square self-end"
-							onClick={toggleSpeciesDetail}
-						>
-							<span className="icon-[tabler--menu-2] collapse-open:hidden size-4"></span>
-							<span className="icon-[tabler--x] collapse-open:block hidden size-4"></span>
-						</button>
-					</div>
-				</td>
-				<td>
-					{
-						encounters.filter((encounter) => encounter.record_type === 'N')
-							.length
-					}
-				</td>
-				<td>
-					{
-						encounters.filter((encounter) => encounter.record_type === 'S')
-							.length
-					}
-				</td>
-				<td>
-					{
-						encounters.filter((encounter) => encounter.minimum_years >= 1)
-							.length
-					}
-				</td>
-				<td>
-					{
-						encounters.filter((encounter) => encounter.minimum_years === 0)
-							.length
-					}
-				</td>
-			</tr>
-			{expandedSpecies === species ? (
-				<tr>
-					<td colSpan={5}>
-						<SpeciesDetails encounters={speciesDetail} />
-					</td>
-				</tr>
-			) : (
-				''
-			)}
+			<td>
+				{encounters.filter((encounter) => encounter.record_type === 'N').length}
+			</td>
+			<td>
+				{encounters.filter((encounter) => encounter.record_type === 'S').length}
+			</td>
+			<td>
+				{encounters.filter((encounter) => encounter.minimum_years >= 1).length}
+			</td>
+			<td>
+				{encounters.filter((encounter) => encounter.minimum_years === 0).length}
+			</td>
 		</>
 	);
 }
 
 export function SessionTable({
-	date,
 	speciesBreakdown
 }: {
-	date: string;
-	speciesBreakdown: SpeciesBreakdown;
+	speciesBreakdown: SpeciesBreakdown[];
 }) {
-	const [expandedSpecies, setExpandedSpecies] = useState<string | null>(null);
 	return (
 		<Table>
 			<thead>
@@ -142,17 +96,14 @@ export function SessionTable({
 					<th>Juvs</th>
 				</tr>
 			</thead>
-			<tbody>
-				{speciesBreakdown.map(({ species, encounters }) => (
-					<SpeciesRow
-						key={species}
-						species={species}
-						encounters={encounters}
-						onExpand={setExpandedSpecies}
-						expandedSpecies={expandedSpecies}
-					/>
-				))}
-			</tbody>
+			<AccordionTableBody<SpeciesBreakdown>
+				data={speciesBreakdown}
+				getKey={(speciesBreakdown) => speciesBreakdown.species}
+				columnCount={5}
+				FirstColumnComponent={SpeciesNameCell}
+				RestColumnsComponent={SpeciesRow}
+				ExpandedContentComponent={SpeciesDetailsTable}
+			/>
 		</Table>
 	);
 }
