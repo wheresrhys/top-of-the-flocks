@@ -12,7 +12,7 @@ export type SpeciesBreakdown = {
 
 function SpeciesNameCell({ model: { species } }: { model: SpeciesBreakdown }) {
 	return (
-		<Link className="link" href={`/species/${species}`}>
+		<Link className="link text-wrap" href={`/species/${species}`}>
 			{species}
 		</Link>
 	);

@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-
+import { Fragment } from 'react';
 type AccordionTableComponent<ItemModel> = React.ComponentType<{
 	model: ItemModel;
 }>;
@@ -63,33 +63,33 @@ export function AccordionTableBody<ItemModel>({
 		<tbody>
 			{data.map((item: ItemModel) => {
 				const rowId = getKey(item);
+				const isExpanded = expandedRow === rowId;
 				return (
-					<>
-						<tr key={rowId}>
-							<td className="flex justify-between">
-								<FirstColumnComponent model={item} />
+					<Fragment key={rowId}>
+						<tr>
+							<td className="flex justify-left gap-2">
 								<button
 									type="button"
-									className="collapse-toggle btn btn-outline btn-secondary btn-xs btn-square self-end"
-									onClick={() =>
-										setExpandedRow(expandedRow === rowId ? false : rowId)
-									}
+									// className="btn btn-outline btn-secondary btn-xs btn-square"
+									onClick={() => setExpandedRow(isExpanded ? false : rowId)}
 								>
-									<span className="icon-[tabler--menu-2] collapse-open:hidden size-4"></span>
-									<span className="icon-[tabler--x] collapse-open:block hidden size-4"></span>
+									<span
+										className={`icon-[tabler--circle-arrow-down] ${isExpanded ? '-rotate-180' : ''} size-5 shrink-0`}
+									></span>
 								</button>
+								<FirstColumnComponent model={item} />
 							</td>
 
 							<RestColumnsComponent model={item} />
 						</tr>
-						{expandedRow === rowId ? (
+						{isExpanded ? (
 							<tr>
 								<td colSpan={columnCount}>
 									<ExpandedContentComponent model={item} />
 								</td>
 							</tr>
 						) : null}
-					</>
+					</Fragment>
 				);
 			})}
 		</tbody>
