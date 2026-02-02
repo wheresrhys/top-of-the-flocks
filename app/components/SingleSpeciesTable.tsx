@@ -1,80 +1,49 @@
 'use client';
-import { useState } from 'react';
 import { format as formatDate } from 'date-fns';
-import {
-	type EnrichedBirdWithEncounters,
-	type Encounter
-} from '@/app/lib/bird-data-helpers';
+import { type EnrichedBirdWithEncounters } from '@/app/lib/bird-data-helpers';
 import { SingleBirdTable } from '@/app/components/SingleBirdTable';
 import Link from 'next/link';
 import { Table } from './DesignSystem';
-function BirdRow({
-	ring_no,
-	encounters,
-	onExpand,
-	expandedBird,
-	provenAge
+import { AccordionTableBody } from './AccordionTableBody';
+
+function RingNumberCell({
+	model: { ring_no }
 }: {
-	ring_no: string;
-	encounters: Encounter[];
-	provenAge: number;
-	onExpand: (ring_no: string | null) => void;
-	expandedBird: string | null;
+	model: EnrichedBirdWithEncounters;
 }) {
-	const [birdDetail, setBirdDetail] = useState<Encounter[]>(
-		expandedBird === ring_no ? encounters : []
+	return (
+		<Link className="link" href={`/bird/${ring_no}`}>
+			{ring_no}
+		</Link>
 	);
-	function toggleBirdDetail() {
-		if (expandedBird === ring_no) {
-			onExpand(null);
-			setBirdDetail([]);
-		} else {
-			onExpand(ring_no);
-			setBirdDetail(encounters);
-		}
-	}
+}
+
+function BirdDetailsTable({
+	model: { encounters }
+}: {
+	model: EnrichedBirdWithEncounters;
+}) {
+	return <SingleBirdTable encounters={encounters} isInline={true} />;
+}
+
+function BirdRow({
+	model: { encounters, provenAge }
+}: {
+	model: EnrichedBirdWithEncounters;
+}) {
 	return (
 		<>
-			<tr>
-				<td>
-					<div className="flex justify-between">
-						<Link className="link" href={`/bird/${ring_no}`}>
-							{ring_no}
-						</Link>{' '}
-						<button
-							type="button"
-							className="collapse-toggle btn btn-outline btn-secondary btn-xs btn-square self-end"
-							onClick={toggleBirdDetail}
-						>
-							<span className="icon-[tabler--menu-2] collapse-open:hidden size-4"></span>
-							<span className="icon-[tabler--x] collapse-open:block hidden size-4"></span>
-						</button>
-					</div>
-				</td>
-				<td>{encounters.length}</td>
-				<td>
-					{formatDate(
-						new Date(encounters[0].session.visit_date),
-						'dd MMMM yyyy'
-					)}
-				</td>
-				<td>
-					{formatDate(
-						new Date(encounters[encounters.length - 1].session.visit_date),
-						'dd MMMM yyyy'
-					)}
-				</td>
-				<td>{provenAge}</td>
-			</tr>
-			{expandedBird === ring_no ? (
-				<tr>
-					<td colSpan={5}>
-						<SingleBirdTable encounters={birdDetail} />
-					</td>
-				</tr>
-			) : (
-				''
-			)}
+			<td>{encounters.length}</td>
+			<td>
+				{formatDate(new Date(encounters[0].session.visit_date), 'dd MMMM yyyy')}
+			</td>
+			<td>
+				{formatDate(
+					new Date(encounters[encounters.length - 1].session.visit_date),
+					'dd MMMM yyyy'
+				)}
+			</td>
+			<td>{provenAge}</td>
 		</>
 	);
 }
@@ -84,7 +53,6 @@ export function SpeciesTable({
 }: {
 	birds: EnrichedBirdWithEncounters[];
 }) {
-	const [expandedBird, setExpandedBird] = useState<string | null>(null);
 	return (
 		<Table>
 			<thead>
@@ -96,18 +64,14 @@ export function SpeciesTable({
 					<th>Proven age</th>
 				</tr>
 			</thead>
-			<tbody>
-				{birds.map(({ ring_no, encounters, provenAge }) => (
-					<BirdRow
-						key={ring_no}
-						ring_no={ring_no}
-						provenAge={provenAge}
-						encounters={encounters}
-						onExpand={setExpandedBird}
-						expandedBird={expandedBird}
-					/>
-				))}
-			</tbody>
+			<AccordionTableBody<EnrichedBirdWithEncounters>
+				data={birds}
+				getKey={(bird) => bird.ring_no}
+				columnCount={5}
+				FirstColumnComponent={RingNumberCell}
+				RestColumnsComponent={BirdRow}
+				ExpandedContentComponent={BirdDetailsTable}
+			/>
 		</Table>
 	);
 }
