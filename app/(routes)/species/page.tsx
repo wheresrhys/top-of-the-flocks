@@ -54,10 +54,7 @@ function SpeciesLeagueTable({ data }: { data: SpeciesLeagueTableRow[] }) {
 				{data.map((species) => (
 					<tr key={species.species_name}>
 						<td>
-							<Link
-								className="link link-primary"
-								href={`/species/${species.species_name}`}
-							>
+							<Link className="link" href={`/species/${species.species_name}`}>
 								{species.species_name}
 							</Link>
 						</td>
