@@ -35,41 +35,49 @@ function SpeciesLeagueTable({ data }: { data: SpeciesLeagueTableRow[] }) {
 		<Table>
 			<thead>
 				<tr>
-					<th>Species</th>
-					<th>Individuals</th>
-					<th>Encounters</th>
-					<th>Session Count</th>
-					<th>Longest Stay</th>
-					<th>Unluckiest</th>
-					<th>Longest Winged</th>
-					<th>Average Wing Length</th>
-					<th>Shortest Winged</th>
-					<th>Heaviest</th>
-					<th>Average Weight</th>
-					<th>Lightest</th>
-					<th>Total Weight</th>
+					<th className="text-wrap">Species</th>
+					<th className="text-wrap">
+						<span className="hidden md:inline">Individuals</span>
+						<span className="inline md:hidden">Inds</span>
+					</th>
+					<th className="text-wrap">
+						<span className="hidden md:inline">Encounters</span>
+						<span className="inline md:hidden">Encs</span>
+					</th>
+					<th className="text-wrap">
+						<span className="hidden md:inline">Sessions</span>
+						<span className="inline md:hidden">Sess</span>
+					</th>
+					<th className="text-wrap">Max retraps</th>
+					<th className="text-wrap">Max Wing</th>
+					<th className="text-wrap">Avg Wing</th>
+					<th className="text-wrap">Min Wing</th>
+					<th className="text-wrap">Max Weight</th>
+					<th className="text-wrap">Avg Weight</th>
+					<th className="text-wrap">Min Weight</th>
 				</tr>
 			</thead>
 			<tbody>
 				{data.map((species) => (
 					<tr key={species.species_name}>
 						<td>
-							<Link className="link" href={`/species/${species.species_name}`}>
+							<Link
+								className="link text-wrap"
+								href={`/species/${species.species_name}`}
+							>
 								{species.species_name}
 							</Link>
 						</td>
 						<td>{species.individuals}</td>
 						<td>{species.encounters}</td>
 						<td>{species.session_count}</td>
-						<td>{species.longest_stay}</td>
 						<td>{species.unluckiest}</td>
 						<td>{species.longest_winged}</td>
-						<td>{species.average_wing_length}</td>
+						<td>{species.average_wing_length?.toFixed(1)}</td>
 						<td>{species.shortest_winged}</td>
 						<td>{species.heaviest}</td>
-						<td>{species.average_weight}</td>
+						<td>{species.average_weight?.toFixed(1)}</td>
 						<td>{species.lightest}</td>
-						<td>{species.total_weight}</td>
 					</tr>
 				))}
 			</tbody>

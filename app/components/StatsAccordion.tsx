@@ -74,7 +74,10 @@ function ContentComponent({
 	return hasData(data) ? (
 		<ol className="list-inside list-none">
 			{data.map((item) => (
-				<li className="mb-2" key={item.visit_date}>
+				<li
+					className="mb-2"
+					key={`${item.visit_date}-${(item as TopSpeciesResult).species_name} ?? ''`}
+				>
 					<StatOutput
 						value={item.metric_value}
 						speciesName={(item as TopSpeciesResult).species_name}
