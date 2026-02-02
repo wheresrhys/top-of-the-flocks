@@ -1,4 +1,4 @@
-import type { Encounter } from '@/app/(routes)/bird/[ring]/page';
+import type { Encounter } from '@/app/lib/bird-data-helpers';
 
 export function SingleBirdTable({
 	encounters,

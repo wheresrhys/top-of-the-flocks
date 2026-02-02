@@ -5,12 +5,12 @@ import type { Database } from '@/types/supabase.types';
 import { getTopPeriodsByMetric } from '@/app/isomorphic/stats-data-tables';
 import type { TopPeriodsResult } from '@/app/components/StatOutput';
 import {
-	addProvenAgeToBird,
-	pairwiseSortEncounters,
-	orderEncountersByRecency,
+	addProvenAgeToBirds,
+	orderBirdsByRecency,
 	type BirdWithEncounters,
 	type EnrichedBirdWithEncounters
-} from '@/app/(routes)/bird/[ring]/page';
+} from '@/app/lib/bird-data-helpers';
+
 import { PageWrapper, PrimaryHeading } from '@/app/components/DesignSystem';
 import { SpeciesHighlightStats } from '@/app/components/SpeciesHighlights';
 
@@ -43,9 +43,11 @@ async function getMostCaughtBirds(
 		})
 		.then(catchSupabaseErrors);
 
-	return birds?.filter(
-		(bird) => bird.encounters > 1
-	) as MostCaughtBirdsResult[];
+	return (
+		birds?.filter(
+			(bird) => bird.encounters > 1 && bird.encounters === birds[0].encounters
+		) || ([] as MostCaughtBirdsResult[])
+	);
 }
 
 async function fetchAllBirds(species: string) {
@@ -84,22 +86,6 @@ async function fetchAllBirds(species: string) {
 	return addProvenAgeToBirds(orderBirdsByRecency(data.birds, 'desc', 'last'));
 }
 
-function orderBirdsByRecency(
-	birds: BirdWithEncounters[],
-	direction: 'asc' | 'desc',
-	type: 'first' | 'last'
-) {
-	return birds.sort((a, b) => {
-		// note that to avoid confusion, encounters are always sorted from first to last, so that the most recent encounter is the last one
-		a.encounters = orderEncountersByRecency(a.encounters, 'asc');
-		b.encounters = orderEncountersByRecency(b.encounters, 'asc');
-		return pairwiseSortEncounters(direction)(
-			a.encounters[type === 'first' ? 0 : a.encounters.length - 1],
-			b.encounters[type === 'first' ? 0 : b.encounters.length - 1]
-		);
-	});
-}
-
 async function fetchSpeciesData(params: PageParams): Promise<PageData | null> {
 	const [topSessions, birds, mostCaughtBirds] = await Promise.all([
 		getTopSessions(params.speciesName),
@@ -112,12 +98,6 @@ async function fetchSpeciesData(params: PageParams): Promise<PageData | null> {
 		birds,
 		mostCaughtBirds
 	};
-}
-
-function addProvenAgeToBirds(
-	birds: BirdWithEncounters[]
-): EnrichedBirdWithEncounters[] {
-	return birds.map(addProvenAgeToBird);
 }
 
 function SpeciesSummary({

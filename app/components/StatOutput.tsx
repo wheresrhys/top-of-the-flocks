@@ -9,12 +9,13 @@ import Link from 'next/link';
 import { format as formatDate } from 'date-fns';
 export type StatOutputModel = {
 	value: number;
-	speciesName: string;
+	speciesName?: string;
 	visitDate: string;
-	showUnit: boolean;
-	unit: string;
+	showUnit?: boolean;
+	unit?: string;
 	temporalUnit: TemporalUnit;
 	dateFormat?: string;
+	classes?: string;
 };
 export type TemporalUnit = 'day' | 'month' | 'year';
 const connectingVerbMap: Record<TemporalUnit, 'in' | 'on'> = {
@@ -36,10 +37,11 @@ export function StatOutput({
 	speciesName,
 	visitDate,
 	showUnit,
-	temporalUnit
+	temporalUnit,
+	classes
 }: StatOutputModel) {
 	return (
-		<>
+		<span className={classes}>
 			<span className="font-bold">
 				{value} {speciesName || (showUnit ? ` ${unit}` : '')}
 			</span>{' '}
@@ -57,6 +59,6 @@ export function StatOutput({
 					dateFormat || dateFormatMap[temporalUnit as TemporalUnit]
 				)
 			)}
-		</>
+		</span>
 	);
 }

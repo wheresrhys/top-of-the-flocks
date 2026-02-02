@@ -3,8 +3,8 @@ import { useState } from 'react';
 import { format as formatDate } from 'date-fns';
 import {
 	type EnrichedBirdWithEncounters,
-	Encounter
-} from '@/app/(routes)/bird/[ring]/page';
+	type Encounter
+} from '@/app/lib/bird-data-helpers';
 import { SingleBirdTable } from '@/app/components/SingleBirdTable';
 import Link from 'next/link';
 function BirdRow({
