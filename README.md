@@ -6,7 +6,6 @@ Leaderboard for bird ringing data
 This is a Next.js application that provides a leaderboard for bird ringing data. The application uses:
 - **Next.js** - React framework for production
 - **Supabase** - PostgreSQL database and authentication
-- **Hasura** - GraphQL API layer
 - **Vercel** - Hosting and deployment
 - **GitHub Actions** - Continuous Integration
 
@@ -15,7 +14,16 @@ This is a Next.js application that provides a leaderboard for bird ringing data.
 - Node.js 20 or higher
 - npm
 - A Supabase account and project
-- A Hasura Cloud account or self-hosted instance
+
+## DB management
+- `npx supabase db link` to link to the totf project
+- `npm run db:local` to start the db
+- `npm run db:types` to generate types from the local db
+- To reflect any changes made via the local supabase dashboard http://127.0.0.1:54323/project/default as a migration
+  1. `npx supabase migration new {your name}`
+  2. `npm run db:diff > {name of created migration file}`
+- To discard changes from local delete all but the migration reflecting the state of prod, then `npm run db:sync:local`. This also regenerates some data
+- To push changes to prod `npm run db:sync:prod`
 
 ## Getting Started
 
@@ -24,15 +32,10 @@ This is a Next.js application that provides a leaderboard for bird ringing data.
 ```bash
 git clone https://github.com/wheresrhys/top-of-the-flocks.git
 cd top-of-the-flocks
-```
-
-### 2. Install dependencies
-
-```bash
 npm install
 ```
 
-### 3. Configure environment variables
+### 2. Configure environment variables
 
 This project uses 1Password CLI for secure environment variable management. See [1Password Setup Guide](docs/1PASSWORD_SETUP.md) for detailed instructions.
 

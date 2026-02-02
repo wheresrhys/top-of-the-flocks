@@ -19,6 +19,11 @@ COMMENT ON SCHEMA "public" IS '@graphql({"inflect_names": true})';
 
 CREATE EXTENSION IF NOT EXISTS "pg_graphql" WITH SCHEMA "graphql";
 
+
+
+
+
+
 CREATE EXTENSION IF NOT EXISTS "pg_stat_statements" WITH SCHEMA "extensions";
 
 
@@ -46,22 +51,40 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA "extensions";
 
 
 
-SET default_tablespace = '';
 
-SET default_table_access_method = "heap";
-
-
-CREATE TABLE IF NOT EXISTS "public"."top_periods_result" (
-    "visit_date" "date",
-    "metric_value" bigint
-);
-
-
-ALTER TABLE "public"."top_periods_result" OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."top_periods_by_metric"("temporal_unit" "text" DEFAULT 'day'::"text", "metric_name" "text" DEFAULT 'encounters'::"text", "result_limit" integer DEFAULT 5, "month_filter" integer DEFAULT NULL::integer, "year_filter" integer DEFAULT NULL::integer, "exact_months_filter" "text"[] DEFAULT NULL::"text"[], "months_filter" integer[] DEFAULT NULL::integer[], "species_filter" "text" DEFAULT NULL::"text") RETURNS SETOF "public"."top_periods_result"
+CREATE OR REPLACE FUNCTION "public"."most_caught_birds"("result_limit" integer DEFAULT 5, "species_filter" "text" DEFAULT NULL::"text", "year_filter" integer DEFAULT NULL::integer) RETURNS TABLE("species_name" "text", "ring_no" "text", "encounters" bigint)
     LANGUAGE "plpgsql" STABLE
+    SET "search_path" TO 'public', 'pg_catalog'
+    AS $$
+BEGIN
+  RETURN QUERY
+  SELECT
+    sp.species_name as species_name,
+    b.ring_no as ring_no,
+    count(en.*) as encounters
+  FROM public."Encounters" en
+    LEFT JOIN public."Birds" b on  b.id=en.bird_id
+    LEFT JOIN public."Species" sp on sp.id=b.species_id
+    LEFT JOIN public."Sessions" sess on sess.id=en.session_id
+  WHERE
+    (species_filter IS NULL OR sp.species_name ilike species_filter) AND
+    (year_filter IS NULL OR EXTRACT(YEAR FROM sess.visit_date) = year_filter)
+  GROUP BY
+    sp.species_name,
+    b.ring_no
+  ORDER BY
+    encounters DESC
+  LIMIT result_limit;
+END;
+$$;
+
+
+ALTER FUNCTION "public"."most_caught_birds"("result_limit" integer, "species_filter" "text", "year_filter" integer) OWNER TO "postgres";
+
+
+CREATE OR REPLACE FUNCTION "public"."top_periods_by_metric"("temporal_unit" "text" DEFAULT 'day'::"text", "metric_name" "text" DEFAULT 'encounters'::"text", "result_limit" integer DEFAULT 5, "month_filter" integer DEFAULT NULL::integer, "year_filter" integer DEFAULT NULL::integer, "exact_months_filter" "text"[] DEFAULT NULL::"text"[], "months_filter" integer[] DEFAULT NULL::integer[], "species_filter" "text" DEFAULT NULL::"text") RETURNS TABLE("visit_date" "date", "metric_value" bigint)
+    LANGUAGE "plpgsql" STABLE
+    SET "search_path" TO 'public', 'pg_catalog'
     AS $$
 BEGIN
   RETURN QUERY
@@ -74,10 +97,10 @@ BEGIN
       ELSE count(e.*)
     END::BIGINT AS metric_value
   FROM
-    "Birds" b
-    LEFT JOIN "Encounters" e ON b.id = e.bird_id
-    LEFT JOIN "Sessions" sess ON e.session_id = sess.id
-    LEFT JOIN "Species" sp ON b.species_id = sp.id
+    public."Birds" b
+    LEFT JOIN public."Encounters" e ON b.id = e.bird_id
+    LEFT JOIN public."Sessions" sess ON e.session_id = sess.id
+    LEFT JOIN public."Species" sp ON b.species_id = sp.id
   WHERE
     sess.visit_date IS NOT NULL
     AND (month_filter IS NULL OR EXTRACT(MONTH FROM sess.visit_date) = month_filter)
@@ -97,18 +120,9 @@ $$;
 ALTER FUNCTION "public"."top_periods_by_metric"("temporal_unit" "text", "metric_name" "text", "result_limit" integer, "month_filter" integer, "year_filter" integer, "exact_months_filter" "text"[], "months_filter" integer[], "species_filter" "text") OWNER TO "postgres";
 
 
-CREATE TABLE IF NOT EXISTS "public"."top_species_result" (
-    "species_name" "text",
-    "visit_date" "date",
-    "metric_value" bigint
-);
-
-
-ALTER TABLE "public"."top_species_result" OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."top_species_by_metric"("temporal_unit" "text" DEFAULT 'day'::"text", "metric_name" "text" DEFAULT 'encounters'::"text", "result_limit" integer DEFAULT 5, "month_filter" integer DEFAULT NULL::integer, "year_filter" integer DEFAULT NULL::integer, "exact_months_filter" "text"[] DEFAULT NULL::"text"[], "months_filter" integer[] DEFAULT NULL::integer[]) RETURNS SETOF "public"."top_species_result"
+CREATE OR REPLACE FUNCTION "public"."top_species_by_metric"("temporal_unit" "text" DEFAULT 'day'::"text", "metric_name" "text" DEFAULT 'encounters'::"text", "result_limit" integer DEFAULT 5, "month_filter" integer DEFAULT NULL::integer, "year_filter" integer DEFAULT NULL::integer, "exact_months_filter" "text"[] DEFAULT NULL::"text"[], "months_filter" integer[] DEFAULT NULL::integer[]) RETURNS TABLE("species_name" "text", "visit_date" "date", "metric_value" bigint)
     LANGUAGE "plpgsql" STABLE
+    SET "search_path" TO 'public', 'pg_catalog'
     AS $$
 BEGIN
   RETURN QUERY
@@ -122,10 +136,10 @@ BEGIN
       ELSE count(e.*)
     END::BIGINT AS metric_value
   FROM
-    "Birds" b
-    LEFT JOIN "Encounters" e ON b.id = e.bird_id
-    LEFT JOIN "Sessions" sess ON e.session_id = sess.id
-    LEFT JOIN "Species" sp ON b.species_id = sp.id
+    public."Birds" b
+    LEFT JOIN public."Encounters" e ON b.id = e.bird_id
+    LEFT JOIN public."Sessions" sess ON e.session_id = sess.id
+    LEFT JOIN public."Species" sp ON b.species_id = sp.id
   WHERE
     sess.visit_date IS NOT NULL
     AND (month_filter IS NULL OR EXTRACT(MONTH FROM sess.visit_date) = month_filter)
@@ -133,7 +147,7 @@ BEGIN
     AND (exact_months_filter IS NULL OR TO_CHAR(sess.visit_date, 'YYYY-MM') = ANY(exact_months_filter))
     AND (months_filter IS NULL OR EXTRACT(MONTH FROM sess.visit_date) = ANY(months_filter))
   GROUP BY
-    species_name,
+    sp.species_name,
     date_trunc(temporal_unit, sess.visit_date)
   ORDER BY
     metric_value DESC
@@ -143,6 +157,10 @@ $$;
 
 
 ALTER FUNCTION "public"."top_species_by_metric"("temporal_unit" "text", "metric_name" "text", "result_limit" integer, "month_filter" integer, "year_filter" integer, "exact_months_filter" "text"[], "months_filter" integer[]) OWNER TO "postgres";
+
+SET default_tablespace = '';
+
+SET default_table_access_method = "heap";
 
 
 CREATE TABLE IF NOT EXISTS "public"."Birds" (
@@ -269,7 +287,7 @@ ALTER SEQUENCE "public"."Species_id_seq" OWNED BY "public"."Species"."id";
 
 
 
-CREATE OR REPLACE VIEW "public"."species_league_table" AS
+CREATE OR REPLACE VIEW "public"."species_league_table" WITH ("security_invoker"='true') AS
  SELECT "sp"."species_name",
     "count"(DISTINCT "b"."ring_no") AS "individuals",
     "count"("e".*) AS "encounters",
@@ -548,21 +566,15 @@ GRANT USAGE ON SCHEMA "public" TO "service_role";
 
 
 
-GRANT ALL ON TABLE "public"."top_periods_result" TO "anon";
-GRANT ALL ON TABLE "public"."top_periods_result" TO "authenticated";
-GRANT ALL ON TABLE "public"."top_periods_result" TO "service_role";
+GRANT ALL ON FUNCTION "public"."most_caught_birds"("result_limit" integer, "species_filter" "text", "year_filter" integer) TO "anon";
+GRANT ALL ON FUNCTION "public"."most_caught_birds"("result_limit" integer, "species_filter" "text", "year_filter" integer) TO "authenticated";
+GRANT ALL ON FUNCTION "public"."most_caught_birds"("result_limit" integer, "species_filter" "text", "year_filter" integer) TO "service_role";
 
 
 
 GRANT ALL ON FUNCTION "public"."top_periods_by_metric"("temporal_unit" "text", "metric_name" "text", "result_limit" integer, "month_filter" integer, "year_filter" integer, "exact_months_filter" "text"[], "months_filter" integer[], "species_filter" "text") TO "anon";
 GRANT ALL ON FUNCTION "public"."top_periods_by_metric"("temporal_unit" "text", "metric_name" "text", "result_limit" integer, "month_filter" integer, "year_filter" integer, "exact_months_filter" "text"[], "months_filter" integer[], "species_filter" "text") TO "authenticated";
 GRANT ALL ON FUNCTION "public"."top_periods_by_metric"("temporal_unit" "text", "metric_name" "text", "result_limit" integer, "month_filter" integer, "year_filter" integer, "exact_months_filter" "text"[], "months_filter" integer[], "species_filter" "text") TO "service_role";
-
-
-
-GRANT ALL ON TABLE "public"."top_species_result" TO "anon";
-GRANT ALL ON TABLE "public"."top_species_result" TO "authenticated";
-GRANT ALL ON TABLE "public"."top_species_result" TO "service_role";
 
 
 
