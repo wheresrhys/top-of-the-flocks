@@ -3,6 +3,7 @@
 import { type Encounter } from '@/app/(routes)/session/[date]/page';
 import Link from 'next/link';
 import { useState } from 'react';
+import { InlineTable, Table } from './DesignSystem';
 export type SpeciesBreakdown = {
 	species: string;
 	encounters: Encounter[];
@@ -10,7 +11,7 @@ export type SpeciesBreakdown = {
 
 function SpeciesDetails({ encounters }: { encounters: Encounter[] | null }) {
 	return (
-		<table className="table table-xs ">
+		<InlineTable>
 			<thead>
 				<tr>
 					<th>Time</th>
@@ -39,7 +40,7 @@ function SpeciesDetails({ encounters }: { encounters: Encounter[] | null }) {
 					</tr>
 				))}
 			</tbody>
-		</table>
+		</InlineTable>
 	);
 }
 
@@ -131,29 +132,27 @@ export function SessionTable({
 }) {
 	const [expandedSpecies, setExpandedSpecies] = useState<string | null>(null);
 	return (
-		<div className="w-full overflow-x-auto mt-4">
-			<table className="table">
-				<thead>
-					<tr>
-						<th>Species</th>
-						<th>New</th>
-						<th>Retraps</th>
-						<th>Adults</th>
-						<th>Juvs</th>
-					</tr>
-				</thead>
-				<tbody>
-					{speciesBreakdown.map(({ species, encounters }) => (
-						<SpeciesRow
-							key={species}
-							species={species}
-							encounters={encounters}
-							onExpand={setExpandedSpecies}
-							expandedSpecies={expandedSpecies}
-						/>
-					))}
-				</tbody>
-			</table>
-		</div>
+		<Table>
+			<thead>
+				<tr>
+					<th>Species</th>
+					<th>New</th>
+					<th>Retraps</th>
+					<th>Adults</th>
+					<th>Juvs</th>
+				</tr>
+			</thead>
+			<tbody>
+				{speciesBreakdown.map(({ species, encounters }) => (
+					<SpeciesRow
+						key={species}
+						species={species}
+						encounters={encounters}
+						onExpand={setExpandedSpecies}
+						expandedSpecies={expandedSpecies}
+					/>
+				))}
+			</tbody>
+		</Table>
 	);
 }

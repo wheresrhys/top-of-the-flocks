@@ -14,3 +14,15 @@ export function BoxyList({ children }: { children: React.ReactNode }) {
 		</ul>
 	);
 }
+
+export function Table({ children }: { children: React.ReactNode }) {
+	return (
+		<div className="w-full overflow-x-auto mt-4">
+			<table className="table">{children}</table>
+		</div>
+	);
+}
+
+export function InlineTable({ children }: { children: React.ReactNode }) {
+	return <table className="table table-xs">{children}</table>;
+}

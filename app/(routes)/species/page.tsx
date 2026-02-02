@@ -2,6 +2,7 @@ import { BootstrapPageData } from '@/app/components/BootstrapPageData';
 import type { Database } from '@/types/supabase.types';
 import Link from 'next/link';
 import { supabase, catchSupabaseErrors } from '@/lib/supabase';
+import { Table } from '@/app/components/DesignSystem';
 type SpeciesLeagueTableRow =
 	Database['public']['Views']['species_league_table']['Row'];
 
@@ -31,53 +32,51 @@ export async function fetchSpeciesData(): Promise<SpeciesLeagueTableRow[]> {
 
 function SpeciesLeagueTable({ data }: { data: SpeciesLeagueTableRow[] }) {
 	return (
-		<div className="w-full overflow-x-auto h-fit">
-			<table className="table">
-				<thead>
-					<tr>
-						<th>Species</th>
-						<th>Individuals</th>
-						<th>Encounters</th>
-						<th>Session Count</th>
-						<th>Longest Stay</th>
-						<th>Unluckiest</th>
-						<th>Longest Winged</th>
-						<th>Average Wing Length</th>
-						<th>Shortest Winged</th>
-						<th>Heaviest</th>
-						<th>Average Weight</th>
-						<th>Lightest</th>
-						<th>Total Weight</th>
+		<Table>
+			<thead>
+				<tr>
+					<th>Species</th>
+					<th>Individuals</th>
+					<th>Encounters</th>
+					<th>Session Count</th>
+					<th>Longest Stay</th>
+					<th>Unluckiest</th>
+					<th>Longest Winged</th>
+					<th>Average Wing Length</th>
+					<th>Shortest Winged</th>
+					<th>Heaviest</th>
+					<th>Average Weight</th>
+					<th>Lightest</th>
+					<th>Total Weight</th>
+				</tr>
+			</thead>
+			<tbody>
+				{data.map((species) => (
+					<tr key={species.species_name}>
+						<td>
+							<Link
+								className="link link-primary"
+								href={`/species/${species.species_name}`}
+							>
+								{species.species_name}
+							</Link>
+						</td>
+						<td>{species.individuals}</td>
+						<td>{species.encounters}</td>
+						<td>{species.session_count}</td>
+						<td>{species.longest_stay}</td>
+						<td>{species.unluckiest}</td>
+						<td>{species.longest_winged}</td>
+						<td>{species.average_wing_length}</td>
+						<td>{species.shortest_winged}</td>
+						<td>{species.heaviest}</td>
+						<td>{species.average_weight}</td>
+						<td>{species.lightest}</td>
+						<td>{species.total_weight}</td>
 					</tr>
-				</thead>
-				<tbody>
-					{data.map((species) => (
-						<tr key={species.species_name}>
-							<td>
-								<Link
-									className="link link-primary"
-									href={`/species/${species.species_name}`}
-								>
-									{species.species_name}
-								</Link>
-							</td>
-							<td>{species.individuals}</td>
-							<td>{species.encounters}</td>
-							<td>{species.session_count}</td>
-							<td>{species.longest_stay}</td>
-							<td>{species.unluckiest}</td>
-							<td>{species.longest_winged}</td>
-							<td>{species.average_wing_length}</td>
-							<td>{species.shortest_winged}</td>
-							<td>{species.heaviest}</td>
-							<td>{species.average_weight}</td>
-							<td>{species.lightest}</td>
-							<td>{species.total_weight}</td>
-						</tr>
-					))}
-				</tbody>
-			</table>
-		</div>
+				))}
+			</tbody>
+		</Table>
 	);
 }
 

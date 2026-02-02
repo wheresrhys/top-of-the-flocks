@@ -7,6 +7,7 @@ import {
 } from '@/app/lib/bird-data-helpers';
 import { SingleBirdTable } from '@/app/components/SingleBirdTable';
 import Link from 'next/link';
+import { Table } from './DesignSystem';
 function BirdRow({
 	ring_no,
 	encounters,
@@ -68,7 +69,7 @@ function BirdRow({
 			{expandedBird === ring_no ? (
 				<tr>
 					<td colSpan={5}>
-						<SingleBirdTable encounters={birdDetail} size="xs" />
+						<SingleBirdTable encounters={birdDetail} />
 					</td>
 				</tr>
 			) : (
@@ -85,30 +86,28 @@ export function SpeciesTable({
 }) {
 	const [expandedBird, setExpandedBird] = useState<string | null>(null);
 	return (
-		<div className="w-full overflow-x-auto">
-			<table className="table">
-				<thead>
-					<tr>
-						<th>Ring</th>
-						<th>Encounters</th>
-						<th>First record</th>
-						<th>Last record</th>
-						<th>Proven age</th>
-					</tr>
-				</thead>
-				<tbody>
-					{birds.map(({ ring_no, encounters, provenAge }) => (
-						<BirdRow
-							key={ring_no}
-							ring_no={ring_no}
-							provenAge={provenAge}
-							encounters={encounters}
-							onExpand={setExpandedBird}
-							expandedBird={expandedBird}
-						/>
-					))}
-				</tbody>
-			</table>
-		</div>
+		<Table>
+			<thead>
+				<tr>
+					<th>Ring</th>
+					<th>Encounters</th>
+					<th>First record</th>
+					<th>Last record</th>
+					<th>Proven age</th>
+				</tr>
+			</thead>
+			<tbody>
+				{birds.map(({ ring_no, encounters, provenAge }) => (
+					<BirdRow
+						key={ring_no}
+						ring_no={ring_no}
+						provenAge={provenAge}
+						encounters={encounters}
+						onExpand={setExpandedBird}
+						expandedBird={expandedBird}
+					/>
+				))}
+			</tbody>
+		</Table>
 	);
 }
