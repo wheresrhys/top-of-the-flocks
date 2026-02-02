@@ -14,15 +14,16 @@ import {
 import { PageWrapper, PrimaryHeading } from '@/app/components/DesignSystem';
 import { SpeciesHighlightStats } from '@/app/components/SpeciesHighlights';
 
+type SpeciesLeagueTableRow =
+	Database['public']['Views']['species_league_table']['Row'];
 type PageParams = { speciesName: string };
 type PageProps = { params: Promise<PageParams> };
+
 export type PageData = {
 	topSessions: TopPeriodsResult[];
 	birds: EnrichedBirdWithEncounters[];
-	mostCaughtBirds: MostCaughtBirdsResult[];
+	speciesStats: SpeciesLeagueTableRow;
 };
-type MostCaughtBirdsResult =
-	Database['public']['Functions']['most_caught_birds']['Returns'][number];
 
 function getTopSessions(species: string) {
 	return getTopPeriodsByMetric({
@@ -33,21 +34,13 @@ function getTopSessions(species: string) {
 	}) as Promise<TopPeriodsResult[]>;
 }
 
-async function getMostCaughtBirds(
-	species: string
-): Promise<MostCaughtBirdsResult[]> {
-	const birds = await supabase
-		.rpc('most_caught_birds', {
-			species_filter: species,
-			result_limit: 5
-		})
-		.then(catchSupabaseErrors);
-
-	return (
-		birds?.filter(
-			(bird) => bird.encounters > 1 && bird.encounters === birds[0].encounters
-		) || ([] as MostCaughtBirdsResult[])
-	);
+async function getSpeciesStats(species: string) {
+	return supabase
+		.from('species_league_table')
+		.select('*')
+		.eq('species_name', species)
+		.maybeSingle()
+		.then(catchSupabaseErrors) as Promise<SpeciesLeagueTableRow>;
 }
 
 async function fetchAllBirds(species: string) {
@@ -87,16 +80,16 @@ async function fetchAllBirds(species: string) {
 }
 
 async function fetchSpeciesData(params: PageParams): Promise<PageData | null> {
-	const [topSessions, birds, mostCaughtBirds] = await Promise.all([
+	const [topSessions, birds, speciesStats] = await Promise.all([
 		getTopSessions(params.speciesName),
 		fetchAllBirds(params.speciesName),
-		getMostCaughtBirds(params.speciesName)
+		getSpeciesStats(params.speciesName)
 	]);
 	if (birds.length === 0) return null;
 	return {
 		topSessions,
 		birds,
-		mostCaughtBirds
+		speciesStats
 	};
 }
 
