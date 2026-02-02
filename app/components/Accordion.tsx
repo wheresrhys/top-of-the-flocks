@@ -1,6 +1,4 @@
 'use client';
-import { useState } from 'react';
-import { BoxyList } from './DesignSystem';
 type HeadingComponent<ItemModel> = React.ComponentType<{
 	model: ItemModel;
 	expandedId: string | false;

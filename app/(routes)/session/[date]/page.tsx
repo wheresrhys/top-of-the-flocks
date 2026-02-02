@@ -58,7 +58,7 @@ async function fetchSessionData({
 	return data.encounters;
 }
 
-function getSpeciesBreakdown(encounters: Encounter[]): SpeciesBreakdown {
+function groupBySpecies(encounters: Encounter[]): SpeciesBreakdown[] {
 	const map: Record<string, Encounter[]> = {};
 	encounters.forEach((encounter) => {
 		const species = encounter.bird.species.species_name;
@@ -82,7 +82,7 @@ function SessionSummary({
 	data: Encounter[];
 	params: { date: string };
 }) {
-	const speciesBreakdown = getSpeciesBreakdown(session);
+	const speciesBreakdown = groupBySpecies(session);
 
 	return (
 		<PageWrapper>
@@ -111,7 +111,7 @@ function SessionSummary({
 					juvs
 				</li>
 			</ul>
-			<SessionTable date={date} speciesBreakdown={speciesBreakdown} />
+			<SessionTable speciesBreakdown={speciesBreakdown} />
 		</PageWrapper>
 	);
 }
