@@ -1,13 +1,20 @@
 import { expect, describe, it } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, getByRole, getAllByRole } from '@testing-library/react';
 import Page from '../page';
 describe('home page', () => {
-	it('should render the page', async () => {
+	it('should render page content', async () => {
 		render(await Page());
-		const heading = await screen.findByRole('heading', {
-			level: 2,
-			name: /Busiest sessions/
+		const accordionGroups = await screen.findAllByTestId('stats-accordion-group');
+		accordionGroups.map((accordionGroup) => {
+			const heading = getByRole(accordionGroup, 'heading', {
+				level: 2,
+			});
+			expect(heading.textContent).toMatch(/[a-z ]+:/i);
+			const buttons = getAllByRole(accordionGroup, 'button');
+			buttons.map((button) => {
+				expect(button.textContent).toMatch(/[a-z ]+: [0-9]+ [a-z]+/i);
+			});
 		});
-		expect(heading).toBeDefined();
+
 	});
 });
