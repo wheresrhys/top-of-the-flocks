@@ -1,12 +1,6 @@
-import type { Database } from '@/types/supabase.types';
-
-export type TopPeriodsResult =
-	Database['public']['Functions']['top_periods_by_metric']['Returns'][number];
-export type TopSpeciesResult =
-	Database['public']['Functions']['top_species_by_metric']['Returns'][number];
-
 import Link from 'next/link';
 import { format as formatDate } from 'date-fns';
+export type TemporalUnit = 'day' | 'month' | 'year';
 export type StatOutputModel = {
 	value: number;
 	speciesName?: string;
@@ -17,7 +11,7 @@ export type StatOutputModel = {
 	dateFormat?: string;
 	classes?: string;
 };
-export type TemporalUnit = 'day' | 'month' | 'year';
+
 const connectingVerbMap: Record<TemporalUnit, 'in' | 'on'> = {
 	day: 'on',
 	month: 'in',

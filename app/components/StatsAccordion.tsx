@@ -3,10 +3,13 @@ import { useState, useEffect } from 'react';
 import { AccordionItem } from './Accordion';
 import { SecondaryHeading, BoxyList } from './DesignSystem';
 import { StatOutput } from './StatOutput';
-import type { TopPeriodsResult, TopSpeciesResult } from './StatOutput';
+import type {
+	TopPeriodsResult,
+	TopSpeciesResult
+} from '@/app/isomorphic/stats-data-tables';
 import {
 	getTopStats,
-	type TopStatsArguments
+	type TopStatsArgsWithoutLimit
 } from '@/app/isomorphic/stats-data-tables';
 import type { TemporalUnit } from './StatOutput';
 
@@ -15,7 +18,7 @@ export type StatConfig = {
 	category: string;
 	unit: string;
 	bySpecies?: boolean;
-	dataArguments: TopStatsArguments;
+	dataArguments: TopStatsArgsWithoutLimit;
 };
 
 export type AccordionItemModel = {

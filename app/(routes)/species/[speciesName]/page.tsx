@@ -2,8 +2,10 @@ import { SpeciesTable } from '@/app/components/SingleSpeciesTable';
 import { BootstrapPageData } from '@/app/components/BootstrapPageData';
 import { supabase, catchSupabaseErrors } from '@/lib/supabase';
 import type { Database } from '@/types/supabase.types';
-import { getTopPeriodsByMetric } from '@/app/isomorphic/stats-data-tables';
-import type { TopPeriodsResult } from '@/app/components/StatOutput';
+import {
+	getTopPeriodsByMetric,
+	type TopPeriodsResult
+} from '@/app/isomorphic/stats-data-tables';
 import {
 	addProvenAgeToBirds,
 	orderBirdsByRecency,
