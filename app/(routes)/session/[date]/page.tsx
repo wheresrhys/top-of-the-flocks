@@ -5,7 +5,11 @@ import {
 import { supabase, catchSupabaseErrors } from '@/lib/supabase';
 import type { Database } from '@/types/supabase.types';
 import { BootstrapPageData } from '@/app/components/BootstrapPageData';
-import { PageWrapper, PrimaryHeading } from '@/app/components/DesignSystem';
+import {
+	BadgeList,
+	PageWrapper,
+	PrimaryHeading
+} from '@/app/components/DesignSystem';
 import { format as formatDate } from 'date-fns';
 
 type PageParams = { date: string };
@@ -89,28 +93,17 @@ function SessionSummary({
 			<PrimaryHeading>
 				{formatDate(new Date(date), 'EEE do MMMM yyyy')}
 			</PrimaryHeading>
-			<ul className="flex flex-wrap gap-2">
-				<li className="badge badge-secondary">{session.length} birds</li>
-				<li className="badge badge-secondary">
-					{speciesBreakdown.length} species
-				</li>
-				<li className="badge badge-secondary">
-					{session.filter((encounter) => encounter.record_type === 'N').length}{' '}
-					new
-				</li>
-				<li className="badge badge-secondary">
-					{session.filter((encounter) => encounter.record_type === 'S').length}{' '}
-					retraps
-				</li>
-				<li className="badge badge-secondary">
-					{session.filter((encounter) => encounter.minimum_years >= 1).length}{' '}
-					adults
-				</li>
-				<li className="badge badge-secondary">
-					{session.filter((encounter) => encounter.minimum_years === 0).length}{' '}
-					juvs
-				</li>
-			</ul>
+			<BadgeList
+				testId="session-stats"
+				items={[
+					`${session.length} birds`,
+					`${speciesBreakdown.length} species`,
+					`${session.filter((encounter) => encounter.record_type === 'N').length} new`,
+					`${session.filter((encounter) => encounter.record_type === 'S').length} retraps`,
+					`${session.filter((encounter) => encounter.minimum_years >= 1).length} adults`,
+					`${session.filter((encounter) => encounter.minimum_years === 0).length} juvs`
+				]}
+			/>
 			<SessionTable speciesBreakdown={speciesBreakdown} />
 		</PageWrapper>
 	);

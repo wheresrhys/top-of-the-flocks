@@ -75,7 +75,7 @@ export function HistoryAccordion({ sessions }: { sessions: Session[] | null }) {
 			{calendar.map((year) => {
 				const yearString = new Date(year[0][0].visit_date).getFullYear();
 				return (
-					<div key={yearString}>
+					<div data-testid="history-accordion-group" key={yearString}>
 						<SecondaryHeading>{yearString}</SecondaryHeading>
 						<BoxyList>
 							{year.map((month) => {

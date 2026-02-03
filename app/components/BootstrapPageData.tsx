@@ -2,10 +2,10 @@ import { Suspense } from 'react';
 import { unstable_cache } from 'next/cache';
 import { notFound } from 'next/navigation';
 
-type DefaultPageParams = Record<string, string>;
-type DefaultPageProps = { params: Promise<DefaultPageParams> };
+export type DefaultPageParams = Record<string, string>;
+export type DefaultPageProps = { params: Promise<DefaultPageParams> };
 
-type BootstrapPageDataProps<DataType, PagePropsType, ParamsType> = {
+export type BootstrapPageDataProps<DataType, PagePropsType, ParamsType> = {
 	pageProps?: PagePropsType;
 	loading?: React.ReactNode;
 	getCacheKeys: (params: ParamsType) => string[];
@@ -17,7 +17,7 @@ type BootstrapPageDataProps<DataType, PagePropsType, ParamsType> = {
 	}) => React.ReactNode;
 };
 
-async function defaultGetParams<
+export async function defaultGetParams<
 	PagePropsType,
 	ParamsType extends Record<string, string>
 >(pageProps: PagePropsType): Promise<ParamsType> {
@@ -33,7 +33,7 @@ async function defaultGetParams<
 	return decodedParams;
 }
 
-async function fetchDataWithCache<DataType, ParamsType>(
+export async function fetchDataWithCache<DataType, ParamsType>(
 	params: ParamsType,
 	dataFetcher: (params: ParamsType) => Promise<DataType | null>,
 	cacheKeys: string[]
@@ -44,7 +44,7 @@ async function fetchDataWithCache<DataType, ParamsType>(
 	})();
 }
 
-async function LoadWithData<DataType, PagePropsType, ParamsType>({
+export async function LoadWithData<DataType, PagePropsType, ParamsType>({
 	pageProps,
 	getParams,
 	dataFetcher,

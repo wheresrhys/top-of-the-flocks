@@ -86,7 +86,7 @@ export function SessionTable({
 	speciesBreakdown: SpeciesBreakdown[];
 }) {
 	return (
-		<Table>
+		<Table testId="session-table">
 			<thead>
 				<tr>
 					<th>Species</th>

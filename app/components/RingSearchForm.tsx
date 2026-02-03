@@ -9,11 +9,17 @@ export function RingSearchForm() {
 		router.push(`/bird/${ring}`);
 	};
 	return (
-		<form className="flex gap-2" onSubmit={handleSubmit}>
+		<form
+			name="ring-search-form"
+			className="flex gap-2"
+			onSubmit={handleSubmit}
+		>
 			<input
 				className="input input-bordered"
 				type="text"
 				name="ring"
+				id="ring"
+				aria-label="ring number"
 				placeholder="Search by ring"
 			/>
 			<button className="btn btn-primary" type="submit">

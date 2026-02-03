@@ -10,7 +10,7 @@ export function SingleBirdTable({
 }) {
 	const TableComponent = isInline ? InlineTable : Table;
 	return (
-		<TableComponent>
+		<TableComponent testId="single-bird-table">
 			<thead>
 				<tr>
 					<th>Date</th>

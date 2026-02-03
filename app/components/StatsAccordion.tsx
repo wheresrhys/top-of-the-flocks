@@ -119,7 +119,7 @@ export function StatsAccordion({ data }: { data: StatsAccordionModel[] }) {
 	return (
 		<>
 			{data.map(({ heading, stats }) => (
-				<div key={heading}>
+				<div data-testid="stats-accordion-group" key={heading}>
 					<SecondaryHeading>{heading}</SecondaryHeading>
 					<BoxyList>
 						{stats.map((item) => (

@@ -20,7 +20,7 @@ export async function fetchAllSessions(): Promise<Session[]> {
 		.then(catchSupabaseErrors) as Promise<Session[]>;
 }
 
-async function ListAllSessions({ data }: { data: Session[] }) {
+function ListAllSessions({ data }: { data: Session[] }) {
 	return (
 		<PageWrapper>
 			<PrimaryHeading>Session history</PrimaryHeading>
