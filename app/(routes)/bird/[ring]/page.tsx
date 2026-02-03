@@ -69,6 +69,7 @@ function BirdSummary({
 				{bird?.species?.species_name} {ring}
 			</PrimaryHeading>
 			<BadgeList
+				testId="bird-stats"
 				items={[
 					`${bird?.encounters.length} encounters`,
 					`First: ${formatDate(new Date(bird?.encounters[0].session.visit_date), 'dd MMMM yyyy')}`,
