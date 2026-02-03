@@ -31,7 +31,7 @@ describe('home page', () => {
 		expect(ringSearchButton.textContent).toBe('Search');
 		expect(mockPush).toHaveBeenCalledWith('/bird/R12345');
 	});
-	it('should render stats accordions', async () => {
+	it('should show stats accordions', async () => {
 		render(await Page());
 		const accordionGroups = await screen.findAllByTestId(
 			'stats-accordion-group'
