@@ -4,9 +4,9 @@ WITH ("security_invoker"='true') AS
 
 SELECT
   "sp"."species_name",
-  "count"(DISTINCT "b"."ring_no") AS "individuals",
-  "count"("e".*) AS "encounters",
-  "count"(DISTINCT "sess"."visit_date") AS "sessions",
+  "count"(DISTINCT "b"."ring_no") AS "bird_count",
+  "count"("e".*) AS "encounter_count",
+  "count"(DISTINCT "sess"."visit_date") AS "session_count",
   "max"("e"."weight") AS "max_weight",
   "round"("avg"("e"."weight")::numeric, 1) AS "avg_weight",
   "min"("e"."weight") AS "min_weight",
@@ -22,7 +22,7 @@ SELECT
     4
   ) AS "pct_retrapped",
   "u"."max_time_span",
-  MAX("busy_session"."encounter_count") AS "max_session_haul",
+  MAX("busy_session"."encounter_count") AS "max_per_session",
   (
     SELECT MAX(
       first_enc.minimum_years +
