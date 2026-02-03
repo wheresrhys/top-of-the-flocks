@@ -19,7 +19,7 @@
 		"lint": "npx prettier -w app && npx eslint",
 		"typecheck": "tsc --noEmit",
 		"test": "dotenvx run -f .env.dev -- vitest",
-		"qa": "npm run lint && npm run typecheck",
+		"qa": "npm run lint && npm run typecheck && npm run test",
 		"prepare": "husky"
 	},
 	"dependencies": {

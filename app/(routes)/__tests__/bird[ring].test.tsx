@@ -19,7 +19,7 @@ describe('bird page', () => {
 		const heading = await screen.findByRole('heading', {
 			level: 1
 		});
-		expect(heading.textContent).toBe("Cetti's Warbler BVB4353");
+		expect(heading.textContent).toBe(" Cetti's Warbler  BVB4353");
 	});
 	it('should show headline stats', async () => {
 		render(
@@ -29,11 +29,12 @@ describe('bird page', () => {
 		);
 		const headlineStats = await screen.findByTestId('bird-stats');
 		const statsLineItems = getAllByRole(headlineStats, 'listitem');
-		expect(statsLineItems).toHaveLength(4);
+		expect(statsLineItems).toHaveLength(5);
 		expect(statsLineItems[0].textContent).toBe('3 encounters');
 		expect(statsLineItems[1].textContent).toBe('First: 09 November 2025');
 		expect(statsLineItems[2].textContent).toBe('Last: 14 January 2026');
-		expect(statsLineItems[3].textContent).toBe('Proven Age: 1');
+		expect(statsLineItems[3].textContent).toBe('Sex: F');
+		expect(statsLineItems[4].textContent).toBe('Proven Age: 1');
 	});
 	it('should show table of every encounter', async () => {
 		render(
