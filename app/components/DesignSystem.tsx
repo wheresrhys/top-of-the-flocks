@@ -54,9 +54,15 @@ export function InlineTable({
 	);
 }
 
-export function BadgeList({ items }: { items: string[] }) {
+export function BadgeList({
+	items,
+	testId
+}: {
+	items: string[];
+	testId?: string;
+}) {
 	return (
-		<ul className="flex flex-wrap gap-2">
+		<ul data-testid={testId} className="flex flex-wrap gap-2">
 			{items.map((item) => (
 				<li key={item} className="badge badge-secondary">
 					{item}

@@ -1,38 +1,59 @@
-import { expect, describe, it, vi, beforeEach } from 'vitest';
-import {
-	render,
-	screen,
-	getByRole,
-	getAllByRole,
-	fireEvent
-} from '@testing-library/react';
+import { expect, describe, it } from 'vitest';
+import { render, screen, getAllByRole } from '@testing-library/react';
 import Page from '../session/[date]/page';
+import { verifyTableData } from './helpers/verify-table-data';
 
 describe('session page', () => {
-	// it('should render stats accordions', async () => {
-	//   render(await Page({ params: new Promise((resolve) => resolve({ date: '2025-12-03' })) }));
-	//   const accordionGroups = await screen.findAllByTestId(
-	//     'stats-accordion-group'
-	//   );
-	//   accordionGroups.map((accordionGroup) => {
-	//     const heading = getByRole(accordionGroup, 'heading', {
-	//       level: 2
-	//     });
-	//     expect(heading.textContent).toMatch(/[a-z ]+:/i);
-	//     const accordionWrapper = accordionGroup.querySelector(
-	//       ':scope > ul, :scope > ol'
-	//     );
-	//     getAllByRole(accordionGroup, 'button')
-	//       .filter((button) => {
-	//         const closestListItem = button.closest('li');
-	//         return (
-	//           closestListItem &&
-	//           closestListItem.parentElement === accordionWrapper
-	//         );
-	//       })
-	//       .forEach((button) => {
-	//         expect(button.textContent).toMatch(/^[a-z ]+: [0-9]+ [a-z]+$/i);
-	//       });
-	//   });
-	// });
+	it('should show correct heading', async () => {
+		render(
+			await Page({
+				params: new Promise((resolve) => resolve({ date: '2025-12-03' }))
+			})
+		);
+		const heading = await screen.findByRole('heading', {
+			level: 1
+		});
+		expect(heading.textContent).toBe('Wed 3rd December 2025');
+	});
+	it('should show headline stats', async () => {
+		render(
+			await Page({
+				params: new Promise((resolve) => resolve({ date: '2025-12-03' }))
+			})
+		);
+
+		const headlineStats = await screen.findByTestId('session-stats');
+		const statsLineItems = getAllByRole(headlineStats, 'listitem');
+		expect(statsLineItems).toHaveLength(6);
+		expect(statsLineItems[0].textContent).toBe('40 birds');
+		expect(statsLineItems[1].textContent).toBe('11 species');
+		expect(statsLineItems[2].textContent).toBe('32 new');
+		expect(statsLineItems[3].textContent).toBe('8 retraps');
+		expect(statsLineItems[4].textContent).toBe('8 adults');
+		expect(statsLineItems[5].textContent).toBe('32 juvs');
+	});
+	it('should show table of every species', async () => {
+		render(
+			await Page({
+				params: new Promise((resolve) => resolve({ date: '2025-12-03' }))
+			})
+		);
+		const speciesTable = await screen.findByTestId('session-table');
+		verifyTableData(speciesTable, [
+			['Species', 'New', 'Retraps', 'Adults', 'Juvs'],
+			['Chiffchaff', '12', '1', '2', '11'],
+			['Goldcrest', '6', '0', '1', '5'],
+			['Reed Bunting', '4', '1', '3', '2'],
+			["Cetti's Warbler", '0', '4', '0', '4'],
+			['Robin', '2', '1', '0', '3'],
+			['Blue Tit', '2', '0', '1', '1'],
+			['Wren', '1', '1', '0', '2'],
+			['Chiffchaff (Siberian - tristis)', '2', '0', '1', '1'],
+			['Long-tailed Tit', '1', '0', '0', '1'],
+			['Great Tit', '1', '0', '0', '1'],
+			['Blackcap', '1', '0', '0', '1']
+		]);
+	});
+	// todo fix the async issues
+	it.skip('should allow each individual species to be expanded', async () => {});
 });

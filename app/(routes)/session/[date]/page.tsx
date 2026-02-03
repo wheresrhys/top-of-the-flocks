@@ -94,6 +94,7 @@ function SessionSummary({
 				{formatDate(new Date(date), 'EEE do MMMM yyyy')}
 			</PrimaryHeading>
 			<BadgeList
+				testId="session-stats"
 				items={[
 					`${session.length} birds`,
 					`${speciesBreakdown.length} species`,
