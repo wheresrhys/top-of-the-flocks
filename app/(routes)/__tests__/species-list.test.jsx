@@ -1,11 +1,5 @@
-import { expect, describe, it, vi, beforeEach } from 'vitest';
-import {
-	render,
-	screen,
-	getByRole,
-	getAllByRole,
-	fireEvent
-} from '@testing-library/react';
+import { describe, it } from 'vitest';
+import { render, screen } from '@testing-library/react';
 import Page from '../species/page';
 import { verifyTableData } from './helpers/verify-table-data';
 

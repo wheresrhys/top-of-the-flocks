@@ -12,9 +12,11 @@ export function verifyTableData(
 		expect(headers[index].textContent.trim()).toBe(header);
 	});
 	const rowEls = getAllByRole(tbody, 'row');
-	isPartial
-		? expect(rowEls.length).toBeGreaterThanOrEqual(data.length - 1)
-		: expect(rowEls).toHaveLength(data.length - 1);
+	if (isPartial) {
+		expect(rowEls.length).toBeGreaterThanOrEqual(data.length - 1);
+	} else {
+		expect(rowEls).toHaveLength(data.length - 1);
+	}
 	data.slice(1).map((row, index) => {
 		const rowEl = rowEls[index];
 		const cells = getAllByRole(rowEl, 'cell');

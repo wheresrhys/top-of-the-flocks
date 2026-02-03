@@ -70,7 +70,15 @@ function ContentComponent({
 					});
 			}
 		}
-	}, [expandedId]);
+	}, [
+		expandedId,
+		isLoaded,
+		isLoading,
+		model.definition.id,
+		model.definition.bySpecies,
+		model.definition.dataArguments
+	]);
+
 	return hasData(data) ? (
 		<ol className="list-inside list-none">
 			{data.map((item) => (
