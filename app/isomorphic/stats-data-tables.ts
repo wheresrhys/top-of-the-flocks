@@ -1,9 +1,9 @@
 import { supabase, catchSupabaseErrors } from '@/lib/supabase';
 import type { Database } from '@/types/supabase.types';
 
-type TopPeriodsResult =
+export type TopPeriodsResult =
 	Database['public']['Functions']['top_periods_by_metric']['Returns'][number];
-type TopSpeciesResult =
+export type TopSpeciesResult =
 	Database['public']['Functions']['top_species_by_metric']['Returns'][number];
 export type TopStatsResult = TopPeriodsResult | TopSpeciesResult;
 
@@ -12,6 +12,7 @@ type TopPeriodsArgs =
 type TopSpeciesArgs =
 	Database['public']['Functions']['top_species_by_metric']['Args'];
 export type TopStatsArguments = TopPeriodsArgs | TopSpeciesArgs;
+export type TopStatsArgsWithoutLimit = Omit<TopStatsArguments, 'result_limit'>;
 
 export async function getTopPeriodsByMetric(
 	options: TopPeriodsArgs

@@ -15,8 +15,6 @@ import path from 'path';
 
 interface FileLocation {
   file: string;
-  line: number;
-  column: number;
 }
 
 function parseTypeScriptOutput(output: string): FileLocation[] {
@@ -47,7 +45,7 @@ function parseTypeScriptOutput(output: string): FileLocation[] {
   return locations;
 }
 
-function openFileInCursor(filePath: string, line: number, column: number): void {
+function openFileInCursor(filePath: string): void {
   const absolutePath = path.resolve(filePath);
 
   if (!existsSync(absolutePath)) {
@@ -56,7 +54,7 @@ function openFileInCursor(filePath: string, line: number, column: number): void 
   }
 
   try {
-      const result = spawnSync('cursor', `"${absolutePath}"`, {
+      const result = spawnSync('cursor', [`"${absolutePath}"`], {
         stdio: 'pipe',
       });
 
@@ -86,10 +84,10 @@ function main(): void {
     // We need to capture stderr separately
     console.log('No type errors found!');
     process.exit(0);
-
-  } catch (error: any) { // @ts-expect-error - I'll use any in a dev script
+  } catch (error: unknown) { //eslint-disable-line @typescript-eslint/no-explicit-any
     // tsc exits with non-zero code when there are errors
     // The error output is in stderr
+    // @ts-expect-error - Don't care - it's a dev script
     const errorOutput = error.stderr || error.stdout || error.message || '';
 
     if (errorOutput) {
