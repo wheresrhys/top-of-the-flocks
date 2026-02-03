@@ -1,6 +1,5 @@
 'use client';
-import { useState } from 'react';
-import { Fragment } from 'react';
+import { useEffect, useState, Fragment } from 'react';
 type AccordionTableComponent<ItemModel> = React.ComponentType<{
 	model: ItemModel;
 }>;
@@ -59,6 +58,9 @@ export function AccordionTableBody<ItemModel>({
 	columnCount
 }: AccordionTableProps<ItemModel>) {
 	const [expandedRow, setExpandedRow] = useState<string | false>(false);
+	useEffect(() => {
+		setExpandedRow(false);
+	}, []);
 	return (
 		<tbody>
 			{data.map((item: ItemModel) => {
