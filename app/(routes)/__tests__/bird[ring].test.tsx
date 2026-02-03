@@ -1,11 +1,5 @@
-import { expect, describe, it, vi, beforeEach } from 'vitest';
-import {
-	render,
-	screen,
-	getByRole,
-	getAllByRole,
-	fireEvent
-} from '@testing-library/react';
+import { expect, describe, it } from 'vitest';
+import { render, screen, getAllByRole } from '@testing-library/react';
 import Page from '../bird/[ring]/page';
 import { verifyTableData } from './helpers/verify-table-data';
 

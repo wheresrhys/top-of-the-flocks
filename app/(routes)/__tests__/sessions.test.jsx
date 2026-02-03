@@ -1,10 +1,9 @@
-import { expect, describe, it, vi, beforeEach } from 'vitest';
+import { expect, describe, it } from 'vitest';
 import {
 	render,
 	screen,
 	getByRole,
-	getAllByRole,
-	fireEvent
+	getAllByRole
 } from '@testing-library/react';
 import Page from '../sessions/page';
 

@@ -5,7 +5,6 @@ import {
 	getByRole,
 	getAllByRole,
 	fireEvent,
-	findAllByRole,
 	waitFor
 } from '@testing-library/react';
 import { verifyTableData } from './helpers/verify-table-data';

@@ -2,7 +2,6 @@
 
 import { type Encounter } from '@/app/(routes)/session/[date]/page';
 import Link from 'next/link';
-import { useState } from 'react';
 import { InlineTable, Table } from './DesignSystem';
 import { AccordionTableBody } from './AccordionTableBody';
 export type SpeciesBreakdown = {
@@ -57,11 +56,7 @@ function SpeciesDetailsTable({
 	);
 }
 
-function SpeciesRow({
-	model: { species, encounters }
-}: {
-	model: SpeciesBreakdown;
-}) {
+function SpeciesRow({ model: { encounters } }: { model: SpeciesBreakdown }) {
 	return (
 		<>
 			<td>

@@ -1,9 +1,6 @@
 'use client';
 import { format as formatDate } from 'date-fns';
-import {
-	Encounter,
-	type EnrichedBirdWithEncounters
-} from '@/app/lib/bird-data-helpers';
+import { type EnrichedBirdWithEncounters } from '@/app/lib/bird-data-helpers';
 import { SingleBirdTable } from '@/app/components/SingleBirdTable';
 import Link from 'next/link';
 import { Table } from './DesignSystem';

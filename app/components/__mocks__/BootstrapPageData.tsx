@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import {
 	defaultGetParams,
-	fetchDataWithCache,
 	type BootstrapPageDataProps,
 	type DefaultPageParams,
 	type DefaultPageProps
@@ -44,7 +43,7 @@ export function BootstrapPageData<
 		}
 
 		loadData();
-	}, []);
+	}, [bootstrapProps]);
 
 	if (isLoading) {
 		return <>{bootstrapProps.loading || <div>Loading...</div>}</>;

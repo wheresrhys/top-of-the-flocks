@@ -1,4 +1,4 @@
-import { expect, describe, it, vi, beforeEach } from 'vitest';
+import { expect, describe, it, beforeEach } from 'vitest';
 import {
 	render,
 	screen,
