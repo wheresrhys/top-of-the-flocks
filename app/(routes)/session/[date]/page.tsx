@@ -73,7 +73,7 @@ function groupBySpecies(encounters: Encounter[]): SpeciesBreakdown[] {
 		.map(([species, encounters]) => ({ species, encounters }))
 		.sort((a, b) => {
 			if (a.encounters.length === b.encounters.length) {
-				return 0;
+				return a.species.localeCompare(b.species);
 			}
 			return a.encounters.length < b.encounters.length ? 1 : -1;
 		});

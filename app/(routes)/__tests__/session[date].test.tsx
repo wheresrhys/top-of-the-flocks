@@ -47,11 +47,11 @@ describe('session page', () => {
 			["Cetti's Warbler", '0', '4', '0', '4'],
 			['Robin', '2', '1', '0', '3'],
 			['Blue Tit', '2', '0', '1', '1'],
-			['Wren', '1', '1', '0', '2'],
 			['Chiffchaff (Siberian - tristis)', '2', '0', '1', '1'],
-			['Long-tailed Tit', '1', '0', '0', '1'],
+			['Wren', '1', '1', '0', '2'],
+			['Blackcap', '1', '0', '0', '1'],
 			['Great Tit', '1', '0', '0', '1'],
-			['Blackcap', '1', '0', '0', '1']
+			['Long-tailed Tit', '1', '0', '0', '1']
 		]);
 	});
 	// todo fix the async issues
