@@ -44,7 +44,7 @@ export function SpeciesHighlightStats({
 		'last'
 	)[0];
 	return (
-		<BoxyList>
+		<BoxyList testId="headline-stats">
 			<li>
 				{speciesStats.individuals} individuals, {speciesStats.encounters}{' '}
 				encounters, caught at {speciesStats.session_count} sessions
@@ -121,7 +121,7 @@ export function SpeciesHighlightStats({
 				<li>No birds retrapped</li>
 			)}
 			<li className="flex items-center gap-2 flex-wrap">
-				<span className="text-nowrap">Top sessions</span>
+				<span className="text-nowrap">Top sessions:</span>{' '}
 				{topSessions.map((session) => (
 					<StatOutput
 						key={session.visit_date}

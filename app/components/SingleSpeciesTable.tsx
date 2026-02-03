@@ -54,7 +54,7 @@ export function SpeciesTable({
 	birds: EnrichedBirdWithEncounters[];
 }) {
 	return (
-		<Table>
+		<Table testId="species-table">
 			<thead>
 				<tr>
 					<th>Ring</th>
