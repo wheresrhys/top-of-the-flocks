@@ -7,24 +7,51 @@ export function PrimaryHeading({ children }: { children: React.ReactNode }) {
 export function SecondaryHeading({ children }: { children: React.ReactNode }) {
 	return <h2 className="text-base-content text-2xl mt-3 mb-3">{children}</h2>;
 }
-export function BoxyList({ children, testId }: { children: React.ReactNode, testId?: string }) {
+export function BoxyList({
+	children,
+	testId
+}: {
+	children: React.ReactNode;
+	testId?: string;
+}) {
 	return (
-		<ul data-testid={testId} className="border-base-content/25 divide-base-content/25 divide-y rounded-md border *:p-3 *:first:rounded-t-md *:last:rounded-b-md">
+		<ul
+			data-testid={testId}
+			className="border-base-content/25 divide-base-content/25 divide-y rounded-md border *:p-3 *:first:rounded-t-md *:last:rounded-b-md"
+		>
 			{children}
 		</ul>
 	);
 }
 
-export function Table({ children, testId }: { children: React.ReactNode, testId?: string }) {
+export function Table({
+	children,
+	testId
+}: {
+	children: React.ReactNode;
+	testId?: string;
+}) {
 	return (
 		<div className="w-full overflow-x-auto mt-4">
-			<table data-testid={testId} className="table">{children}</table>
+			<table data-testid={testId} className="table">
+				{children}
+			</table>
 		</div>
 	);
 }
 
-export function InlineTable({ children, testId }: { children: React.ReactNode, testId?: string }) {
-	return <table data-testid={testId} className="table table-xs">{children}</table>;
+export function InlineTable({
+	children,
+	testId
+}: {
+	children: React.ReactNode;
+	testId?: string;
+}) {
+	return (
+		<table data-testid={testId} className="table table-xs">
+			{children}
+		</table>
+	);
 }
 
 export function BadgeList({ items }: { items: string[] }) {
