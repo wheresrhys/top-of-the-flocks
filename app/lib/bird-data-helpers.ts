@@ -66,3 +66,32 @@ export function addProvenAgeToBird(
 		new Date(bird.encounters[0].session.visit_date).getFullYear();
 	return bird as EnrichedBirdWithEncounters;
 }
+
+export function getSex(encounters: Encounter[]) {
+	const counts = encounters.reduce(
+		(tallies, encounter) => {
+			tallies[encounter.sex]++;
+			return tallies;
+		},
+		{ M: 0, F: 0, U: 0 } as Record<string, number>
+	);
+	if (counts['U'] === encounters.length) {
+		return 'U';
+	}
+	if (counts['M'] === counts['F']) {
+		return 'U';
+	}
+	if (counts['M'] > counts['F']) {
+		if (counts['F'] <= 1 || counts['F'] / encounters.length < 0.1) {
+			return 'M';
+		} else {
+			return 'M?';
+		}
+	} else {
+		if (counts['M'] <= 1 || counts['M'] / encounters.length < 0.1) {
+			return 'F';
+		} else {
+			return 'F?';
+		}
+	}
+}

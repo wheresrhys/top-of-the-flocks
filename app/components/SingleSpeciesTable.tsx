@@ -1,10 +1,14 @@
 'use client';
 import { format as formatDate } from 'date-fns';
-import { type EnrichedBirdWithEncounters } from '@/app/lib/bird-data-helpers';
+import {
+	Encounter,
+	type EnrichedBirdWithEncounters
+} from '@/app/lib/bird-data-helpers';
 import { SingleBirdTable } from '@/app/components/SingleBirdTable';
 import Link from 'next/link';
 import { Table } from './DesignSystem';
 import { AccordionTableBody } from './AccordionTableBody';
+import { getSex } from '@/app/lib/bird-data-helpers';
 
 function RingNumberCell({
 	model: { ring_no }
@@ -34,6 +38,7 @@ function BirdRow({
 	return (
 		<>
 			<td>{encounters.length}</td>
+			<td>{getSex(encounters)}</td>
 			<td>
 				{formatDate(new Date(encounters[0].session.visit_date), 'dd MMMM yyyy')}
 			</td>
@@ -43,6 +48,7 @@ function BirdRow({
 					'dd MMMM yyyy'
 				)}
 			</td>
+			<td>{encounters[encounters.length - 1].age_code}</td>
 			<td>{provenAge}</td>
 		</>
 	);
@@ -59,8 +65,10 @@ export function SpeciesTable({
 				<tr>
 					<th>Ring</th>
 					<th>Encounters</th>
+					<th>Sex</th>
 					<th>First record</th>
 					<th>Last record</th>
+					<th>Last aged as</th>
 					<th>Proven age</th>
 				</tr>
 			</thead>
