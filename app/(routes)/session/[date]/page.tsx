@@ -5,7 +5,11 @@ import {
 import { supabase, catchSupabaseErrors } from '@/lib/supabase';
 import type { Database } from '@/types/supabase.types';
 import { BootstrapPageData } from '@/app/components/BootstrapPageData';
-import { BadgeList, PageWrapper, PrimaryHeading } from '@/app/components/DesignSystem';
+import {
+	BadgeList,
+	PageWrapper,
+	PrimaryHeading
+} from '@/app/components/DesignSystem';
 import { format as formatDate } from 'date-fns';
 
 type PageParams = { date: string };
@@ -89,14 +93,16 @@ function SessionSummary({
 			<PrimaryHeading>
 				{formatDate(new Date(date), 'EEE do MMMM yyyy')}
 			</PrimaryHeading>
-			<BadgeList items={[
-				`${session.length} birds`,
-				`${speciesBreakdown.length} species`,
-				`${session.filter((encounter) => encounter.record_type === 'N').length} new`,
-				`${session.filter((encounter) => encounter.record_type === 'S').length} retraps`,
-				`${session.filter((encounter) => encounter.minimum_years >= 1).length} adults`,
-				`${session.filter((encounter) => encounter.minimum_years === 0).length} juvs`
-			]} />
+			<BadgeList
+				items={[
+					`${session.length} birds`,
+					`${speciesBreakdown.length} species`,
+					`${session.filter((encounter) => encounter.record_type === 'N').length} new`,
+					`${session.filter((encounter) => encounter.record_type === 'S').length} retraps`,
+					`${session.filter((encounter) => encounter.minimum_years >= 1).length} adults`,
+					`${session.filter((encounter) => encounter.minimum_years === 0).length} juvs`
+				]}
+			/>
 			<SessionTable speciesBreakdown={speciesBreakdown} />
 		</PageWrapper>
 	);

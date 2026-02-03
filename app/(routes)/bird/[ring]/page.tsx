@@ -2,7 +2,11 @@ import { BootstrapPageData } from '@/app/components/BootstrapPageData';
 import { supabase, catchSupabaseErrors } from '@/lib/supabase';
 import { SingleBirdTable } from '@/app/components/SingleBirdTable';
 import { format as formatDate } from 'date-fns';
-import { BadgeList, PageWrapper, PrimaryHeading } from '@/app/components/DesignSystem';
+import {
+	BadgeList,
+	PageWrapper,
+	PrimaryHeading
+} from '@/app/components/DesignSystem';
 import {
 	addProvenAgeToBird,
 	orderEncountersByRecency,
@@ -64,12 +68,14 @@ function BirdSummary({
 			<PrimaryHeading>
 				{bird?.species?.species_name} {ring}
 			</PrimaryHeading>
-			<BadgeList items={[
-				`${bird?.encounters.length} encounters`,
-				`First: ${formatDate(new Date(bird?.encounters[0].session.visit_date), 'dd MMMM yyyy')}`,
-				`Last: ${formatDate(new Date(bird?.encounters[bird?.encounters.length - 1].session.visit_date), 'dd MMMM yyyy')}`,
-				`Proven Age: ${bird?.provenAge}`
-			]} />
+			<BadgeList
+				items={[
+					`${bird?.encounters.length} encounters`,
+					`First: ${formatDate(new Date(bird?.encounters[0].session.visit_date), 'dd MMMM yyyy')}`,
+					`Last: ${formatDate(new Date(bird?.encounters[bird?.encounters.length - 1].session.visit_date), 'dd MMMM yyyy')}`,
+					`Proven Age: ${bird?.provenAge}`
+				]}
+			/>
 			<SingleBirdTable encounters={bird?.encounters ?? []} />
 		</PageWrapper>
 	);
