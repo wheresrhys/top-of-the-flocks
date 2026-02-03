@@ -26,3 +26,14 @@ export function Table({ children }: { children: React.ReactNode }) {
 export function InlineTable({ children }: { children: React.ReactNode }) {
 	return <table className="table table-xs">{children}</table>;
 }
+
+
+export function BadgeList({items}: {items: string[]}) {
+	return (
+		<ul className="flex flex-wrap gap-2">
+			{items.map((item) => (
+				<li key={item} className="badge badge-secondary">{item}</li>
+			))}
+		</ul>
+	);
+}
