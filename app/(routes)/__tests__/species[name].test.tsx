@@ -61,21 +61,13 @@ describe('species page', () => {
 		);
 		const speciesTable = await screen.findByTestId('species-table');
 		verifyTableData(speciesTable, [
-			[
-				'Ring',
-				'Encounters',
-				'Sex',
-				'First record',
-				'Last record',
-				'Last aged as',
-				'Proven age'
-			],
-			['BVB4353', '3', 'F', '09 November 2025', '14 January 2026', '4', '1'],
-			['ADZ0566', '3', 'U', '08 November 2025', '20 December 2025', '2', '0'],
-			['BVB4581', '3', 'U', '09 November 2025', '16 December 2025', '2', '0'],
-			['BVB4401', '3', 'U', '08 November 2025', '16 December 2025', '2', '0'],
-			['BVB4420', '2', 'U', '03 December 2025', '16 December 2025', '2', '0'],
-			['BVB4138', '1', 'U', '09 November 2025', '09 November 2025', '2', '0']
+			['Ring', 'Count', 'Sex', 'First', 'Last', 'Last aged', 'Proven age'],
+			['BVB4353', '3', 'F', '09 Nov 2025', '14 Jan 2026', '4', '1'],
+			['ADZ0566', '3', 'U', '08 Nov 2025', '20 Dec 2025', '2', '0'],
+			['BVB4581', '3', 'U', '09 Nov 2025', '16 Dec 2025', '2', '0'],
+			['BVB4401', '3', 'U', '08 Nov 2025', '16 Dec 2025', '2', '0'],
+			['BVB4420', '2', 'U', '03 Dec 2025', '16 Dec 2025', '2', '0'],
+			['BVB4138', '1', 'U', '09 Nov 2025', '09 Nov 2025', '2', '0']
 		]);
 	});
 	// todo fix the async issues

@@ -37,12 +37,12 @@ function BirdRow({
 			<td>{encounters.length}</td>
 			<td>{getSex(encounters)}</td>
 			<td>
-				{formatDate(new Date(encounters[0].session.visit_date), 'dd MMMM yyyy')}
+				{formatDate(new Date(encounters[0].session.visit_date), 'dd MMM yyyy')}
 			</td>
 			<td>
 				{formatDate(
 					new Date(encounters[encounters.length - 1].session.visit_date),
-					'dd MMMM yyyy'
+					'dd MMM yyyy'
 				)}
 			</td>
 			<td>{encounters[encounters.length - 1].age_code}</td>
@@ -61,11 +61,11 @@ export function SpeciesTable({
 			<thead>
 				<tr>
 					<th>Ring</th>
-					<th>Encounters</th>
+					<th>Count</th>
 					<th>Sex</th>
-					<th>First record</th>
-					<th>Last record</th>
-					<th>Last aged as</th>
+					<th>First</th>
+					<th>Last</th>
+					<th>Last aged</th>
 					<th>Proven age</th>
 				</tr>
 			</thead>
