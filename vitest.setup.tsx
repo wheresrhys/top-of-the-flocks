@@ -12,15 +12,24 @@ vi.mock('next/link', () => ({
 	},
 }));
 
+
+// Create mock functions that can be accessed in tests
+export const mockPush = vi.fn();
+export const mockReplace = vi.fn();
+export const mockRefresh = vi.fn();
+export const mockBack = vi.fn();
+export const mockForward = vi.fn();
+export const mockPrefetch = vi.fn();
+
 // Mock Next.js navigation
 vi.mock('next/navigation', () => ({
   useRouter: () => ({
-    push: vi.fn(),
-    replace: vi.fn(),
-    refresh: vi.fn(),
-    back: vi.fn(),
-    forward: vi.fn(),
-    prefetch: vi.fn(),
+    push: mockPush,
+    replace: mockReplace,
+    refresh: mockRefresh,
+    back: mockBack,
+    forward: mockForward,
+    prefetch: mockPrefetch,
   }),
   usePathname: () => '/',
   useSearchParams: () => new URLSearchParams(),
