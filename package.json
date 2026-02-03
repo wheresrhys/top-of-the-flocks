@@ -5,9 +5,11 @@
 	"type": "module",
 	"scripts": {
 		"db:sync:prod": "supabase migration up --linked --debug --include-all",
-		"db:sync:local": "supabase db reset && npm run db:import:dev ./data/end25.csv",
+		"db:sync:local": "supabase db reset && npm run db:seed:local",
+		"db:seed:local": "npm run db:import:local ./data/end25.csv",
 		"db:diff": "supabase db diff --schema public --local",
 		"db:local": "supabase start",
+		"db:console": "open http://localhost:54323/project/default",
 		"db:types": "supabase gen types typescript --local --schema public > ./types/supabase.types.ts",
 		"db:import:prod": "./scripts/load-prod-env.sh tsx scripts/import-csv.ts",
 		"db:import:local": "dotenvx run -f .env.dev -- tsx scripts/import-csv.ts",
@@ -17,10 +19,11 @@
 		"next:prod": "./scripts/load-prod-env.sh next dev --turbopack",
 		"next:build": "dotenvx run -f .env.dev -- next build --turbopack --debug",
 		"lint": "npx prettier -w app && npx eslint",
-		"typecheck": "tsc --noEmit",
+		"type:check": "tsc --noEmit",
+		"type:check:open": "tsx scripts/open-type-errors.ts",
 		"test": "dotenvx run -f .env.dev -- vitest",
 		"test:nowatch": "dotenvx run -f .env.dev -- vitest run",
-		"qa": "npm run lint && npm run typecheck && npm run test:nowatch",
+		"qa": "npm run lint && npm run type:check && npm run test:nowatch",
 		"prepare": "husky"
 	},
 	"dependencies": {
