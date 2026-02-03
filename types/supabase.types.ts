@@ -177,12 +177,12 @@ export type Database = {
       top_periods_by_metric: {
         Args: {
           exact_months_filter?: string[]
-          metric_name?: string
+          metric_name: string
           month_filter?: number
           months_filter?: number[]
-          result_limit?: number
+          result_limit: number
           species_filter?: string
-          temporal_unit?: string
+          temporal_unit: string
           year_filter?: number
         }
         Returns: {
@@ -193,11 +193,11 @@ export type Database = {
       top_species_by_metric: {
         Args: {
           exact_months_filter?: string[]
-          metric_name?: string
+          metric_name: string
           month_filter?: number
           months_filter?: number[]
-          result_limit?: number
-          temporal_unit?: string
+          result_limit: number
+          temporal_unit: string
           year_filter?: number
         }
         Returns: {
