@@ -17,10 +17,21 @@ describe('home page', () => {
 				level: 2
 			});
 			expect(heading.textContent).toMatch(/[a-z ]+:/i);
-			const buttons = getAllByRole(accordionGroup, 'button');
-			buttons.map((button) => {
-				expect(button.textContent).toMatch(/[a-z ]+: [0-9]+ [a-z]+/i);
-			});
+			const accordionWrapper = accordionGroup.querySelector(
+				':scope > ul, :scope > ol'
+			);
+
+			getAllByRole(accordionGroup, 'button')
+				.filter((button) => {
+					const closestListItem = button.closest('li');
+					return (
+						closestListItem &&
+						closestListItem.parentElement === accordionWrapper
+					);
+				})
+				.forEach((button) => {
+					expect(button.textContent).toMatch(/^[a-z ]+: [0-9]+ [a-z]+$/i);
+				});
 		});
 	});
 });
