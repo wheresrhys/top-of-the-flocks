@@ -10,7 +10,7 @@ import {
 import { useState } from 'react';
 import { PageWrapper, PrimaryHeading } from '@/app/components/DesignSystem';
 import { SingleSpeciesStats } from '@/app/components/SingleSpeciesStats';
-import { ScatterChart } from 'react-chartkick';
+import { ScatterChart, type ScatterChartData } from 'react-chartkick';
 import 'chartkick/chart.js';
 
 type SpeciesStatsRow = Database['public']['Views']['SpeciesStats']['Row'];
@@ -131,11 +131,6 @@ function getWingWeightXYEncounter(
 	] as [number | null, number | null];
 	return isValidPoint(point) ? point : null;
 }
-
-type ScatterChartData = {
-	name: string;
-	data: [number, number][];
-};
 
 function getChartData(
 	birds: EnrichedBirdWithEncounters[],

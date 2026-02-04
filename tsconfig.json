@@ -24,7 +24,10 @@
     ],
     "paths": {
       "@/*": [
-        "./*"
+        "./*",
+      ],
+      "react-chartkick": [
+        "./types/react-chartkick.d.ts"
       ]
     }
   },
