@@ -4,25 +4,25 @@ WITH ("security_invoker"='true') AS
 
 SELECT
   "sp"."species_name",
-  "count"(DISTINCT "b"."ring_no") AS "bird_count",
-  "count"("e".*) AS "encounter_count",
-  "count"(DISTINCT "sess"."visit_date") AS "session_count",
+  "count"(DISTINCT "b"."ring_no") AS "individuals",
+  "count"("e".*) AS "encounters",
+  "count"(DISTINCT "sess"."visit_date") AS "sessions",
   "max"("e"."weight") AS "max_weight",
   "round"("avg"("e"."weight")::numeric, 1) AS "avg_weight",
   "min"("e"."weight") AS "min_weight",
-  "percentile_cont"(0.5) WITHIN GROUP (ORDER BY weight) AS "median_weight",
+  "percentile_cont"(0.5) WITHIN GROUP (ORDER BY wing_length) AS "median_weight",
   "max"("e"."wing_length") AS "max_wing",
   "round"("avg"("e"."wing_length")::numeric, 1) AS "avg_wing",
   "min"("e"."wing_length") AS "min_wing",
   "percentile_cont"(0.5) WITHIN GROUP (ORDER BY wing_length) AS "median_wing",
   "u"."cnt" AS "max_encountered_bird",
   ROUND(
-    100*COUNT(DISTINCT CASE WHEN encounter_counts.encounter_count > 1 THEN b.id END)::numeric /
+    COUNT(DISTINCT CASE WHEN encounter_counts.encounter_count > 1 THEN b.id END)::numeric /
     NULLIF(COUNT(DISTINCT b.id), 0)::numeric,
-    0
+    4
   ) AS "pct_retrapped",
   "u"."max_time_span",
-  MAX("busy_session"."encounter_count") AS "max_per_session",
+  MAX("busy_session"."cnt") AS "max_per_session",
   (
     SELECT MAX(
       first_enc.minimum_years +
@@ -92,13 +92,15 @@ FROM (
   ) encounter_counts ON b.id = encounter_counts.bird_id
   LEFT JOIN (
     SELECT
-      session_id,
-      COUNT(*) AS encounter_count
-    FROM
-      public."Encounters"
-    GROUP BY
-      session_id
-  ) busy_session ON sess.id = busy_session.session_id
+      sp3.id as "species_id",
+      ss3.visit_date,
+      count(e3.id) as "cnt"
+    FROM "Species" sp3
+    JOIN "Birds" b3 ON b3.species_id=sp3.id
+    JOIN "Encounters" e3 ON e3.bird_id=b3.id
+    JOIN "Sessions" ss3 on ss3.id=e3.session_id
+    GROUP BY sp3."id", ss3."id"
+  ) busy_session ON sp.id = busy_session.species_id
   GROUP BY "sp"."species_name", "u"."cnt", "u"."max_time_span";
 
 ALTER VIEW "public"."SpeciesStats" OWNER TO "postgres";
