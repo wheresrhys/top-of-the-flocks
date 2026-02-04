@@ -4,6 +4,7 @@ import type { Database } from '@/types/supabase.types';
 import { type TopPeriodsResult } from '@/app/isomorphic/stats-data-tables';
 import {
 	getSex,
+	Encounter,
 	type EnrichedBirdWithEncounters
 } from '@/app/lib/bird-data-helpers';
 import { useState } from 'react';
@@ -84,15 +85,21 @@ function addNoiseToWingLength(x: number | null) {
 	return x + (Math.random() - 0.5) * 0.3;
 }
 
-function getMedian(bird: EnrichedBirdWithEncounters, property: string) {
+function getMedian(
+	bird: EnrichedBirdWithEncounters,
+	property: keyof Encounter
+) {
 	return median(
 		bird.encounters
-			.filter((encounter) => Boolean(encounter[property]))
 			.map((encounter) => encounter[property])
+			.filter((number): number is number => Boolean(number))
 	);
 }
 
-function getNoisyMedian(bird: EnrichedBirdWithEncounters, property: string) {
+function getNoisyMedian(
+	bird: EnrichedBirdWithEncounters,
+	property: keyof Encounter
+) {
 	return addNoiseToWingLength(getMedian(bird, property));
 }
 
@@ -118,12 +125,17 @@ function isValidPoint(
 function getWingWeightXYEncounter(
 	encounter: Encounter
 ): [number, number] | null {
-	const point = [encounter.wing_length, encounter.weight];
-	if (isValidPoint(point)) {
-		return [addNoiseToWingLength(point[0]), point[1]];
-	}
-	return null;
+	const point = [
+		addNoiseToWingLength(encounter.wing_length),
+		encounter.weight
+	] as [number | null, number | null];
+	return isValidPoint(point) ? point : null;
 }
+
+type ScatterChartData = {
+	name: string;
+	data: [number, number][];
+};
 
 function getChartData(
 	birds: EnrichedBirdWithEncounters[],
