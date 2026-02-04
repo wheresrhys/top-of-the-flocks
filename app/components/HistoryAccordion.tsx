@@ -5,6 +5,7 @@ import { BoxyList, SecondaryHeading } from '@/app/components/DesignSystem';
 import { useState, useEffect } from 'react';
 import { StatOutput } from './StatOutput';
 import { format as formatDate } from 'date-fns';
+
 function groupByDateMethod(methodName: 'getFullYear' | 'getMonth') {
 	return function (sessions: Session[] | null): Session[][] {
 		if (!sessions) return [];
@@ -64,38 +65,85 @@ function MonthHeading({ model: month }: { model: Session[] }) {
 	);
 }
 
+function YearHeading({
+	model: { yearString }
+}: {
+	model: { yearString: string };
+}) {
+	return <SecondaryHeading>{yearString}</SecondaryHeading>;
+}
+
+function MonthsOfYear({
+	model: { yearData, setExpandedMonth, expandedMonth }
+}: {
+	model: {
+		yearData: Session[][];
+		yearString: string;
+		setExpandedMonth: (month: string | false) => void;
+		expandedMonth: string | false;
+	};
+}) {
+	return (
+		<div data-testid="months-of-year">
+			<BoxyList>
+				{yearData.map((month) => {
+					const id = formatDate(new Date(month[0].visit_date), 'yyyy-MM');
+					return (
+						<AccordionItem
+							key={id}
+							id={id}
+							HeadingComponent={MonthHeading}
+							ContentComponent={SessionsOfMonth}
+							model={month}
+							onToggle={setExpandedMonth}
+							expandedId={expandedMonth}
+						/>
+					);
+				})}
+			</BoxyList>
+		</div>
+	);
+}
+
+function getYearString(year: Session[][]) {
+	return String(new Date(year[0][0].visit_date).getFullYear());
+}
+
 export function HistoryAccordion({ sessions }: { sessions: Session[] | null }) {
 	const calendar = groupByYear(sessions || []).map(groupByMonth);
-	const [expanded, setExpanded] = useState<string | false>(false);
+	const [expandedMonth, setExpandedMonth] = useState<string | false>(false);
+	const [expandedYear, setExpandedYear] = useState(getYearString(calendar[0]));
+	const thisYearString = getYearString(calendar[0]);
 	useEffect(() => {
-		setExpanded(false);
-	}, []);
+		setExpandedYear(thisYearString);
+		setExpandedMonth(false);
+	}, [thisYearString]);
 	return (
-		<>
+		<ol>
 			{calendar.map((year) => {
-				const yearString = new Date(year[0][0].visit_date).getFullYear();
+				const yearString = getYearString(year);
 				return (
-					<div data-testid="history-accordion-group" key={yearString}>
-						<SecondaryHeading>{yearString}</SecondaryHeading>
-						<BoxyList>
-							{year.map((month) => {
-								const id = formatDate(new Date(month[0].visit_date), 'yyyy-MM');
-								return (
-									<AccordionItem
-										key={id}
-										id={id}
-										HeadingComponent={MonthHeading}
-										ContentComponent={SessionsOfMonth}
-										model={month}
-										onToggle={setExpanded}
-										expandedId={expanded}
-									/>
-								);
-							})}
-						</BoxyList>
-					</div>
+					<AccordionItem
+						key={yearString}
+						id={yearString}
+						testId="year-accordion-item"
+						HeadingComponent={YearHeading}
+						ContentComponent={MonthsOfYear}
+						model={{
+							yearString,
+							yearData: year,
+							setExpandedMonth,
+							expandedMonth
+						}}
+						onToggle={() => {
+							setExpandedYear(yearString);
+							setExpandedMonth(false);
+						}}
+						expandedId={expandedYear}
+						icon="calendar-week"
+					/>
 				);
 			})}
-		</>
+		</ol>
 	);
 }

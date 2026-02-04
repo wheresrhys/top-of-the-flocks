@@ -14,7 +14,9 @@ export function AccordionItem<ItemModel>({
 	onToggle,
 	expandedId,
 	HeadingComponent,
-	ContentComponent
+	ContentComponent,
+	testId,
+	icon
 }: {
 	id: string;
 	model: ItemModel;
@@ -22,6 +24,8 @@ export function AccordionItem<ItemModel>({
 	expandedId: string | false;
 	HeadingComponent: HeadingComponent<ItemModel>;
 	ContentComponent: ContentComponent<ItemModel>;
+	testId?: string;
+	icon?: string;
 }) {
 	async function onClick(isAlreadyExpanded: boolean) {
 		if (isAlreadyExpanded) {
@@ -31,9 +35,11 @@ export function AccordionItem<ItemModel>({
 		}
 	}
 	const isExpanded = expandedId === id;
-
+	const iconStyles = icon
+		? `icon-[tabler--${icon}]`
+		: `icon-[tabler--chevron-left] ${isExpanded ? '-rotate-90' : ''} transition-transform duration-300 rtl:-rotate-180`;
 	return (
-		<li>
+		<li data-testid={testId}>
 			<div className="flex basis-full">
 				<button
 					onClick={() => onClick(isExpanded)}
@@ -43,9 +49,7 @@ export function AccordionItem<ItemModel>({
 					className="flex items-center justify-between cursor-pointer basis-full"
 				>
 					<HeadingComponent model={model} expandedId={expandedId} />
-					<span
-						className={`icon-[tabler--chevron-left] ${isExpanded ? '-rotate-90' : ''} size-5 shrink-0 transition-transform duration-300 rtl:-rotate-180`}
-					></span>
+					<span className={`size-5 shrink-0 ${iconStyles}`}></span>
 				</button>
 			</div>
 			<div

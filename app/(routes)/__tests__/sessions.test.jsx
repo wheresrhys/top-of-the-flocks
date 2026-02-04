@@ -2,7 +2,7 @@ import { expect, describe, it } from 'vitest';
 import {
 	render,
 	screen,
-	getByRole,
+	getByTestId,
 	getAllByRole
 } from '@testing-library/react';
 import Page from '../sessions/page';
@@ -26,21 +26,30 @@ describe('session list page', () => {
 			}
 		});
 	});
-	it('should show session list accordions', async () => {
+	it('first session list accordion should be expanded by default', async () => {
 		render(await Page());
-		const accordionGroups = await screen.findAllByTestId(
-			'history-accordion-group'
+		const accordionGroups = await screen.findAllByTestId('year-accordion-item');
+		expect(accordionGroups).toHaveLength(2);
+		const firstYearAccordionItem = accordionGroups[0];
+		const firstYearAccordionItemButton = getAllByRole(
+			firstYearAccordionItem,
+			'button'
+		)[0];
+		expect(firstYearAccordionItemButton.getAttribute('aria-expanded')).toBe(
+			'true'
+		);
+		const secondYearAccordionItem = accordionGroups[1];
+		const secondYearAccordionItemButton = getAllByRole(
+			secondYearAccordionItem,
+			'button'
+		)[0];
+		expect(secondYearAccordionItemButton.getAttribute('aria-expanded')).toBe(
+			'false'
 		);
 		accordionGroups.map((accordionGroup) => {
-			const heading = getByRole(accordionGroup, 'heading', {
-				level: 2
-			});
-			const year = Number(heading.textContent);
-			const accordionWrapper = accordionGroup.querySelector(
-				':scope > ul, :scope > ol'
-			);
+			const accordionWrapper = getByTestId(accordionGroup, 'months-of-year');
 			expect(accordionWrapper).toBeDefined();
-			getAllByRole(accordionGroup, 'button')
+			getAllByRole(accordionWrapper, 'button')
 				.filter((button) => {
 					const closestListItem = button.closest('li');
 					return (
