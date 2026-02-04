@@ -11,7 +11,7 @@ import { createClient } from '@supabase/supabase-js';
 import fs from 'fs';
 import path from 'path';
 import csvParser from 'csv-parser';
-import { Database, Tables } from '../types/supabase.types';
+import { Database } from '../types/supabase.types';
 
 type SpeciesInsert = Database['public']['Tables']['Species']['Insert'];
 type BirdsInsert = Database['public']['Tables']['Birds']['Insert'];
@@ -23,39 +23,17 @@ type SessionsInsert = Database['public']['Tables']['Sessions']['Insert'];
 // Extract all table names from the database schema
 type TableNames = keyof Database['public']['Tables'];
 
-// Create a union of all table row types
-type AllTableRows<T extends TableNames = TableNames> = T extends TableNames
-  ? Database['public']['Tables'][T]['Row']
-  : never;
 
 // Extract all unique property names from all tables
 type AllTableProperties = {
   [K in TableNames]: keyof Database['public']['Tables'][K]['Row'] | "age"
 }[TableNames];
 
-// Create a type that represents all possible CSV columns
-// This is a union of all property names from Birds, Encounters, and Species tables
-type CsvColumnName = AllTableProperties;
-
 // Create a type for CSV row data that can contain any property from any table
 // All properties are optional since a CSV row might not contain all columns
 type CsvRowData = {
   [K in AllTableProperties]?: string | number | boolean | null;
 };
-
-// Individual table row types for typed access
-type BirdsRow = Tables<'Birds'>;
-type EncountersRow = Tables<'Encounters'>;
-type SpeciesRow = Tables<'Species'>;
-
-// Helper type to get the expected type for a specific column
-type CsvColumnType<T extends CsvColumnName> = T extends keyof BirdsRow
-  ? BirdsRow[T]
-  : T extends keyof EncountersRow
-  ? EncountersRow[T]
-  : T extends keyof SpeciesRow
-  ? SpeciesRow[T]
-  : never;
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -102,11 +80,10 @@ function convertDateFormat(dateString: string): string {
 
 interface ImportOptions {
   csvFilePath: string;
-  batchSize?: number;
 }
 
 async function importCSV(options: ImportOptions): Promise<void> {
-  const { csvFilePath, batchSize = 100 } = options;
+  const { csvFilePath } = options;
 
   if (!fs.existsSync(csvFilePath)) {
     console.error(`Error: File not found: ${csvFilePath}`);
@@ -115,7 +92,6 @@ async function importCSV(options: ImportOptions): Promise<void> {
 
   console.log(`Starting import from ${csvFilePath}...`);
 
-  const records: CsvRowData[] = [];
   let totalRecords = 0;
   let successfulRecords = 0;
   let failedRecords = 0;

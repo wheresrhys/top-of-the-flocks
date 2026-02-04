@@ -81,6 +81,7 @@ export function getSex(encounters: Encounter[]) {
 	if (counts['M'] === counts['F']) {
 		return 'U';
 	}
+	// TODO split into sex and sxing certainty columns
 	if (counts['M'] > counts['F']) {
 		if (counts['F'] <= 1 || counts['F'] / encounters.length < 0.1) {
 			return 'M';

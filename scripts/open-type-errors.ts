@@ -75,7 +75,7 @@ function main(): void {
 
   try {
     // Run tsc --noEmit and capture both stdout and stderr
-    const output = execSync('npx tsc --noEmit', {
+    execSync('npx tsc --noEmit', {
       encoding: 'utf-8',
       stdio: ['inherit', 'pipe', 'pipe'],
     });
@@ -84,7 +84,7 @@ function main(): void {
     // We need to capture stderr separately
     console.log('No type errors found!');
     process.exit(0);
-  } catch (error: unknown) { //eslint-disable-line @typescript-eslint/no-explicit-any
+  } catch (error: unknown) {
     // tsc exits with non-zero code when there are errors
     // The error output is in stderr
     // @ts-expect-error - Don't care - it's a dev script
