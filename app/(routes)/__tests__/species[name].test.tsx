@@ -33,21 +33,27 @@ describe('species page', () => {
 			})
 		);
 		const headlineStats = await screen.findByTestId('headline-stats');
-		const statsLineItems = getAllByRole(headlineStats, 'listitem');
+		const statsLineItems = headlineStats.querySelectorAll(':scope > li');
 
-		expect(statsLineItems).toHaveLength(6);
+		expect(statsLineItems).toHaveLength(7);
 		expect(statsLineItems[0].textContent).toBe(
-			'6 individuals, 15 encounters, caught at 6 sessions'
+			'Totals: 6 birds15 encounters6 sessionsmax haul: 4 birds'
 		);
-		expect(statsLineItems[1].textContent).toBe('Wing: 55 - 65 (avg 59.9)');
+		expect(statsLineItems[1].textContent).toBe(
+			'Recoveries: 83 % retrappedmax time span: 66 daysmax proven age: 1 yearsmost seen bird: 3 times'
+		);
 		expect(statsLineItems[2].textContent).toBe(
-			'Weight: 11.1 - 15.1 (avg 13.0)'
+			'Weight: max: 15.1 gavg: 13 gmin: 11.1 gmedian: 62 g'
 		);
-		expect(statsLineItems[3].textContent).toBe('No notably old birds');
-		expect(statsLineItems[4].textContent).toBe(
-			'Most caught birds: 3 encounters each BVB4353  ADZ0566  BVB4581  BVB4401 '
+		expect(statsLineItems[3].textContent).toBe(
+			'Wing: max: 65 mmavg: 59.9 mmmin: 55 mmmedian: 62 mm'
 		);
+
+		expect(statsLineItems[4].textContent).toBe('No notably old birds');
 		expect(statsLineItems[5].textContent).toBe(
+			'Most caught birds: 3 encounters each BVB4353  ADZ0566  BVB4401  BVB4581 '
+		);
+		expect(statsLineItems[6].textContent).toBe(
 			'Top sessions: 4  on  3 Dec 2025 3  on  16 Dec 2025 3  on  9 Nov 2025 2  on  20 Dec 2025 2  on  8 Nov 2025 '
 		);
 	});
@@ -64,8 +70,8 @@ describe('species page', () => {
 			['Ring', 'Count', 'Sex', 'First', 'Last', 'Last aged', 'Proven age'],
 			['BVB4353', '3', 'F', '09 Nov 2025', '14 Jan 2026', '4', '1'],
 			['ADZ0566', '3', 'U', '08 Nov 2025', '20 Dec 2025', '2', '0'],
-			['BVB4581', '3', 'U', '09 Nov 2025', '16 Dec 2025', '2', '0'],
 			['BVB4401', '3', 'U', '08 Nov 2025', '16 Dec 2025', '2', '0'],
+			['BVB4581', '3', 'U', '09 Nov 2025', '16 Dec 2025', '2', '0'],
 			['BVB4420', '2', 'U', '03 Dec 2025', '16 Dec 2025', '2', '0'],
 			['BVB4138', '1', 'U', '09 Nov 2025', '09 Nov 2025', '2', '0']
 		]);

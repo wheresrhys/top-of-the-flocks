@@ -14,17 +14,16 @@ import {
 } from '@/app/lib/bird-data-helpers';
 
 import { PageWrapper, PrimaryHeading } from '@/app/components/DesignSystem';
-import { SpeciesHighlightStats } from '@/app/components/SpeciesHighlights';
+import { SingleSpeciesStats } from '@/app/components/SingleSpeciesStats';
 
-type SpeciesLeagueTableRow =
-	Database['public']['Views']['species_league_table']['Row'];
+type SpeciesStatsRow = Database['public']['Views']['SpeciesStats']['Row'];
 type PageParams = { speciesName: string };
 type PageProps = { params: Promise<PageParams> };
 
 export type PageData = {
 	topSessions: TopPeriodsResult[];
 	birds: EnrichedBirdWithEncounters[];
-	speciesStats: SpeciesLeagueTableRow;
+	speciesStats: SpeciesStatsRow;
 };
 
 function getTopSessions(species: string) {
@@ -38,11 +37,11 @@ function getTopSessions(species: string) {
 
 async function getSpeciesStats(species: string) {
 	return supabase
-		.from('species_league_table')
+		.from('SpeciesStats')
 		.select('*')
 		.eq('species_name', species)
 		.maybeSingle()
-		.then(catchSupabaseErrors) as Promise<SpeciesLeagueTableRow>;
+		.then(catchSupabaseErrors) as Promise<SpeciesStatsRow>;
 }
 
 async function fetchAllBirds(species: string) {
@@ -105,7 +104,7 @@ function SpeciesSummary({
 	return (
 		<PageWrapper>
 			<PrimaryHeading>{speciesName}</PrimaryHeading>
-			<SpeciesHighlightStats {...data} />
+			<SingleSpeciesStats {...data} />
 			<SpeciesTable birds={data.birds} />
 		</PageWrapper>
 	);

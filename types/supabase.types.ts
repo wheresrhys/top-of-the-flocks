@@ -160,6 +160,28 @@ export type Database = {
         }
         Relationships: []
       }
+      SpeciesStats: {
+        Row: {
+          avg_weight: number | null
+          avg_wing: number | null
+          bird_count: number | null
+          encounter_count: number | null
+          max_encountered_bird: number | null
+          max_per_session: number | null
+          max_proven_age: number | null
+          max_time_span: number | null
+          max_weight: number | null
+          max_wing: number | null
+          median_weight: number | null
+          median_wing: number | null
+          min_weight: number | null
+          min_wing: number | null
+          pct_retrapped: number | null
+          session_count: number | null
+          species_name: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       most_caught_birds: {
