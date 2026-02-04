@@ -2,104 +2,96 @@ DROP VIEW IF EXISTS "public"."SpeciesStats";
 CREATE OR REPLACE VIEW "public"."SpeciesStats"
 WITH ("security_invoker"='true') AS
 
+WITH species_encounters AS (
+  -- Pre-aggregate all encounter data per species
+  SELECT
+    sp.id AS species_id,
+    sp.species_name,
+    b.id AS bird_id,
+    b.ring_no,
+    e.id AS encounter_id,
+    e.weight,
+    e.wing_length,
+    sess.id AS session_id,
+    sess.visit_date,
+    e.minimum_years
+  FROM public."Species" sp
+  JOIN public."Birds" b ON sp.id = b.species_id
+  LEFT JOIN public."Encounters" e ON b.id = e.bird_id
+  LEFT JOIN public."Sessions" sess ON e.session_id = sess.id
+),
+bird_stats AS (
+  -- Calculate per-bird statistics once
+  SELECT
+    species_id,
+    bird_id,
+    COUNT(*) AS encounter_count,
+    MIN(visit_date) AS first_visit,
+    MAX(visit_date) AS last_visit,
+    MIN(minimum_years) AS min_years_at_first,
+    EXTRACT(EPOCH FROM (MAX(visit_date)::timestamp - MIN(visit_date)::timestamp)) / 86400.0 AS time_span_days
+  FROM species_encounters
+  WHERE encounter_id IS NOT NULL
+  GROUP BY species_id, bird_id
+),
+species_bird_aggregates AS (
+  -- Aggregate bird-level stats to species level
+  SELECT
+    species_id,
+    MAX(encounter_count) AS max_encounter_count,
+    MAX(time_span_days) AS max_time_span,
+    MAX(
+      min_years_at_first +
+      EXTRACT(YEAR FROM last_visit) -
+      EXTRACT(YEAR FROM first_visit)
+    ) AS max_proven_age
+  FROM bird_stats
+  GROUP BY species_id
+),
+session_counts AS (
+  -- Count encounters per session per species
+  SELECT
+    species_id,
+    session_id,
+    COUNT(*) AS encounter_count
+  FROM species_encounters
+  WHERE session_id IS NOT NULL
+  GROUP BY species_id, session_id
+),
+species_session_max AS (
+  -- Get max encounters per session per species
+  SELECT
+    species_id,
+    MAX(encounter_count) AS max_per_session
+  FROM session_counts
+  GROUP BY species_id
+)
 SELECT
-  "sp"."species_name",
-  "count"(DISTINCT "b"."ring_no") AS "individuals",
-  "count"("e".*) AS "encounters",
-  "count"(DISTINCT "sess"."visit_date") AS "sessions",
-  "max"("e"."weight") AS "max_weight",
-  "round"("avg"("e"."weight")::numeric, 1) AS "avg_weight",
-  "min"("e"."weight") AS "min_weight",
-  "percentile_cont"(0.5) WITHIN GROUP (ORDER BY wing_length) AS "median_weight",
-  "max"("e"."wing_length") AS "max_wing",
-  "round"("avg"("e"."wing_length")::numeric, 1) AS "avg_wing",
-  "min"("e"."wing_length") AS "min_wing",
-  "percentile_cont"(0.5) WITHIN GROUP (ORDER BY wing_length) AS "median_wing",
-  "u"."cnt" AS "max_encountered_bird",
+  se.species_name,
+  COUNT(DISTINCT se.bird_id) AS "bird_count",
+  COUNT(se.encounter_id) AS "encounter_count",
+  COUNT(DISTINCT se.visit_date) AS "session_count",
+  MAX(se.weight) AS "max_weight",
+  ROUND(AVG(se.weight)::numeric, 1) AS "avg_weight",
+  MIN(se.weight) AS "min_weight",
+  PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY se.wing_length) AS "median_weight",
+  MAX(se.wing_length) AS "max_wing",
+  ROUND(AVG(se.wing_length)::numeric, 1) AS "avg_wing",
+  MIN(se.wing_length) AS "min_wing",
+  PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY se.wing_length) AS "median_wing",
+  sba.max_encounter_count AS "max_encountered_bird",
   ROUND(
-    100 * COUNT(DISTINCT CASE WHEN encounter_counts.encounter_count > 1 THEN b.id END)::numeric /
-    NULLIF(COUNT(DISTINCT b.id), 0)::numeric,
+    100 * COUNT(DISTINCT CASE WHEN bs.encounter_count > 1 THEN se.bird_id END)::numeric /
+    NULLIF(COUNT(DISTINCT se.bird_id), 0)::numeric,
     0
   ) AS "pct_retrapped",
-  "u"."max_time_span",
-  MAX("busy_session"."cnt") AS "max_per_session",
-  (
-    SELECT MAX(
-      first_enc.minimum_years +
-      EXTRACT(YEAR FROM last_enc.visit_date) -
-      EXTRACT(YEAR FROM first_enc.visit_date)
-    )
-    FROM
-      public."Species" "sp2"
-      INNER JOIN public."Birds" "b3" ON "sp2"."id" = "b3"."species_id"
-      INNER JOIN (
-        SELECT DISTINCT ON (e3.bird_id)
-          e3.bird_id,
-          e3.minimum_years,
-          s3.visit_date
-        FROM
-          public."Encounters" e3
-          INNER JOIN public."Sessions" s3 ON e3.session_id = s3.id
-        ORDER BY
-          e3.bird_id,
-          s3.visit_date ASC
-      ) first_enc ON b3.id = first_enc.bird_id
-      INNER JOIN (
-        SELECT DISTINCT ON (e4.bird_id)
-          e4.bird_id,
-          s4.visit_date
-        FROM
-          public."Encounters" e4
-          INNER JOIN public."Sessions" s4 ON e4.session_id = s4.id
-        ORDER BY
-          e4.bird_id,
-          s4.visit_date DESC
-      ) last_enc ON b3.id = last_enc.bird_id
-    WHERE
-      "sp2"."species_name" = "sp"."species_name"
-  ) AS "max_proven_age"
-FROM (
-  (
-    (
-      (
-        "public"."Species" "sp"
-        JOIN "public"."Birds" "b" ON (("sp"."id" = "b"."species_id"))
-      )
-      LEFT JOIN "public"."Encounters" "e" ON (("b"."id" = "e"."bird_id"))
-    )
-    LEFT JOIN "public"."Sessions" "sess" ON (("e"."session_id" = "sess"."id"))
-  )
-  LEFT JOIN LATERAL (
-    SELECT
-      "b2"."id",
-      "count"(*) AS "cnt",
-      "round"((EXTRACT(epoch FROM ("max"(("sess2"."visit_date")::timestamp without time zone) - "min"(("sess2"."visit_date")::timestamp without time zone))) / (86400.0)), 0) AS "max_time_span"
-           FROM (("public"."Encounters" "e2"
-             JOIN "public"."Birds" "b2" ON (("e2"."bird_id" = "b2"."id")))
-             JOIN "public"."Sessions" "sess2" ON (("e2"."session_id" = "sess2"."id")))
-          WHERE ("b2"."species_id" = "sp"."id")
-          GROUP BY "b2"."id"
-          ORDER BY ("count"(*)) DESC
-         LIMIT 1) "u" ON (true))
-    LEFT JOIN LATERAL (
-    SELECT
-      bird_id,
-      COUNT(*) AS encounter_count
-    FROM
-      public."Encounters"
-    GROUP BY
-      bird_id
-  ) encounter_counts ON b.id = encounter_counts.bird_id
-  LEFT JOIN LATERAL (
-    SELECT
-      sp3.id as "species_id",
-      ss3.visit_date,
-      count(e3.id) as "cnt"
-    FROM "Species" sp3
-    JOIN "Birds" b3 ON b3.species_id=sp3.id
-    JOIN "Encounters" e3 ON e3.bird_id=b3.id
-    JOIN "Sessions" ss3 on ss3.id=e3.session_id
-    GROUP BY sp3."id", ss3."id"
-  ) busy_session ON sp.id = busy_session.species_id
-  GROUP BY "sp"."species_name", "u"."cnt", "u"."max_time_span";
+  ROUND(sba.max_time_span, 0) AS "max_time_span",
+  ssm.max_per_session AS "max_per_session",
+  sba.max_proven_age AS "max_proven_age"
+FROM species_encounters se
+LEFT JOIN bird_stats bs ON se.bird_id = bs.bird_id
+LEFT JOIN species_bird_aggregates sba ON se.species_id = sba.species_id
+LEFT JOIN species_session_max ssm ON se.species_id = ssm.species_id
+GROUP BY se.species_name, sba.max_encounter_count, sba.max_time_span, ssm.max_per_session, sba.max_proven_age;
+
 ALTER VIEW "public"."SpeciesStats" OWNER TO "postgres";
