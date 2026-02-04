@@ -1,3 +1,4 @@
+import { Fragment } from 'react';
 export function PageWrapper({ children }: { children: React.ReactNode }) {
 	return <div className="m-3">{children}</div>;
 }
@@ -69,5 +70,17 @@ export function BadgeList({
 				</li>
 			))}
 		</ul>
+	);
+}
+
+export function UnwrappedBadgeList({ items }: { items: string[] }) {
+	return (
+		<Fragment>
+			{items.map((item) => (
+				<span key={item} className="badge badge-secondary">
+					{item}
+				</span>
+			))}
+		</Fragment>
 	);
 }

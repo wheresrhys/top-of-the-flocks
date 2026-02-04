@@ -3,7 +3,7 @@ import Link from 'next/link';
 import type { PageData } from '@/app/(routes)/species/[speciesName]/page';
 import { StatOutput } from './StatOutput';
 import type { Database } from '@/types/supabase.types';
-import { BadgeList } from './DesignSystem';
+import { UnwrappedBadgeList } from './DesignSystem';
 
 type SpeciesStatsRow = Database['public']['Views']['SpeciesStats']['Row'];
 
@@ -159,7 +159,7 @@ function StatsByCategory({ speciesStats }: { speciesStats: SpeciesStatsRow }) {
 		return (
 			<li className="flex items-center gap-2 flex-wrap" key={categoryName}>
 				{categoryName}:{' '}
-				<BadgeList
+				<UnwrappedBadgeList
 					items={subStats.map(
 						(stat) =>
 							`${stat.prefix ? `${stat.prefix} ` : ''}${speciesStats[stat.property as keyof SpeciesStatsRow]}${stat.suffix ? ` ${stat.suffix}` : ''}`

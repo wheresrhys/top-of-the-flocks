@@ -1,4 +1,3 @@
-import { SpeciesTable } from '@/app/components/SingleSpeciesTable';
 import { BootstrapPageData } from '@/app/components/BootstrapPageData';
 import { supabase, catchSupabaseErrors } from '@/lib/supabase';
 import type { Database } from '@/types/supabase.types';
@@ -12,9 +11,7 @@ import {
 	type BirdWithEncounters,
 	type EnrichedBirdWithEncounters
 } from '@/app/lib/bird-data-helpers';
-
-import { PageWrapper, PrimaryHeading } from '@/app/components/DesignSystem';
-import { SingleSpeciesStats } from '@/app/components/SingleSpeciesStats';
+import { SpeciesPageWithFilters } from '@/app/components/SpeciesPageWithFilters';
 
 type SpeciesStatsRow = Database['public']['Views']['SpeciesStats']['Row'];
 type PageParams = { speciesName: string };
@@ -94,29 +91,13 @@ async function fetchSpeciesData(params: PageParams): Promise<PageData | null> {
 	};
 }
 
-function SpeciesSummary({
-	params: { speciesName },
-	data
-}: {
-	params: PageParams;
-	data: PageData;
-}) {
-	return (
-		<PageWrapper>
-			<PrimaryHeading>{speciesName}</PrimaryHeading>
-			<SingleSpeciesStats {...data} />
-			<SpeciesTable birds={data.birds} />
-		</PageWrapper>
-	);
-}
-
 export default async function SpeciesPage(props: PageProps) {
 	return (
 		<BootstrapPageData<PageData, PageProps, PageParams>
 			pageProps={props}
 			getCacheKeys={(params: PageParams) => ['species', params.speciesName]}
 			dataFetcher={fetchSpeciesData}
-			PageComponent={SpeciesSummary}
+			PageComponent={SpeciesPageWithFilters}
 		/>
 	);
 }
