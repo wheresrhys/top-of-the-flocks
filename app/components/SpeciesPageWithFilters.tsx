@@ -51,13 +51,26 @@ function Switch({
 
 function BirdFilters({
 	retrappedOnly,
-	setRetrappedOnly
+	setRetrappedOnly,
+	setShowChart,
+	showChart
 }: {
 	retrappedOnly: boolean;
 	setRetrappedOnly: (retrappedOnly: boolean) => void;
+	setShowChart: (showChart: boolean) => void;
+	showChart: boolean;
 }) {
 	return (
-		<form className="mt-7 flex justify-end">
+		<form className="mt-7 flex justify-end gap-2">
+			{showChart ? null : (
+				<button
+					type="button"
+					className="btn btn-secondary btn-sm"
+					onClick={() => setShowChart(true)}
+				>
+					View graph
+				</button>
+			)}
 			<Switch
 				label="List retrapped only"
 				id="retrapped-only"
@@ -196,7 +209,7 @@ function WeightVsWingLengthChart({
 	const chartData = getChartData(birds, chartGrouping);
 	return (
 		<>
-			<div className="mb-3 flex justify-end">
+			<div className="mt-3 mb-3 flex justify-end">
 				<div
 					id="toggle-count"
 					className="border-base-content/20 flex gap-0.5 rounded-field border p-0.5"
@@ -255,6 +268,7 @@ export function SpeciesPageWithFilters({
 	data: PageData;
 }) {
 	const [retrappedOnly, setRetrappedOnly] = useState(false);
+	const [showChart, setShowChart] = useState(false);
 	const birds = retrappedOnly
 		? data.birds.filter((bird) =>
 				bird.encounters.some((encounter) => encounter.record_type === 'S')
@@ -264,10 +278,12 @@ export function SpeciesPageWithFilters({
 		<PageWrapper>
 			<PrimaryHeading>{speciesName}</PrimaryHeading>
 			<SingleSpeciesStats {...data} />
-			<WeightVsWingLengthChart birds={birds} />
+			{showChart ? <WeightVsWingLengthChart birds={birds} /> : null}
 			<BirdFilters
 				retrappedOnly={retrappedOnly}
 				setRetrappedOnly={setRetrappedOnly}
+				setShowChart={setShowChart}
+				showChart={showChart}
 			/>
 			<SpeciesTable birds={birds} />
 		</PageWrapper>
