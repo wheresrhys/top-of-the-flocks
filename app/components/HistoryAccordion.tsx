@@ -66,9 +66,13 @@ function MonthHeading({ model: month }: { model: Session[] }) {
 
 export function HistoryAccordion({ sessions }: { sessions: Session[] | null }) {
 	const calendar = groupByYear(sessions || []).map(groupByMonth);
-	const [expanded, setExpanded] = useState<string | false>(false);
+	const [expandedMonth, setExpandedMonth] = useState<string | false>(false);
+	const [expandedYear, setExpandedYear] = useState(
+		new Date(calendar[0][0][0].visit_date).getFullYear()
+	);
 	useEffect(() => {
-		setExpanded(false);
+		setExpandedYear(new Date(calendar[0][0][0].visit_date).getFullYear());
+		setExpandedMonth(false);
 	}, []);
 	return (
 		<>
@@ -76,23 +80,37 @@ export function HistoryAccordion({ sessions }: { sessions: Session[] | null }) {
 				const yearString = new Date(year[0][0].visit_date).getFullYear();
 				return (
 					<div data-testid="history-accordion-group" key={yearString}>
-						<SecondaryHeading>{yearString}</SecondaryHeading>
-						<BoxyList>
-							{year.map((month) => {
-								const id = formatDate(new Date(month[0].visit_date), 'yyyy-MM');
-								return (
-									<AccordionItem
-										key={id}
-										id={id}
-										HeadingComponent={MonthHeading}
-										ContentComponent={SessionsOfMonth}
-										model={month}
-										onToggle={setExpanded}
-										expandedId={expanded}
-									/>
-								);
-							})}
-						</BoxyList>
+						<button
+							type="button"
+							className="btn btn-secondary btn-sm"
+							onClick={() => {
+								setExpandedYear(yearString);
+								setExpandedMonth(false);
+							}}
+						>
+							<SecondaryHeading>{yearString}</SecondaryHeading>
+						</button>
+						<div className={expandedYear === yearString ? '' : 'hidden'}>
+							<BoxyList>
+								{year.map((month) => {
+									const id = formatDate(
+										new Date(month[0].visit_date),
+										'yyyy-MM'
+									);
+									return (
+										<AccordionItem
+											key={id}
+											id={id}
+											HeadingComponent={MonthHeading}
+											ContentComponent={SessionsOfMonth}
+											model={month}
+											onToggle={setExpandedMonth}
+											expandedId={expandedMonth}
+										/>
+									);
+								})}
+							</BoxyList>
+						</div>
 					</div>
 				);
 			})}
