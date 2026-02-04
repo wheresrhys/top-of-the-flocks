@@ -142,24 +142,6 @@ export type Database = {
       }
     }
     Views: {
-      species_league_table: {
-        Row: {
-          average_weight: number | null
-          average_wing_length: number | null
-          encounters: number | null
-          heaviest: number | null
-          individuals: number | null
-          lightest: number | null
-          longest_stay: number | null
-          longest_winged: number | null
-          session_count: number | null
-          shortest_winged: number | null
-          species_name: string | null
-          total_weight: number | null
-          unluckiest: number | null
-        }
-        Relationships: []
-      }
       SpeciesStats: {
         Row: {
           avg_weight: number | null

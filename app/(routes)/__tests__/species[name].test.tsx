@@ -43,7 +43,7 @@ describe('species page', () => {
 			'Recoveries: 83 % retrappedmax time span: 66 daysmax proven age: 1 yearsmost seen bird: 3 times'
 		);
 		expect(statsLineItems[2].textContent).toBe(
-			'Weight: max: 15.1 gavg: 13 gmin: 11.1 gmedian: 62 g'
+			'Weight: max: 15.1 gavg: 13 gmin: 11.1 gmedian: 13.9 g'
 		);
 		expect(statsLineItems[3].textContent).toBe(
 			'Wing: max: 65 mmavg: 59.9 mmmin: 55 mmmedian: 62 mm'
