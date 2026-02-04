@@ -111,11 +111,11 @@ export function HistoryAccordion({ sessions }: { sessions: Session[] | null }) {
 	const calendar = groupByYear(sessions || []).map(groupByMonth);
 	const [expandedMonth, setExpandedMonth] = useState<string | false>(false);
 	const [expandedYear, setExpandedYear] = useState(getYearString(calendar[0]));
+	const thisYearString = getYearString(calendar[0]);
 	useEffect(() => {
-		setExpandedYear(getYearString(calendar[0]));
+		setExpandedYear(thisYearString);
 		setExpandedMonth(false);
-		//TODO: fix this
-	}, []); // eslint-disable-line react-hooks/exhaustive-deps
+	}, [thisYearString]);
 	return (
 		<ol>
 			{calendar.map((year) => {
