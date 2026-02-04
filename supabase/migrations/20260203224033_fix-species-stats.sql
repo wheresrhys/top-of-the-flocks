@@ -17,9 +17,9 @@ SELECT
   "percentile_cont"(0.5) WITHIN GROUP (ORDER BY wing_length) AS "median_wing",
   "u"."cnt" AS "max_encountered_bird",
   ROUND(
-    COUNT(DISTINCT CASE WHEN encounter_counts.encounter_count > 1 THEN b.id END)::numeric /
+    100 * COUNT(DISTINCT CASE WHEN encounter_counts.encounter_count > 1 THEN b.id END)::numeric /
     NULLIF(COUNT(DISTINCT b.id), 0)::numeric,
-    4
+    0
   ) AS "pct_retrapped",
   "u"."max_time_span",
   MAX("busy_session"."cnt") AS "max_per_session",
@@ -81,7 +81,7 @@ FROM (
           GROUP BY "b2"."id"
           ORDER BY ("count"(*)) DESC
          LIMIT 1) "u" ON (true))
-    LEFT JOIN (
+    LEFT JOIN LATERAL (
     SELECT
       bird_id,
       COUNT(*) AS encounter_count
@@ -90,7 +90,7 @@ FROM (
     GROUP BY
       bird_id
   ) encounter_counts ON b.id = encounter_counts.bird_id
-  LEFT JOIN (
+  LEFT JOIN LATERAL (
     SELECT
       sp3.id as "species_id",
       ss3.visit_date,
@@ -102,5 +102,4 @@ FROM (
     GROUP BY sp3."id", ss3."id"
   ) busy_session ON sp.id = busy_session.species_id
   GROUP BY "sp"."species_name", "u"."cnt", "u"."max_time_span";
-
 ALTER VIEW "public"."SpeciesStats" OWNER TO "postgres";
