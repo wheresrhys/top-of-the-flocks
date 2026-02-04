@@ -140,6 +140,7 @@ export function HistoryAccordion({ sessions }: { sessions: Session[] | null }) {
 							setExpandedMonth(false);
 						}}
 						expandedId={expandedYear}
+						icon="calendar-week"
 					/>
 				);
 			})}
