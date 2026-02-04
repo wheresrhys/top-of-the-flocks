@@ -14,7 +14,8 @@ export function AccordionItem<ItemModel>({
 	onToggle,
 	expandedId,
 	HeadingComponent,
-	ContentComponent
+	ContentComponent,
+	testId
 }: {
 	id: string;
 	model: ItemModel;
@@ -22,6 +23,7 @@ export function AccordionItem<ItemModel>({
 	expandedId: string | false;
 	HeadingComponent: HeadingComponent<ItemModel>;
 	ContentComponent: ContentComponent<ItemModel>;
+	testId?: string;
 }) {
 	async function onClick(isAlreadyExpanded: boolean) {
 		if (isAlreadyExpanded) {
@@ -33,7 +35,7 @@ export function AccordionItem<ItemModel>({
 	const isExpanded = expandedId === id;
 
 	return (
-		<li>
+		<li data-testid={testId}>
 			<div className="flex basis-full">
 				<button
 					onClick={() => onClick(isExpanded)}

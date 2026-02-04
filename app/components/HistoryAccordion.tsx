@@ -84,22 +84,24 @@ function MonthsOfYear({
 	};
 }) {
 	return (
-		<BoxyList>
-			{yearData.map((month) => {
-				const id = formatDate(new Date(month[0].visit_date), 'yyyy-MM');
-				return (
-					<AccordionItem
-						key={id}
-						id={id}
-						HeadingComponent={MonthHeading}
-						ContentComponent={SessionsOfMonth}
-						model={month}
-						onToggle={setExpandedMonth}
-						expandedId={expandedMonth}
-					/>
-				);
-			})}
-		</BoxyList>
+		<div data-testid="months-of-year">
+			<BoxyList>
+				{yearData.map((month) => {
+					const id = formatDate(new Date(month[0].visit_date), 'yyyy-MM');
+					return (
+						<AccordionItem
+							key={id}
+							id={id}
+							HeadingComponent={MonthHeading}
+							ContentComponent={SessionsOfMonth}
+							model={month}
+							onToggle={setExpandedMonth}
+							expandedId={expandedMonth}
+						/>
+					);
+				})}
+			</BoxyList>
+		</div>
 	);
 }
 
@@ -124,6 +126,7 @@ export function HistoryAccordion({ sessions }: { sessions: Session[] | null }) {
 					<AccordionItem
 						key={yearString}
 						id={yearString}
+						testId="year-accordion-item"
 						HeadingComponent={YearHeading}
 						ContentComponent={MonthsOfYear}
 						model={{
