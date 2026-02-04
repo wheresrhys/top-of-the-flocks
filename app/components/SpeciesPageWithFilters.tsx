@@ -52,11 +52,15 @@ function Switch({
 function BirdFilters({
 	retrappedOnly,
 	setRetrappedOnly,
+	sexedOnly,
+	setSexedOnly,
 	setShowChart,
 	showChart
 }: {
 	retrappedOnly: boolean;
 	setRetrappedOnly: (retrappedOnly: boolean) => void;
+	sexedOnly: boolean;
+	setSexedOnly: (sexedOnly: boolean) => void;
 	setShowChart: (showChart: boolean) => void;
 	showChart: boolean;
 }) {
@@ -76,6 +80,12 @@ function BirdFilters({
 				id="retrapped-only"
 				checked={retrappedOnly}
 				onChange={setRetrappedOnly}
+			/>
+			<Switch
+				label="List sexed only"
+				id="sexed-only"
+				checked={sexedOnly}
+				onChange={setSexedOnly}
 			/>
 		</form>
 	);
@@ -268,12 +278,19 @@ export function SpeciesPageWithFilters({
 	data: PageData;
 }) {
 	const [retrappedOnly, setRetrappedOnly] = useState(false);
+	const [sexedOnly, setSexedOnly] = useState(false);
+
 	const [showChart, setShowChart] = useState(false);
-	const birds = retrappedOnly
-		? data.birds.filter((bird) =>
-				bird.encounters.some((encounter) => encounter.record_type === 'S')
-			)
-		: data.birds;
+	let birds = data.birds;
+	if (retrappedOnly) {
+		birds = birds.filter((bird) =>
+			bird.encounters.some((encounter) => encounter.record_type === 'S')
+		);
+	}
+	if (sexedOnly) {
+		birds = birds.filter((bird) => getSex(bird.encounters) !== 'U');
+	}
+
 	return (
 		<PageWrapper>
 			<PrimaryHeading>{speciesName}</PrimaryHeading>
@@ -282,6 +299,8 @@ export function SpeciesPageWithFilters({
 			<BirdFilters
 				retrappedOnly={retrappedOnly}
 				setRetrappedOnly={setRetrappedOnly}
+				setSexedOnly={setSexedOnly}
+				sexedOnly={sexedOnly}
 				setShowChart={setShowChart}
 				showChart={showChart}
 			/>
