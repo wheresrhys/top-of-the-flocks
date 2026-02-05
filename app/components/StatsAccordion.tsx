@@ -23,7 +23,7 @@ export type StatConfig = {
 
 export type AccordionItemModel = {
 	definition: StatConfig;
-	data: TopPeriodsResult[] | TopSpeciesResult[] | null;
+	data: TopPeriodsResult[] | TopSpeciesResult[];
 };
 
 export type StatsAccordionModel = {
@@ -109,14 +109,12 @@ function ContentComponent({
 		<span>No data available</span>
 	);
 }
-// TODO shoudln't need to be so careful with ?. all over the place
-// maybe need to defined things as non-nullable in the SQL
 function HeadingComponent({ model }: { model: AccordionItemModel }) {
 	return (
 		<span>
 			<span className="font-bold">{model.definition.category}:</span>{' '}
 			<span>
-				{model.data?.[0]?.metric_value} {model.definition.unit}
+				{model.data[0].metric_value} {model.definition.unit}
 			</span>
 		</span>
 	);

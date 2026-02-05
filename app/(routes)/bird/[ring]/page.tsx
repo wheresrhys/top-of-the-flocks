@@ -64,22 +64,22 @@ function BirdSummary({
 	return (
 		<PageWrapper>
 			<PrimaryHeading>
-				<Link className="link" href={`/species/${bird?.species?.species_name}`}>
-					{bird?.species?.species_name}
+				<Link className="link" href={`/species/${bird.species?.species_name}`}>
+					{bird.species?.species_name}
 				</Link>{' '}
 				{ring}
 			</PrimaryHeading>
 			<BadgeList
 				testId="bird-stats"
 				items={[
-					`${bird?.encounters.length} encounters`,
-					`First: ${formatDate(new Date(bird?.encounters[0].session.visit_date), 'dd MMMM yyyy')}`,
-					`Last: ${formatDate(new Date(bird?.encounters[bird?.encounters.length - 1].session.visit_date), 'dd MMMM yyyy')}`,
+					`${bird.encounters.length} encounters`,
+					`First: ${formatDate(new Date(bird.encounters[0].session.visit_date), 'dd MMMM yyyy')}`,
+					`Last: ${formatDate(new Date(bird.encounters[bird.encounters.length - 1].session.visit_date), 'dd MMMM yyyy')}`,
 					`Sex: ${bird.sex}${bird.sexCertainty < 0.5 ? `?` : ''}`,
-					`Proven Age: ${bird?.provenAge}`
+					`Proven Age: ${bird.provenAge}`
 				]}
 			/>
-			<SingleBirdTable encounters={bird?.encounters ?? []} />
+			<SingleBirdTable encounters={bird.encounters} />
 		</PageWrapper>
 	);
 }
