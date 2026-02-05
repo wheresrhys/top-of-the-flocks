@@ -1,4 +1,4 @@
-import { HistoryAccordion } from '@/app/components/HistoryAccordion';
+import { HistoryAccordion } from '@/app/components/SessionHistoryCalendar';
 import { BootstrapPageData } from '@/app/components/BootstrapPageData';
 import { supabase, catchSupabaseErrors } from '@/lib/supabase';
 import { PageWrapper, PrimaryHeading } from '@/app/components/DesignSystem';

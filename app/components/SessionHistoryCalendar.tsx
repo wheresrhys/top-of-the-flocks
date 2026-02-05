@@ -32,7 +32,7 @@ const groupByMonth = groupByDateMethod('getMonth');
 
 function SessionsOfMonth({ model: month }: { model: Session[] }) {
 	return (
-		<ol className="list-inside list-none">
+		<ol className="list-inside list-none py-3">
 			{month.map((session) => (
 				<li className="mb-2" key={session.id}>
 					<StatOutput
@@ -97,6 +97,7 @@ function MonthsOfYear({
 							model={month}
 							onToggle={setExpandedMonth}
 							expandedId={expandedMonth}
+							icon="calendar-week"
 						/>
 					);
 				})}
@@ -140,7 +141,7 @@ export function HistoryAccordion({ sessions }: { sessions: Session[] | null }) {
 							setExpandedMonth(false);
 						}}
 						expandedId={expandedYear}
-						icon="calendar-week"
+						icon="calendar"
 					/>
 				);
 			})}

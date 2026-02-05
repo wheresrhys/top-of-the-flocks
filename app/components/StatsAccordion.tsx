@@ -83,7 +83,7 @@ function ContentComponent({
 	]);
 
 	return hasData(data) ? (
-		<ol className="list-inside list-none">
+		<ol className="list-inside list-none py-3">
 			{data.map((item) => (
 				<li
 					className="mb-2"
