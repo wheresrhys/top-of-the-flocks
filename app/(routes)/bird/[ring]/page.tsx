@@ -73,8 +73,8 @@ function BirdSummary({
 				testId="bird-stats"
 				items={[
 					`${bird.encounters.length} encounters`,
-					`First: ${formatDate(new Date(bird.encounters[0].session.visit_date), 'dd MMMM yyyy')}`,
-					`Last: ${formatDate(new Date(bird.encounters[bird.encounters.length - 1].session.visit_date), 'dd MMMM yyyy')}`,
+					`First: ${formatDate(bird.firstEncounterDate, 'dd MMMM yyyy')}`,
+					`Last: ${formatDate(bird.lastEncounterDate, 'dd MMMM yyyy')}`,
 					`Sex: ${bird.sex}${bird.sexCertainty < 0.5 ? `?` : ''}`,
 					`Proven Age: ${bird.provenAge}`
 				]}

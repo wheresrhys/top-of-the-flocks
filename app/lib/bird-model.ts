@@ -18,6 +18,9 @@ export type EnrichedBirdWithEncounters = BirdWithEncounters & {
 	provenAge: number;
 	sex: Sex;
 	sexCertainty: number;
+	firstEncounterDate: Date;
+	lastEncounterDate: Date;
+	lastEncounter: Encounter;
 };
 
 export function orderBirdsByRecency<BirdType>(
@@ -125,6 +128,11 @@ export function enrichBird(
 		encounters: orderedEncounters,
 		sex,
 		sexCertainty,
+		firstEncounterDate: new Date(orderedEncounters[0].session.visit_date),
+		lastEncounterDate: new Date(
+			orderedEncounters[orderedEncounters.length - 1].session.visit_date
+		),
+		lastEncounter: orderedEncounters[orderedEncounters.length - 1],
 		provenAge: getProvenAge(orderedEncounters, true)
 	};
 }

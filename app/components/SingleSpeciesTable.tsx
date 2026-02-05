@@ -26,29 +26,18 @@ function BirdDetailsTable({
 	return <SingleBirdTable encounters={encounters} isInline={true} />;
 }
 
-function BirdRow({
-	model: { encounters, provenAge, sex, sexCertainty }
-}: {
-	model: EnrichedBirdWithEncounters;
-}) {
+function BirdRow({ model: bird }: { model: EnrichedBirdWithEncounters }) {
 	return (
 		<>
-			<td>{encounters.length}</td>
+			<td>{bird.encounters.length}</td>
 			<td>
-				{sex}
-				{sexCertainty < 0.5 ? `?` : ''}
+				{bird.sex}
+				{bird.sexCertainty < 0.5 ? `?` : ''}
 			</td>
-			<td>
-				{formatDate(new Date(encounters[0].session.visit_date), 'dd MMM yyyy')}
-			</td>
-			<td>
-				{formatDate(
-					new Date(encounters[encounters.length - 1].session.visit_date),
-					'dd MMM yyyy'
-				)}
-			</td>
-			<td>{encounters[encounters.length - 1].age_code}</td>
-			<td>{provenAge}</td>
+			<td>{formatDate(bird.firstEncounterDate, 'dd MMM yyyy')}</td>
+			<td>{formatDate(bird.lastEncounterDate, 'dd MMM yyyy')}</td>
+			<td>{bird.lastEncounter.age_code}</td>
+			<td>{bird.provenAge}</td>
 		</>
 	);
 }
