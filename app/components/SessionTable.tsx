@@ -36,7 +36,7 @@ function SpeciesDetailsTable({
 				</tr>
 			</thead>
 			<tbody>
-				{encounters?.map((encounter) => (
+				{encounters.map((encounter) => (
 					<tr key={encounter.id}>
 						<td>{encounter.capture_time}</td>
 						<td>

@@ -8,11 +8,9 @@ import {
 	PrimaryHeading
 } from '@/app/components/DesignSystem';
 import {
-	addProvenAgeToBird,
-	getSex,
-	orderEncountersByRecency,
+	enrichBird,
 	type EnrichedBirdWithEncounters
-} from '@/app/lib/bird-data-helpers';
+} from '@/app/lib/bird-model';
 import Link from 'next/link';
 
 type PageParams = { ring: string };
@@ -53,9 +51,7 @@ async function fetchBirdData({ ring }: PageParams) {
 		return null;
 	}
 
-	data.encounters = orderEncountersByRecency(data.encounters, 'asc');
-	addProvenAgeToBird(data);
-	return data as EnrichedBirdWithEncounters;
+	return enrichBird(data) as EnrichedBirdWithEncounters;
 }
 
 function BirdSummary({
@@ -68,22 +64,22 @@ function BirdSummary({
 	return (
 		<PageWrapper>
 			<PrimaryHeading>
-				<Link className="link" href={`/species/${bird?.species?.species_name}`}>
-					{bird?.species?.species_name}
+				<Link className="link" href={`/species/${bird.species?.species_name}`}>
+					{bird.species?.species_name}
 				</Link>{' '}
 				{ring}
 			</PrimaryHeading>
 			<BadgeList
 				testId="bird-stats"
 				items={[
-					`${bird?.encounters.length} encounters`,
-					`First: ${formatDate(new Date(bird?.encounters[0].session.visit_date), 'dd MMMM yyyy')}`,
-					`Last: ${formatDate(new Date(bird?.encounters[bird?.encounters.length - 1].session.visit_date), 'dd MMMM yyyy')}`,
-					`Sex: ${getSex(bird?.encounters ?? [])}`,
-					`Proven Age: ${bird?.provenAge}`
+					`${bird.encounters.length} encounters`,
+					`First: ${formatDate(bird.firstEncounterDate, 'dd MMMM yyyy')}`,
+					`Last: ${formatDate(bird.lastEncounterDate, 'dd MMMM yyyy')}`,
+					`Sex: ${bird.sex}${bird.sexCertainty < 0.5 ? `?` : ''}`,
+					`Proven Age: ${bird.provenAge}`
 				]}
 			/>
-			<SingleBirdTable encounters={bird?.encounters ?? []} />
+			<SingleBirdTable encounters={bird.encounters} />
 		</PageWrapper>
 	);
 }

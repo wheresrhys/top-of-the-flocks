@@ -77,7 +77,15 @@ export function BootstrapPageData<
 	ParamsType = DefaultPageParams
 >(bootstrapProps: BootstrapPageDataProps<DataType, PagePropsType, ParamsType>) {
 	return (
-		<Suspense fallback={bootstrapProps.loading || <div>Loading...</div>}>
+		<Suspense
+			fallback={
+				bootstrapProps.loading || (
+					<div className="flex items-center justify-center h-screen">
+						<div className="loading loading-spinner loading-xl"></div>
+					</div>
+				)
+			}
+		>
 			<LoadWithData {...bootstrapProps} />
 		</Suspense>
 	);

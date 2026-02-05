@@ -6,11 +6,11 @@ import {
 	type TopPeriodsResult
 } from '@/app/isomorphic/stats-data-tables';
 import {
-	addProvenAgeToBirds,
 	orderBirdsByRecency,
+	enrichBird,
 	type BirdWithEncounters,
 	type EnrichedBirdWithEncounters
-} from '@/app/lib/bird-data-helpers';
+} from '@/app/lib/bird-model';
 import { SpeciesPageWithFilters } from '@/app/components/SpeciesPageWithFilters';
 
 type SpeciesStatsRow = Database['public']['Views']['SpeciesStats']['Row'];
@@ -74,7 +74,14 @@ async function fetchAllBirds(species: string) {
 	if (!data) {
 		return [] as EnrichedBirdWithEncounters[];
 	}
-	return addProvenAgeToBirds(orderBirdsByRecency(data.birds, 'desc', 'last'));
+	return orderBirdsByRecency<EnrichedBirdWithEncounters>(
+		data.birds.map(enrichBird),
+		{
+			direction: 'desc',
+			type: 'last',
+			encountersAlreadySorted: true
+		}
+	);
 }
 
 async function fetchSpeciesData(params: PageParams): Promise<PageData | null> {

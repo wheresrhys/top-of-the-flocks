@@ -1,4 +1,4 @@
-import type { Encounter } from '@/app/lib/bird-data-helpers';
+import type { Encounter } from '@/app/lib/bird-model';
 import { Table, InlineTable } from './DesignSystem';
 
 export function SingleBirdTable({
@@ -22,7 +22,7 @@ export function SingleBirdTable({
 				</tr>
 			</thead>
 			<tbody>
-				{encounters?.map((encounter) => (
+				{encounters.map((encounter) => (
 					<tr key={encounter.id}>
 						<td>{encounter.session.visit_date}</td>
 						<td>{encounter.capture_time}</td>
