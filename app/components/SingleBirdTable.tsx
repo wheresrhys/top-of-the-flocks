@@ -1,4 +1,4 @@
-import type { Encounter } from '@/app/lib/bird-data-helpers';
+import type { Encounter } from '@/app/lib/bird-model';
 import { Table, InlineTable } from './DesignSystem';
 
 export function SingleBirdTable({

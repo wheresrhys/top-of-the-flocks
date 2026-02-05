@@ -3,10 +3,9 @@ import { SpeciesTable } from '@/app/components/SingleSpeciesTable';
 import type { Database } from '@/types/supabase.types';
 import { type TopPeriodsResult } from '@/app/isomorphic/stats-data-tables';
 import {
-	getSex,
 	Encounter,
 	type EnrichedBirdWithEncounters
-} from '@/app/lib/bird-data-helpers';
+} from '@/app/lib/bird-model';
 import { useState } from 'react';
 import { PageWrapper, PrimaryHeading } from '@/app/components/DesignSystem';
 import { SingleSpeciesStats } from '@/app/components/SingleSpeciesStats';
@@ -164,21 +163,21 @@ function getChartData(
 			{
 				name: 'F',
 				data: birds
-					.filter((bird) => getSex(bird.encounters).startsWith('F'))
+					.filter((bird) => bird.sex === 'F')
 					.map(getWingWeightXYBird)
 					.filter((point) => point !== null)
 			},
 			{
 				name: 'M',
 				data: birds
-					.filter((bird) => getSex(bird.encounters).startsWith('M'))
+					.filter((bird) => bird.sex === 'M')
 					.map(getWingWeightXYBird)
 					.filter((point) => point !== null)
 			},
 			{
 				name: 'U',
 				data: birds
-					.filter((bird) => getSex(bird.encounters).startsWith('U'))
+					.filter((bird) => bird.sex === 'U')
 					.map(getWingWeightXYBird)
 					.filter((point) => point !== null)
 			}
@@ -288,7 +287,7 @@ export function SpeciesPageWithFilters({
 		);
 	}
 	if (sexedOnly) {
-		birds = birds.filter((bird) => getSex(bird.encounters) !== 'U');
+		birds = birds.filter((bird) => bird.sex !== 'U');
 	}
 
 	return (
