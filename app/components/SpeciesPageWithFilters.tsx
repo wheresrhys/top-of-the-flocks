@@ -11,6 +11,7 @@ import { PageWrapper, PrimaryHeading } from '@/app/components/DesignSystem';
 import { SingleSpeciesStats } from '@/app/components/SingleSpeciesStats';
 import { ScatterChart, type ScatterChartData } from 'react-chartkick';
 import 'chartkick/chart.js';
+import { SPECIES_PAGE_BATCH_SIZE } from '@/app/isomorphic/constants';
 
 type SpeciesStatsRow = Database['public']['Views']['SpeciesStats']['Row'];
 type PageParams = { speciesName: string };

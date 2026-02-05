@@ -1,0 +1,1 @@
+export const SPECIES_PAGE_BATCH_SIZE = 10;
