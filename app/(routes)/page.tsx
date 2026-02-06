@@ -3,8 +3,7 @@ import {
 	StatConfig,
 	type StatsAccordionModel
 } from '../components/StatsAccordion';
-
-import { getSeasonMonths, getSeasonName } from '../lib/season-month-mapping';
+import { getSeasonMonths, getSeasonName } from '../models/seasons';
 import { BootstrapPageData } from '../components/BootstrapPageData';
 import { RingSearchForm } from '../components/RingSearchForm';
 import { PageWrapper } from '../components/DesignSystem';
@@ -111,15 +110,6 @@ function getStatConfigs(
 				}
 			]
 		}
-		//TODO add individual birds stats
-		// 	<SecondaryHeading>Individual birds</SecondaryHeading>
-		// 	<BoxyList>
-		// 		<BoxyListItem isExpandable={true}>
-		// 			Most caught: 12 encounters
-		// 		</BoxyListItem>
-		// 		<BoxyListItem isExpandable={true}>Oldest: 12 years</BoxyListItem>
-		// 		<BoxyListItem isExpandable={true}>Recent peaks: 12 birds</BoxyListItem>
-		// 	</BoxyList>
 	];
 }
 

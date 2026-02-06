@@ -7,15 +7,12 @@ import {
 	PageWrapper,
 	PrimaryHeading
 } from '@/app/components/DesignSystem';
-import {
-	enrichBird,
-	type EnrichedBirdWithEncounters
-} from '@/app/lib/bird-model';
+import { enrichBird, type EnrichedStandaloneBird } from '@/app/models/bird';
 import Link from 'next/link';
+import type { StandaloneBird } from '@/app/models/db-types';
 
 type PageParams = { ring: string };
 type PageProps = { params: Promise<PageParams> };
-type PageData = EnrichedBirdWithEncounters;
 
 async function fetchBirdData({ ring }: PageParams) {
 	const data = (await supabase
@@ -45,13 +42,13 @@ async function fetchBirdData({ ring }: PageParams) {
 		)
 		.eq('ring_no', ring)
 		.maybeSingle()
-		.then(catchSupabaseErrors)) as PageData;
+		.then(catchSupabaseErrors)) as StandaloneBird;
 
 	if (!data) {
 		return null;
 	}
 
-	return enrichBird(data) as EnrichedBirdWithEncounters;
+	return enrichBird(data) as EnrichedStandaloneBird;
 }
 
 function BirdSummary({
@@ -59,7 +56,7 @@ function BirdSummary({
 	data: bird
 }: {
 	params: PageParams;
-	data: PageData;
+	data: EnrichedStandaloneBird;
 }) {
 	return (
 		<PageWrapper>
@@ -86,7 +83,7 @@ function BirdSummary({
 
 export default async function BirdPage(props: PageProps) {
 	return (
-		<BootstrapPageData<PageData, PageProps, PageParams>
+		<BootstrapPageData<EnrichedStandaloneBird, PageProps, PageParams>
 			pageProps={props}
 			getParams={async (pageProps: PageProps) => ({
 				ring: (await pageProps.params).ring.toUpperCase()

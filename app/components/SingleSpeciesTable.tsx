@@ -1,6 +1,6 @@
 'use client';
 import { format as formatDate } from 'date-fns';
-import { type EnrichedBirdWithEncounters } from '@/app/lib/bird-model';
+import { type EnrichedBirdOfSpecies } from '@/app/models/bird';
 import { SingleBirdTable } from '@/app/components/SingleBirdTable';
 import Link from 'next/link';
 import { Table } from './DesignSystem';
@@ -9,7 +9,7 @@ import { AccordionTableBody } from './AccordionTableBody';
 function RingNumberCell({
 	model: { ring_no }
 }: {
-	model: EnrichedBirdWithEncounters;
+	model: EnrichedBirdOfSpecies;
 }) {
 	return (
 		<Link className="link" href={`/bird/${ring_no}`}>
@@ -21,12 +21,12 @@ function RingNumberCell({
 function BirdDetailsTable({
 	model: { encounters }
 }: {
-	model: EnrichedBirdWithEncounters;
+	model: EnrichedBirdOfSpecies;
 }) {
 	return <SingleBirdTable encounters={encounters} isInline={true} />;
 }
 
-function BirdRow({ model: bird }: { model: EnrichedBirdWithEncounters }) {
+function BirdRow({ model: bird }: { model: EnrichedBirdOfSpecies }) {
 	return (
 		<>
 			<td>{bird.encounters.length}</td>
@@ -45,11 +45,7 @@ function BirdRow({ model: bird }: { model: EnrichedBirdWithEncounters }) {
 	);
 }
 
-export function SpeciesTable({
-	birds
-}: {
-	birds: EnrichedBirdWithEncounters[];
-}) {
+export function SpeciesTable({ birds }: { birds: EnrichedBirdOfSpecies[] }) {
 	return (
 		<Table testId="species-table">
 			<thead>
@@ -63,7 +59,7 @@ export function SpeciesTable({
 					<th>Proven age</th>
 				</tr>
 			</thead>
-			<AccordionTableBody<EnrichedBirdWithEncounters>
+			<AccordionTableBody<EnrichedBirdOfSpecies>
 				data={birds}
 				getKey={(bird) => bird.ring_no}
 				columnCount={5}

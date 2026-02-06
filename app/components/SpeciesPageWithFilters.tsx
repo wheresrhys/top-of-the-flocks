@@ -1,28 +1,22 @@
 'use client';
 import { SpeciesTable } from '@/app/components/SingleSpeciesTable';
-import { type TopPeriodsResult } from '@/app/isomorphic/stats-data-tables';
-import {
-	Encounter,
-	type EnrichedBirdWithEncounters
-} from '@/app/lib/bird-model';
+import { type TopPeriodsResult } from '@/app/models/db-types';
+import { EnrichedBirdOfSpecies } from '@/app/models/bird';
+import type { EncounterRow } from '@/app/models/db-types';
 import { useState } from 'react';
 import { PageWrapper, PrimaryHeading } from '@/app/components/DesignSystem';
-import {
-	SingleSpeciesStats,
-	type SpeciesStatsRow
-} from '@/app/components/SingleSpeciesStats';
+import { SingleSpeciesStats } from '@/app/components/SingleSpeciesStats';
+import type { SpeciesStatsRow } from '@/app/models/db-types';
 import { ScatterChart, type ScatterChartData } from 'react-chartkick';
 import 'chartkick/chart.js';
 import { fetchPageOfBirds } from '../isomorphic/single-species-data';
 import { useOnInView } from 'react-intersection-observer';
 
-export type { SpeciesStatsRow } from '@/app/components/SingleSpeciesStats';
-
 type PageParams = { speciesName: string };
 
 export type PageData = {
 	topSessions: TopPeriodsResult[];
-	birds: EnrichedBirdWithEncounters[];
+	birds: EnrichedBirdOfSpecies[];
 	speciesStats: SpeciesStatsRow;
 };
 
@@ -112,10 +106,7 @@ function addNoiseToWingLength(x: number | null) {
 	return x + (Math.random() - 0.5) * 0.3;
 }
 
-function getMedian(
-	bird: EnrichedBirdWithEncounters,
-	property: keyof Encounter
-) {
+function getMedian(bird: EnrichedBirdOfSpecies, property: keyof EncounterRow) {
 	return median(
 		bird.encounters
 			.map((encounter) => encounter[property])
@@ -124,14 +115,14 @@ function getMedian(
 }
 
 function getNoisyMedian(
-	bird: EnrichedBirdWithEncounters,
-	property: keyof Encounter
+	bird: EnrichedBirdOfSpecies,
+	property: keyof EncounterRow
 ) {
 	return addNoiseToWingLength(getMedian(bird, property));
 }
 
 function getWingWeightXYBird(
-	bird: EnrichedBirdWithEncounters
+	bird: EnrichedBirdOfSpecies
 ): [number, number] | null {
 	const wing = getNoisyMedian(bird, 'wing_length');
 	const weight = getMedian(bird, 'weight');
@@ -150,7 +141,7 @@ function isValidPoint(
 }
 
 function getWingWeightXYEncounter(
-	encounter: Encounter
+	encounter: EncounterRow
 ): [number, number] | null {
 	const point = [
 		addNoiseToWingLength(encounter.wing_length),
@@ -160,7 +151,7 @@ function getWingWeightXYEncounter(
 }
 
 function getChartData(
-	birds: EnrichedBirdWithEncounters[],
+	birds: EnrichedBirdOfSpecies[],
 	chartGrouping: 'sex' | 'age'
 ): ScatterChartData[] {
 	if (chartGrouping === 'sex') {
@@ -217,7 +208,7 @@ function getChartData(
 function WeightVsWingLengthChart({
 	birds
 }: {
-	birds: EnrichedBirdWithEncounters[];
+	birds: EnrichedBirdOfSpecies[];
 }) {
 	const [chartGrouping, setChartGrouping] = useState<'sex' | 'age'>('sex');
 	const chartData = getChartData(birds, chartGrouping);

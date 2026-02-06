@@ -2,27 +2,26 @@ import { SPECIES_PAGE_BATCH_SIZE } from '@/app/isomorphic/constants';
 import {
 	orderBirdsByRecency,
 	enrichBird,
-	type BirdWithEncounters,
-	type Encounter,
-	type EnrichedBirdWithEncounters
-} from '@/app/lib/bird-model';
+	type EnrichedBirdOfSpecies
+} from '@/app/models/bird';
+import type {
+	EncounterOfBird,
+	BirdOfSpecies,
+	PaginatedBirdsResult
+} from '@/app/models/db-types';
 import { supabase, catchSupabaseErrors } from '@/lib/supabase';
-import type { Database } from '@/types/supabase.types';
-
-type PaginatedBirdsResult =
-	Database['public']['Functions']['paginated_birds_table']['Returns'][number];
 
 function convertPaginatedBirdResultsToBirds(
 	paginatedBirdResults: PaginatedBirdsResult[]
-): BirdWithEncounters[] {
-	const birdsMap: Record<string, BirdWithEncounters> = {};
+): BirdOfSpecies[] {
+	const birdsMap: Record<string, BirdOfSpecies> = {};
 	paginatedBirdResults.forEach((result) => {
 		if (!birdsMap[result.ring_no]) {
 			birdsMap[result.ring_no] = {
 				id: result.bird_id,
 				ring_no: result.ring_no,
-				encounters: [] as Encounter[]
-			} as BirdWithEncounters;
+				encounters: [] as EncounterOfBird[]
+			} as BirdOfSpecies;
 		}
 		birdsMap[result.ring_no].encounters.push({
 			id: result.encounter_id,
@@ -38,7 +37,7 @@ function convertPaginatedBirdResultsToBirds(
 				id: result.session_id,
 				visit_date: result.visit_date
 			}
-		} as Encounter);
+		} as EncounterOfBird);
 	});
 	return Object.values(birdsMap);
 }
@@ -52,7 +51,7 @@ export async function fetchPageOfBirds(species: string, page: number = 0) {
 		})
 		.then(catchSupabaseErrors)) as PaginatedBirdsResult[];
 
-	return orderBirdsByRecency<EnrichedBirdWithEncounters>(
+	return orderBirdsByRecency<EnrichedBirdOfSpecies>(
 		convertPaginatedBirdResultsToBirds(paginatedBirdResults).map(enrichBird),
 		{
 			direction: 'desc',
