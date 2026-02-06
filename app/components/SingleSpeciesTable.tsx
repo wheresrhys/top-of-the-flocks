@@ -3,9 +3,8 @@ import { format as formatDate } from 'date-fns';
 import { type EnrichedBirdOfSpecies } from '@/app/models/bird';
 import { SingleBirdTable } from '@/app/components/SingleBirdTable';
 import Link from 'next/link';
-import { Table } from './shared/DesignSystem';
 import { AccordionTableBody } from './shared/AccordionTableBody';
-
+import { SortableTable, type ColumnConfig } from './shared/SortableTable';
 function RingNumberCell({
 	model: { ring_no }
 }: {
@@ -45,28 +44,60 @@ function BirdRow({ model: bird }: { model: EnrichedBirdOfSpecies }) {
 	);
 }
 
+const columnConfigs = [
+	{
+		label: 'Ring',
+		property: 'ring_no'
+	},
+	{
+		label: 'Count',
+		property: 'encounters.length',
+		accessor: (row: EnrichedBirdOfSpecies) => row.encounters.length
+	},
+	{
+		label: 'Sex',
+		property: 'sex',
+		accessor: (row: EnrichedBirdOfSpecies) => row.sex
+	},
+	{
+		label: 'First',
+		property: 'firstEncounterDate',
+		accessor: (row: EnrichedBirdOfSpecies) =>
+			formatDate(row.firstEncounterDate, 'dd MMM yyyy')
+	},
+	{
+		label: 'Last',
+		property: 'lastEncounterDate',
+		accessor: (row: EnrichedBirdOfSpecies) =>
+			formatDate(row.lastEncounterDate, 'dd MMM yyyy')
+	},
+	{
+		label: 'Last aged',
+		property: 'lastEncounter.age_code',
+		accessor: (row: EnrichedBirdOfSpecies) => row.lastEncounter.age_code
+	},
+	{
+		label: 'Proven age',
+		property: 'provenAge'
+	}
+] as ColumnConfig<EnrichedBirdOfSpecies>[];
+
 export function SpeciesTable({ birds }: { birds: EnrichedBirdOfSpecies[] }) {
 	return (
-		<Table testId="species-table">
-			<thead>
-				<tr>
-					<th>Ring</th>
-					<th>Count</th>
-					<th>Sex</th>
-					<th>First</th>
-					<th>Last</th>
-					<th>Last aged</th>
-					<th>Proven age</th>
-				</tr>
-			</thead>
-			<AccordionTableBody<EnrichedBirdOfSpecies>
-				data={birds}
-				getKey={(bird) => bird.ring_no}
-				columnCount={5}
-				FirstColumnComponent={RingNumberCell}
-				RestColumnsComponent={BirdRow}
-				ExpandedContentComponent={BirdDetailsTable}
-			/>
-		</Table>
+		<SortableTable<EnrichedBirdOfSpecies>
+			columnConfigs={columnConfigs}
+			data={birds}
+			testId="species-table"
+			TableBodyComponent={({ data }) => (
+				<AccordionTableBody<EnrichedBirdOfSpecies>
+					data={data}
+					getKey={(bird) => bird.ring_no}
+					columnCount={columnConfigs.length}
+					FirstColumnComponent={RingNumberCell}
+					RestColumnsComponent={BirdRow}
+					ExpandedContentComponent={BirdDetailsTable}
+				/>
+			)}
+		/>
 	);
 }
