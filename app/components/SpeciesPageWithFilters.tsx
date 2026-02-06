@@ -282,18 +282,15 @@ export function SpeciesPageWithFilters({
 	const [sexedOnly, setSexedOnly] = useState(false);
 	const [loadedBirds, setLoadedBirds] = useState(data.birds);
 	const [page, setPage] = useState(0);
-	const [isLoading, setIsLoading] = useState(false);
 
 	async function loadMoreBirds() {
 		const nextPage = page + 1;
 		setPage(nextPage);
-		setIsLoading(true);
 		const newBirds = await fetchPageOfBirds(speciesName, nextPage);
 		setLoadedBirds([
 			...loadedBirds,
 			...newBirds.filter((bird) => !loadedIds.includes(bird.id))
 		]);
-		setIsLoading(false);
 	}
 
 	const loadMoreRef = useOnInView(
