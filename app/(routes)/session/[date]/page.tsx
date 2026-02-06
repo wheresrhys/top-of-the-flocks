@@ -3,7 +3,7 @@ import {
 	type SpeciesBreakdown
 } from '@/app/components/SingleSessionTable';
 import { supabase, catchSupabaseErrors } from '@/lib/supabase';
-import type { OrphanEncounter } from '@/app/models/db-types';
+import type { SessionEncounter } from '@/app/models/session';
 import { BootstrapPageData } from '@/app/components/layout/BootstrapPageData';
 import {
 	BadgeList,
@@ -17,7 +17,7 @@ type PageProps = { params: Promise<PageParams> };
 
 async function fetchSessionData({
 	date
-}: PageParams): Promise<OrphanEncounter[] | null> {
+}: PageParams): Promise<SessionEncounter[] | null> {
 	const data = (await supabase
 		.from('Sessions')
 		.select(
@@ -47,7 +47,7 @@ async function fetchSessionData({
 		.maybeSingle()
 		.then(catchSupabaseErrors)) as {
 		id: number;
-		encounters: OrphanEncounter[];
+		encounters: SessionEncounter[];
 	} | null;
 	if (!data) {
 		return null;
@@ -55,8 +55,8 @@ async function fetchSessionData({
 	return data.encounters;
 }
 
-function groupBySpecies(encounters: OrphanEncounter[]): SpeciesBreakdown[] {
-	const map: Record<string, OrphanEncounter[]> = {};
+function groupBySpecies(encounters: SessionEncounter[]): SpeciesBreakdown[] {
+	const map: Record<string, SessionEncounter[]> = {};
 	encounters.forEach((encounter) => {
 		const species = encounter.bird.species.species_name;
 		map[species] = map[species] || [];
@@ -76,7 +76,7 @@ function SessionSummary({
 	data: session,
 	params: { date }
 }: {
-	data: OrphanEncounter[];
+	data: SessionEncounter[];
 	params: { date: string };
 }) {
 	const speciesBreakdown = groupBySpecies(session);
@@ -104,7 +104,7 @@ function SessionSummary({
 
 export default async function SessionPage(props: PageProps) {
 	return (
-		<BootstrapPageData<OrphanEncounter[], PageProps, PageParams>
+		<BootstrapPageData<SessionEncounter[], PageProps, PageParams>
 			pageProps={props}
 			getCacheKeys={(params) => ['session', params.date as string]}
 			dataFetcher={fetchSessionData}

@@ -4,7 +4,7 @@ import type {
 	TopSpeciesResult,
 	TopPeriodsArgs,
 	TopSpeciesArgs
-} from '@/app/models/db-types';
+} from '@/app/models/db';
 
 export type TopStatsResult = TopPeriodsResult | TopSpeciesResult;
 export type TopStatsArguments = TopPeriodsArgs | TopSpeciesArgs;

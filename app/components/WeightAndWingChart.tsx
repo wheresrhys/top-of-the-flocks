@@ -1,7 +1,7 @@
 import { type EnrichedBirdOfSpecies } from '@/app/models/bird';
 import { useState } from 'react';
 import { ScatterChart, type ScatterChartData } from 'react-chartkick';
-import type { EncounterRow } from '@/app/models/db-types';
+import type { EncounterRow } from '@/app/models/db';
 
 //function to find the median of the given array
 function median(arr: number[]): number {

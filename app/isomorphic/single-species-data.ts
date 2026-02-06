@@ -2,13 +2,11 @@ import { SPECIES_PAGE_BATCH_SIZE } from '@/app/constants';
 import {
 	orderBirdsByRecency,
 	enrichBird,
+	type EncounterOfBird,
+	type BirdOfSpecies,
 	type EnrichedBirdOfSpecies
 } from '@/app/models/bird';
-import type {
-	EncounterOfBird,
-	BirdOfSpecies,
-	PaginatedBirdsResult
-} from '@/app/models/db-types';
+import type { PaginatedBirdsResult } from '@/app/models/db';
 import { supabase, catchSupabaseErrors } from '@/lib/supabase';
 
 function convertPaginatedBirdResultsToBirds(

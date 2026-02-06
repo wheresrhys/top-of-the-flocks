@@ -1,4 +1,4 @@
-import type { SpeciesStatsRow } from './db-types';
+import type { SpeciesStatsRow } from './db';
 import Link from 'next/link';
 
 export type SpeciesStatsColumnConfig = {

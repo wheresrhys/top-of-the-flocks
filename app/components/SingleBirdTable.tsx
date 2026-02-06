@@ -1,4 +1,4 @@
-import type { EncounterOfBird } from '@/app/models/db-types';
+import type { EncounterOfBird } from '@/app/models/bird';
 import { Table, InlineTable } from './shared/DesignSystem';
 
 export function SingleBirdTable({

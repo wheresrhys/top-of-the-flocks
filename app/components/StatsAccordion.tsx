@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { AccordionItem } from './shared/Accordion';
 import { SecondaryHeading, BoxyList } from './shared/DesignSystem';
 import { StatOutput } from './shared/StatOutput';
-import type { TopPeriodsResult, TopSpeciesResult } from '@/app/models/db-types';
+import type { TopPeriodsResult, TopSpeciesResult } from '@/app/models/db';
 import {
 	getTopStats,
 	type TopStatsArgsWithoutLimit

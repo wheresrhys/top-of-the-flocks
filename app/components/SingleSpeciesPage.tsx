@@ -1,6 +1,6 @@
 'use client';
 import { SpeciesTable } from '@/app/components/SingleSpeciesTable';
-import { type TopPeriodsResult } from '@/app/models/db-types';
+import { type TopPeriodsResult } from '@/app/models/db';
 import { EnrichedBirdOfSpecies } from '@/app/models/bird';
 import { useState } from 'react';
 import {
@@ -8,7 +8,7 @@ import {
 	PrimaryHeading
 } from '@/app/components/shared/DesignSystem';
 import { SingleSpeciesStats } from '@/app/components/SingleSpeciesStats';
-import type { SpeciesStatsRow } from '@/app/models/db-types';
+import type { SpeciesStatsRow } from '@/app/models/db';
 import 'chartkick/chart.js';
 import { fetchPageOfBirds } from '../isomorphic/single-species-data';
 import { useOnInView } from 'react-intersection-observer';

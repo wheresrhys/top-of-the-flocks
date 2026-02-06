@@ -3,7 +3,7 @@ import Link from 'next/link';
 import type { PageData } from '@/app/(routes)/species/[speciesName]/page';
 import { StatOutput } from './shared/StatOutput';
 import { UnwrappedBadgeList } from './shared/DesignSystem';
-import type { SpeciesStatsRow } from '@/app/models/db-types';
+import type { SpeciesStatsRow } from '@/app/models/db';
 import type { SpeciesStatsColumnConfig } from '@/app/models/species-stats';
 import { speciesStatsColumns } from '@/app/models/species-stats';
 

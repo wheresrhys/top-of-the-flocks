@@ -7,9 +7,12 @@ import {
 	PageWrapper,
 	PrimaryHeading
 } from '@/app/components/shared/DesignSystem';
-import { enrichBird, type EnrichedStandaloneBird } from '@/app/models/bird';
+import {
+	enrichBird,
+	type EnrichedStandaloneBird,
+	type StandaloneBird
+} from '@/app/models/bird';
 import Link from 'next/link';
-import type { StandaloneBird } from '@/app/models/db-types';
 
 type PageParams = { ring: string };
 type PageProps = { params: Promise<PageParams> };

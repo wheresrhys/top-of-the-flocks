@@ -1,9 +1,16 @@
-import type {
-	EncounterOfBird,
-	BirdRow,
-	BirdOfSpecies,
-	StandaloneBird
-} from './db-types';
+import type { BirdRow, EncounterRow, SessionRow, SpeciesRow } from './db';
+
+export type EncounterOfBird = EncounterRow & {
+	session: SessionRow;
+};
+
+export type BirdOfSpecies = BirdRow & {
+	encounters: EncounterOfBird[];
+};
+
+export type StandaloneBird = BirdOfSpecies & {
+	species: SpeciesRow;
+};
 
 type Sex = 'M' | 'F' | 'U';
 

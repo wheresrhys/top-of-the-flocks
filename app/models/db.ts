@@ -5,24 +5,6 @@ export type SessionRow = Database['public']['Tables']['Sessions']['Row'];
 export type EncounterRow = Database['public']['Tables']['Encounters']['Row'];
 export type BirdRow = Database['public']['Tables']['Birds']['Row'];
 
-export type OrphanEncounter = EncounterRow & {
-	bird: BirdRow & {
-		species: SpeciesRow;
-	};
-};
-
-export type EncounterOfBird = EncounterRow & {
-	session: SessionRow;
-};
-
-export type BirdOfSpecies = BirdRow & {
-	encounters: EncounterOfBird[];
-};
-
-export type StandaloneBird = BirdOfSpecies & {
-	species: SpeciesRow;
-};
-
 export type TopPeriodsResult =
 	Database['public']['Functions']['top_periods_by_metric']['Returns'][number];
 export type TopSpeciesResult =

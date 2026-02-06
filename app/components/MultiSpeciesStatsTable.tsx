@@ -1,7 +1,7 @@
 'use client';
 import { PageWrapper, Table } from '@/app/components/shared/DesignSystem';
 import { speciesStatsColumns } from '@/app/models/species-stats';
-import type { SpeciesStatsRow } from '@/app/models/db-types';
+import type { SpeciesStatsRow } from '@/app/models/db';
 import type { PageData } from '@/app/(routes)/species/page';
 import { useState, useEffect, useRef } from 'react';
 import { fetchSpeciesData } from '@/app/isomorphic/multi-species-data';
