@@ -1,7 +1,10 @@
 import { HistoryAccordion } from '@/app/components/SessionHistoryCalendar';
-import { BootstrapPageData } from '@/app/components/BootstrapPageData';
+import { BootstrapPageData } from '@/app/components/layout/BootstrapPageData';
 import { supabase, catchSupabaseErrors } from '@/lib/supabase';
-import { PageWrapper, PrimaryHeading } from '@/app/components/DesignSystem';
+import {
+	PageWrapper,
+	PrimaryHeading
+} from '@/app/components/layout/DesignSystem';
 export type Session = {
 	id: number;
 	visit_date: string;

@@ -1,4 +1,4 @@
-import { BootstrapPageData } from '@/app/components/BootstrapPageData';
+import { BootstrapPageData } from '@/app/components/layout/BootstrapPageData';
 import { supabase, catchSupabaseErrors } from '@/lib/supabase';
 import { SingleBirdTable } from '@/app/components/SingleBirdTable';
 import { format as formatDate } from 'date-fns';
@@ -6,7 +6,7 @@ import {
 	BadgeList,
 	PageWrapper,
 	PrimaryHeading
-} from '@/app/components/DesignSystem';
+} from '@/app/components/layout/DesignSystem';
 import { enrichBird, type EnrichedStandaloneBird } from '@/app/models/bird';
 import Link from 'next/link';
 import type { StandaloneBird } from '@/app/models/db-types';

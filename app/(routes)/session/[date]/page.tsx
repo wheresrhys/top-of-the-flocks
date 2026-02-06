@@ -4,12 +4,12 @@ import {
 } from '@/app/components/SessionTable';
 import { supabase, catchSupabaseErrors } from '@/lib/supabase';
 import type { OrphanEncounter } from '@/app/models/db-types';
-import { BootstrapPageData } from '@/app/components/BootstrapPageData';
+import { BootstrapPageData } from '@/app/components/layout/BootstrapPageData';
 import {
 	BadgeList,
 	PageWrapper,
 	PrimaryHeading
-} from '@/app/components/DesignSystem';
+} from '@/app/components/layout/DesignSystem';
 import { format as formatDate } from 'date-fns';
 
 type PageParams = { date: string };

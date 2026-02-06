@@ -1,4 +1,4 @@
-import { BootstrapPageData } from '@/app/components/BootstrapPageData';
+import { BootstrapPageData } from '@/app/components/layout/BootstrapPageData';
 import { MultiSpeciesStatsTable } from '@/app/components/MultiSpeciesStatsTable';
 import { fetchSpeciesData } from '@/app/isomorphic/multi-species-data';
 import { supabase, catchSupabaseErrors } from '@/lib/supabase';

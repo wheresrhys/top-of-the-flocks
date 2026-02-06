@@ -4,9 +4,9 @@ import {
 	type StatsAccordionModel
 } from '../components/StatsAccordion';
 import { getSeasonMonths, getSeasonName } from '../models/seasons';
-import { BootstrapPageData } from '../components/BootstrapPageData';
+import { BootstrapPageData } from '../components/layout/BootstrapPageData';
 import { RingSearchForm } from '../components/RingSearchForm';
-import { PageWrapper } from '../components/DesignSystem';
+import { PageWrapper } from '../components/layout/DesignSystem';
 import { getTopStats } from '../isomorphic/stats-data-tables';
 
 function getStatConfigs(

@@ -6,7 +6,7 @@ configMocks({ act, afterAll });
 
 global.IS_REACT_ACT_ENVIRONMENT = true
 
-vi.mock('./app/components/BootstrapPageData');
+vi.mock('./app/components/layout/BootstrapPageData');
 
 // Mock Next.js Link component
 vi.mock('next/link', () => ({

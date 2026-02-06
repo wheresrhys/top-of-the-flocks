@@ -3,7 +3,7 @@ import { format as formatDate } from 'date-fns';
 import { type EnrichedBirdOfSpecies } from '@/app/models/bird';
 import { SingleBirdTable } from '@/app/components/SingleBirdTable';
 import Link from 'next/link';
-import { Table } from './DesignSystem';
+import { Table } from './layout/DesignSystem';
 import { AccordionTableBody } from './AccordionTableBody';
 
 function RingNumberCell({

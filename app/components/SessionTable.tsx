@@ -2,7 +2,7 @@
 
 import { type OrphanEncounter } from '@/app/models/db-types';
 import Link from 'next/link';
-import { InlineTable, Table } from './DesignSystem';
+import { InlineTable, Table } from './layout/DesignSystem';
 import { AccordionTableBody } from './AccordionTableBody';
 export type SpeciesBreakdown = {
 	species: string;

@@ -1,4 +1,4 @@
-import { BootstrapPageData } from '@/app/components/BootstrapPageData';
+import { BootstrapPageData } from '@/app/components/layout/BootstrapPageData';
 import { supabase, catchSupabaseErrors } from '@/lib/supabase';
 import { getTopPeriodsByMetric } from '@/app/isomorphic/stats-data-tables';
 import { type TopPeriodsResult } from '@/app/models/db-types';

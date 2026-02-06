@@ -1,7 +1,10 @@
 'use client';
 import { type Session } from '@/app/(routes)/sessions/page';
 import { AccordionItem } from '@/app/components/Accordion';
-import { BoxyList, SecondaryHeading } from '@/app/components/DesignSystem';
+import {
+	BoxyList,
+	SecondaryHeading
+} from '@/app/components/layout/DesignSystem';
 import { useState, useEffect } from 'react';
 import { StatOutput } from './StatOutput';
 import { format as formatDate } from 'date-fns';
