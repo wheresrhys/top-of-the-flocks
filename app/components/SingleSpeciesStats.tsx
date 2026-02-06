@@ -15,6 +15,7 @@ type SpeciesStatsColumnConfig = {
 	suffix?: string;
 	category?: string;
 	prefix?: string;
+	invertSort?: boolean;
 };
 
 export const speciesStatsColumns: SpeciesStatsColumnConfig[] = [
@@ -26,7 +27,8 @@ export const speciesStatsColumns: SpeciesStatsColumnConfig[] = [
 			<Link className="link text-wrap" href={`/species/${speciesName}`}>
 				{speciesName}
 			</Link>
-		)
+		),
+		invertSort: true
 	},
 	{
 		label: 'Birds',
@@ -75,7 +77,7 @@ export const speciesStatsColumns: SpeciesStatsColumnConfig[] = [
 		suffix: 'years'
 	},
 	{
-		label: 'Max encountered bird',
+		label: 'Most caught bird',
 		property: 'max_encountered_bird',
 		category: 'Recoveries',
 		prefix: 'most seen bird:',
