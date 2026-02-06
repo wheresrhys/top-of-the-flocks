@@ -12,6 +12,7 @@ import { SingleSpeciesStats } from '@/app/components/SingleSpeciesStats';
 import { ScatterChart, type ScatterChartData } from 'react-chartkick';
 import 'chartkick/chart.js';
 import { SPECIES_PAGE_BATCH_SIZE } from '@/app/isomorphic/constants';
+import { fetchPageOfBirds } from '../isomorphic/single-species-data';
 
 type SpeciesStatsRow = Database['public']['Views']['SpeciesStats']['Row'];
 type PageParams = { speciesName: string };
@@ -279,9 +280,14 @@ export function SpeciesPageWithFilters({
 }) {
 	const [retrappedOnly, setRetrappedOnly] = useState(false);
 	const [sexedOnly, setSexedOnly] = useState(false);
+	const [loadedBirds, setLoadedBirds] = useState(data.birds);
+	const [page, setPage] = useState(0);
 
+	const isFullyLoaded =
+		loadedBirds.length >= (data.speciesStats.bird_count ?? 0);
 	const [showChart, setShowChart] = useState(false);
-	let birds = data.birds;
+	let birds = loadedBirds;
+	const loadedIds = loadedBirds.map((bird) => bird.id);
 	if (retrappedOnly) {
 		birds = birds.filter((bird) =>
 			bird.encounters.some((encounter) => encounter.record_type === 'S')
@@ -289,6 +295,16 @@ export function SpeciesPageWithFilters({
 	}
 	if (sexedOnly) {
 		birds = birds.filter((bird) => bird.sex !== 'U');
+	}
+
+	async function loadMoreBirds() {
+		const nextPage = page + 1;
+		setPage(nextPage);
+		const newBirds = await fetchPageOfBirds(speciesName, nextPage);
+		setLoadedBirds([
+			...loadedBirds,
+			...newBirds.filter((bird) => !loadedIds.includes(bird.id))
+		]);
 	}
 
 	return (
@@ -305,6 +321,15 @@ export function SpeciesPageWithFilters({
 				showChart={showChart}
 			/>
 			<SpeciesTable birds={birds} />
+			{isFullyLoaded ? null : (
+				<button
+					type="button"
+					className="btn btn-secondary btn-sm"
+					onClick={loadMoreBirds}
+				>
+					Load more
+				</button>
+			)}
 		</PageWrapper>
 	);
 }

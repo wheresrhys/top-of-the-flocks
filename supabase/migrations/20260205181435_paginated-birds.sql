@@ -21,7 +21,7 @@ RETURNS TABLE (
 ) AS $$
 BEGIN
   RETURN QUERY
- WITH bird_first_encounters AS (
+ WITH bird_last_encounters AS (
     -- Get the most recent encounter for each bird
     SELECT DISTINCT ON (b.id)
       b.id,
@@ -40,8 +40,11 @@ BEGIN
   top_birds AS (
     -- Select distinct bird IDs based on their most recent encounter
     SELECT id
-    FROM bird_first_encounters
-    ORDER BY bird_first_encounters.visit_date DESC, bird_first_encounters.capture_time DESC
+    FROM bird_last_encounters
+    ORDER BY
+      bird_last_encounters.visit_date DESC,
+      bird_last_encounters.capture_time DESC,
+      bird_last_encounters.id ASC
     LIMIT result_limit
     OFFSET result_offset
   )
