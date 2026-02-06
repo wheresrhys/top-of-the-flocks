@@ -1,5 +1,35 @@
+'use client';
 import type { EncounterOfBird } from '@/app/models/bird';
-import { Table, InlineTable } from './shared/DesignSystem';
+import { InlineTable } from './shared/DesignSystem';
+import { SortableTable, type ColumnConfig } from './shared/SortableTable';
+
+const columnConfigs = [
+	{
+		label: 'Date',
+		property: 'visit_date',
+		accessor: (row: EncounterOfBird) => row.session.visit_date
+	},
+	{
+		label: 'Time',
+		property: 'capture_time'
+	},
+	{
+		label: 'Age',
+		property: 'age_code'
+	},
+	{
+		label: 'Sex',
+		property: 'sex'
+	},
+	{
+		label: 'Wing',
+		property: 'wing_length'
+	},
+	{
+		label: 'Weight',
+		property: 'weight'
+	}
+] as ColumnConfig<EncounterOfBird>[];
 
 export function SingleBirdTable({
 	encounters,
@@ -8,34 +38,42 @@ export function SingleBirdTable({
 	encounters: EncounterOfBird[];
 	isInline?: boolean;
 }) {
-	const TableComponent = isInline ? InlineTable : Table;
-	return (
-		<TableComponent testId="single-bird-table">
-			<thead>
-				<tr>
-					<th>Date</th>
-					<th>Time</th>
-					<th>Age</th>
-					<th>Sex</th>
-					<th>Wing</th>
-					<th>Weight</th>
-				</tr>
-			</thead>
-			<tbody>
-				{encounters.map((encounter) => (
-					<tr key={encounter.id}>
-						<td>{encounter.session.visit_date}</td>
-						<td>{encounter.capture_time}</td>
-						<td>
-							{encounter.age_code}
-							{encounter.is_juv ? 'J' : ''}
-						</td>
-						<td>{encounter.sex}</td>
-						<td>{encounter.wing_length}</td>
-						<td>{encounter.weight}</td>
+	if (isInline) {
+		return (
+			<InlineTable testId="single-bird-table">
+				<thead>
+					<tr>
+						{columnConfigs.map((column) => (
+							<th key={column.property}>{column.label}</th>
+						))}
 					</tr>
-				))}
-			</tbody>
-		</TableComponent>
-	);
+				</thead>
+				<tbody>
+					{encounters.map((encounter) => (
+						<tr key={encounter.id}>
+							{columnConfigs.map((column) => (
+								<td key={column.property}>
+									{column.accessor
+										? column.accessor(encounter)
+										: (encounter[column.property] as string | number | boolean)}
+								</td>
+							))}
+						</tr>
+					))}
+				</tbody>
+			</InlineTable>
+		);
+	} else {
+		function getKey(row: EncounterOfBird) {
+			return row.id.toString();
+		}
+		return (
+			<SortableTable<EncounterOfBird>
+				columnConfigs={columnConfigs}
+				data={encounters}
+				testId="single-bird-table"
+				getRowKey={getKey}
+			/>
+		);
+	}
 }

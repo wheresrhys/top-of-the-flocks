@@ -2,10 +2,11 @@
 import { Table } from '@/app/components/shared/DesignSystem';
 import { useState } from 'react';
 
-type ColumnConfig<RowModel> = {
+export type ColumnConfig<RowModel> = {
 	label: string;
 	property: keyof RowModel;
 	invertSort?: boolean;
+	accessor?: (row: RowModel) => string;
 };
 
 export function SortableTable<RowModel>({
@@ -14,6 +15,7 @@ export function SortableTable<RowModel>({
 	initialSortColumn,
 	RowComponent,
 	getRowKey,
+	testId,
 	columnComponents = {} as Record<
 		keyof RowModel,
 		React.ComponentType<{ data: RowModel }>
@@ -21,6 +23,7 @@ export function SortableTable<RowModel>({
 }: {
 	columnConfigs: ColumnConfig<RowModel>[];
 	data: RowModel[];
+	testId?: string;
 	initialSortColumn?: keyof RowModel;
 	RowComponent?: React.ComponentType<{ data: RowModel }>;
 	columnComponents?: Partial<
@@ -79,56 +82,56 @@ export function SortableTable<RowModel>({
 	});
 
 	return (
-		<>
-			<Table>
-				<thead>
-					<tr>
-						{columnConfigs.map((column) => (
-							<th
-								className="text-wrap cursor-pointer"
-								key={column.property as string}
-								onClick={() => handleColumnClick(column.property)}
-							>
-								<div className="flex items-center justify-between gap-1">
-									{column.label}
-									{sortColumn === column.property ? (
-										<span
-											className={`icon-[tabler--chevron-${sortDirection === 'asc' ? 'up' : 'down'}] size-4`}
-										></span>
-									) : null}
-								</div>
-							</th>
-						))}
-					</tr>
-				</thead>
-				<tbody>
-					{sortedData.map((row) => {
-						const rowKey = getRowKey(row);
-						if (RowComponent) {
-							return <RowComponent key={rowKey} data={row} />;
-						} else {
-							return (
-								<tr key={rowKey}>
-									{columnConfigs.map((column) => {
-										const Component = columnComponents[column.property] as
-											| React.ComponentType<{ data: RowModel }>
-											| undefined;
-										return (
-											<td key={column.property as string}>
-												{Component ? (
-													<Component data={row} />
-												) : (
-													(row[column.property] as string | number)
-												)}
-											</td>
-										);
-									})}
-								</tr>
-							);
-						}
-					})}
-				</tbody>
-			</Table>
-		</>
+		<Table testId={testId}>
+			<thead>
+				<tr>
+					{columnConfigs.map((column) => (
+						<th
+							className="text-wrap cursor-pointer"
+							key={column.property as string}
+							onClick={() => handleColumnClick(column.property)}
+						>
+							<div className="flex items-center justify-between gap-1">
+								{column.label}
+								{sortColumn === column.property ? (
+									<span
+										className={`icon-[tabler--chevron-${sortDirection === 'asc' ? 'up' : 'down'}] size-4`}
+									></span>
+								) : null}
+							</div>
+						</th>
+					))}
+				</tr>
+			</thead>
+			<tbody>
+				{sortedData.map((row) => {
+					const rowKey = getRowKey(row);
+					if (RowComponent) {
+						return <RowComponent key={rowKey} data={row} />;
+					} else {
+						return (
+							<tr key={rowKey}>
+								{columnConfigs.map((column) => {
+									const Component = columnComponents[column.property] as
+										| React.ComponentType<{ data: RowModel }>
+										| undefined;
+									return (
+										<td key={column.property as string}>
+											{Component ? (
+												<Component data={row} />
+											) : column.accessor ? (
+												column.accessor(row)
+											) : (
+												(row[column.property] as string | number | boolean)
+											)}
+										</td>
+									);
+								})}
+							</tr>
+						);
+					}
+				})}
+			</tbody>
+		</Table>
 	);
 }

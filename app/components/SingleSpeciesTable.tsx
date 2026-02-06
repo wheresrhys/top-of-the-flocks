@@ -5,7 +5,6 @@ import { SingleBirdTable } from '@/app/components/SingleBirdTable';
 import Link from 'next/link';
 import { Table } from './shared/DesignSystem';
 import { AccordionTableBody } from './shared/AccordionTableBody';
-
 function RingNumberCell({
 	model: { ring_no }
 }: {
@@ -62,7 +61,7 @@ export function SpeciesTable({ birds }: { birds: EnrichedBirdOfSpecies[] }) {
 			<AccordionTableBody<EnrichedBirdOfSpecies>
 				data={birds}
 				getKey={(bird) => bird.ring_no}
-				columnCount={5}
+				columnCount={7}
 				FirstColumnComponent={RingNumberCell}
 				RestColumnsComponent={BirdRow}
 				ExpandedContentComponent={BirdDetailsTable}
