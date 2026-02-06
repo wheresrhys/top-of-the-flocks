@@ -6,7 +6,7 @@ import {
 import { getSeasonMonths, getSeasonName } from '../models/seasons';
 import { BootstrapPageData } from '../components/layout/BootstrapPageData';
 import { RingSearchForm } from '../components/RingSearchForm';
-import { PageWrapper } from '../components/layout/DesignSystem';
+import { PageWrapper } from '../components/shared/DesignSystem';
 import { getTopStats } from '../isomorphic/stats-data-tables';
 
 function getStatConfigs(

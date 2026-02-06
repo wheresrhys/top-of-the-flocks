@@ -1,5 +1,5 @@
 'use client';
-import { PageWrapper, Table } from '@/app/components/layout/DesignSystem';
+import { PageWrapper, Table } from '@/app/components/shared/DesignSystem';
 import { speciesStatsColumns } from '@/app/components/SingleSpeciesStats';
 import type { SpeciesStatsRow } from '@/app/models/db-types';
 import type { PageData } from '@/app/(routes)/species/page';

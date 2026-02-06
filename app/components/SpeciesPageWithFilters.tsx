@@ -7,7 +7,7 @@ import { useState } from 'react';
 import {
 	PageWrapper,
 	PrimaryHeading
-} from '@/app/components/layout/DesignSystem';
+} from '@/app/components/shared/DesignSystem';
 import { SingleSpeciesStats } from '@/app/components/SingleSpeciesStats';
 import type { SpeciesStatsRow } from '@/app/models/db-types';
 import { ScatterChart, type ScatterChartData } from 'react-chartkick';

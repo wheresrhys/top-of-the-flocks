@@ -9,7 +9,7 @@ import {
 	BadgeList,
 	PageWrapper,
 	PrimaryHeading
-} from '@/app/components/layout/DesignSystem';
+} from '@/app/components/shared/DesignSystem';
 import { format as formatDate } from 'date-fns';
 
 type PageParams = { date: string };

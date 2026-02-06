@@ -1,8 +1,8 @@
-import { BoxyList } from '@/app/components/layout/DesignSystem';
+import { BoxyList } from '@/app/components/shared/DesignSystem';
 import Link from 'next/link';
 import type { PageData } from '@/app/(routes)/species/[speciesName]/page';
-import { StatOutput } from './StatOutput';
-import { UnwrappedBadgeList } from './layout/DesignSystem';
+import { StatOutput } from './shared/StatOutput';
+import { UnwrappedBadgeList } from './shared/DesignSystem';
 import type { SpeciesStatsRow } from '@/app/models/db-types';
 
 type SpeciesStatsColumnConfig = {

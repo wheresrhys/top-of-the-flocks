@@ -6,7 +6,7 @@ import {
 	BadgeList,
 	PageWrapper,
 	PrimaryHeading
-} from '@/app/components/layout/DesignSystem';
+} from '@/app/components/shared/DesignSystem';
 import { enrichBird, type EnrichedStandaloneBird } from '@/app/models/bird';
 import Link from 'next/link';
 import type { StandaloneBird } from '@/app/models/db-types';

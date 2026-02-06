@@ -2,8 +2,8 @@
 
 import { type OrphanEncounter } from '@/app/models/db-types';
 import Link from 'next/link';
-import { InlineTable, Table } from './layout/DesignSystem';
-import { AccordionTableBody } from './AccordionTableBody';
+import { InlineTable, Table } from './shared/DesignSystem';
+import { AccordionTableBody } from './shared/AccordionTableBody';
 export type SpeciesBreakdown = {
 	species: string;
 	encounters: OrphanEncounter[];

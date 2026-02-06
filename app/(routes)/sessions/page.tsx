@@ -4,7 +4,7 @@ import { supabase, catchSupabaseErrors } from '@/lib/supabase';
 import {
 	PageWrapper,
 	PrimaryHeading
-} from '@/app/components/layout/DesignSystem';
+} from '@/app/components/shared/DesignSystem';
 export type Session = {
 	id: number;
 	visit_date: string;
