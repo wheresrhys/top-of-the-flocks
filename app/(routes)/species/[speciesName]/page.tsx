@@ -1,15 +1,16 @@
 import { BootstrapPageData } from '@/app/components/BootstrapPageData';
 import { supabase, catchSupabaseErrors } from '@/lib/supabase';
-import type { Database } from '@/types/supabase.types';
 import {
 	getTopPeriodsByMetric,
 	type TopPeriodsResult
 } from '@/app/isomorphic/stats-data-tables';
 import { type EnrichedBirdWithEncounters } from '@/app/lib/bird-model';
-import { SpeciesPageWithFilters } from '@/app/components/SpeciesPageWithFilters';
+import {
+	SpeciesPageWithFilters,
+	type SpeciesStatsRow
+} from '@/app/components/SpeciesPageWithFilters';
 import { fetchPageOfBirds } from '@/app/isomorphic/single-species-data';
 
-type SpeciesStatsRow = Database['public']['Views']['SpeciesStats']['Row'];
 type PageParams = { speciesName: string };
 type PageProps = { params: Promise<PageParams> };
 
@@ -30,11 +31,10 @@ function getTopSessions(species: string) {
 
 async function getSpeciesStats(species: string) {
 	return supabase
-		.from('SpeciesStats')
-		.select('*')
-		.eq('species_name', species)
-		.maybeSingle()
-		.then(catchSupabaseErrors) as Promise<SpeciesStatsRow>;
+		.rpc('species_stats', {
+			species_name_filter: species
+		})
+		.then(catchSupabaseErrors) as Promise<SpeciesStatsRow[]>;
 }
 
 async function fetchSpeciesData(params: PageParams): Promise<PageData | null> {
@@ -47,7 +47,7 @@ async function fetchSpeciesData(params: PageParams): Promise<PageData | null> {
 	return {
 		topSessions,
 		birds,
-		speciesStats
+		speciesStats: speciesStats[0]
 	};
 }
 

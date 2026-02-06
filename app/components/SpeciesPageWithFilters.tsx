@@ -8,13 +8,17 @@ import {
 } from '@/app/lib/bird-model';
 import { useState } from 'react';
 import { PageWrapper, PrimaryHeading } from '@/app/components/DesignSystem';
-import { SingleSpeciesStats } from '@/app/components/SingleSpeciesStats';
+import {
+	SingleSpeciesStats,
+	type SpeciesStatsRow
+} from '@/app/components/SingleSpeciesStats';
 import { ScatterChart, type ScatterChartData } from 'react-chartkick';
 import 'chartkick/chart.js';
 import { fetchPageOfBirds } from '../isomorphic/single-species-data';
 import { useOnInView } from 'react-intersection-observer';
 
-type SpeciesStatsRow = Database['public']['Views']['SpeciesStats']['Row'];
+export type { SpeciesStatsRow } from '@/app/components/SingleSpeciesStats';
+
 type PageParams = { speciesName: string };
 
 export type PageData = {
@@ -294,7 +298,7 @@ export function SpeciesPageWithFilters({
 	}
 
 	const loadMoreRef = useOnInView(
-		(inView, entry) => {
+		(inView) => {
 			if (inView) {
 				loadMoreBirds();
 			}

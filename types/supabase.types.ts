@@ -201,13 +201,17 @@ export type Database = {
         }[]
       }
       species_stats: {
-        Args: { from_date?: string; to_date?: string }
+        Args: {
+          from_date?: string
+          species_name_filter?: string
+          to_date?: string
+        }
         Returns: {
           avg_weight: number
           avg_wing: number
           bird_count: number
           encounter_count: number
-          max_encounter_count: number
+          max_encountered_bird: number
           max_per_session: number
           max_proven_age: number
           max_time_span: number
