@@ -137,7 +137,10 @@ export function MultiSpeciesStatsTable({
 							</select>
 						</div>
 						<div className="flex items-center gap-2">
-							<label htmlFor="ces-only-checkbox" className="shrink-0">
+							<label
+								htmlFor="ces-only-checkbox"
+								className={`shrink-0 ${!year ? 'text-gray-400' : ''}`}
+							>
 								CES only
 							</label>
 							<input
@@ -146,6 +149,7 @@ export function MultiSpeciesStatsTable({
 								className="checkbox"
 								onChange={handleCesOnlyChange}
 								checked={cesOnly}
+								disabled={!year}
 							/>
 						</div>
 					</div>
