@@ -5,7 +5,8 @@ import { StatOutput } from './StatOutput';
 import type { Database } from '@/types/supabase.types';
 import { UnwrappedBadgeList } from './DesignSystem';
 
-type SpeciesStatsRow = Database['public']['Views']['SpeciesStats']['Row'];
+export type SpeciesStatsRow =
+	Database['public']['Functions']['species_stats']['Returns'][number];
 
 type SpeciesStatsColumnConfig = {
 	label: string;
