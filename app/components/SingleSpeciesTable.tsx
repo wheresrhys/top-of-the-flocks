@@ -36,7 +36,10 @@ function BirdRow({ model: bird }: { model: EnrichedBirdWithEncounters }) {
 			</td>
 			<td>{formatDate(bird.firstEncounterDate, 'dd MMM yyyy')}</td>
 			<td>{formatDate(bird.lastEncounterDate, 'dd MMM yyyy')}</td>
-			<td>{bird.lastEncounter.age_code}</td>
+			<td>
+				{bird.lastEncounter.age_code}
+				{bird.lastEncounter.is_juv ? 'J' : ''}
+			</td>
 			<td>{bird.provenAge}</td>
 		</>
 	);

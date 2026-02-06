@@ -27,6 +27,7 @@ function convertPaginatedBirdResultsToBirds(
 		birdsMap[result.ring_no].encounters.push({
 			id: result.encounter_id,
 			capture_time: result.capture_time,
+			age_code: result.age_code,
 			is_juv: result.is_juv,
 			minimum_years: result.minimum_years,
 			record_type: result.record_type,

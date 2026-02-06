@@ -1,5 +1,9 @@
-import { vi } from 'vitest';
-import React, { ReactNode } from 'react';
+import { vi, afterAll } from 'vitest';
+import React, { ReactNode, act } from 'react';
+import { configMocks } from 'jsdom-testing-mocks';
+
+configMocks({ act, afterAll });
+
 global.IS_REACT_ACT_ENVIRONMENT = true
 
 vi.mock('./app/components/BootstrapPageData');

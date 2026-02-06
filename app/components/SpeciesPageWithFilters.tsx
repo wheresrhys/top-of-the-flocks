@@ -11,8 +11,8 @@ import { PageWrapper, PrimaryHeading } from '@/app/components/DesignSystem';
 import { SingleSpeciesStats } from '@/app/components/SingleSpeciesStats';
 import { ScatterChart, type ScatterChartData } from 'react-chartkick';
 import 'chartkick/chart.js';
-import { SPECIES_PAGE_BATCH_SIZE } from '@/app/isomorphic/constants';
 import { fetchPageOfBirds } from '../isomorphic/single-species-data';
+import { useOnInView } from 'react-intersection-observer';
 
 type SpeciesStatsRow = Database['public']['Views']['SpeciesStats']['Row'];
 type PageParams = { speciesName: string };
@@ -282,6 +282,30 @@ export function SpeciesPageWithFilters({
 	const [sexedOnly, setSexedOnly] = useState(false);
 	const [loadedBirds, setLoadedBirds] = useState(data.birds);
 	const [page, setPage] = useState(0);
+	const [isLoading, setIsLoading] = useState(false);
+
+	async function loadMoreBirds() {
+		const nextPage = page + 1;
+		setPage(nextPage);
+		setIsLoading(true);
+		const newBirds = await fetchPageOfBirds(speciesName, nextPage);
+		setLoadedBirds([
+			...loadedBirds,
+			...newBirds.filter((bird) => !loadedIds.includes(bird.id))
+		]);
+		setIsLoading(false);
+	}
+
+	const loadMoreRef = useOnInView(
+		(inView, entry) => {
+			if (inView) {
+				loadMoreBirds();
+			} else {
+				console.log('Element left view', entry.target);
+			}
+		},
+		{ threshold: 0 }
+	);
 
 	const isFullyLoaded =
 		loadedBirds.length >= (data.speciesStats.bird_count ?? 0);
@@ -295,16 +319,6 @@ export function SpeciesPageWithFilters({
 	}
 	if (sexedOnly) {
 		birds = birds.filter((bird) => bird.sex !== 'U');
-	}
-
-	async function loadMoreBirds() {
-		const nextPage = page + 1;
-		setPage(nextPage);
-		const newBirds = await fetchPageOfBirds(speciesName, nextPage);
-		setLoadedBirds([
-			...loadedBirds,
-			...newBirds.filter((bird) => !loadedIds.includes(bird.id))
-		]);
 	}
 
 	return (
@@ -322,13 +336,13 @@ export function SpeciesPageWithFilters({
 			/>
 			<SpeciesTable birds={birds} />
 			{isFullyLoaded ? null : (
-				<button
-					type="button"
-					className="btn btn-secondary btn-sm"
-					onClick={loadMoreBirds}
+				<div
+					ref={loadMoreRef}
+					data-testid="infinite-scroll-loader"
+					className="flex items-center justify-center"
 				>
-					Load more
-				</button>
+					<div className="loading loading-spinner loading-xl"></div>
+				</div>
 			)}
 		</PageWrapper>
 	);
