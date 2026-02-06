@@ -1,30 +1,31 @@
-import type { Database } from '@/types/supabase.types';
+import type {
+	EncounterOfBird,
+	BirdRow,
+	BirdOfSpecies,
+	StandaloneBird
+} from './db-types';
 
 type Sex = 'M' | 'F' | 'U';
 
-export type Encounter = Database['public']['Tables']['Encounters']['Row'] & {
-	session: Database['public']['Tables']['Sessions']['Row'];
-};
+type EncountersInterface = { encounters: readonly EncounterOfBird[] };
 
-export type BirdWithEncounters =
-	Database['public']['Tables']['Birds']['Row'] & {
-		encounters: Encounter[];
-		species?: {
-			species_name: string;
-		};
+type BasicBird = BirdRow & EncountersInterface;
+
+export type EnrichedBirdWithEncounters<BirdType extends BasicBird> =
+	BirdType & {
+		provenAge: number;
+		sex: Sex;
+		sexCertainty: number;
+		firstEncounterDate: Date;
+		lastEncounterDate: Date;
+		lastEncounter: BirdType['encounters'][number];
 	};
 
-export type EnrichedBirdWithEncounters = BirdWithEncounters & {
-	provenAge: number;
-	sex: Sex;
-	sexCertainty: number;
-	firstEncounterDate: Date;
-	lastEncounterDate: Date;
-	lastEncounter: Encounter;
-};
+export type EnrichedBirdOfSpecies = EnrichedBirdWithEncounters<BirdOfSpecies>;
+export type EnrichedStandaloneBird = EnrichedBirdWithEncounters<StandaloneBird>;
 
-export function orderBirdsByRecency<BirdType>(
-	birds: EnrichedBirdWithEncounters[] | BirdWithEncounters[],
+export function orderBirdsByRecency<BirdType extends BasicBird>(
+	birds: BirdType[],
 	{
 		direction,
 		type,
@@ -38,10 +39,10 @@ export function orderBirdsByRecency<BirdType>(
 	return birds.sort((a, b) => {
 		const aEncs = encountersAlreadySorted
 			? a.encounters
-			: orderEncountersByRecency(a.encounters, 'asc');
+			: orderEncountersByRecency(a.encounters as EncounterOfBird[], 'asc');
 		const bEncs = encountersAlreadySorted
 			? b.encounters
-			: orderEncountersByRecency(b.encounters, 'asc');
+			: orderEncountersByRecency(b.encounters as EncounterOfBird[], 'asc');
 		// note that to avoid confusion, encounters are always sorted from first to last, so that the most recent encounter is the last one
 		return pairwiseSortEncounters(direction)(
 			aEncs[type === 'first' ? 0 : aEncs.length - 1],
@@ -52,7 +53,7 @@ export function orderBirdsByRecency<BirdType>(
 
 export function pairwiseSortEncounters(
 	direction: 'asc' | 'desc'
-): (a: Encounter, b: Encounter) => -1 | 0 | 1 {
+): (a: EncounterOfBird, b: EncounterOfBird) => -1 | 0 | 1 {
 	return (a, b) => {
 		const aTime = new Date(a.session.visit_date).getTime();
 		const bTime = new Date(b.session.visit_date).getTime();
@@ -63,25 +64,25 @@ export function pairwiseSortEncounters(
 }
 
 export function orderEncountersByRecency(
-	encounters: Encounter[],
+	encounters: EncounterOfBird[],
 	direction: 'asc' | 'desc'
 ) {
 	return encounters.sort(pairwiseSortEncounters(direction));
 }
 
-export function addProvenAgeToBird(
-	bird: BirdWithEncounters
-): EnrichedBirdWithEncounters {
-	(bird as EnrichedBirdWithEncounters).provenAge =
+export function addProvenAgeToBird<BirdType extends BasicBird>(
+	bird: BirdType
+): EnrichedBirdWithEncounters<BirdType> {
+	(bird as EnrichedBirdWithEncounters<BirdType>).provenAge =
 		bird.encounters[0].minimum_years +
 		new Date(
 			bird.encounters[bird.encounters.length - 1].session.visit_date
 		).getFullYear() -
 		new Date(bird.encounters[0].session.visit_date).getFullYear();
-	return bird as EnrichedBirdWithEncounters;
+	return bird as EnrichedBirdWithEncounters<BirdType>;
 }
 
-function getSex(encounters: Encounter[]): [Sex, number] {
+function getSex(encounters: EncounterOfBird[]): [Sex, number] {
 	const counts = encounters.reduce(
 		(tallies, encounter) => {
 			tallies[encounter.sex]++;
@@ -103,7 +104,7 @@ function getSex(encounters: Encounter[]): [Sex, number] {
 }
 
 function getProvenAge(
-	encounters: Encounter[],
+	encounters: EncounterOfBird[],
 	isOrdered: boolean = false
 ): number {
 	if (!isOrdered) {
@@ -118,10 +119,13 @@ function getProvenAge(
 	);
 }
 
-export function enrichBird(
-	bird: BirdWithEncounters
-): EnrichedBirdWithEncounters {
-	const orderedEncounters = orderEncountersByRecency(bird.encounters, 'asc');
+export function enrichBird<BirdType extends BasicBird>(
+	bird: BirdType
+): EnrichedBirdWithEncounters<BirdType> {
+	const orderedEncounters = orderEncountersByRecency(
+		bird.encounters as EncounterOfBird[],
+		'asc'
+	);
 	const [sex, sexCertainty] = getSex(orderedEncounters);
 	return {
 		...bird,

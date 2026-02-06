@@ -3,7 +3,7 @@ import {
 	type SpeciesBreakdown
 } from '@/app/components/SessionTable';
 import { supabase, catchSupabaseErrors } from '@/lib/supabase';
-import type { Database } from '@/types/supabase.types';
+import type { OrphanEncounter } from '@/app/models/db-types';
 import { BootstrapPageData } from '@/app/components/BootstrapPageData';
 import {
 	BadgeList,
@@ -15,16 +15,9 @@ import { format as formatDate } from 'date-fns';
 type PageParams = { date: string };
 type PageProps = { params: Promise<PageParams> };
 
-export type Encounter = Database['public']['Tables']['Encounters']['Row'] & {
-	bird: {
-		ring_no: string;
-		species: { species_name: string };
-	};
-};
-
 async function fetchSessionData({
 	date
-}: PageParams): Promise<Encounter[] | null> {
+}: PageParams): Promise<OrphanEncounter[] | null> {
 	const data = (await supabase
 		.from('Sessions')
 		.select(
@@ -54,7 +47,7 @@ async function fetchSessionData({
 		.maybeSingle()
 		.then(catchSupabaseErrors)) as {
 		id: number;
-		encounters: Encounter[];
+		encounters: OrphanEncounter[];
 	} | null;
 	if (!data) {
 		return null;
@@ -62,8 +55,8 @@ async function fetchSessionData({
 	return data.encounters;
 }
 
-function groupBySpecies(encounters: Encounter[]): SpeciesBreakdown[] {
-	const map: Record<string, Encounter[]> = {};
+function groupBySpecies(encounters: OrphanEncounter[]): SpeciesBreakdown[] {
+	const map: Record<string, OrphanEncounter[]> = {};
 	encounters.forEach((encounter) => {
 		const species = encounter.bird.species.species_name;
 		map[species] = map[species] || [];
@@ -83,7 +76,7 @@ function SessionSummary({
 	data: session,
 	params: { date }
 }: {
-	data: Encounter[];
+	data: OrphanEncounter[];
 	params: { date: string };
 }) {
 	const speciesBreakdown = groupBySpecies(session);
@@ -111,7 +104,7 @@ function SessionSummary({
 
 export default async function SessionPage(props: PageProps) {
 	return (
-		<BootstrapPageData<Encounter[], PageProps, PageParams>
+		<BootstrapPageData<OrphanEncounter[], PageProps, PageParams>
 			pageProps={props}
 			getCacheKeys={(params) => ['session', params.date as string]}
 			dataFetcher={fetchSessionData}

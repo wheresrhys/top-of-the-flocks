@@ -3,10 +3,7 @@ import { useState, useEffect } from 'react';
 import { AccordionItem } from './Accordion';
 import { SecondaryHeading, BoxyList } from './DesignSystem';
 import { StatOutput } from './StatOutput';
-import type {
-	TopPeriodsResult,
-	TopSpeciesResult
-} from '@/app/isomorphic/stats-data-tables';
+import type { TopPeriodsResult, TopSpeciesResult } from '@/app/models/db-types';
 import {
 	getTopStats,
 	type TopStatsArgsWithoutLimit

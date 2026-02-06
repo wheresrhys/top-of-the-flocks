@@ -1,7 +1,5 @@
 import { supabase, catchSupabaseErrors } from '@/lib/supabase';
-import type { Database } from '@/types/supabase.types';
-export type SpeciesStatsRow =
-	Database['public']['Functions']['species_stats']['Returns'][number];
+import type { SpeciesStatsRow } from '@/app/models/db-types';
 
 export async function fetchSpeciesData(
 	fromDate?: string,

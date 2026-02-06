@@ -2,11 +2,8 @@ import { BoxyList } from '@/app/components/DesignSystem';
 import Link from 'next/link';
 import type { PageData } from '@/app/(routes)/species/[speciesName]/page';
 import { StatOutput } from './StatOutput';
-import type { Database } from '@/types/supabase.types';
 import { UnwrappedBadgeList } from './DesignSystem';
-
-export type SpeciesStatsRow =
-	Database['public']['Functions']['species_stats']['Returns'][number];
+import type { SpeciesStatsRow } from '@/app/models/db-types';
 
 type SpeciesStatsColumnConfig = {
 	label: string;

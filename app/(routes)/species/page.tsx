@@ -1,10 +1,8 @@
 import { BootstrapPageData } from '@/app/components/BootstrapPageData';
 import { MultiSpeciesStatsTable } from '@/app/components/MultiSpeciesStatsTable';
-import {
-	fetchSpeciesData,
-	type SpeciesStatsRow
-} from '@/app/isomorphic/multi-species-data';
+import { fetchSpeciesData } from '@/app/isomorphic/multi-species-data';
 import { supabase, catchSupabaseErrors } from '@/lib/supabase';
+import type { SpeciesStatsRow } from '@/app/models/db-types';
 
 //TODO get year/date range from URL params
 

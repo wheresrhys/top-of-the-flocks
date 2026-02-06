@@ -1,22 +1,19 @@
 import { BootstrapPageData } from '@/app/components/BootstrapPageData';
 import { supabase, catchSupabaseErrors } from '@/lib/supabase';
+import { getTopPeriodsByMetric } from '@/app/isomorphic/stats-data-tables';
 import {
-	getTopPeriodsByMetric,
-	type TopPeriodsResult
-} from '@/app/isomorphic/stats-data-tables';
-import { type EnrichedBirdWithEncounters } from '@/app/lib/bird-model';
-import {
-	SpeciesPageWithFilters,
-	type SpeciesStatsRow
-} from '@/app/components/SpeciesPageWithFilters';
+	type TopPeriodsResult,
+} from '@/app/models/db-types';
+import { type EnrichedBirdOfSpecies } from '@/app/models/bird';
+import { SpeciesPageWithFilters } from '@/app/components/SpeciesPageWithFilters';
 import { fetchPageOfBirds } from '@/app/isomorphic/single-species-data';
-
+import type { SpeciesStatsRow } from '@/app/models/db-types';
 type PageParams = { speciesName: string };
 type PageProps = { params: Promise<PageParams> };
 
 export type PageData = {
 	topSessions: TopPeriodsResult[];
-	birds: EnrichedBirdWithEncounters[];
+	birds: EnrichedBirdOfSpecies[];
 	speciesStats: SpeciesStatsRow;
 };
 

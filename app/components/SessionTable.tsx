@@ -1,12 +1,12 @@
 'use client';
 
-import { type Encounter } from '@/app/(routes)/session/[date]/page';
+import { type OrphanEncounter } from '@/app/models/db-types';
 import Link from 'next/link';
 import { InlineTable, Table } from './DesignSystem';
 import { AccordionTableBody } from './AccordionTableBody';
 export type SpeciesBreakdown = {
 	species: string;
-	encounters: Encounter[];
+	encounters: OrphanEncounter[];
 };
 
 function SpeciesNameCell({ model: { species } }: { model: SpeciesBreakdown }) {

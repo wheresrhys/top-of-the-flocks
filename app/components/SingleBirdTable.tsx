@@ -1,11 +1,11 @@
-import type { Encounter } from '@/app/lib/bird-model';
+import type { EncounterOfBird } from '@/app/models/db-types';
 import { Table, InlineTable } from './DesignSystem';
 
 export function SingleBirdTable({
 	encounters,
 	isInline = false
 }: {
-	encounters: Encounter[];
+	encounters: EncounterOfBird[];
 	isInline?: boolean;
 }) {
 	const TableComponent = isInline ? InlineTable : Table;
