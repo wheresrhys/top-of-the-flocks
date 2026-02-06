@@ -1,93 +1,7 @@
-'use client';
-import { SpeciesTable } from '@/app/components/SingleSpeciesTable';
-import { type TopPeriodsResult } from '@/app/models/db-types';
-import { EnrichedBirdOfSpecies } from '@/app/models/bird';
-import type { EncounterRow } from '@/app/models/db-types';
+import { type EnrichedBirdOfSpecies } from '@/app/models/bird';
 import { useState } from 'react';
-import { PageWrapper, PrimaryHeading } from '@/app/components/DesignSystem';
-import { SingleSpeciesStats } from '@/app/components/SingleSpeciesStats';
-import type { SpeciesStatsRow } from '@/app/models/db-types';
 import { ScatterChart, type ScatterChartData } from 'react-chartkick';
-import 'chartkick/chart.js';
-import { fetchPageOfBirds } from '../isomorphic/single-species-data';
-import { useOnInView } from 'react-intersection-observer';
-
-type PageParams = { speciesName: string };
-
-export type PageData = {
-	topSessions: TopPeriodsResult[];
-	birds: EnrichedBirdOfSpecies[];
-	speciesStats: SpeciesStatsRow;
-};
-
-function Switch({
-	label,
-	id,
-	checked,
-	onChange
-}: {
-	label: string;
-	id: string;
-	checked: boolean;
-	onChange: (checked: boolean) => void;
-}) {
-	return (
-		<div className="flex items-center gap-1">
-			<input
-				type="checkbox"
-				className="switch"
-				id={id}
-				checked={checked}
-				onChange={(event) => onChange(event.target.checked)}
-			/>
-			<label className="label-text text-base" htmlFor={id}>
-				{label}
-			</label>
-		</div>
-	);
-}
-
-function BirdFilters({
-	retrappedOnly,
-	setRetrappedOnly,
-	sexedOnly,
-	setSexedOnly,
-	setShowChart,
-	showChart
-}: {
-	retrappedOnly: boolean;
-	setRetrappedOnly: (retrappedOnly: boolean) => void;
-	sexedOnly: boolean;
-	setSexedOnly: (sexedOnly: boolean) => void;
-	setShowChart: (showChart: boolean) => void;
-	showChart: boolean;
-}) {
-	return (
-		<form className="mt-7 flex justify-end gap-2">
-			{showChart ? null : (
-				<button
-					type="button"
-					className="btn btn-secondary btn-sm"
-					onClick={() => setShowChart(true)}
-				>
-					View graph
-				</button>
-			)}
-			<Switch
-				label="List retrapped only"
-				id="retrapped-only"
-				checked={retrappedOnly}
-				onChange={setRetrappedOnly}
-			/>
-			<Switch
-				label="List sexed only"
-				id="sexed-only"
-				checked={sexedOnly}
-				onChange={setSexedOnly}
-			/>
-		</form>
-	);
-}
+import type { EncounterRow } from '@/app/models/db-types';
 
 //function to find the median of the given array
 function median(arr: number[]): number {
@@ -205,7 +119,7 @@ function getChartData(
 	];
 }
 
-function WeightVsWingLengthChart({
+export function WeightVsWingLengthChart({
 	birds
 }: {
 	birds: EnrichedBirdOfSpecies[];
@@ -262,77 +176,5 @@ function WeightVsWingLengthChart({
 				library={{ elements: { point: { radius: 1 } } }}
 			/>
 		</>
-	);
-}
-
-export function SpeciesPageWithFilters({
-	params: { speciesName },
-	data
-}: {
-	params: PageParams;
-	data: PageData;
-}) {
-	const [retrappedOnly, setRetrappedOnly] = useState(false);
-	const [sexedOnly, setSexedOnly] = useState(false);
-	const [loadedBirds, setLoadedBirds] = useState(data.birds);
-	const [page, setPage] = useState(0);
-
-	async function loadMoreBirds() {
-		const nextPage = page + 1;
-		setPage(nextPage);
-		const newBirds = await fetchPageOfBirds(speciesName, nextPage);
-		setLoadedBirds([
-			...loadedBirds,
-			...newBirds.filter((bird) => !loadedIds.includes(bird.id))
-		]);
-	}
-
-	const loadMoreRef = useOnInView(
-		(inView) => {
-			if (inView) {
-				loadMoreBirds();
-			}
-		},
-		{ threshold: 0 }
-	);
-
-	const isFullyLoaded =
-		loadedBirds.length >= (data.speciesStats.bird_count ?? 0);
-	const [showChart, setShowChart] = useState(false);
-	let birds = loadedBirds;
-	const loadedIds = loadedBirds.map((bird) => bird.id);
-	if (retrappedOnly) {
-		birds = birds.filter((bird) =>
-			bird.encounters.some((encounter) => encounter.record_type === 'S')
-		);
-	}
-	if (sexedOnly) {
-		birds = birds.filter((bird) => bird.sex !== 'U');
-	}
-
-	return (
-		<PageWrapper>
-			<PrimaryHeading>{speciesName}</PrimaryHeading>
-			<SingleSpeciesStats {...data} />
-			{showChart ? <WeightVsWingLengthChart birds={birds} /> : null}
-			<BirdFilters
-				retrappedOnly={retrappedOnly}
-				setRetrappedOnly={setRetrappedOnly}
-				setSexedOnly={setSexedOnly}
-				sexedOnly={sexedOnly}
-				setShowChart={setShowChart}
-				showChart={showChart}
-			/>
-			<SpeciesTable birds={birds} />
-			{isFullyLoaded ? null : (
-				<div
-					ref={loadMoreRef}
-					data-testid="infinite-scroll-loader"
-					className="flex items-center justify-center"
-				>
-					<div className="loading loading-spinner loading-xl"></div>
-				</div>
-			)}
-		</PageWrapper>
 	);
 }

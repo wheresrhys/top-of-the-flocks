@@ -1,9 +1,12 @@
 'use client';
 import { type Session } from '@/app/(routes)/sessions/page';
-import { AccordionItem } from '@/app/components/Accordion';
-import { BoxyList, SecondaryHeading } from '@/app/components/DesignSystem';
+import { AccordionItem } from '@/app/components/shared/Accordion';
+import {
+	BoxyList,
+	SecondaryHeading
+} from '@/app/components/shared/DesignSystem';
 import { useState, useEffect } from 'react';
-import { StatOutput } from './StatOutput';
+import { StatOutput } from './shared/StatOutput';
 import { format as formatDate } from 'date-fns';
 
 function groupByDateMethod(methodName: 'getFullYear' | 'getMonth') {

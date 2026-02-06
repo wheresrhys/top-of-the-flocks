@@ -1,14 +1,14 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { AccordionItem } from './Accordion';
-import { SecondaryHeading, BoxyList } from './DesignSystem';
-import { StatOutput } from './StatOutput';
+import { AccordionItem } from './shared/Accordion';
+import { SecondaryHeading, BoxyList } from './shared/DesignSystem';
+import { StatOutput } from './shared/StatOutput';
 import type { TopPeriodsResult, TopSpeciesResult } from '@/app/models/db-types';
 import {
 	getTopStats,
 	type TopStatsArgsWithoutLimit
 } from '@/app/isomorphic/stats-data-tables';
-import type { TemporalUnit } from './StatOutput';
+import type { TemporalUnit } from './shared/StatOutput';
 
 export type StatConfig = {
 	id: string;
