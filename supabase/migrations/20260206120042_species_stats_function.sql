@@ -16,7 +16,7 @@ RETURNS TABLE (
   avg_wing NUMERIC,
   min_wing INT2,
   median_wing NUMERIC,
-  max_encounter_count BIGINT,
+  max_encountered_bird BIGINT,
   pct_retrapped NUMERIC,
   max_time_span NUMERIC,
   max_per_session BIGINT,
