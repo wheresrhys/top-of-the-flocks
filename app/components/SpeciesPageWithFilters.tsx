@@ -1,6 +1,5 @@
 'use client';
 import { SpeciesTable } from '@/app/components/SingleSpeciesTable';
-import type { Database } from '@/types/supabase.types';
 import { type TopPeriodsResult } from '@/app/isomorphic/stats-data-tables';
 import {
 	Encounter,
