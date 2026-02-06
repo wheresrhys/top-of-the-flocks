@@ -1,6 +1,6 @@
 'use client';
 import { PageWrapper, Table } from '@/app/components/shared/DesignSystem';
-import { speciesStatsColumns } from '@/app/components/SingleSpeciesStats';
+import { speciesStatsColumns } from '@/app/models/species-stats';
 import type { SpeciesStatsRow } from '@/app/models/db-types';
 import type { PageData } from '@/app/(routes)/species/page';
 import { useState, useEffect, useRef } from 'react';
@@ -24,7 +24,6 @@ export function MultiSpeciesStatsTable({
 	const [sortIsInverted, setSortIsInverted] = useState<boolean>(false);
 	const [speciesStats, setSpeciesStats] =
 		useState<SpeciesStatsRow[]>(initialSpeciesStats);
-	console.log(sortDirection, sortIsInverted);
 	useEffect(() => {
 		fetchSpeciesData(fromDate ?? undefined, toDate ?? undefined).then(
 			setSpeciesStats
