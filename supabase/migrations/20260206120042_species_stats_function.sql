@@ -42,7 +42,7 @@ RETURNS TABLE (
     LEFT JOIN public."Encounters" e ON b.id = e.bird_id
     LEFT JOIN public."Sessions" sess ON e.session_id = sess.id
     WHERE (from_date IS NULL OR sess.visit_date >=from_date)
-     AND (to_date IS NULL OR sess.visit_date<to_date)
+     AND (to_date IS NULL OR sess.visit_date<=to_date)
   ),
   bird_stats AS (
     -- Calculate per-bird statistics once

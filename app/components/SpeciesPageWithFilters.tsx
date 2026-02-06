@@ -297,8 +297,6 @@ export function SpeciesPageWithFilters({
 		(inView, entry) => {
 			if (inView) {
 				loadMoreBirds();
-			} else {
-				console.log('Element left view', entry.target);
 			}
 		},
 		{ threshold: 0 }
