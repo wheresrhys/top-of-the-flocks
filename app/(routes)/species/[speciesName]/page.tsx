@@ -3,7 +3,7 @@ import { supabase, catchSupabaseErrors } from '@/lib/supabase';
 import { getTopPeriodsByMetric } from '@/app/isomorphic/stats-data-tables';
 import { type TopPeriodsResult } from '@/app/models/db-types';
 import { type EnrichedBirdOfSpecies } from '@/app/models/bird';
-import { SpeciesPageWithFilters } from '@/app/components/SingleSpeciesPageWithFilters';
+import { SpeciesPageWithFilters } from '@/app/components/SingleSpeciesPage';
 import { fetchPageOfBirds } from '@/app/isomorphic/single-species-data';
 import type { SpeciesStatsRow } from '@/app/models/db-types';
 type PageParams = { speciesName: string };
