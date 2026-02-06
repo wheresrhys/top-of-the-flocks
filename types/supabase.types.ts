@@ -200,6 +200,28 @@ export type Database = {
           wing_length: number
         }[]
       }
+      species_stats: {
+        Args: { from_date?: string; to_date?: string }
+        Returns: {
+          avg_weight: number
+          avg_wing: number
+          bird_count: number
+          encounter_count: number
+          max_encounter_count: number
+          max_per_session: number
+          max_proven_age: number
+          max_time_span: number
+          max_weight: number
+          max_wing: number
+          median_weight: number
+          median_wing: number
+          min_weight: number
+          min_wing: number
+          pct_retrapped: number
+          session_count: number
+          species_name: string
+        }[]
+      }
       top_periods_by_metric: {
         Args: {
           exact_months_filter?: string[]

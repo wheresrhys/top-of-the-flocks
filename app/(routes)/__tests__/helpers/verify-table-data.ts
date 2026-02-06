@@ -22,7 +22,7 @@ export function verifyTableData(
 		const cells = getAllByRole(rowEl, 'cell');
 		expect(cells).toHaveLength(row.length);
 		row.map((cell, index) => {
-			expect(cells[index].textContent.trim()).toBe(cell);
+			expect(cells[index].textContent.trim()).toBe(String(cell));
 		});
 	});
 }

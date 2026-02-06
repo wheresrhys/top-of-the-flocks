@@ -1,58 +1,47 @@
 import { BootstrapPageData } from '@/app/components/BootstrapPageData';
-import type { Database } from '@/types/supabase.types';
+import { MultiSpeciesStatsTable } from '@/app/components/MultiSpeciesStatsTable';
+import {
+	fetchSpeciesData,
+	type SpeciesStatsRow
+} from '@/app/isomorphic/multi-species-data';
 import { supabase, catchSupabaseErrors } from '@/lib/supabase';
-import { Table } from '@/app/components/DesignSystem';
-type SpeciesStatsRow = Database['public']['Views']['SpeciesStats']['Row'];
-import { speciesStatsColumns } from '@/app/components/SingleSpeciesStats';
 
-export async function fetchSpeciesData(): Promise<SpeciesStatsRow[]> {
-	return supabase
-		.from('SpeciesStats')
-		.select('*')
-		.order('encounter_count', { ascending: false })
-		.then(catchSupabaseErrors) as Promise<SpeciesStatsRow[]>;
+//TODO get year/date range from URL params
+
+export type PageData = {
+	speciesStats: SpeciesStatsRow[];
+	years: number[];
+};
+
+async function fetchYears(): Promise<number[]> {
+	const dates = (await supabase
+		.from('Sessions')
+		.select('visit_date')
+		.order('visit_date', { ascending: false })
+		.then(catchSupabaseErrors)) as { visit_date: string }[];
+
+	return [
+		...new Set(dates.map((date) => new Date(date.visit_date).getFullYear()))
+	] as number[];
 }
 
-function SpeciesStatsTable({ data }: { data: SpeciesStatsRow[] }) {
-	return (
-		<Table>
-			<thead>
-				<tr>
-					{speciesStatsColumns.map((column) => (
-						<th className="text-wrap" key={column.property}>
-							{column.label}
-						</th>
-					))}
-				</tr>
-			</thead>
-			<tbody>
-				{data.map((species) => (
-					<tr key={species.species_name}>
-						{speciesStatsColumns.map((column) => (
-							<td key={column.property}>
-								{column.Component
-									? column.Component(
-											/* @ts-expect-error - TODO: fix this */
-											species[column.property as keyof SpeciesStatsRow]
-										)
-									: (species[column.property as keyof SpeciesStatsRow] as
-											| string
-											| number)}
-							</td>
-						))}
-					</tr>
-				))}
-			</tbody>
-		</Table>
-	);
+async function fetchInitialPageData(): Promise<PageData> {
+	const [speciesStats, years] = await Promise.all([
+		fetchSpeciesData(),
+		fetchYears()
+	]);
+	return {
+		speciesStats,
+		years
+	};
 }
 
 export default async function AllSpeciesPage() {
 	return (
-		<BootstrapPageData<SpeciesStatsRow[]>
+		<BootstrapPageData<PageData>
 			getCacheKeys={() => ['species']}
-			dataFetcher={fetchSpeciesData}
-			PageComponent={SpeciesStatsTable}
+			dataFetcher={fetchInitialPageData}
+			PageComponent={MultiSpeciesStatsTable}
 		/>
 	);
 }

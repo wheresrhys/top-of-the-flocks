@@ -1,0 +1,162 @@
+'use client';
+import { Table } from '@/app/components/DesignSystem';
+import { speciesStatsColumns } from '@/app/components/SingleSpeciesStats';
+import type { SpeciesStatsRow } from '@/app/isomorphic/multi-species-data';
+import type { PageData } from '@/app/(routes)/species/page';
+import { useState, useEffect, useRef } from 'react';
+import { fetchSpeciesData } from '@/app/isomorphic/multi-species-data';
+export function MultiSpeciesStatsTable({
+	data: { speciesStats: initialSpeciesStats, years }
+}: {
+	data: PageData;
+}) {
+	const formRef = useRef<HTMLFormElement>(null);
+	const [year, setYear] = useState<number | null>(null);
+	const [cesOnly, setCesOnly] = useState<boolean>(false);
+	const [fromDate, setFromDate] = useState<string | null>(null);
+	const [toDate, setToDate] = useState<string | null>(null);
+	const [speciesStats, setSpeciesStats] =
+		useState<SpeciesStatsRow[]>(initialSpeciesStats);
+
+	useEffect(() => {
+		fetchSpeciesData(fromDate ?? undefined, toDate ?? undefined).then(
+			setSpeciesStats
+		);
+	}, [fromDate, toDate]);
+
+	function clearSettings() {
+		setYear(null);
+		setCesOnly(false);
+	}
+
+	function clearDates() {
+		setFromDate(null);
+		setToDate(null);
+	}
+
+	function setDatesFromSettings({
+		year,
+		cesOnly
+	}: {
+		year: number | null;
+		cesOnly: boolean;
+	}) {
+		if (year) {
+			setFromDate(`${year.toString()}-${cesOnly ? '04-25' : '01-01'}`);
+			setToDate(`${year.toString()}-${cesOnly ? '09-05' : '12-31'}`);
+		} else {
+			clearDates();
+		}
+	}
+
+	function handleYearSelect(event: React.ChangeEvent<HTMLSelectElement>) {
+		const year = parseInt(event.target.value) || null;
+		setYear(year);
+		setDatesFromSettings({ year, cesOnly });
+	}
+
+	function handleCesOnlyChange(event: React.ChangeEvent<HTMLInputElement>) {
+		const cesOnly = event.target.checked;
+		setCesOnly(cesOnly);
+		setDatesFromSettings({ year, cesOnly });
+	}
+
+	function handleDateChange(event: React.ChangeEvent<HTMLInputElement>) {
+		const value = event.target.value;
+		const inputType = event.target.id.split('-')[0];
+		clearSettings();
+		if (inputType === 'from') {
+			setFromDate(value);
+		} else {
+			setToDate(value);
+		}
+	}
+
+	return (
+		<div>
+			<form ref={formRef} className="flex gap-2 items-center mt-4">
+				<div className="flex items-center gap-2">
+					<label htmlFor="year-select" className="shrink-0">
+						Filter by year
+					</label>
+					<select
+						id="year-select"
+						className="select max-w-sm appearance-none"
+						aria-label="select"
+						onChange={handleYearSelect}
+						value={year ?? ''}
+					>
+						<option value="">All</option>
+						{years.map((year) => (
+							<option key={year} value={year}>
+								{year}
+							</option>
+						))}
+					</select>
+				</div>
+				<div className="flex items-center gap-2">
+					<label htmlFor="ces-only-checkbox" className="shrink-0">
+						CES only
+					</label>
+					<input
+						id="ces-only-checkbox"
+						type="checkbox"
+						className="checkbox"
+						onChange={handleCesOnlyChange}
+						checked={cesOnly}
+					/>
+				</div>
+				<div className="flex items-center gap-2">
+					<label htmlFor="from-date-input" className="shrink-0">
+						From date
+					</label>
+					<input
+						id="from-date-input"
+						type="date"
+						className="input max-w-sm"
+						onChange={handleDateChange}
+						value={fromDate ?? ''}
+					/>
+					<label htmlFor="to-date-input" className="shrink-0">
+						To date
+					</label>
+					<input
+						id="to-date-input"
+						type="date"
+						className="input max-w-sm"
+						onChange={handleDateChange}
+						value={toDate ?? ''}
+					/>
+				</div>
+			</form>
+			<Table>
+				<thead>
+					<tr>
+						{speciesStatsColumns.map((column) => (
+							<th className="text-wrap" key={column.property}>
+								{column.label}
+							</th>
+						))}
+					</tr>
+				</thead>
+				<tbody>
+					{speciesStats.map((species) => (
+						<tr key={species.species_name}>
+							{speciesStatsColumns.map((column) => (
+								<td key={column.property}>
+									{column.Component
+										? column.Component(
+												species[column.property as keyof SpeciesStatsRow]
+											)
+										: (species[column.property as keyof SpeciesStatsRow] as
+												| string
+												| number)}
+								</td>
+							))}
+						</tr>
+					))}
+				</tbody>
+			</Table>
+		</div>
+	);
+}
