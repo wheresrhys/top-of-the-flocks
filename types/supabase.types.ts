@@ -178,6 +178,28 @@ export type Database = {
           species_name: string
         }[]
       }
+      paginated_birds_table: {
+        Args: {
+          result_limit: number
+          result_offset?: number
+          species_name_param: string
+        }
+        Returns: {
+          age_code: number
+          bird_id: number
+          capture_time: string
+          encounter_id: number
+          is_juv: boolean
+          minimum_years: number
+          record_type: string
+          ring_no: string
+          session_id: number
+          sex: string
+          visit_date: string
+          weight: number
+          wing_length: number
+        }[]
+      }
       top_periods_by_metric: {
         Args: {
           exact_months_filter?: string[]

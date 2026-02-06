@@ -5,13 +5,9 @@ import {
 	getTopPeriodsByMetric,
 	type TopPeriodsResult
 } from '@/app/isomorphic/stats-data-tables';
-import {
-	orderBirdsByRecency,
-	enrichBird,
-	type BirdWithEncounters,
-	type EnrichedBirdWithEncounters
-} from '@/app/lib/bird-model';
+import { type EnrichedBirdWithEncounters } from '@/app/lib/bird-model';
 import { SpeciesPageWithFilters } from '@/app/components/SpeciesPageWithFilters';
+import { fetchPageOfBirds } from '@/app/isomorphic/single-species-data';
 
 type SpeciesStatsRow = Database['public']['Views']['SpeciesStats']['Row'];
 type PageParams = { speciesName: string };
@@ -41,53 +37,10 @@ async function getSpeciesStats(species: string) {
 		.then(catchSupabaseErrors) as Promise<SpeciesStatsRow>;
 }
 
-async function fetchAllBirds(species: string) {
-	const data = (await supabase
-		.from('Species')
-		.select(
-			`
-		birds:Birds (
-			id,
-			ring_no,
-			encounters:Encounters (
-				id,
-				age_code,
-				capture_time,
-				is_juv,
-				minimum_years,
-				record_type,
-				sex,
-				weight,
-				wing_length,
-				session:Sessions(
-					visit_date
-				)
-			)
-		)
-	`
-		)
-		.eq('species_name', species)
-		.maybeSingle()
-		.then(catchSupabaseErrors)) as {
-		birds: BirdWithEncounters[];
-	} | null;
-	if (!data) {
-		return [] as EnrichedBirdWithEncounters[];
-	}
-	return orderBirdsByRecency<EnrichedBirdWithEncounters>(
-		data.birds.map(enrichBird),
-		{
-			direction: 'desc',
-			type: 'last',
-			encountersAlreadySorted: true
-		}
-	);
-}
-
 async function fetchSpeciesData(params: PageParams): Promise<PageData | null> {
 	const [topSessions, birds, speciesStats] = await Promise.all([
 		getTopSessions(params.speciesName),
-		fetchAllBirds(params.speciesName),
+		fetchPageOfBirds(params.speciesName),
 		getSpeciesStats(params.speciesName)
 	]);
 	if (birds.length === 0) return null;
