@@ -10,6 +10,7 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
 export function catchSupabaseErrors<T>(
 	{ data, error }: PostgrestSingleResponse<T>
 ): T | null {
+	console.log(error)
 	if (error) {
 		throw new Error(`Failed to fetch data: ${error.message}`);
 	}
