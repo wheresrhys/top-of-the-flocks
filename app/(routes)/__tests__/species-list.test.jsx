@@ -19,7 +19,7 @@ describe('species list page', () => {
 					'% Birds retrapped',
 					'Max time span',
 					'Max proven age',
-					'Max encountered bird',
+					'Most caught bird',
 					'Max weight',
 					'Avg weight',
 					'Min weight',

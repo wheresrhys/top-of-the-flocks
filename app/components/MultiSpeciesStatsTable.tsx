@@ -15,9 +15,16 @@ export function MultiSpeciesStatsTable({
 	const [cesOnly, setCesOnly] = useState<boolean>(false);
 	const [fromDate, setFromDate] = useState<string | null>(null);
 	const [toDate, setToDate] = useState<string | null>(null);
+	const [sortColumn, setSortColumn] = useState<keyof SpeciesStatsRow | null>(
+		null
+	);
+	const [sortDirection, setSortDirection] = useState<'asc' | 'desc' | null>(
+		null
+	);
+	const [sortIsInverted, setSortIsInverted] = useState<boolean>(false);
 	const [speciesStats, setSpeciesStats] =
 		useState<SpeciesStatsRow[]>(initialSpeciesStats);
-
+	console.log(sortDirection, sortIsInverted);
 	useEffect(() => {
 		fetchSpeciesData(fromDate ?? undefined, toDate ?? undefined).then(
 			setSpeciesStats
@@ -71,6 +78,40 @@ export function MultiSpeciesStatsTable({
 			setToDate(value);
 		}
 	}
+
+	function handleColumnClick(property: string) {
+		if (sortColumn === property) {
+			setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+		} else {
+			setSortColumn(property as keyof SpeciesStatsRow);
+			// TODO hideously inefficient
+			setSortIsInverted(
+				speciesStatsColumns.find((col) => col.property === property)
+					?.invertSort || false
+			);
+			setSortDirection('desc');
+		}
+	}
+
+	const sortedSpeciesStats = speciesStats.sort((a, b) => {
+		const aValue = a[sortColumn as keyof SpeciesStatsRow];
+		const bValue = b[sortColumn as keyof SpeciesStatsRow];
+		let comparisonResult = 0;
+		if (typeof aValue === 'string') {
+			comparisonResult = aValue.localeCompare(bValue as string);
+		} else {
+			if (aValue == bValue) {
+				comparisonResult = 0;
+			} else {
+				comparisonResult = (aValue as number) > (bValue as number) ? 1 : -1;
+			}
+		}
+		return (
+			comparisonResult *
+			(sortDirection === 'asc' ? 1 : -1) *
+			(sortIsInverted ? -1 : 1)
+		);
+	});
 
 	return (
 		<>
@@ -141,14 +182,25 @@ export function MultiSpeciesStatsTable({
 				<thead>
 					<tr>
 						{speciesStatsColumns.map((column) => (
-							<th className="text-wrap" key={column.property}>
-								{column.label}
+							<th
+								className="text-wrap"
+								key={column.property}
+								onClick={() => handleColumnClick(column.property)}
+							>
+								<div className="flex items-center justify-between gap-1">
+									{column.label}
+									{sortColumn === column.property ? (
+										<span
+											className={`icon-[tabler--chevron-${sortDirection === 'asc' ? 'up' : 'down'}] size-4`}
+										></span>
+									) : null}
+								</div>
 							</th>
 						))}
 					</tr>
 				</thead>
 				<tbody>
-					{speciesStats.map((species) => (
+					{sortedSpeciesStats.map((species) => (
 						<tr key={species.species_name}>
 							{speciesStatsColumns.map((column) => (
 								<td key={column.property}>
