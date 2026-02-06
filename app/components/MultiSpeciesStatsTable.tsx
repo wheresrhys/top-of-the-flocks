@@ -1,5 +1,5 @@
 'use client';
-import { Table } from '@/app/components/DesignSystem';
+import { PageWrapper, Table } from '@/app/components/DesignSystem';
 import { speciesStatsColumns } from '@/app/components/SingleSpeciesStats';
 import type { SpeciesStatsRow } from '@/app/isomorphic/multi-species-data';
 import type { PageData } from '@/app/(routes)/species/page';
@@ -73,62 +73,70 @@ export function MultiSpeciesStatsTable({
 	}
 
 	return (
-		<div>
-			<form ref={formRef} className="flex gap-2 items-center mt-4">
-				<div className="flex items-center gap-2">
-					<label htmlFor="year-select" className="shrink-0">
-						Filter by year
-					</label>
-					<select
-						id="year-select"
-						className="select max-w-sm appearance-none"
-						aria-label="select"
-						onChange={handleYearSelect}
-						value={year ?? ''}
-					>
-						<option value="">All</option>
-						{years.map((year) => (
-							<option key={year} value={year}>
-								{year}
-							</option>
-						))}
-					</select>
-				</div>
-				<div className="flex items-center gap-2">
-					<label htmlFor="ces-only-checkbox" className="shrink-0">
-						CES only
-					</label>
-					<input
-						id="ces-only-checkbox"
-						type="checkbox"
-						className="checkbox"
-						onChange={handleCesOnlyChange}
-						checked={cesOnly}
-					/>
-				</div>
-				<div className="flex items-center gap-2">
-					<label htmlFor="from-date-input" className="shrink-0">
-						From date
-					</label>
-					<input
-						id="from-date-input"
-						type="date"
-						className="input max-w-sm"
-						onChange={handleDateChange}
-						value={fromDate ?? ''}
-					/>
-					<label htmlFor="to-date-input" className="shrink-0">
-						To date
-					</label>
-					<input
-						id="to-date-input"
-						type="date"
-						className="input max-w-sm"
-						onChange={handleDateChange}
-						value={toDate ?? ''}
-					/>
-				</div>
-			</form>
+		<>
+			<PageWrapper>
+				<form ref={formRef} className="flex gap-2 flex-wrap justify-end">
+					<div className="flex gap-2">
+						<div className="flex items-center gap-2">
+							<label htmlFor="year-select" className="shrink-0">
+								Year
+							</label>
+							<select
+								id="year-select"
+								className="select max-w-sm appearance-none"
+								aria-label="select"
+								onChange={handleYearSelect}
+								value={year ?? ''}
+							>
+								<option value="">All</option>
+								{years.map((year) => (
+									<option key={year} value={year}>
+										{year}
+									</option>
+								))}
+							</select>
+						</div>
+						<div className="flex items-center gap-2">
+							<label htmlFor="ces-only-checkbox" className="shrink-0">
+								CES only
+							</label>
+							<input
+								id="ces-only-checkbox"
+								type="checkbox"
+								className="checkbox"
+								onChange={handleCesOnlyChange}
+								checked={cesOnly}
+							/>
+						</div>
+					</div>
+					<div className="flex gap-2 flex-wrap justify-end">
+						<div className="flex items-center gap-2">
+							<label htmlFor="from-date-input" className="shrink-0">
+								From date
+							</label>
+							<input
+								id="from-date-input"
+								type="date"
+								className="input max-w-sm"
+								onChange={handleDateChange}
+								value={fromDate ?? ''}
+							/>
+						</div>
+						<div className="flex items-center gap-2">
+							<label htmlFor="to-date-input" className="shrink-0">
+								To date
+							</label>
+							<input
+								id="to-date-input"
+								type="date"
+								className="input max-w-sm"
+								onChange={handleDateChange}
+								value={toDate ?? ''}
+							/>
+						</div>
+					</div>
+				</form>
+			</PageWrapper>
 			<Table>
 				<thead>
 					<tr>
@@ -157,6 +165,6 @@ export function MultiSpeciesStatsTable({
 					))}
 				</tbody>
 			</Table>
-		</div>
+		</>
 	);
 }
