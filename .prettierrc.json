@@ -4,5 +4,8 @@
 	"bracketSpacing": true,
 	"arrowParens": "always",
 	"trailingComma": "none",
-	"useTabs": true
+	"useTabs": true,
+	"plugins": ["prettier-plugin-sql"],
+  "language": "postgresql",
+  "keywordCase": "upper"
 }

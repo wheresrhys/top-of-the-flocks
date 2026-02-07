@@ -1,4 +1,7 @@
-import { createClient, type PostgrestSingleResponse } from '@supabase/supabase-js';
+import {
+	createClient,
+	type PostgrestSingleResponse
+} from '@supabase/supabase-js';
 
 import type { Database } from '@/types/supabase.types';
 
@@ -7,10 +10,11 @@ const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
 
-export function catchSupabaseErrors<T>(
-	{ data, error }: PostgrestSingleResponse<T>
-): T | null {
-	console.log(error)
+export function catchSupabaseErrors<T>({
+	data,
+	error
+}: PostgrestSingleResponse<T>): T | null {
+	console.log(error);
 	if (error) {
 		throw new Error(`Failed to fetch data: ${error.message}`);
 	}

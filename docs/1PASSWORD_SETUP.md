@@ -5,6 +5,7 @@ This project uses 1Password CLI for secure environment variable management.
 ## Prerequisites
 
 1. Install 1Password CLI:
+
    ```bash
    # macOS with Homebrew
    brew install --cask 1password-cli
@@ -13,6 +14,7 @@ This project uses 1Password CLI for secure environment variable management.
    ```
 
 2. Sign in to 1Password CLI:
+
    ```bash
    op signin
    ```
@@ -37,6 +39,7 @@ Environment variables are stored in the **TOTF** vault in 1Password. The mapping
 Create the following items in your **TOTF** vault:
 
 ### Supabase Item
+
 - **Title**: `Supabase`
 - **Fields**:
   - `url`: Your Supabase project URL (e.g., `https://your-project.supabase.co`)
@@ -44,6 +47,7 @@ Create the following items in your **TOTF** vault:
   - `service_role_key`: Your Supabase service role key (for imports)
 
 ### Hasura Item
+
 - **Title**: `Hasura`
 - **Fields**:
   - `endpoint`: Your Hasura GraphQL endpoint
