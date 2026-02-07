@@ -1,11 +1,14 @@
 import { BootstrapPageData } from '@/app/components/layout/BootstrapPageData';
 import { supabase, catchSupabaseErrors } from '@/lib/supabase';
 import { getTopPeriodsByMetric } from '@/app/isomorphic/stats-data-tables';
-import { type TopPeriodsResult } from '@/app/models/db';
 import { type EnrichedBirdOfSpecies } from '@/app/models/bird';
 import { SpeciesPageWithFilters } from '@/app/components/SingleSpeciesPage';
 import { fetchPageOfBirds } from '@/app/isomorphic/single-species-data';
-import type { SpeciesStatsRow } from '@/app/models/db';
+import type {
+	SpeciesStatsRow,
+	TopMetricsFilterParams,
+	TopPeriodsResult
+} from '@/app/models/db';
 type PageParams = { speciesName: string };
 type PageProps = { params: Promise<PageParams> };
 
@@ -19,7 +22,7 @@ function getTopSessions(species: string) {
 	return getTopPeriodsByMetric({
 		temporal_unit: 'day',
 		metric_name: 'encounters',
-		species_filter: species,
+		filters: { species_filter: species } as TopMetricsFilterParams,
 		result_limit: 5
 	}) as Promise<TopPeriodsResult[]>;
 }

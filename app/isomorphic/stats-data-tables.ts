@@ -14,7 +14,7 @@ export async function getTopPeriodsByMetric(
 	options: TopPeriodsArgs
 ): Promise<TopPeriodsResult[] | null> {
 	return supabase
-		.rpc('top_periods_by_metric', options)
+		.rpc('top_metrics_by_period', options)
 		.then(catchSupabaseErrors);
 }
 
@@ -22,7 +22,7 @@ export async function getTopSpeciesByMetric(
 	options: TopSpeciesArgs
 ): Promise<TopSpeciesResult[] | null> {
 	return supabase
-		.rpc('top_species_by_metric', options)
+		.rpc('top_metrics_by_species_and_period', options)
 		.then(catchSupabaseErrors);
 }
 

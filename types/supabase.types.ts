@@ -142,30 +142,21 @@ export type Database = {
       }
     }
     Views: {
-      SpeciesStats: {
-        Row: {
-          avg_weight: number | null
-          avg_wing: number | null
-          bird_count: number | null
-          encounter_count: number | null
-          max_encountered_bird: number | null
-          max_per_session: number | null
-          max_proven_age: number | null
-          max_time_span: number | null
-          max_weight: number | null
-          max_wing: number | null
-          median_weight: number | null
-          median_wing: number | null
-          min_weight: number | null
-          min_wing: number | null
-          pct_retrapped: number | null
-          session_count: number | null
-          species_name: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
+      metrics_by_period_and_species: {
+        Args: {
+          filters?: Database["public"]["CompositeTypes"]["top_metrics_filter_params"]
+          metric_name: string
+          temporal_unit: string
+        }
+        Returns: {
+          metric_value: number
+          species_name: string
+          visit_date: string
+        }[]
+      }
       most_caught_birds: {
         Args: {
           result_limit?: number
@@ -226,6 +217,31 @@ export type Database = {
           species_name: string
         }[]
       }
+      top_metrics_by_period: {
+        Args: {
+          filters?: Database["public"]["CompositeTypes"]["top_metrics_filter_params"]
+          metric_name: string
+          result_limit: number
+          temporal_unit: string
+        }
+        Returns: {
+          metric_value: number
+          visit_date: string
+        }[]
+      }
+      top_metrics_by_species_and_period: {
+        Args: {
+          filters?: Database["public"]["CompositeTypes"]["top_metrics_filter_params"]
+          metric_name: string
+          result_limit: number
+          temporal_unit: string
+        }
+        Returns: {
+          metric_value: number
+          species_name: string
+          visit_date: string
+        }[]
+      }
       top_periods_by_metric: {
         Args: {
           exact_months_filter?: string[]
@@ -263,7 +279,13 @@ export type Database = {
       [_ in never]: never
     }
     CompositeTypes: {
-      [_ in never]: never
+      top_metrics_filter_params: {
+        month_filter: number | null
+        year_filter: number | null
+        exact_months_filter: string[] | null
+        months_filter: number[] | null
+        species_filter: string | null
+      }
     }
   }
 }
