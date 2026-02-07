@@ -8,7 +8,7 @@ import { BootstrapPageData } from '../components/layout/BootstrapPageData';
 import { RingSearchForm } from '../components/RingSearchForm';
 import { PageWrapper } from '../components/shared/DesignSystem';
 import { getTopStats } from '../isomorphic/stats-data-tables';
-
+import { TopMetricsFilterParams } from '../models/db';
 function getStatConfigs(
 	date: Date
 ): { heading: string; stats: StatConfig[] }[] {
@@ -29,7 +29,9 @@ function getStatConfigs(
 					dataArguments: {
 						temporal_unit: 'day',
 						metric_name: 'encounters',
-						months_filter: getSeasonMonths(date, false) as number[]
+						filters: {
+							months_filter: getSeasonMonths(date, false) as number[]
+						} as TopMetricsFilterParams
 					}
 				},
 				{
@@ -39,7 +41,9 @@ function getStatConfigs(
 					dataArguments: {
 						temporal_unit: 'day',
 						metric_name: 'encounters',
-						exact_months_filter: getSeasonMonths(date, true) as string[]
+						filters: {
+							exact_months_filter: getSeasonMonths(date, true) as string[]
+						} as TopMetricsFilterParams
 					}
 				}
 			]
@@ -60,7 +64,9 @@ function getStatConfigs(
 					dataArguments: {
 						temporal_unit: 'day',
 						metric_name: 'species',
-						months_filter: getSeasonMonths(date, false) as number[]
+						filters: {
+							months_filter: getSeasonMonths(date, false) as number[]
+						} as TopMetricsFilterParams
 					}
 				},
 				{
@@ -70,7 +76,9 @@ function getStatConfigs(
 					dataArguments: {
 						temporal_unit: 'day',
 						metric_name: 'species',
-						exact_months_filter: getSeasonMonths(date, true) as string[]
+						filters: {
+							exact_months_filter: getSeasonMonths(date, true) as string[]
+						} as TopMetricsFilterParams
 					}
 				}
 			]
