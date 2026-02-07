@@ -1,6 +1,6 @@
 import {
 	SessionTable,
-	type SpeciesBreakdown
+	type SpeciesWithEncounters
 } from '@/app/components/SingleSessionTable';
 import { supabase, catchSupabaseErrors } from '@/lib/supabase';
 import type { SessionEncounter } from '@/app/models/session';
@@ -55,7 +55,9 @@ async function fetchSessionData({
 	return data.encounters;
 }
 
-function groupBySpecies(encounters: SessionEncounter[]): SpeciesBreakdown[] {
+function groupBySpecies(
+	encounters: SessionEncounter[]
+): SpeciesWithEncounters[] {
 	const map: Record<string, SessionEncounter[]> = {};
 	encounters.forEach((encounter) => {
 		const species = encounter.bird.species.species_name;
@@ -79,7 +81,7 @@ function SessionSummary({
 	data: SessionEncounter[];
 	params: { date: string };
 }) {
-	const speciesBreakdown = groupBySpecies(session);
+	const speciesList = groupBySpecies(session);
 
 	return (
 		<PageWrapper>
@@ -90,14 +92,14 @@ function SessionSummary({
 				testId="session-stats"
 				items={[
 					`${session.length} birds`,
-					`${speciesBreakdown.length} species`,
+					`${speciesList.length} species`,
 					`${session.filter((encounter) => encounter.record_type === 'N').length} new`,
 					`${session.filter((encounter) => encounter.record_type === 'S').length} retraps`,
 					`${session.filter((encounter) => encounter.minimum_years >= 1).length} adults`,
 					`${session.filter((encounter) => encounter.minimum_years === 0).length} juvs`
 				]}
 			/>
-			<SessionTable speciesBreakdown={speciesBreakdown} />
+			<SessionTable speciesList={speciesList} />
 		</PageWrapper>
 	);
 }

@@ -1,15 +1,51 @@
 'use client';
 import { PageWrapper } from '@/app/components/shared/DesignSystem';
-import { speciesStatsColumns } from '@/app/models/species-stats';
+import { speciesStatConfigs } from '@/app/models/species-stats';
 import type { SpeciesStatsRow } from '@/app/models/db';
 import type { PageData } from '@/app/(routes)/species/page';
 import { useState, useEffect, useRef } from 'react';
 import { fetchSpeciesData } from '@/app/isomorphic/multi-species-data';
-import { SortableTable } from '@/app/components/shared/SortableTable';
+import {
+	SortableTable,
+	type ColumnConfig
+} from '@/app/components/shared/SortableTable';
+import Link from 'next/link';
 
-const SpeciesNameLink = speciesStatsColumns[0].Component as (
-	value: string | number
-) => React.ReactNode;
+function MultiSpeciesTableBody({ data }: { data: SpeciesStatsRow[] }) {
+	return (
+		<tbody>
+			{data.map((species) => (
+				<tr key={species.species_name}>
+					{speciesStatConfigs.map((column) =>
+						column.property === 'species_name' ? (
+							<td key={column.property}>
+								<Link
+									className="link text-wrap"
+									href={`/species/${species.species_name}`}
+								>
+									{species.species_name}
+								</Link>
+							</td>
+						) : (
+							<td key={column.property}>{species[column.property]}</td>
+						)
+					)}
+				</tr>
+			))}
+		</tbody>
+	);
+}
+
+const sortableColumnConfigs = speciesStatConfigs.reduce(
+	(acc, column) => ({
+		...acc,
+		[column.property]: {
+			label: column.label,
+			invertSort: column.invertSort
+		}
+	}),
+	{} as Record<keyof SpeciesStatsRow, ColumnConfig>
+);
 
 export function MultiSpeciesStatsTable({
 	data: { speciesStats: initialSpeciesStats, years }
@@ -146,16 +182,11 @@ export function MultiSpeciesStatsTable({
 					</div>
 				</form>
 			</PageWrapper>
-			<SortableTable<SpeciesStatsRow>
-				columnConfigs={speciesStatsColumns}
+			<SortableTable<SpeciesStatsRow, SpeciesStatsRow>
+				columnConfigs={sortableColumnConfigs}
 				data={speciesStats}
-				columnComponents={{
-					species_name: ({ data }: { data: SpeciesStatsRow }) => {
-						console.log(data.species_name);
-						return SpeciesNameLink(data.species_name as string);
-					}
-				}}
-				getRowKey={(row) => row.species_name}
+				rowDataTransform={(data) => data}
+				TableBodyComponent={MultiSpeciesTableBody}
 			/>
 		</>
 	);

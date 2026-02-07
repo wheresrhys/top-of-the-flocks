@@ -4,12 +4,12 @@ import type { PageData } from '@/app/(routes)/species/[speciesName]/page';
 import { StatOutput } from './shared/StatOutput';
 import { UnwrappedBadgeList } from './shared/DesignSystem';
 import type { SpeciesStatsRow } from '@/app/models/db';
-import type { SpeciesStatsColumnConfig } from '@/app/models/species-stats';
-import { speciesStatsColumns } from '@/app/models/species-stats';
+import type { SpeciesStatConfig } from '@/app/models/species-stats';
+import { speciesStatConfigs } from '@/app/models/species-stats';
 
 const categoryOrder: string[] = [];
-const statsByCategory: Record<string, SpeciesStatsColumnConfig[]> =
-	speciesStatsColumns.reduce(
+const statsByCategory: Record<string, SpeciesStatConfig[]> =
+	speciesStatConfigs.reduce(
 		(map, config) => {
 			if (!config.category) return map;
 			if (!categoryOrder.includes(config.category)) {
@@ -19,7 +19,7 @@ const statsByCategory: Record<string, SpeciesStatsColumnConfig[]> =
 			map[config.category].push(config);
 			return map;
 		},
-		{} as Record<string, SpeciesStatsColumnConfig[]>
+		{} as Record<string, SpeciesStatConfig[]>
 	);
 
 function StatsByCategory({ speciesStats }: { speciesStats: SpeciesStatsRow }) {

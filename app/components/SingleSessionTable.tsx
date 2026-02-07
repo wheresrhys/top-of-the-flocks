@@ -2,14 +2,23 @@
 
 import { type SessionEncounter } from '@/app/models/session';
 import Link from 'next/link';
-import { InlineTable, Table } from './shared/DesignSystem';
+import { InlineTable } from './shared/DesignSystem';
 import { AccordionTableBody } from './shared/AccordionTableBody';
-export type SpeciesBreakdown = {
+export type SpeciesWithEncounters = {
 	species: string;
 	encounters: SessionEncounter[];
 };
+import {
+	type ColumnConfig,
+	SortableTable,
+	type RowModelWithRawData
+} from './shared/SortableTable';
 
-function SpeciesNameCell({ model: { species } }: { model: SpeciesBreakdown }) {
+function SpeciesNameCell({
+	model: { species }
+}: {
+	model: RowModelWithRawData<SpeciesWithEncounters, RowModel>;
+}) {
 	return (
 		<Link className="link text-wrap" href={`/species/${species}`}>
 			{species}
@@ -18,9 +27,11 @@ function SpeciesNameCell({ model: { species } }: { model: SpeciesBreakdown }) {
 }
 
 function SpeciesDetailsTable({
-	model: { encounters }
+	model: {
+		_rawRowData: { encounters }
+	}
 }: {
-	model: SpeciesBreakdown;
+	model: RowModelWithRawData<SpeciesWithEncounters, RowModel>;
 }) {
 	return (
 		<InlineTable>
@@ -56,49 +67,93 @@ function SpeciesDetailsTable({
 	);
 }
 
-function SpeciesRow({ model: { encounters } }: { model: SpeciesBreakdown }) {
+type RowModel = {
+	species: string;
+	total: number;
+	new: number;
+	retraps: number;
+	adults: number;
+	juvs: number;
+};
+
+function rowDataTransform(data: SpeciesWithEncounters): RowModel {
+	return {
+		species: data.species,
+		total: data.encounters.length,
+		new: data.encounters.filter((encounter) => encounter.record_type === 'N')
+			.length,
+		retraps: data.encounters.filter(
+			(encounter) => encounter.record_type === 'S'
+		).length,
+		adults: data.encounters.filter((encounter) => encounter.minimum_years >= 1)
+			.length,
+		juvs: data.encounters.filter((encounter) => encounter.minimum_years === 0)
+			.length
+	};
+}
+
+const columnConfigs = {
+	species: {
+		label: 'Species',
+		invertSort: true
+	},
+	total: {
+		label: 'Total'
+	},
+	new: {
+		label: 'New'
+	},
+	retraps: {
+		label: 'Retraps'
+	},
+	adults: {
+		label: 'Adults'
+	},
+	juvs: {
+		label: 'Juvs'
+	}
+} as Record<keyof RowModel, ColumnConfig>;
+
+const orderedColumnProperties = Object.keys(
+	columnConfigs
+) as (keyof RowModel)[];
+
+function SpeciesRow({ model }: { model: RowModel }) {
+	return orderedColumnProperties
+		.slice(1)
+		.map((prop) => <td key={prop}>{model[prop]}</td>);
+}
+
+function SessionTableBody({
+	data
+}: {
+	data: RowModelWithRawData<SpeciesWithEncounters, RowModel>[];
+}) {
 	return (
-		<>
-			<td>
-				{encounters.filter((encounter) => encounter.record_type === 'N').length}
-			</td>
-			<td>
-				{encounters.filter((encounter) => encounter.record_type === 'S').length}
-			</td>
-			<td>
-				{encounters.filter((encounter) => encounter.minimum_years >= 1).length}
-			</td>
-			<td>
-				{encounters.filter((encounter) => encounter.minimum_years === 0).length}
-			</td>
-		</>
+		<AccordionTableBody<RowModelWithRawData<SpeciesWithEncounters, RowModel>>
+			data={data}
+			getKey={(speciesWithEncounters) => speciesWithEncounters.species}
+			columnCount={5}
+			FirstColumnComponent={SpeciesNameCell}
+			RestColumnsComponent={SpeciesRow}
+			ExpandedContentComponent={SpeciesDetailsTable}
+		/>
 	);
 }
 
 export function SessionTable({
-	speciesBreakdown
+	speciesList
 }: {
-	speciesBreakdown: SpeciesBreakdown[];
+	speciesList: SpeciesWithEncounters[];
 }) {
 	return (
-		<Table testId="session-table">
-			<thead>
-				<tr>
-					<th>Species</th>
-					<th>New</th>
-					<th>Retraps</th>
-					<th>Adults</th>
-					<th>Juvs</th>
-				</tr>
-			</thead>
-			<AccordionTableBody<SpeciesBreakdown>
-				data={speciesBreakdown}
-				getKey={(speciesBreakdown) => speciesBreakdown.species}
-				columnCount={5}
-				FirstColumnComponent={SpeciesNameCell}
-				RestColumnsComponent={SpeciesRow}
-				ExpandedContentComponent={SpeciesDetailsTable}
-			/>
-		</Table>
+		<SortableTable<SpeciesWithEncounters, RowModel>
+			columnConfigs={columnConfigs}
+			data={speciesList}
+			testId="session-table"
+			initialSortColumn="total"
+			rowDataTransform={rowDataTransform}
+			TableBodyComponent={SessionTableBody}
+		/>
 	);
 }

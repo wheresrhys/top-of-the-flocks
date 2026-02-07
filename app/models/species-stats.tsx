@@ -1,9 +1,7 @@
 import type { SpeciesStatsRow } from './db';
-import Link from 'next/link';
 
-export type SpeciesStatsColumnConfig = {
+export type SpeciesStatConfig = {
 	label: string;
-	Component?: (value: string | number) => React.ReactNode;
 	property: keyof SpeciesStatsRow;
 	suffix?: string;
 	category?: string;
@@ -11,16 +9,10 @@ export type SpeciesStatsColumnConfig = {
 	invertSort?: boolean;
 };
 
-export const speciesStatsColumns: SpeciesStatsColumnConfig[] = [
+export const speciesStatConfigs: SpeciesStatConfig[] = [
 	{
 		label: 'Species',
 		property: 'species_name',
-		// @ts-expect-error - TODO: fix this
-		Component: (speciesName: string) => (
-			<Link className="link text-wrap" href={`/species/${speciesName}`}>
-				{speciesName}
-			</Link>
-		),
 		invertSort: true
 	},
 	{
