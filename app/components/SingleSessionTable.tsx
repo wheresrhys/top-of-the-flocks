@@ -2,12 +2,17 @@
 
 import { type SessionEncounter } from '@/app/models/session';
 import Link from 'next/link';
-import { InlineTable, Table } from './shared/DesignSystem';
+import { InlineTable } from './shared/DesignSystem';
 import { AccordionTableBody } from './shared/AccordionTableBody';
 export type SpeciesBreakdown = {
 	species: string;
 	encounters: SessionEncounter[];
 };
+import {
+	type ColumnConfig,
+	SortableBodyCell,
+	SortableTable
+} from './shared/SortableTable';
 
 function SpeciesNameCell({ model: { species } }: { model: SpeciesBreakdown }) {
 	return (
@@ -56,22 +61,56 @@ function SpeciesDetailsTable({
 	);
 }
 
-function SpeciesRow({ model: { encounters } }: { model: SpeciesBreakdown }) {
+const columnConfigs = [
+	{ label: 'Species', property: 'species' },
+	{
+		label: 'New',
+		property: 'new',
+		accessor: (row: SpeciesBreakdown) =>
+			row.encounters.filter((encounter) => encounter.record_type === 'N').length
+	},
+	{
+		label: 'Retraps',
+		property: 'retraps',
+		accessor: (row: SpeciesBreakdown) =>
+			row.encounters.filter((encounter) => encounter.record_type === 'S').length
+	},
+	{
+		label: 'Adults',
+		property: 'adults',
+		accessor: (row: SpeciesBreakdown) =>
+			row.encounters.filter((encounter) => encounter.minimum_years >= 1).length
+	},
+	{
+		label: 'Juvs',
+		property: 'juvs',
+		accessor: (row: SpeciesBreakdown) =>
+			row.encounters.filter((encounter) => encounter.minimum_years === 0).length
+	}
+] as ColumnConfig<SpeciesBreakdown>[];
+
+function SpeciesRow({ model }: { model: SpeciesBreakdown }) {
+	return columnConfigs
+		.slice(1)
+		.map((column) => (
+			<SortableBodyCell
+				key={column.property}
+				columnConfig={column}
+				data={model}
+			/>
+		));
+}
+
+function SessionTableBody({ data }: { data: SpeciesBreakdown[] }) {
 	return (
-		<>
-			<td>
-				{encounters.filter((encounter) => encounter.record_type === 'N').length}
-			</td>
-			<td>
-				{encounters.filter((encounter) => encounter.record_type === 'S').length}
-			</td>
-			<td>
-				{encounters.filter((encounter) => encounter.minimum_years >= 1).length}
-			</td>
-			<td>
-				{encounters.filter((encounter) => encounter.minimum_years === 0).length}
-			</td>
-		</>
+		<AccordionTableBody<SpeciesBreakdown>
+			data={data}
+			getKey={(speciesBreakdown) => speciesBreakdown.species}
+			columnCount={5}
+			FirstColumnComponent={SpeciesNameCell}
+			RestColumnsComponent={SpeciesRow}
+			ExpandedContentComponent={SpeciesDetailsTable}
+		/>
 	);
 }
 
@@ -81,24 +120,10 @@ export function SessionTable({
 	speciesBreakdown: SpeciesBreakdown[];
 }) {
 	return (
-		<Table testId="session-table">
-			<thead>
-				<tr>
-					<th>Species</th>
-					<th>New</th>
-					<th>Retraps</th>
-					<th>Adults</th>
-					<th>Juvs</th>
-				</tr>
-			</thead>
-			<AccordionTableBody<SpeciesBreakdown>
-				data={speciesBreakdown}
-				getKey={(speciesBreakdown) => speciesBreakdown.species}
-				columnCount={5}
-				FirstColumnComponent={SpeciesNameCell}
-				RestColumnsComponent={SpeciesRow}
-				ExpandedContentComponent={SpeciesDetailsTable}
-			/>
-		</Table>
+		<SortableTable<SpeciesBreakdown>
+			columnConfigs={columnConfigs}
+			data={speciesBreakdown}
+			TableBodyComponent={SessionTableBody}
+		/>
 	);
 }
