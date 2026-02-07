@@ -5,11 +5,38 @@ import type { SpeciesStatsRow } from '@/app/models/db';
 import type { PageData } from '@/app/(routes)/species/page';
 import { useState, useEffect, useRef } from 'react';
 import { fetchSpeciesData } from '@/app/isomorphic/multi-species-data';
-import { SortableTable } from '@/app/components/shared/SortableTable';
+import {
+	SortableTable,
+	SortableBodyCell
+} from '@/app/components/shared/SortableTable';
 
-const SpeciesNameLink = speciesStatsColumns[0].Component as (
-	value: string | number
-) => React.ReactNode;
+const SpeciesNameLink = speciesStatsColumns.find(
+	({ property }) => property === 'species_name'
+)?.Component as (value: string | number) => React.ReactNode;
+
+function MultiSpeciesTableBody({ data }: { data: SpeciesStatsRow[] }) {
+	return (
+		<tbody>
+			{data.map((species) => (
+				<tr key={species.species_name}>
+					{speciesStatsColumns.map((column) =>
+						column.property === 'species_name' ? (
+							<td key={column.property}>
+								{SpeciesNameLink(species.species_name as string)}
+							</td>
+						) : (
+							<SortableBodyCell
+								key={column.property}
+								columnConfig={column}
+								data={species}
+							/>
+						)
+					)}
+				</tr>
+			))}
+		</tbody>
+	);
+}
 
 export function MultiSpeciesStatsTable({
 	data: { speciesStats: initialSpeciesStats, years }
@@ -149,13 +176,7 @@ export function MultiSpeciesStatsTable({
 			<SortableTable<SpeciesStatsRow>
 				columnConfigs={speciesStatsColumns}
 				data={speciesStats}
-				columnComponents={{
-					species_name: ({ data }: { data: SpeciesStatsRow }) => {
-						console.log(data.species_name);
-						return SpeciesNameLink(data.species_name as string);
-					}
-				}}
-				getRowKey={(row) => row.species_name}
+				TableBodyComponent={MultiSpeciesTableBody}
 			/>
 		</>
 	);

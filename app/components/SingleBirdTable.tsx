@@ -1,7 +1,11 @@
 'use client';
 import type { EncounterOfBird } from '@/app/models/bird';
 import { InlineTable } from './shared/DesignSystem';
-import { SortableTable, type ColumnConfig } from './shared/SortableTable';
+import {
+	SortableTable,
+	SortableBodyCell,
+	type ColumnConfig
+} from './shared/SortableTable';
 
 const columnConfigs = [
 	{
@@ -30,6 +34,24 @@ const columnConfigs = [
 		property: 'weight'
 	}
 ] as ColumnConfig<EncounterOfBird>[];
+
+function SingleBirdTableBody({ data }: { data: EncounterOfBird[] }) {
+	return (
+		<tbody>
+			{data.map((encounter) => (
+				<tr key={encounter.id}>
+					{columnConfigs.map((column) => (
+						<SortableBodyCell
+							key={column.property}
+							columnConfig={column}
+							data={encounter}
+						/>
+					))}
+				</tr>
+			))}
+		</tbody>
+	);
+}
 
 export function SingleBirdTable({
 	encounters,
@@ -64,15 +86,12 @@ export function SingleBirdTable({
 			</InlineTable>
 		);
 	} else {
-		function getKey(row: EncounterOfBird) {
-			return row.id.toString();
-		}
 		return (
 			<SortableTable<EncounterOfBird>
 				columnConfigs={columnConfigs}
 				data={encounters}
 				testId="single-bird-table"
-				getRowKey={getKey}
+				TableBodyComponent={SingleBirdTableBody}
 			/>
 		);
 	}

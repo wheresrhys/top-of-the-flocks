@@ -9,48 +9,37 @@ export type ColumnConfig<RowModel> = {
 	accessor?: (row: RowModel) => string;
 };
 
-type RenderingOverrides<RowModel> =
-	| {
-			TableBodyComponent: React.ComponentType<{ data: RowModel[] }>;
-			RowComponent?: never;
-			columnComponents?: never;
-			getRowKey?: never;
-	  }
-	| {
-			RowComponent: React.ComponentType<{ data: RowModel }>;
-			getRowKey: (row: RowModel) => string;
-			TableBodyComponent?: never;
-			columnComponents?: never;
-	  }
-	| {
-			columnComponents?: Partial<
-				Record<keyof RowModel, React.ComponentType<{ data: RowModel }>>
-			>;
-			getRowKey: (row: RowModel) => string;
-			TableBodyComponent?: never;
-			RowComponent?: never;
-	  };
-
 type SortableTableProps<RowModel> = {
 	columnConfigs: ColumnConfig<RowModel>[];
 	data: RowModel[];
 	testId?: string;
 	initialSortColumn?: keyof RowModel;
+	TableBodyComponent: React.ComponentType<{ data: RowModel[] }>;
 };
+
+export function SortableBodyCell<RowModel>({
+	columnConfig,
+	data
+}: {
+	columnConfig: ColumnConfig<RowModel>;
+	data: RowModel;
+}) {
+	return (
+		<td>
+			{columnConfig.accessor
+				? columnConfig.accessor(data)
+				: (data[columnConfig.property] as string | number | boolean)}
+		</td>
+	);
+}
 
 export function SortableTable<RowModel>({
 	columnConfigs,
 	data,
 	initialSortColumn,
-	RowComponent,
-	TableBodyComponent,
-	getRowKey,
 	testId,
-	columnComponents = {} as Record<
-		keyof RowModel,
-		React.ComponentType<{ data: RowModel }>
-	>
-}: SortableTableProps<RowModel> & RenderingOverrides<RowModel>) {
+	TableBodyComponent
+}: SortableTableProps<RowModel>) {
 	const columnConfigMap = columnConfigs.reduce(
 		(acc, columnConfig) => {
 			acc[columnConfig.property] = columnConfig;
@@ -123,39 +112,7 @@ export function SortableTable<RowModel>({
 					))}
 				</tr>
 			</thead>
-			{TableBodyComponent ? (
-				<TableBodyComponent data={sortedData} />
-			) : (
-				<tbody>
-					{sortedData.map((row) => {
-						const rowKey = getRowKey(row);
-						if (RowComponent) {
-							return <RowComponent key={rowKey} data={row} />;
-						} else {
-							return (
-								<tr key={rowKey}>
-									{columnConfigs.map((column) => {
-										const Component = columnComponents[column.property] as
-											| React.ComponentType<{ data: RowModel }>
-											| undefined;
-										return (
-											<td key={column.property as string}>
-												{Component ? (
-													<Component data={row} />
-												) : column.accessor ? (
-													column.accessor(row)
-												) : (
-													(row[column.property] as string | number | boolean)
-												)}
-											</td>
-										);
-									})}
-								</tr>
-							);
-						}
-					})}
-				</tbody>
-			)}
+			<TableBodyComponent data={sortedData} />
 		</Table>
 	);
 }
