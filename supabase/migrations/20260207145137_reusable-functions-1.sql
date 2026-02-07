@@ -1,80 +1,81 @@
+SET
+	statement_timeout = 0;
 
+SET
+	lock_timeout = 0;
 
+SET
+	idle_in_transaction_session_timeout = 0;
 
-SET statement_timeout = 0;
-SET lock_timeout = 0;
-SET idle_in_transaction_session_timeout = 0;
-SET client_encoding = 'UTF8';
-SET standard_conforming_strings = on;
-SELECT pg_catalog.set_config('search_path', '', false);
-SET check_function_bodies = false;
-SET xmloption = content;
-SET client_min_messages = warning;
-SET row_security = off;
+SET
+	client_encoding = 'UTF8';
 
+SET
+	standard_conforming_strings = ON;
 
-CREATE EXTENSION IF NOT EXISTS "pg_net" WITH SCHEMA "extensions";
+SELECT
+	pg_catalog.set_config ('search_path', '', FALSE);
 
+SET
+	check_function_bodies = FALSE;
 
+SET
+	xmloption = content;
 
+SET
+	client_min_messages = warning;
 
+SET
+	row_security = off;
 
+CREATE EXTENSION IF NOT EXISTS "pg_net"
+WITH
+	SCHEMA "extensions";
 
 COMMENT ON SCHEMA "public" IS '@graphql({"inflect_names": true})';
 
+CREATE EXTENSION IF NOT EXISTS "pg_graphql"
+WITH
+	SCHEMA "graphql";
 
+CREATE EXTENSION IF NOT EXISTS "pg_stat_statements"
+WITH
+	SCHEMA "extensions";
 
-CREATE EXTENSION IF NOT EXISTS "pg_graphql" WITH SCHEMA "graphql";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto"
+WITH
+	SCHEMA "extensions";
 
+CREATE EXTENSION IF NOT EXISTS "supabase_vault"
+WITH
+	SCHEMA "vault";
 
-
-
-
-
-CREATE EXTENSION IF NOT EXISTS "pg_stat_statements" WITH SCHEMA "extensions";
-
-
-
-
-
-
-CREATE EXTENSION IF NOT EXISTS "pgcrypto" WITH SCHEMA "extensions";
-
-
-
-
-
-
-CREATE EXTENSION IF NOT EXISTS "supabase_vault" WITH SCHEMA "vault";
-
-
-
-
-
-
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA "extensions";
-
-
-
-
-
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp"
+WITH
+	SCHEMA "extensions";
 
 CREATE TYPE "public"."top_metrics_filter_params" AS (
 	"month_filter" integer,
 	"year_filter" integer,
-	"exact_months_filter" "text"[],
-	"months_filter" integer[],
+	"exact_months_filter" "text" [],
+	"months_filter" INTEGER[],
 	"species_filter" "text"
 );
 
-
 ALTER TYPE "public"."top_metrics_filter_params" OWNER TO "postgres";
 
-
-CREATE OR REPLACE FUNCTION "public"."metrics_by_period_and_species"("temporal_unit" "text", "metric_name" "text", "filters" "public"."top_metrics_filter_params" DEFAULT NULL::"public"."top_metrics_filter_params") RETURNS TABLE("species_name" "text", "visit_date" "date", "metric_value" bigint)
-    LANGUAGE "plpgsql" STABLE
-    SET "search_path" TO 'public', 'pg_catalog'
-    AS $$
+CREATE OR REPLACE FUNCTION "public"."metrics_by_period_and_species" (
+	"temporal_unit" "text",
+	"metric_name" "text",
+	"filters" "public"."top_metrics_filter_params" DEFAULT NULL::"public"."top_metrics_filter_params"
+) RETURNS TABLE (
+	"species_name" "text",
+	"visit_date" "date",
+	"metric_value" bigint
+) LANGUAGE "plpgsql" STABLE
+SET
+	"search_path" TO 'public',
+	'pg_catalog' AS $$
 BEGIN
   RETURN QUERY
   SELECT
@@ -102,14 +103,24 @@ BEGIN
 END;
 $$;
 
+ALTER FUNCTION "public"."metrics_by_period_and_species" (
+	"temporal_unit" "text",
+	"metric_name" "text",
+	"filters" "public"."top_metrics_filter_params"
+) OWNER TO "postgres";
 
-ALTER FUNCTION "public"."metrics_by_period_and_species"("temporal_unit" "text", "metric_name" "text", "filters" "public"."top_metrics_filter_params") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."most_caught_birds"("result_limit" integer DEFAULT 5, "species_filter" "text" DEFAULT NULL::"text", "year_filter" integer DEFAULT NULL::integer) RETURNS TABLE("species_name" "text", "ring_no" "text", "encounters" bigint)
-    LANGUAGE "plpgsql" STABLE
-    SET "search_path" TO 'public', 'pg_catalog'
-    AS $$
+CREATE OR REPLACE FUNCTION "public"."most_caught_birds" (
+	"result_limit" integer DEFAULT 5,
+	"species_filter" "text" DEFAULT NULL::"text",
+	"year_filter" integer DEFAULT NULL::integer
+) RETURNS TABLE (
+	"species_name" "text",
+	"ring_no" "text",
+	"encounters" bigint
+) LANGUAGE "plpgsql" STABLE
+SET
+	"search_path" TO 'public',
+	'pg_catalog' AS $$
 BEGIN
   RETURN QUERY
   SELECT
@@ -132,13 +143,31 @@ BEGIN
 END;
 $$;
 
+ALTER FUNCTION "public"."most_caught_birds" (
+	"result_limit" integer,
+	"species_filter" "text",
+	"year_filter" integer
+) OWNER TO "postgres";
 
-ALTER FUNCTION "public"."most_caught_birds"("result_limit" integer, "species_filter" "text", "year_filter" integer) OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."paginated_birds_table"("species_name_param" "text", "result_limit" integer, "result_offset" integer DEFAULT 0) RETURNS TABLE("encounter_id" bigint, "session_id" bigint, "bird_id" bigint, "visit_date" "date", "capture_time" time without time zone, "ring_no" "text", "age_code" smallint, "is_juv" boolean, "minimum_years" smallint, "record_type" "text", "sex" "text", "weight" real, "wing_length" smallint)
-    LANGUAGE "plpgsql"
-    AS $$
+CREATE OR REPLACE FUNCTION "public"."paginated_birds_table" (
+	"species_name_param" "text",
+	"result_limit" integer,
+	"result_offset" integer DEFAULT 0
+) RETURNS TABLE (
+	"encounter_id" bigint,
+	"session_id" bigint,
+	"bird_id" bigint,
+	"visit_date" "date",
+	"capture_time" time without time zone,
+	"ring_no" "text",
+	"age_code" smallint,
+	"is_juv" boolean,
+	"minimum_years" smallint,
+	"record_type" "text",
+	"sex" "text",
+	"weight" real,
+	"wing_length" smallint
+) LANGUAGE "plpgsql" AS $$
 BEGIN
   RETURN QUERY
  WITH bird_last_encounters AS (
@@ -193,13 +222,35 @@ BEGIN
 END;
 $$;
 
+ALTER FUNCTION "public"."paginated_birds_table" (
+	"species_name_param" "text",
+	"result_limit" integer,
+	"result_offset" integer
+) OWNER TO "postgres";
 
-ALTER FUNCTION "public"."paginated_birds_table"("species_name_param" "text", "result_limit" integer, "result_offset" integer) OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."species_stats"("species_name_filter" "text" DEFAULT NULL::"text", "from_date" "date" DEFAULT NULL::"date", "to_date" "date" DEFAULT NULL::"date") RETURNS TABLE("species_name" "text", "bird_count" bigint, "encounter_count" bigint, "session_count" bigint, "max_weight" real, "avg_weight" numeric, "min_weight" real, "median_weight" numeric, "max_wing" smallint, "avg_wing" numeric, "min_wing" smallint, "median_wing" numeric, "max_encountered_bird" bigint, "pct_retrapped" numeric, "max_time_span" numeric, "max_per_session" bigint, "max_proven_age" numeric)
-    LANGUAGE "plpgsql"
-    AS $$
+CREATE OR REPLACE FUNCTION "public"."species_stats" (
+	"species_name_filter" "text" DEFAULT NULL::"text",
+	"from_date" "date" DEFAULT NULL::"date",
+	"to_date" "date" DEFAULT NULL::"date"
+) RETURNS TABLE (
+	"species_name" "text",
+	"bird_count" bigint,
+	"encounter_count" bigint,
+	"session_count" bigint,
+	"max_weight" real,
+	"avg_weight" numeric,
+	"min_weight" real,
+	"median_weight" numeric,
+	"max_wing" smallint,
+	"avg_wing" numeric,
+	"min_wing" smallint,
+	"median_wing" numeric,
+	"max_encountered_bird" bigint,
+	"pct_retrapped" numeric,
+	"max_time_span" numeric,
+	"max_per_session" bigint,
+	"max_proven_age" numeric
+) LANGUAGE "plpgsql" AS $$
   BEGIN
   RETURN QUERY
   WITH species_encounters AS (
@@ -300,14 +351,21 @@ CREATE OR REPLACE FUNCTION "public"."species_stats"("species_name_filter" "text"
 END;
 $$;
 
+ALTER FUNCTION "public"."species_stats" (
+	"species_name_filter" "text",
+	"from_date" "date",
+	"to_date" "date"
+) OWNER TO "postgres";
 
-ALTER FUNCTION "public"."species_stats"("species_name_filter" "text", "from_date" "date", "to_date" "date") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."top_metrics_by_period"("temporal_unit" "text", "metric_name" "text", "result_limit" integer, "filters" "public"."top_metrics_filter_params" DEFAULT NULL::"public"."top_metrics_filter_params") RETURNS TABLE("visit_date" "date", "metric_value" bigint)
-    LANGUAGE "plpgsql" STABLE
-    SET "search_path" TO 'public', 'pg_catalog'
-    AS $$
+CREATE OR REPLACE FUNCTION "public"."top_metrics_by_period" (
+	"temporal_unit" "text",
+	"metric_name" "text",
+	"result_limit" integer,
+	"filters" "public"."top_metrics_filter_params" DEFAULT NULL::"public"."top_metrics_filter_params"
+) RETURNS TABLE ("visit_date" "date", "metric_value" bigint) LANGUAGE "plpgsql" STABLE
+SET
+	"search_path" TO 'public',
+	'pg_catalog' AS $$
 BEGIN
   RETURN QUERY
   WITH by_period_and_species AS (
@@ -330,14 +388,26 @@ BEGIN
 END;
 $$;
 
+ALTER FUNCTION "public"."top_metrics_by_period" (
+	"temporal_unit" "text",
+	"metric_name" "text",
+	"result_limit" integer,
+	"filters" "public"."top_metrics_filter_params"
+) OWNER TO "postgres";
 
-ALTER FUNCTION "public"."top_metrics_by_period"("temporal_unit" "text", "metric_name" "text", "result_limit" integer, "filters" "public"."top_metrics_filter_params") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."top_metrics_by_species_and_period"("temporal_unit" "text", "metric_name" "text", "result_limit" integer, "filters" "public"."top_metrics_filter_params" DEFAULT NULL::"public"."top_metrics_filter_params") RETURNS TABLE("species_name" "text", "visit_date" "date", "metric_value" bigint)
-    LANGUAGE "plpgsql" STABLE
-    SET "search_path" TO 'public', 'pg_catalog'
-    AS $$
+CREATE OR REPLACE FUNCTION "public"."top_metrics_by_species_and_period" (
+	"temporal_unit" "text",
+	"metric_name" "text",
+	"result_limit" integer,
+	"filters" "public"."top_metrics_filter_params" DEFAULT NULL::"public"."top_metrics_filter_params"
+) RETURNS TABLE (
+	"species_name" "text",
+	"visit_date" "date",
+	"metric_value" bigint
+) LANGUAGE "plpgsql" STABLE
+SET
+	"search_path" TO 'public',
+	'pg_catalog' AS $$
 BEGIN
   RETURN QUERY
   WITH by_period_and_species AS (
@@ -359,14 +429,26 @@ BEGIN
 END;
 $$;
 
+ALTER FUNCTION "public"."top_metrics_by_species_and_period" (
+	"temporal_unit" "text",
+	"metric_name" "text",
+	"result_limit" integer,
+	"filters" "public"."top_metrics_filter_params"
+) OWNER TO "postgres";
 
-ALTER FUNCTION "public"."top_metrics_by_species_and_period"("temporal_unit" "text", "metric_name" "text", "result_limit" integer, "filters" "public"."top_metrics_filter_params") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."top_periods_by_metric"("temporal_unit" "text", "metric_name" "text", "result_limit" integer, "month_filter" integer DEFAULT NULL::integer, "year_filter" integer DEFAULT NULL::integer, "exact_months_filter" "text"[] DEFAULT NULL::"text"[], "months_filter" integer[] DEFAULT NULL::integer[], "species_filter" "text" DEFAULT NULL::"text") RETURNS TABLE("visit_date" "date", "metric_value" bigint)
-    LANGUAGE "plpgsql" STABLE
-    SET "search_path" TO 'public', 'pg_catalog'
-    AS $$
+CREATE OR REPLACE FUNCTION "public"."top_periods_by_metric" (
+	"temporal_unit" "text",
+	"metric_name" "text",
+	"result_limit" integer,
+	"month_filter" integer DEFAULT NULL::integer,
+	"year_filter" integer DEFAULT NULL::integer,
+	"exact_months_filter" "text" [] DEFAULT NULL::"text" [],
+	"months_filter" INTEGER[] DEFAULT NULL::INTEGER[],
+	"species_filter" "text" DEFAULT NULL::"text"
+) RETURNS TABLE ("visit_date" "date", "metric_value" bigint) LANGUAGE "plpgsql" STABLE
+SET
+	"search_path" TO 'public',
+	'pg_catalog' AS $$
 BEGIN
   RETURN QUERY
   SELECT
@@ -397,14 +479,33 @@ BEGIN
 END;
 $$;
 
+ALTER FUNCTION "public"."top_periods_by_metric" (
+	"temporal_unit" "text",
+	"metric_name" "text",
+	"result_limit" integer,
+	"month_filter" integer,
+	"year_filter" integer,
+	"exact_months_filter" "text" [],
+	"months_filter" INTEGER[],
+	"species_filter" "text"
+) OWNER TO "postgres";
 
-ALTER FUNCTION "public"."top_periods_by_metric"("temporal_unit" "text", "metric_name" "text", "result_limit" integer, "month_filter" integer, "year_filter" integer, "exact_months_filter" "text"[], "months_filter" integer[], "species_filter" "text") OWNER TO "postgres";
-
-
-CREATE OR REPLACE FUNCTION "public"."top_species_by_metric"("temporal_unit" "text", "metric_name" "text", "result_limit" integer, "month_filter" integer DEFAULT NULL::integer, "year_filter" integer DEFAULT NULL::integer, "exact_months_filter" "text"[] DEFAULT NULL::"text"[], "months_filter" integer[] DEFAULT NULL::integer[]) RETURNS TABLE("species_name" "text", "visit_date" "date", "metric_value" bigint)
-    LANGUAGE "plpgsql" STABLE
-    SET "search_path" TO 'public', 'pg_catalog'
-    AS $$
+CREATE OR REPLACE FUNCTION "public"."top_species_by_metric" (
+	"temporal_unit" "text",
+	"metric_name" "text",
+	"result_limit" integer,
+	"month_filter" integer DEFAULT NULL::integer,
+	"year_filter" integer DEFAULT NULL::integer,
+	"exact_months_filter" "text" [] DEFAULT NULL::"text" [],
+	"months_filter" INTEGER[] DEFAULT NULL::INTEGER[]
+) RETURNS TABLE (
+	"species_name" "text",
+	"visit_date" "date",
+	"metric_value" bigint
+) LANGUAGE "plpgsql" STABLE
+SET
+	"search_path" TO 'public',
+	'pg_catalog' AS $$
 BEGIN
   RETURN QUERY
   SELECT
@@ -436,566 +537,430 @@ BEGIN
 END;
 $$;
 
+ALTER FUNCTION "public"."top_species_by_metric" (
+	"temporal_unit" "text",
+	"metric_name" "text",
+	"result_limit" integer,
+	"month_filter" integer,
+	"year_filter" integer,
+	"exact_months_filter" "text" [],
+	"months_filter" INTEGER[]
+) OWNER TO "postgres";
 
-ALTER FUNCTION "public"."top_species_by_metric"("temporal_unit" "text", "metric_name" "text", "result_limit" integer, "month_filter" integer, "year_filter" integer, "exact_months_filter" "text"[], "months_filter" integer[]) OWNER TO "postgres";
+SET
+	default_tablespace = '';
 
-SET default_tablespace = '';
-
-SET default_table_access_method = "heap";
-
+SET
+	default_table_access_method = "heap";
 
 CREATE TABLE IF NOT EXISTS "public"."Birds" (
-    "ring_no" "text" NOT NULL,
-    "id" bigint NOT NULL,
-    "species_id" bigint NOT NULL
+	"ring_no" "text" NOT NULL,
+	"id" bigint NOT NULL,
+	"species_id" bigint NOT NULL
 );
-
 
 ALTER TABLE "public"."Birds" OWNER TO "postgres";
 
-
 COMMENT ON TABLE "public"."Birds" IS '@graphql({"aggregate": {"enabled": true}})';
 
-
-
-CREATE SEQUENCE IF NOT EXISTS "public"."Birds_id_seq"
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
+CREATE SEQUENCE IF NOT EXISTS "public"."Birds_id_seq" START
+WITH
+	1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
 
 ALTER SEQUENCE "public"."Birds_id_seq" OWNER TO "postgres";
 
-
 ALTER SEQUENCE "public"."Birds_id_seq" OWNED BY "public"."Birds"."id";
 
-
-
 CREATE TABLE IF NOT EXISTS "public"."Encounters" (
-    "capture_time" time without time zone NOT NULL,
-    "record_type" "text" NOT NULL,
-    "scheme" "text" NOT NULL,
-    "sex" "text" NOT NULL,
-    "sexing_method" "text",
-    "breeding_condition" "text",
-    "wing_length" smallint,
-    "weight" real,
-    "moult_code" "text",
-    "old_greater_coverts" smallint,
-    "extra_text" "text",
-    "is_juv" boolean DEFAULT false NOT NULL,
-    "id" bigint NOT NULL,
-    "bird_id" bigint NOT NULL,
-    "session_id" bigint NOT NULL,
-    "age_code" smallint NOT NULL,
-    "minimum_years" smallint NOT NULL
+	"capture_time" time without time zone NOT NULL,
+	"record_type" "text" NOT NULL,
+	"scheme" "text" NOT NULL,
+	"sex" "text" NOT NULL,
+	"sexing_method" "text",
+	"breeding_condition" "text",
+	"wing_length" smallint,
+	"weight" real,
+	"moult_code" "text",
+	"old_greater_coverts" smallint,
+	"extra_text" "text",
+	"is_juv" boolean DEFAULT FALSE NOT NULL,
+	"id" bigint NOT NULL,
+	"bird_id" bigint NOT NULL,
+	"session_id" bigint NOT NULL,
+	"age_code" smallint NOT NULL,
+	"minimum_years" smallint NOT NULL
 );
-
 
 ALTER TABLE "public"."Encounters" OWNER TO "postgres";
 
-
 COMMENT ON TABLE "public"."Encounters" IS 'Encounters with individual birds';
 
-
-
-CREATE SEQUENCE IF NOT EXISTS "public"."Encounters_id_seq"
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
+CREATE SEQUENCE IF NOT EXISTS "public"."Encounters_id_seq" START
+WITH
+	1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
 
 ALTER SEQUENCE "public"."Encounters_id_seq" OWNER TO "postgres";
 
-
 ALTER SEQUENCE "public"."Encounters_id_seq" OWNED BY "public"."Encounters"."id";
 
-
-
 CREATE TABLE IF NOT EXISTS "public"."Sessions" (
-    "id" bigint NOT NULL,
-    "visit_date" "date" NOT NULL
+	"id" bigint NOT NULL,
+	"visit_date" "date" NOT NULL
 );
-
 
 ALTER TABLE "public"."Sessions" OWNER TO "postgres";
 
-
-CREATE SEQUENCE IF NOT EXISTS "public"."Sessions_id_seq"
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
+CREATE SEQUENCE IF NOT EXISTS "public"."Sessions_id_seq" START
+WITH
+	1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
 
 ALTER SEQUENCE "public"."Sessions_id_seq" OWNER TO "postgres";
 
-
 ALTER SEQUENCE "public"."Sessions_id_seq" OWNED BY "public"."Sessions"."id";
 
-
-
 CREATE TABLE IF NOT EXISTS "public"."Species" (
-    "species_name" "text" NOT NULL,
-    "id" bigint NOT NULL
+	"species_name" "text" NOT NULL,
+	"id" bigint NOT NULL
 );
-
 
 ALTER TABLE "public"."Species" OWNER TO "postgres";
 
-
 COMMENT ON TABLE "public"."Species" IS 'Bird Species';
 
-
-
-CREATE SEQUENCE IF NOT EXISTS "public"."Species_id_seq"
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
+CREATE SEQUENCE IF NOT EXISTS "public"."Species_id_seq" START
+WITH
+	1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
 
 ALTER SEQUENCE "public"."Species_id_seq" OWNER TO "postgres";
 
-
 ALTER SEQUENCE "public"."Species_id_seq" OWNED BY "public"."Species"."id";
 
-
-
-ALTER TABLE ONLY "public"."Birds" ALTER COLUMN "id" SET DEFAULT "nextval"('"public"."Birds_id_seq"'::"regclass");
-
-
-
-ALTER TABLE ONLY "public"."Encounters" ALTER COLUMN "id" SET DEFAULT "nextval"('"public"."Encounters_id_seq"'::"regclass");
-
-
-
-ALTER TABLE ONLY "public"."Sessions" ALTER COLUMN "id" SET DEFAULT "nextval"('"public"."Sessions_id_seq"'::"regclass");
-
-
-
-ALTER TABLE ONLY "public"."Species" ALTER COLUMN "id" SET DEFAULT "nextval"('"public"."Species_id_seq"'::"regclass");
-
-
-
 ALTER TABLE ONLY "public"."Birds"
-    ADD CONSTRAINT "Birds_pkey" PRIMARY KEY ("id");
-
-
+ALTER COLUMN "id"
+SET DEFAULT "nextval" ('"public"."Birds_id_seq"'::"regclass");
 
 ALTER TABLE ONLY "public"."Encounters"
-    ADD CONSTRAINT "Encounters_pkey" PRIMARY KEY ("id");
-
-
-
-ALTER TABLE ONLY "public"."Sessions"
-    ADD CONSTRAINT "Sessions_pkey" PRIMARY KEY ("id");
-
-
+ALTER COLUMN "id"
+SET DEFAULT "nextval" ('"public"."Encounters_id_seq"'::"regclass");
 
 ALTER TABLE ONLY "public"."Sessions"
-    ADD CONSTRAINT "Sessions_visit_date_key" UNIQUE ("visit_date");
-
-
+ALTER COLUMN "id"
+SET DEFAULT "nextval" ('"public"."Sessions_id_seq"'::"regclass");
 
 ALTER TABLE ONLY "public"."Species"
-    ADD CONSTRAINT "Species_pkey" PRIMARY KEY ("id");
-
-
+ALTER COLUMN "id"
+SET DEFAULT "nextval" ('"public"."Species_id_seq"'::"regclass");
 
 ALTER TABLE ONLY "public"."Birds"
-    ADD CONSTRAINT "birds_ring_no_unique" UNIQUE ("ring_no");
-
-
+ADD CONSTRAINT "Birds_pkey" PRIMARY KEY ("id");
 
 ALTER TABLE ONLY "public"."Encounters"
-    ADD CONSTRAINT "encounters_bird_id_session_id_unique" UNIQUE ("bird_id", "session_id");
+ADD CONSTRAINT "Encounters_pkey" PRIMARY KEY ("id");
 
+ALTER TABLE ONLY "public"."Sessions"
+ADD CONSTRAINT "Sessions_pkey" PRIMARY KEY ("id");
 
+ALTER TABLE ONLY "public"."Sessions"
+ADD CONSTRAINT "Sessions_visit_date_key" UNIQUE ("visit_date");
 
 ALTER TABLE ONLY "public"."Species"
-    ADD CONSTRAINT "species_species_name_unique" UNIQUE ("species_name");
+ADD CONSTRAINT "Species_pkey" PRIMARY KEY ("id");
 
+ALTER TABLE ONLY "public"."Birds"
+ADD CONSTRAINT "birds_ring_no_unique" UNIQUE ("ring_no");
 
+ALTER TABLE ONLY "public"."Encounters"
+ADD CONSTRAINT "encounters_bird_id_session_id_unique" UNIQUE ("bird_id", "session_id");
+
+ALTER TABLE ONLY "public"."Species"
+ADD CONSTRAINT "species_species_name_unique" UNIQUE ("species_name");
 
 CREATE INDEX "idx_birds_species_id" ON "public"."Birds" USING "btree" ("species_id");
 
-
-
 CREATE INDEX "idx_encounters_bird_id" ON "public"."Encounters" USING "btree" ("bird_id");
-
-
 
 CREATE INDEX "idx_encounters_session_id" ON "public"."Encounters" USING "btree" ("session_id");
 
-
-
 ALTER TABLE ONLY "public"."Birds"
-    ADD CONSTRAINT "birds_species_id_fkey" FOREIGN KEY ("species_id") REFERENCES "public"."Species"("id");
-
-
+ADD CONSTRAINT "birds_species_id_fkey" FOREIGN KEY ("species_id") REFERENCES "public"."Species" ("id");
 
 ALTER TABLE ONLY "public"."Encounters"
-    ADD CONSTRAINT "encounters_bird_id_fkey" FOREIGN KEY ("bird_id") REFERENCES "public"."Birds"("id");
-
-
+ADD CONSTRAINT "encounters_bird_id_fkey" FOREIGN KEY ("bird_id") REFERENCES "public"."Birds" ("id");
 
 ALTER TABLE ONLY "public"."Encounters"
-    ADD CONSTRAINT "encounters_session_id_fkey" FOREIGN KEY ("session_id") REFERENCES "public"."Sessions"("id");
-
-
-
-
+ADD CONSTRAINT "encounters_session_id_fkey" FOREIGN KEY ("session_id") REFERENCES "public"."Sessions" ("id");
 
 ALTER PUBLICATION "supabase_realtime" OWNER TO "postgres";
 
-
-
-
-
 GRANT USAGE ON SCHEMA "public" TO "postgres";
+
 GRANT USAGE ON SCHEMA "public" TO "anon";
+
 GRANT USAGE ON SCHEMA "public" TO "authenticated";
+
 GRANT USAGE ON SCHEMA "public" TO "service_role";
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-GRANT ALL ON FUNCTION "public"."metrics_by_period_and_species"("temporal_unit" "text", "metric_name" "text", "filters" "public"."top_metrics_filter_params") TO "anon";
-GRANT ALL ON FUNCTION "public"."metrics_by_period_and_species"("temporal_unit" "text", "metric_name" "text", "filters" "public"."top_metrics_filter_params") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."metrics_by_period_and_species"("temporal_unit" "text", "metric_name" "text", "filters" "public"."top_metrics_filter_params") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."most_caught_birds"("result_limit" integer, "species_filter" "text", "year_filter" integer) TO "anon";
-GRANT ALL ON FUNCTION "public"."most_caught_birds"("result_limit" integer, "species_filter" "text", "year_filter" integer) TO "authenticated";
-GRANT ALL ON FUNCTION "public"."most_caught_birds"("result_limit" integer, "species_filter" "text", "year_filter" integer) TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."paginated_birds_table"("species_name_param" "text", "result_limit" integer, "result_offset" integer) TO "anon";
-GRANT ALL ON FUNCTION "public"."paginated_birds_table"("species_name_param" "text", "result_limit" integer, "result_offset" integer) TO "authenticated";
-GRANT ALL ON FUNCTION "public"."paginated_birds_table"("species_name_param" "text", "result_limit" integer, "result_offset" integer) TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."species_stats"("species_name_filter" "text", "from_date" "date", "to_date" "date") TO "anon";
-GRANT ALL ON FUNCTION "public"."species_stats"("species_name_filter" "text", "from_date" "date", "to_date" "date") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."species_stats"("species_name_filter" "text", "from_date" "date", "to_date" "date") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."top_metrics_by_period"("temporal_unit" "text", "metric_name" "text", "result_limit" integer, "filters" "public"."top_metrics_filter_params") TO "anon";
-GRANT ALL ON FUNCTION "public"."top_metrics_by_period"("temporal_unit" "text", "metric_name" "text", "result_limit" integer, "filters" "public"."top_metrics_filter_params") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."top_metrics_by_period"("temporal_unit" "text", "metric_name" "text", "result_limit" integer, "filters" "public"."top_metrics_filter_params") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."top_metrics_by_species_and_period"("temporal_unit" "text", "metric_name" "text", "result_limit" integer, "filters" "public"."top_metrics_filter_params") TO "anon";
-GRANT ALL ON FUNCTION "public"."top_metrics_by_species_and_period"("temporal_unit" "text", "metric_name" "text", "result_limit" integer, "filters" "public"."top_metrics_filter_params") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."top_metrics_by_species_and_period"("temporal_unit" "text", "metric_name" "text", "result_limit" integer, "filters" "public"."top_metrics_filter_params") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."top_periods_by_metric"("temporal_unit" "text", "metric_name" "text", "result_limit" integer, "month_filter" integer, "year_filter" integer, "exact_months_filter" "text"[], "months_filter" integer[], "species_filter" "text") TO "anon";
-GRANT ALL ON FUNCTION "public"."top_periods_by_metric"("temporal_unit" "text", "metric_name" "text", "result_limit" integer, "month_filter" integer, "year_filter" integer, "exact_months_filter" "text"[], "months_filter" integer[], "species_filter" "text") TO "authenticated";
-GRANT ALL ON FUNCTION "public"."top_periods_by_metric"("temporal_unit" "text", "metric_name" "text", "result_limit" integer, "month_filter" integer, "year_filter" integer, "exact_months_filter" "text"[], "months_filter" integer[], "species_filter" "text") TO "service_role";
-
-
-
-GRANT ALL ON FUNCTION "public"."top_species_by_metric"("temporal_unit" "text", "metric_name" "text", "result_limit" integer, "month_filter" integer, "year_filter" integer, "exact_months_filter" "text"[], "months_filter" integer[]) TO "anon";
-GRANT ALL ON FUNCTION "public"."top_species_by_metric"("temporal_unit" "text", "metric_name" "text", "result_limit" integer, "month_filter" integer, "year_filter" integer, "exact_months_filter" "text"[], "months_filter" integer[]) TO "authenticated";
-GRANT ALL ON FUNCTION "public"."top_species_by_metric"("temporal_unit" "text", "metric_name" "text", "result_limit" integer, "month_filter" integer, "year_filter" integer, "exact_months_filter" "text"[], "months_filter" integer[]) TO "service_role";
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+GRANT ALL ON FUNCTION "public"."metrics_by_period_and_species" (
+	"temporal_unit" "text",
+	"metric_name" "text",
+	"filters" "public"."top_metrics_filter_params"
+) TO "anon";
+
+GRANT ALL ON FUNCTION "public"."metrics_by_period_and_species" (
+	"temporal_unit" "text",
+	"metric_name" "text",
+	"filters" "public"."top_metrics_filter_params"
+) TO "authenticated";
+
+GRANT ALL ON FUNCTION "public"."metrics_by_period_and_species" (
+	"temporal_unit" "text",
+	"metric_name" "text",
+	"filters" "public"."top_metrics_filter_params"
+) TO "service_role";
+
+GRANT ALL ON FUNCTION "public"."most_caught_birds" (
+	"result_limit" integer,
+	"species_filter" "text",
+	"year_filter" integer
+) TO "anon";
+
+GRANT ALL ON FUNCTION "public"."most_caught_birds" (
+	"result_limit" integer,
+	"species_filter" "text",
+	"year_filter" integer
+) TO "authenticated";
+
+GRANT ALL ON FUNCTION "public"."most_caught_birds" (
+	"result_limit" integer,
+	"species_filter" "text",
+	"year_filter" integer
+) TO "service_role";
+
+GRANT ALL ON FUNCTION "public"."paginated_birds_table" (
+	"species_name_param" "text",
+	"result_limit" integer,
+	"result_offset" integer
+) TO "anon";
+
+GRANT ALL ON FUNCTION "public"."paginated_birds_table" (
+	"species_name_param" "text",
+	"result_limit" integer,
+	"result_offset" integer
+) TO "authenticated";
+
+GRANT ALL ON FUNCTION "public"."paginated_birds_table" (
+	"species_name_param" "text",
+	"result_limit" integer,
+	"result_offset" integer
+) TO "service_role";
+
+GRANT ALL ON FUNCTION "public"."species_stats" (
+	"species_name_filter" "text",
+	"from_date" "date",
+	"to_date" "date"
+) TO "anon";
+
+GRANT ALL ON FUNCTION "public"."species_stats" (
+	"species_name_filter" "text",
+	"from_date" "date",
+	"to_date" "date"
+) TO "authenticated";
+
+GRANT ALL ON FUNCTION "public"."species_stats" (
+	"species_name_filter" "text",
+	"from_date" "date",
+	"to_date" "date"
+) TO "service_role";
+
+GRANT ALL ON FUNCTION "public"."top_metrics_by_period" (
+	"temporal_unit" "text",
+	"metric_name" "text",
+	"result_limit" integer,
+	"filters" "public"."top_metrics_filter_params"
+) TO "anon";
+
+GRANT ALL ON FUNCTION "public"."top_metrics_by_period" (
+	"temporal_unit" "text",
+	"metric_name" "text",
+	"result_limit" integer,
+	"filters" "public"."top_metrics_filter_params"
+) TO "authenticated";
+
+GRANT ALL ON FUNCTION "public"."top_metrics_by_period" (
+	"temporal_unit" "text",
+	"metric_name" "text",
+	"result_limit" integer,
+	"filters" "public"."top_metrics_filter_params"
+) TO "service_role";
+
+GRANT ALL ON FUNCTION "public"."top_metrics_by_species_and_period" (
+	"temporal_unit" "text",
+	"metric_name" "text",
+	"result_limit" integer,
+	"filters" "public"."top_metrics_filter_params"
+) TO "anon";
+
+GRANT ALL ON FUNCTION "public"."top_metrics_by_species_and_period" (
+	"temporal_unit" "text",
+	"metric_name" "text",
+	"result_limit" integer,
+	"filters" "public"."top_metrics_filter_params"
+) TO "authenticated";
+
+GRANT ALL ON FUNCTION "public"."top_metrics_by_species_and_period" (
+	"temporal_unit" "text",
+	"metric_name" "text",
+	"result_limit" integer,
+	"filters" "public"."top_metrics_filter_params"
+) TO "service_role";
+
+GRANT ALL ON FUNCTION "public"."top_periods_by_metric" (
+	"temporal_unit" "text",
+	"metric_name" "text",
+	"result_limit" integer,
+	"month_filter" integer,
+	"year_filter" integer,
+	"exact_months_filter" "text" [],
+	"months_filter" INTEGER[],
+	"species_filter" "text"
+) TO "anon";
+
+GRANT ALL ON FUNCTION "public"."top_periods_by_metric" (
+	"temporal_unit" "text",
+	"metric_name" "text",
+	"result_limit" integer,
+	"month_filter" integer,
+	"year_filter" integer,
+	"exact_months_filter" "text" [],
+	"months_filter" INTEGER[],
+	"species_filter" "text"
+) TO "authenticated";
+
+GRANT ALL ON FUNCTION "public"."top_periods_by_metric" (
+	"temporal_unit" "text",
+	"metric_name" "text",
+	"result_limit" integer,
+	"month_filter" integer,
+	"year_filter" integer,
+	"exact_months_filter" "text" [],
+	"months_filter" INTEGER[],
+	"species_filter" "text"
+) TO "service_role";
+
+GRANT ALL ON FUNCTION "public"."top_species_by_metric" (
+	"temporal_unit" "text",
+	"metric_name" "text",
+	"result_limit" integer,
+	"month_filter" integer,
+	"year_filter" integer,
+	"exact_months_filter" "text" [],
+	"months_filter" INTEGER[]
+) TO "anon";
+
+GRANT ALL ON FUNCTION "public"."top_species_by_metric" (
+	"temporal_unit" "text",
+	"metric_name" "text",
+	"result_limit" integer,
+	"month_filter" integer,
+	"year_filter" integer,
+	"exact_months_filter" "text" [],
+	"months_filter" INTEGER[]
+) TO "authenticated";
+
+GRANT ALL ON FUNCTION "public"."top_species_by_metric" (
+	"temporal_unit" "text",
+	"metric_name" "text",
+	"result_limit" integer,
+	"month_filter" integer,
+	"year_filter" integer,
+	"exact_months_filter" "text" [],
+	"months_filter" INTEGER[]
+) TO "service_role";
 
 GRANT ALL ON TABLE "public"."Birds" TO "anon";
+
 GRANT ALL ON TABLE "public"."Birds" TO "authenticated";
+
 GRANT ALL ON TABLE "public"."Birds" TO "service_role";
 
-
-
 GRANT ALL ON SEQUENCE "public"."Birds_id_seq" TO "anon";
+
 GRANT ALL ON SEQUENCE "public"."Birds_id_seq" TO "authenticated";
+
 GRANT ALL ON SEQUENCE "public"."Birds_id_seq" TO "service_role";
 
-
-
 GRANT ALL ON TABLE "public"."Encounters" TO "anon";
+
 GRANT ALL ON TABLE "public"."Encounters" TO "authenticated";
+
 GRANT ALL ON TABLE "public"."Encounters" TO "service_role";
 
-
-
 GRANT ALL ON SEQUENCE "public"."Encounters_id_seq" TO "anon";
+
 GRANT ALL ON SEQUENCE "public"."Encounters_id_seq" TO "authenticated";
+
 GRANT ALL ON SEQUENCE "public"."Encounters_id_seq" TO "service_role";
 
-
-
 GRANT ALL ON TABLE "public"."Sessions" TO "anon";
+
 GRANT ALL ON TABLE "public"."Sessions" TO "authenticated";
+
 GRANT ALL ON TABLE "public"."Sessions" TO "service_role";
 
-
-
 GRANT ALL ON SEQUENCE "public"."Sessions_id_seq" TO "anon";
+
 GRANT ALL ON SEQUENCE "public"."Sessions_id_seq" TO "authenticated";
+
 GRANT ALL ON SEQUENCE "public"."Sessions_id_seq" TO "service_role";
 
-
-
 GRANT ALL ON TABLE "public"."Species" TO "anon";
+
 GRANT ALL ON TABLE "public"."Species" TO "authenticated";
+
 GRANT ALL ON TABLE "public"."Species" TO "service_role";
 
-
-
 GRANT ALL ON SEQUENCE "public"."Species_id_seq" TO "anon";
+
 GRANT ALL ON SEQUENCE "public"."Species_id_seq" TO "authenticated";
+
 GRANT ALL ON SEQUENCE "public"."Species_id_seq" TO "service_role";
 
+ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public"
+GRANT ALL ON SEQUENCES TO "postgres";
 
+ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public"
+GRANT ALL ON SEQUENCES TO "anon";
 
+ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public"
+GRANT ALL ON SEQUENCES TO "authenticated";
 
+ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public"
+GRANT ALL ON SEQUENCES TO "service_role";
 
+ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public"
+GRANT ALL ON FUNCTIONS TO "postgres";
 
+ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public"
+GRANT ALL ON FUNCTIONS TO "anon";
 
+ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public"
+GRANT ALL ON FUNCTIONS TO "authenticated";
 
+ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public"
+GRANT ALL ON FUNCTIONS TO "service_role";
 
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES TO "postgres";
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES TO "anon";
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES TO "authenticated";
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON SEQUENCES TO "service_role";
+ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public"
+GRANT ALL ON TABLES TO "postgres";
 
+ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public"
+GRANT ALL ON TABLES TO "anon";
 
+ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public"
+GRANT ALL ON TABLES TO "authenticated";
 
-
-
-
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS TO "postgres";
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS TO "anon";
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS TO "authenticated";
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON FUNCTIONS TO "service_role";
-
-
-
-
-
-
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "postgres";
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "anon";
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "authenticated";
-ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public" GRANT ALL ON TABLES TO "service_role";
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+ALTER DEFAULT PRIVILEGES FOR ROLE "postgres" IN SCHEMA "public"
+GRANT ALL ON TABLES TO "service_role";
 
 --
 -- Dumped schema changes for auth and storage
 --
-
