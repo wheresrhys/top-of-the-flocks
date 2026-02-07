@@ -1,6 +1,6 @@
 'use client';
 import { PageWrapper } from '@/app/components/shared/DesignSystem';
-import { speciesStatsColumns } from '@/app/models/species-stats';
+import { speciesStatConfigs } from '@/app/models/species-stats';
 import type { SpeciesStatsRow } from '@/app/models/db';
 import type { PageData } from '@/app/(routes)/species/page';
 import { useState, useEffect, useRef } from 'react';
@@ -9,20 +9,22 @@ import {
 	SortableTable,
 	SortableBodyCell
 } from '@/app/components/shared/SortableTable';
-
-const SpeciesNameLink = speciesStatsColumns.find(
-	({ property }) => property === 'species_name'
-)?.Component as (value: string | number) => React.ReactNode;
+import Link from 'next/link';
 
 function MultiSpeciesTableBody({ data }: { data: SpeciesStatsRow[] }) {
 	return (
 		<tbody>
 			{data.map((species) => (
 				<tr key={species.species_name}>
-					{speciesStatsColumns.map((column) =>
+					{speciesStatConfigs.map((column) =>
 						column.property === 'species_name' ? (
 							<td key={column.property}>
-								{SpeciesNameLink(species.species_name as string)}
+								<Link
+									className="link text-wrap"
+									href={`/species/${species.species_name}`}
+								>
+									{species.species_name}
+								</Link>
 							</td>
 						) : (
 							<SortableBodyCell
@@ -174,7 +176,7 @@ export function MultiSpeciesStatsTable({
 				</form>
 			</PageWrapper>
 			<SortableTable<SpeciesStatsRow>
-				columnConfigs={speciesStatsColumns}
+				columnConfigs={speciesStatConfigs}
 				data={speciesStats}
 				TableBodyComponent={MultiSpeciesTableBody}
 			/>
