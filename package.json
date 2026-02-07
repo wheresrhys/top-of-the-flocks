@@ -6,7 +6,7 @@
 	"scripts": {
 		"db:schema:build": "cat ./supabase/schema/*.sql > ./supabase/schema_build.sql",
 		"db:schema:apply": "psql \"postgresql: //postgres:postgres@localhost:54322/postgres\" -f ./supabase/schema_build.sql",
-		"db:schema:mew-migra": "supabase db diff --local -f my_feature_update",
+		"db:schema:new-migra": "supabase db diff --local -f my_feature_update",
 		"db:sync:prod": "supabase migration up --linked --debug --include-all",
 		"db:sync:local": "supabase db reset && npm run db:seed:local",
 		"db:seed:local": "npm run db:import:local ./data/end25.csv",
