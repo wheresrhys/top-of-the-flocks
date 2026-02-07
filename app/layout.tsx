@@ -21,6 +21,8 @@ export default function RootLayout({
 				<Suspense>
 					<LoadFlyonUI />
 				</Suspense>
+				{/* Force icon imports */}
+				<span className="hidden icon-[tabler--calendar] icon-[tabler--calendar-week] icon-[tabler--chevron-up] icon-[tabler--chevron-down]"></span>
 			</body>
 		</html>
 	);

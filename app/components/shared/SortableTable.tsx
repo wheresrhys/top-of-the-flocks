@@ -107,7 +107,7 @@ export function SortableTable<RawRowData, RowModel>({
 								{column.label}
 								{sortColumn === column.property ? (
 									<span
-										className={`${sortDirection === 'asc' ? 'icon-[tabler--chevron-up' : 'icon-[tabler--chevron-down'}] size-4`}
+										className={`${sortDirection === 'asc' ? 'icon-[tabler--chevron-up]' : 'icon-[tabler--chevron-down]'} size-4`}
 									></span>
 								) : null}
 							</div>
