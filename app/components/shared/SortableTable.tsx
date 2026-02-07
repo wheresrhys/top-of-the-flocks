@@ -70,25 +70,33 @@ export function SortableTable<RowModel>({
 		}
 	}
 
-	const sortedData = data.sort((a, b) => {
-		const aValue = a[sortColumn as keyof RowModel];
-		const bValue = b[sortColumn as keyof RowModel];
-		let comparisonResult = 0;
-		if (typeof aValue === 'string') {
-			comparisonResult = aValue.localeCompare(bValue as string);
-		} else {
-			if (aValue == bValue) {
-				comparisonResult = 0;
+	let sortedData = data;
+	if (sortColumn) {
+		const sortColumnConfig = columnConfigMap[sortColumn as keyof RowModel];
+		const accessor =
+			sortColumnConfig.accessor ||
+			((row: RowModel) => row[sortColumn as keyof RowModel]);
+
+		sortedData = data.sort((a, b) => {
+			const aValue = accessor(a);
+			const bValue = accessor(b);
+			let comparisonResult = 0;
+			if (typeof aValue === 'string') {
+				comparisonResult = aValue.localeCompare(bValue as string);
 			} else {
-				comparisonResult = (aValue as number) > (bValue as number) ? 1 : -1;
+				if (aValue == bValue) {
+					comparisonResult = 0;
+				} else {
+					comparisonResult = (aValue as number) > (bValue as number) ? 1 : -1;
+				}
 			}
-		}
-		return (
-			comparisonResult *
-			(sortDirection === 'asc' ? 1 : -1) *
-			(sortIsInverted ? -1 : 1)
-		);
-	});
+			return (
+				comparisonResult *
+				(sortDirection === 'asc' ? 1 : -1) *
+				(sortIsInverted ? -1 : 1)
+			);
+		});
+	}
 
 	return (
 		<Table testId={testId}>

@@ -62,7 +62,12 @@ function SpeciesDetailsTable({
 }
 
 const columnConfigs = [
-	{ label: 'Species', property: 'species' },
+	{ label: 'Species', property: 'species', invertSort: true },
+	{
+		label: 'Total',
+		property: 'total',
+		accessor: (row: SpeciesBreakdown) => row.encounters.length
+	},
 	{
 		label: 'New',
 		property: 'new',
@@ -123,6 +128,10 @@ export function SessionTable({
 		<SortableTable<SpeciesBreakdown>
 			columnConfigs={columnConfigs}
 			data={speciesBreakdown}
+			testId="session-table"
+			// @ts-expect-error need to tweak the types so that this is allowed to be a value of property in ColumnConfig... which is usually a keyof RowModel but when an accessor is used doesn't need to be.
+			// Maybe the thing to do is to expect a transformer function that converts the raw data model into a row model which maps perfectly to the column config
+			initialSortColumn="total"
 			TableBodyComponent={SessionTableBody}
 		/>
 	);

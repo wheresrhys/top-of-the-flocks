@@ -40,18 +40,18 @@ describe('session page', () => {
 		);
 		const speciesTable = await screen.findByTestId('session-table');
 		verifyTableData(speciesTable, [
-			['Species', 'New', 'Retraps', 'Adults', 'Juvs'],
-			['Chiffchaff', '12', '1', '2', '11'],
-			['Goldcrest', '6', '0', '1', '5'],
-			['Reed Bunting', '4', '1', '3', '2'],
-			["Cetti's Warbler", '0', '4', '0', '4'],
-			['Robin', '2', '1', '0', '3'],
-			['Blue Tit', '2', '0', '1', '1'],
-			['Chiffchaff (Siberian - tristis)', '2', '0', '1', '1'],
-			['Wren', '1', '1', '0', '2'],
-			['Blackcap', '1', '0', '0', '1'],
-			['Great Tit', '1', '0', '0', '1'],
-			['Long-tailed Tit', '1', '0', '0', '1']
+			['Species', 'Total', 'New', 'Retraps', 'Adults', 'Juvs'],
+			['Chiffchaff', '13', '12', '1', '2', '11'],
+			['Goldcrest', '6', '6', '0', '1', '5'],
+			['Reed Bunting', '5', '4', '1', '3', '2'],
+			["Cetti's Warbler", '4', '0', '4', '0', '4'],
+			['Robin', '3', '2', '1', '0', '3'],
+			['Blue Tit', '2', '2', '0', '1', '1'],
+			['Chiffchaff (Siberian - tristis)', '2', '2', '0', '1', '1'],
+			['Wren', '2', '1', '1', '0', '2'],
+			['Blackcap', '1', '1', '0', '0', '1'],
+			['Great Tit', '1', '1', '0', '0', '1'],
+			['Long-tailed Tit', '1', '1', '0', '0', '1']
 		]);
 	});
 	// todo fix the async issues
