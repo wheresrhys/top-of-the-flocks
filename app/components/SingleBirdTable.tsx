@@ -3,49 +3,65 @@ import type { EncounterOfBird } from '@/app/models/bird';
 import { InlineTable } from './shared/DesignSystem';
 import {
 	SortableTable,
-	SortableBodyCell,
-	type ColumnConfig
+	type ColumnConfig,
+	type RowModelWithRawData
 } from './shared/SortableTable';
 
-const columnConfigs = [
-	{
-		label: 'Date',
-		property: 'visit_date',
-		accessor: (row: EncounterOfBird) => row.session.visit_date
-	},
-	{
-		label: 'Time',
-		property: 'capture_time'
-	},
-	{
-		label: 'Age',
-		property: 'age_code'
-	},
-	{
-		label: 'Sex',
-		property: 'sex'
-	},
-	{
-		label: 'Wing',
-		property: 'wing_length'
-	},
-	{
-		label: 'Weight',
-		property: 'weight'
-	}
-] as ColumnConfig<EncounterOfBird>[];
+type RowModel = {
+	visit_date: string;
+	capture_time: string;
+	age_code: string;
+	sex: string;
+	wing_length: number | null;
+	weight: number | null;
+};
 
-function SingleBirdTableBody({ data }: { data: EncounterOfBird[] }) {
+function rowDataTransform(encounter: EncounterOfBird): RowModel {
+	return {
+		visit_date: encounter.session.visit_date,
+		capture_time: encounter.capture_time,
+		age_code: `${encounter.age_code}${encounter.is_juv ? 'J' : ''}`,
+		sex: encounter.sex,
+		wing_length: encounter.wing_length,
+		weight: encounter.weight
+	};
+}
+const columnConfigs = {
+	visit_date: {
+		label: 'Date'
+	},
+	capture_time: {
+		label: 'Time'
+	},
+	age_code: {
+		label: 'Age'
+	},
+	sex: {
+		label: 'Sex'
+	},
+	wing_length: {
+		label: 'Wing'
+	},
+	weight: {
+		label: 'Weight'
+	}
+} as Record<keyof RowModel, ColumnConfig>;
+
+const orderedColumnProperties = Object.keys(
+	columnConfigs
+) as (keyof RowModel)[];
+
+function SingleBirdTableBody({
+	data
+}: {
+	data: RowModelWithRawData<EncounterOfBird, RowModel>[];
+}) {
 	return (
 		<tbody>
-			{data.map((encounter) => (
-				<tr key={encounter.id}>
-					{columnConfigs.map((column) => (
-						<SortableBodyCell
-							key={column.property}
-							columnConfig={column}
-							data={encounter}
-						/>
+			{data.map((rowModel) => (
+				<tr key={rowModel._rawRowData.id}>
+					{orderedColumnProperties.map((property) => (
+						<td key={property}>{rowModel[property]}</td>
 					))}
 				</tr>
 			))}
@@ -65,32 +81,32 @@ export function SingleBirdTable({
 			<InlineTable testId="single-bird-table">
 				<thead>
 					<tr>
-						{columnConfigs.map((column) => (
-							<th key={column.property}>{column.label}</th>
+						{orderedColumnProperties.map((property) => (
+							<th key={property}>{columnConfigs[property].label}</th>
 						))}
 					</tr>
 				</thead>
 				<tbody>
-					{encounters.map((encounter) => (
-						<tr key={encounter.id}>
-							{columnConfigs.map((column) => (
-								<td key={column.property}>
-									{column.accessor
-										? column.accessor(encounter)
-										: (encounter[column.property] as string | number | boolean)}
-								</td>
-							))}
-						</tr>
-					))}
+					{encounters.map((encounter) => {
+						const rowModel = rowDataTransform(encounter);
+						return (
+							<tr key={encounter.id}>
+								{orderedColumnProperties.map((property) => (
+									<td key={property}>{rowModel[property]}</td>
+								))}
+							</tr>
+						);
+					})}
 				</tbody>
 			</InlineTable>
 		);
 	} else {
 		return (
-			<SortableTable<EncounterOfBird>
+			<SortableTable<EncounterOfBird, RowModel>
 				columnConfigs={columnConfigs}
 				data={encounters}
 				testId="single-bird-table"
+				rowDataTransform={rowDataTransform}
 				TableBodyComponent={SingleBirdTableBody}
 			/>
 		);

@@ -2,60 +2,54 @@
 import { Table } from '@/app/components/shared/DesignSystem';
 import { useState } from 'react';
 
-export type ColumnConfig<RowModel> = {
+export type ColumnConfig = {
 	label: string;
-	property: keyof RowModel;
 	invertSort?: boolean;
-	accessor?: (row: RowModel) => string;
 };
 
-type SortableTableProps<RowModel> = {
-	columnConfigs: ColumnConfig<RowModel>[];
-	data: RowModel[];
-	testId?: string;
-	initialSortColumn?: keyof RowModel;
-	TableBodyComponent: React.ComponentType<{ data: RowModel[] }>;
+export type RowModelWithRawData<RawRowData, RowModel> = RowModel & {
+	_rawRowData: RawRowData;
 };
 
-export function SortableBodyCell<RowModel>({
-	columnConfig,
-	data
-}: {
-	columnConfig: ColumnConfig<RowModel>;
-	data: RowModel;
-}) {
-	return (
-		<td>
-			{columnConfig.accessor
-				? columnConfig.accessor(data)
-				: (data[columnConfig.property] as string | number | boolean)}
-		</td>
-	);
+export function SortableBodyCell() {
+	return <td>rats</td>;
 }
 
-export function SortableTable<RowModel>({
+type SortableTableProps<RawRowData, RowModel> = {
+	columnConfigs: Record<keyof RowModel, ColumnConfig>;
+	data: RawRowData[];
+	rowDataTransform: (modelData: RawRowData) => RowModel;
+	testId?: string;
+	initialSortColumn?: keyof RowModel;
+	TableBodyComponent: React.ComponentType<{
+		data: RowModelWithRawData<RawRowData, RowModel>[];
+	}>;
+};
+
+export function SortableTable<RawRowData, RowModel>({
 	columnConfigs,
 	data,
 	initialSortColumn,
 	testId,
+	rowDataTransform,
 	TableBodyComponent
-}: SortableTableProps<RowModel>) {
-	const columnConfigMap = columnConfigs.reduce(
-		(acc, columnConfig) => {
-			acc[columnConfig.property] = columnConfig;
-			return acc;
-		},
-		{} as Record<keyof RowModel, ColumnConfig<RowModel>>
+}: SortableTableProps<RawRowData, RowModel>) {
+	const orderedColumns = Object.entries(columnConfigs).map(
+		([property, columnConfig]) =>
+			({ property, ...(columnConfig as object) }) as {
+				property: keyof RowModel;
+			} & ColumnConfig
 	);
+
 	const [sortColumn, setSortColumn] = useState<keyof RowModel | null>(
 		initialSortColumn || null
 	);
 	const [sortDirection, setSortDirection] = useState<'asc' | 'desc' | null>(
-		null
+		initialSortColumn ? 'desc' : null
 	);
 	const [sortIsInverted, setSortIsInverted] = useState<boolean>(
 		initialSortColumn
-			? columnConfigMap[initialSortColumn].invertSort || false
+			? columnConfigs[initialSortColumn].invertSort || false
 			: false
 	);
 
@@ -65,21 +59,22 @@ export function SortableTable<RowModel>({
 		} else {
 			setSortColumn(property);
 			// TODO hideously inefficient
-			setSortIsInverted(columnConfigMap[property].invertSort || false);
+			setSortIsInverted(columnConfigs[property].invertSort || false);
 			setSortDirection('desc');
 		}
 	}
 
-	let sortedData = data;
+	let sortedData = data.map((rawRowData) => {
+		const rowModel = rowDataTransform(rawRowData);
+		return { ...rowModel, _rawRowData: rawRowData } as RowModelWithRawData<
+			RawRowData,
+			RowModel
+		>;
+	});
 	if (sortColumn) {
-		const sortColumnConfig = columnConfigMap[sortColumn as keyof RowModel];
-		const accessor =
-			sortColumnConfig.accessor ||
-			((row: RowModel) => row[sortColumn as keyof RowModel]);
-
-		sortedData = data.sort((a, b) => {
-			const aValue = accessor(a);
-			const bValue = accessor(b);
+		sortedData = sortedData.sort((a, b) => {
+			const aValue = a[sortColumn as keyof RowModel];
+			const bValue = b[sortColumn as keyof RowModel];
 			let comparisonResult = 0;
 			if (typeof aValue === 'string') {
 				comparisonResult = aValue.localeCompare(bValue as string);
@@ -95,14 +90,14 @@ export function SortableTable<RowModel>({
 				(sortDirection === 'asc' ? 1 : -1) *
 				(sortIsInverted ? -1 : 1)
 			);
-		});
+		}) as RowModelWithRawData<RawRowData, RowModel>[];
 	}
 
 	return (
 		<Table testId={testId}>
 			<thead>
 				<tr>
-					{columnConfigs.map((column) => (
+					{orderedColumns.map((column) => (
 						<th
 							className="text-wrap cursor-pointer"
 							key={column.property as string}
@@ -112,7 +107,7 @@ export function SortableTable<RowModel>({
 								{column.label}
 								{sortColumn === column.property ? (
 									<span
-										className={`icon-[tabler--chevron-${sortDirection === 'asc' ? 'up' : 'down'}] size-4`}
+										className={`${sortDirection === 'asc' ? 'icon-[tabler--chevron-up' : 'icon-[tabler--chevron-down'}] size-4`}
 									></span>
 								) : null}
 							</div>

@@ -7,7 +7,7 @@ import { useState, useEffect, useRef } from 'react';
 import { fetchSpeciesData } from '@/app/isomorphic/multi-species-data';
 import {
 	SortableTable,
-	SortableBodyCell
+	type ColumnConfig
 } from '@/app/components/shared/SortableTable';
 import Link from 'next/link';
 
@@ -27,11 +27,7 @@ function MultiSpeciesTableBody({ data }: { data: SpeciesStatsRow[] }) {
 								</Link>
 							</td>
 						) : (
-							<SortableBodyCell
-								key={column.property}
-								columnConfig={column}
-								data={species}
-							/>
+							<td key={column.property}>{species[column.property]}</td>
 						)
 					)}
 				</tr>
@@ -39,6 +35,17 @@ function MultiSpeciesTableBody({ data }: { data: SpeciesStatsRow[] }) {
 		</tbody>
 	);
 }
+
+const sortableColumnConfigs = speciesStatConfigs.reduce(
+	(acc, column) => ({
+		...acc,
+		[column.property]: {
+			label: column.label,
+			invertSort: column.invertSort
+		}
+	}),
+	{} as Record<keyof SpeciesStatsRow, ColumnConfig>
+);
 
 export function MultiSpeciesStatsTable({
 	data: { speciesStats: initialSpeciesStats, years }
@@ -175,9 +182,10 @@ export function MultiSpeciesStatsTable({
 					</div>
 				</form>
 			</PageWrapper>
-			<SortableTable<SpeciesStatsRow>
-				columnConfigs={speciesStatConfigs}
+			<SortableTable<SpeciesStatsRow, SpeciesStatsRow>
+				columnConfigs={sortableColumnConfigs}
 				data={speciesStats}
+				rowDataTransform={(data) => data}
 				TableBodyComponent={MultiSpeciesTableBody}
 			/>
 		</>

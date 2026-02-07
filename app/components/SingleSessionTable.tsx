@@ -4,17 +4,21 @@ import { type SessionEncounter } from '@/app/models/session';
 import Link from 'next/link';
 import { InlineTable } from './shared/DesignSystem';
 import { AccordionTableBody } from './shared/AccordionTableBody';
-export type SpeciesBreakdown = {
+export type SpeciesWithEncounters = {
 	species: string;
 	encounters: SessionEncounter[];
 };
 import {
 	type ColumnConfig,
-	SortableBodyCell,
-	SortableTable
+	SortableTable,
+	type RowModelWithRawData
 } from './shared/SortableTable';
 
-function SpeciesNameCell({ model: { species } }: { model: SpeciesBreakdown }) {
+function SpeciesNameCell({
+	model: { species }
+}: {
+	model: RowModelWithRawData<SpeciesWithEncounters, RowModel>;
+}) {
 	return (
 		<Link className="link text-wrap" href={`/species/${species}`}>
 			{species}
@@ -23,9 +27,11 @@ function SpeciesNameCell({ model: { species } }: { model: SpeciesBreakdown }) {
 }
 
 function SpeciesDetailsTable({
-	model: { encounters }
+	model: {
+		_rawRowData: { encounters }
+	}
 }: {
-	model: SpeciesBreakdown;
+	model: RowModelWithRawData<SpeciesWithEncounters, RowModel>;
 }) {
 	return (
 		<InlineTable>
@@ -61,56 +67,72 @@ function SpeciesDetailsTable({
 	);
 }
 
-const columnConfigs = [
-	{ label: 'Species', property: 'species', invertSort: true },
-	{
-		label: 'Total',
-		property: 'total',
-		accessor: (row: SpeciesBreakdown) => row.encounters.length
-	},
-	{
-		label: 'New',
-		property: 'new',
-		accessor: (row: SpeciesBreakdown) =>
-			row.encounters.filter((encounter) => encounter.record_type === 'N').length
-	},
-	{
-		label: 'Retraps',
-		property: 'retraps',
-		accessor: (row: SpeciesBreakdown) =>
-			row.encounters.filter((encounter) => encounter.record_type === 'S').length
-	},
-	{
-		label: 'Adults',
-		property: 'adults',
-		accessor: (row: SpeciesBreakdown) =>
-			row.encounters.filter((encounter) => encounter.minimum_years >= 1).length
-	},
-	{
-		label: 'Juvs',
-		property: 'juvs',
-		accessor: (row: SpeciesBreakdown) =>
-			row.encounters.filter((encounter) => encounter.minimum_years === 0).length
-	}
-] as ColumnConfig<SpeciesBreakdown>[];
+type RowModel = {
+	species: string;
+	total: number;
+	new: number;
+	retraps: number;
+	adults: number;
+	juvs: number;
+};
 
-function SpeciesRow({ model }: { model: SpeciesBreakdown }) {
-	return columnConfigs
-		.slice(1)
-		.map((column) => (
-			<SortableBodyCell
-				key={column.property}
-				columnConfig={column}
-				data={model}
-			/>
-		));
+function rowDataTransform(data: SpeciesWithEncounters): RowModel {
+	return {
+		species: data.species,
+		total: data.encounters.length,
+		new: data.encounters.filter((encounter) => encounter.record_type === 'N')
+			.length,
+		retraps: data.encounters.filter(
+			(encounter) => encounter.record_type === 'S'
+		).length,
+		adults: data.encounters.filter((encounter) => encounter.minimum_years >= 1)
+			.length,
+		juvs: data.encounters.filter((encounter) => encounter.minimum_years === 0)
+			.length
+	};
 }
 
-function SessionTableBody({ data }: { data: SpeciesBreakdown[] }) {
+const columnConfigs = {
+	species: {
+		label: 'Species',
+		invertSort: true
+	},
+	total: {
+		label: 'Total'
+	},
+	new: {
+		label: 'New'
+	},
+	retraps: {
+		label: 'Retraps'
+	},
+	adults: {
+		label: 'Adults'
+	},
+	juvs: {
+		label: 'Juvs'
+	}
+} as Record<keyof RowModel, ColumnConfig>;
+
+const orderedColumnProperties = Object.keys(
+	columnConfigs
+) as (keyof RowModel)[];
+
+function SpeciesRow({ model }: { model: RowModel }) {
+	return orderedColumnProperties
+		.slice(1)
+		.map((prop) => <td key={prop}>{model[prop]}</td>);
+}
+
+function SessionTableBody({
+	data
+}: {
+	data: RowModelWithRawData<SpeciesWithEncounters, RowModel>[];
+}) {
 	return (
-		<AccordionTableBody<SpeciesBreakdown>
+		<AccordionTableBody<RowModelWithRawData<SpeciesWithEncounters, RowModel>>
 			data={data}
-			getKey={(speciesBreakdown) => speciesBreakdown.species}
+			getKey={(speciesWithEncounters) => speciesWithEncounters.species}
 			columnCount={5}
 			FirstColumnComponent={SpeciesNameCell}
 			RestColumnsComponent={SpeciesRow}
@@ -120,18 +142,17 @@ function SessionTableBody({ data }: { data: SpeciesBreakdown[] }) {
 }
 
 export function SessionTable({
-	speciesBreakdown
+	speciesList
 }: {
-	speciesBreakdown: SpeciesBreakdown[];
+	speciesList: SpeciesWithEncounters[];
 }) {
 	return (
-		<SortableTable<SpeciesBreakdown>
+		<SortableTable<SpeciesWithEncounters, RowModel>
 			columnConfigs={columnConfigs}
-			data={speciesBreakdown}
+			data={speciesList}
 			testId="session-table"
-			// @ts-expect-error need to tweak the types so that this is allowed to be a value of property in ColumnConfig... which is usually a keyof RowModel but when an accessor is used doesn't need to be.
-			// Maybe the thing to do is to expect a transformer function that converts the raw data model into a row model which maps perfectly to the column config
 			initialSortColumn="total"
+			rowDataTransform={rowDataTransform}
 			TableBodyComponent={SessionTableBody}
 		/>
 	);
