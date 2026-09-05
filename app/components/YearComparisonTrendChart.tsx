@@ -237,22 +237,20 @@ function PerMetricChartGrid({
 	) => { data: LineChartData[]; colors: string[] };
 }) {
 	return (
-		<div className="grid h-full grid-cols-1 gap-4 overflow-auto sm:grid-cols-2">
+		<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 			{metrics.map((metric, metricIndex) => {
 				const { data, colors } = buildChart(metric, metricIndex);
 				return (
-					<div key={metric.name} className="flex h-[240px] flex-col">
+					<div key={metric.name}>
 						<SecondaryHeading>{metric.name}</SecondaryHeading>
-						<div className="min-h-0 flex-1">
-							<LineChart
-								min={min}
-								data={data}
-								colors={colors}
-								xtitle="Month"
-								ytitle={ytitle}
-								library={TREND_CHART_LIBRARY}
-							/>
-						</div>
+						<LineChart
+							min={min}
+							data={data}
+							colors={colors}
+							xtitle="Month"
+							ytitle={ytitle}
+							library={TREND_CHART_LIBRARY}
+						/>
 					</div>
 				);
 			})}
@@ -291,7 +289,7 @@ export function YearComparisonTrendChart({
 		metricBaseColor(metricIndex)
 	);
 	return (
-		<div className="flex h-full flex-col">
+		<div className="flex flex-col">
 			<div className="mb-2 flex justify-end">
 				<div className="border-base-content/20 flex gap-0.5 rounded-field border p-0.5">
 					{MODE_OPTIONS.map((option) => (
@@ -313,7 +311,7 @@ export function YearComparisonTrendChart({
 					))}
 				</div>
 			</div>
-			<div className="min-h-0 flex-1">
+			<div>
 				{mode === 'all-time' && (
 					<LineChart
 						min={min}
