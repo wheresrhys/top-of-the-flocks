@@ -19,6 +19,62 @@ const MONTH_LABELS = [
 	'Dec'
 ];
 
+// Base colour per metric, matching chartkick's own default palette so the
+// per-metric year-on-year / this-year charts reuse the exact colour each metric
+// has in the all-time chart. The all-time chart is handed these same colours
+// explicitly (rather than relying on chartkick's implicit defaults) so the two
+// views stay in lock-step even if chartkick's palette ever changes.
+const METRIC_BASE_COLORS = [
+	'#3366CC',
+	'#DC3912',
+	'#FF9900',
+	'#109618',
+	'#990099',
+	'#3B3EAC',
+	'#0099C6',
+	'#DD4477',
+	'#66AA00',
+	'#B82E2E',
+	'#316395',
+	'#994499',
+	'#22AA99',
+	'#AAAA11',
+	'#6633CC',
+	'#E67300',
+	'#8B0707',
+	'#329262',
+	'#5574A6',
+	'#651067'
+];
+
+// The current calendar year is always drawn in black so it stands out against
+// the shaded previous years.
+const CURRENT_YEAR_COLOR = '#000000';
+
+function metricBaseColor(metricIndex: number): string {
+	return METRIC_BASE_COLORS[metricIndex % METRIC_BASE_COLORS.length];
+}
+
+// Mixes a hex colour towards white by `fraction` (0 = unchanged, 1 = white).
+function lighten(hex: string, fraction: number): string {
+	const value = parseInt(hex.slice(1), 16);
+	const r = (value >> 16) & 0xff;
+	const g = (value >> 8) & 0xff;
+	const b = value & 0xff;
+	const mix = (channel: number) =>
+		Math.round(channel + (255 - channel) * fraction);
+	const toHex = (channel: number) => channel.toString(16).padStart(2, '0');
+	return `#${toHex(mix(r))}${toHex(mix(g))}${toHex(mix(b))}`;
+}
+
+function median(values: number[]): number {
+	const sorted = [...values].sort((a, b) => a - b);
+	const middle = Math.floor(sorted.length / 2);
+	return sorted.length % 2 === 0
+		? (sorted[middle - 1] + sorted[middle]) / 2
+		: sorted[middle];
+}
+
 // Shared chartkick config for every trend line — small points, smoothed lines.
 // Used by both the all-time chart and each per-year chart so a single toggle can
 // swap between them without the lines changing appearance.
@@ -29,11 +85,12 @@ const TREND_CHART_LIBRARY = {
 	}
 };
 
-type ChartMode = 'all-time' | 'year-on-year';
+type ChartMode = 'all-time' | 'compare-years' | 'this-year';
 
 const MODE_OPTIONS: { value: ChartMode; label: string }[] = [
 	{ value: 'all-time', label: 'All time' },
-	{ value: 'year-on-year', label: 'Year on year' }
+	{ value: 'compare-years', label: 'Compare years' },
+	{ value: 'this-year', label: 'This year' }
 ];
 
 // Regroups one metric's `[date, value]` points into one series per calendar
@@ -68,14 +125,152 @@ export function toYearOnYearSeries(metric: LineChartData): LineChartData[] {
 		}));
 }
 
-// A metrics-over-time line chart with a toggle between two views of the same
+// One colour per year (in the oldest-first order `toYearOnYearSeries` returns),
+// for the compare-years view. The current year is black; every previous year is
+// a shade of the metric's base colour — the most recent previous year at full
+// strength, older years progressively paler.
+export function yearColors(
+	years: number[],
+	baseColor: string,
+	currentYear: number
+): string[] {
+	const previousYears = years.filter((year) => year !== currentYear);
+	const denominator = previousYears.length - 1;
+	const MAX_LIGHTEN = 0.7;
+	return years.map((year) => {
+		if (year === currentYear) return CURRENT_YEAR_COLOR;
+		// `previousYears` is oldest-first: rank 0 is the oldest (palest), the last
+		// rank is the most recent previous year (full-strength base colour).
+		const rank = previousYears.indexOf(year);
+		const lightenFraction =
+			denominator <= 0 ? 0 : MAX_LIGHTEN * (1 - rank / denominator);
+		return lighten(baseColor, lightenFraction);
+	});
+}
+
+// Builds the this-year view for one metric: the current year's monthly line
+// plus a summary of every previous year as a median line with a min–max band.
+// The band is two invisible-point lines (max, then min) where min fills back to
+// max, so chartkick/chart.js shades the range between them. Series order is
+// load-bearing: max must immediately precede min for min's `fill: '-1'` to
+// target it, and the current-year line comes last so it draws on top.
+export function toThisYearSeries(
+	metric: LineChartData,
+	currentYear: number
+): LineChartData[] {
+	const currentYearValues = new Array<number | null>(12).fill(null);
+	const previousValuesByMonth: number[][] = Array.from(
+		{ length: 12 },
+		() => []
+	);
+	for (const [rawDate, value] of metric.data) {
+		if (value == null) continue;
+		const date = new Date(rawDate);
+		const year = date.getUTCFullYear();
+		const monthIndex = date.getUTCMonth();
+		if (year === currentYear) {
+			currentYearValues[monthIndex] = value;
+		} else if (year < currentYear) {
+			previousValuesByMonth[monthIndex].push(value);
+		}
+	}
+	const point = (monthIndex: number, value: number | null) =>
+		[MONTH_LABELS[monthIndex], value] as [string, number | null];
+	const maxData = previousValuesByMonth.map((values, monthIndex) =>
+		point(monthIndex, values.length ? Math.max(...values) : null)
+	);
+	const minData = previousValuesByMonth.map((values, monthIndex) =>
+		point(monthIndex, values.length ? Math.min(...values) : null)
+	);
+	const medianData = previousValuesByMonth.map((values, monthIndex) =>
+		point(monthIndex, values.length ? median(values) : null)
+	);
+	const currentData = MONTH_LABELS.map((_, monthIndex) =>
+		point(monthIndex, currentYearValues[monthIndex])
+	);
+	return [
+		{
+			name: 'Previous max',
+			data: maxData,
+			dataset: { fill: false, pointRadius: 0, borderWidth: 1 }
+		},
+		{
+			name: 'Previous min',
+			data: minData,
+			// Fill back to the immediately-preceding dataset (max) to shade the band.
+			dataset: { fill: '-1', pointRadius: 0, borderWidth: 1 }
+		},
+		{
+			name: 'Previous median',
+			data: medianData,
+			dataset: { fill: false, pointRadius: 0, borderDash: [6, 4] }
+		},
+		{
+			name: String(currentYear),
+			data: currentData,
+			dataset: { fill: false, borderWidth: 3 }
+		}
+	];
+}
+
+// Colours for the this-year view, in the series order `toThisYearSeries`
+// returns (max, min, median, current year): a pale band, a mid-shade median,
+// and the metric's full-strength base colour for the current year.
+export function thisYearColors(baseColor: string): string[] {
+	const bandColor = lighten(baseColor, 0.75);
+	const medianColor = lighten(baseColor, 0.35);
+	return [bandColor, bandColor, medianColor, baseColor];
+}
+
+function PerMetricChartGrid({
+	metrics,
+	ytitle,
+	min,
+	buildChart
+}: {
+	metrics: LineChartData[];
+	ytitle: string;
+	min: number | null;
+	buildChart: (
+		metric: LineChartData,
+		metricIndex: number
+	) => { data: LineChartData[]; colors: string[] };
+}) {
+	return (
+		<div className="grid h-full grid-cols-1 gap-4 overflow-auto sm:grid-cols-2">
+			{metrics.map((metric, metricIndex) => {
+				const { data, colors } = buildChart(metric, metricIndex);
+				return (
+					<div key={metric.name} className="flex h-[240px] flex-col">
+						<SecondaryHeading>{metric.name}</SecondaryHeading>
+						<div className="min-h-0 flex-1">
+							<LineChart
+								min={min}
+								data={data}
+								colors={colors}
+								xtitle="Month"
+								ytitle={ytitle}
+								library={TREND_CHART_LIBRARY}
+							/>
+						</div>
+					</div>
+				);
+			})}
+		</div>
+	);
+}
+
+// A metrics-over-time line chart with a toggle between three views of the same
 // data:
 //   - "All time": every metric plotted as one series across the full timeline
 //     (the conventional trend chart).
-//   - "Year on year": one small chart per metric, each holding a series per year
-//     over a shared twelve-month axis, so equivalent months line up across years.
+//   - "Compare years": one small chart per metric, each holding a series per
+//     year over a shared twelve-month axis (current year black, previous years
+//     shades of the metric's colour), so equivalent months line up across years.
+//   - "This year": one small chart per metric showing the current year against a
+//     median line and min–max band summarising every previous year.
 // Reusable across any set of dated metric series (`series`), so any
-// metrics-plotted-over-time chart can opt into year-on-year comparison.
+// metrics-plotted-over-time chart can opt into year comparison.
 export function YearComparisonTrendChart({
 	series,
 	xtitle = 'Year',
@@ -91,6 +286,10 @@ export function YearComparisonTrendChart({
 	// Unique per instance so several of these charts on one page (e.g. multiple
 	// expanded species-graph tiles) don't share a radio group.
 	const toggleName = useId();
+	const currentYear = new Date().getFullYear();
+	const allTimeColors = series.map((_, metricIndex) =>
+		metricBaseColor(metricIndex)
+	);
 	return (
 		<div className="flex h-full flex-col">
 			<div className="mb-2 flex justify-end">
@@ -115,31 +314,45 @@ export function YearComparisonTrendChart({
 				</div>
 			</div>
 			<div className="min-h-0 flex-1">
-				{mode === 'all-time' ? (
+				{mode === 'all-time' && (
 					<LineChart
 						min={min}
 						data={series}
+						colors={allTimeColors}
 						xtitle={xtitle}
 						ytitle={ytitle}
 						library={TREND_CHART_LIBRARY}
 					/>
-				) : (
-					<div className="grid h-full grid-cols-1 gap-4 overflow-auto sm:grid-cols-2">
-						{series.map((metric) => (
-							<div key={metric.name} className="flex h-[240px] flex-col">
-								<SecondaryHeading>{metric.name}</SecondaryHeading>
-								<div className="min-h-0 flex-1">
-									<LineChart
-										min={min}
-										data={toYearOnYearSeries(metric)}
-										xtitle="Month"
-										ytitle={ytitle}
-										library={TREND_CHART_LIBRARY}
-									/>
-								</div>
-							</div>
-						))}
-					</div>
+				)}
+				{mode === 'compare-years' && (
+					<PerMetricChartGrid
+						metrics={series}
+						ytitle={ytitle}
+						min={min}
+						buildChart={(metric, metricIndex) => {
+							const yearSeries = toYearOnYearSeries(metric);
+							const years = yearSeries.map((yearRow) => Number(yearRow.name));
+							return {
+								data: yearSeries,
+								colors: yearColors(
+									years,
+									metricBaseColor(metricIndex),
+									currentYear
+								)
+							};
+						}}
+					/>
+				)}
+				{mode === 'this-year' && (
+					<PerMetricChartGrid
+						metrics={series}
+						ytitle={ytitle}
+						min={min}
+						buildChart={(metric, metricIndex) => ({
+							data: toThisYearSeries(metric, currentYear),
+							colors: thisYearColors(metricBaseColor(metricIndex))
+						})}
+					/>
 				)}
 			</div>
 		</div>
