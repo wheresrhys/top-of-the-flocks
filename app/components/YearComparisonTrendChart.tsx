@@ -67,6 +67,20 @@ function lighten(hex: string, fraction: number): string {
 	return `#${toHex(mix(r))}${toHex(mix(g))}${toHex(mix(b))}`;
 }
 
+// `aggregate_stats` returns a *dense* monthly spine: every month between the
+// first and last session emits a row, and a month with no encounters of this
+// species comes back as an explicit `0` (not an absent row). Plotting those
+// zeros verbatim makes a partial/quiet year's line dive to a flat zero baseline
+// through its empty months and then cliff up to its first real value — which
+// reads as a broken, misplaced spike rather than a short line at the months that
+// actually have data. So in the year-comparison views a zero-count month is
+// treated as "no data" (a gap), matching the `null`-is-a-gap intent these
+// transforms are built around. Genuine measurements (weights/wings) are never
+// exactly `0`, so this only ever elides empty count months.
+function hasReportableValue(value: number | null): value is number {
+	return value != null && value !== 0;
+}
+
 function median(values: number[]): number {
 	const sorted = [...values].sort((a, b) => a - b);
 	const middle = Math.floor(sorted.length / 2);
@@ -103,6 +117,7 @@ const MODE_OPTIONS: { value: ChartMode; label: string }[] = [
 export function toYearOnYearSeries(metric: LineChartData): LineChartData[] {
 	const valuesByYear = new Map<number, (number | null)[]>();
 	for (const [rawDate, value] of metric.data) {
+		if (!hasReportableValue(value)) continue;
 		const date = new Date(rawDate);
 		const year = date.getUTCFullYear();
 		const monthIndex = date.getUTCMonth();
@@ -164,7 +179,7 @@ export function toThisYearSeries(
 		() => []
 	);
 	for (const [rawDate, value] of metric.data) {
-		if (value == null) continue;
+		if (!hasReportableValue(value)) continue;
 		const date = new Date(rawDate);
 		const year = date.getUTCFullYear();
 		const monthIndex = date.getUTCMonth();

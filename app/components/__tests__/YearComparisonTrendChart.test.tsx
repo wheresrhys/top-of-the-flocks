@@ -108,6 +108,35 @@ describe('toYearOnYearSeries', () => {
 			expect(toYearOnYearSeries({ name: 'encounters', data: [] })).toEqual([]);
 		});
 
+		it('treats a dense-spine zero-count month as a gap, not a dip to zero', () => {
+			const metric: LineChartData = {
+				name: 'encounters',
+				data: [
+					['2024-01-01', 0],
+					['2024-03-01', 30]
+				]
+			};
+			const [year2024] = toYearOnYearSeries(metric);
+			// The explicit 0 the RPC emits for a quiet month renders as a gap,
+			// so the line doesn't dive to the baseline there.
+			expect(year2024.data[0]).toEqual(['Jan', null]);
+			expect(year2024.data[2]).toEqual(['Mar', 30]);
+		});
+
+		it('omits a year whose only points are zero-count months', () => {
+			const metric: LineChartData = {
+				name: 'encounters',
+				data: [
+					['2022-05-01', 0],
+					['2022-06-01', 0],
+					['2023-05-01', 4]
+				]
+			};
+			expect(toYearOnYearSeries(metric).map((series) => series.name)).toEqual([
+				'2023'
+			]);
+		});
+
 		it('orders years oldest-first regardless of input order', () => {
 			const metric: LineChartData = {
 				name: 'encounters',
@@ -179,6 +208,55 @@ describe('toThisYearSeries', () => {
 			expect(max.data[0]).toEqual(['Jan', null]);
 			expect(min.data[0]).toEqual(['Jan', null]);
 			expect(median.data[0]).toEqual(['Jan', null]);
+		});
+	});
+
+	describe('Structure: every series shares one Jan→Dec x-domain', () => {
+		it('gives the band, median and current-year lines identical month labels in order', () => {
+			// The core alignment guarantee: the current-year line and the
+			// previous-year summary lines are plotted against the same twelve
+			// category labels, so a month lines up across all of them.
+			for (const series of toThisYearSeries(metric, 2025)) {
+				expect(series.data.map(([month]) => month)).toEqual(MONTHS);
+			}
+		});
+	});
+
+	describe('Edge: dense-spine zero-count months', () => {
+		// The RPC emits an explicit `0` for a month with no encounters; a partial
+		// current year would otherwise draw a flat zero baseline through its empty
+		// months then cliff up to its first real value — the "broken spike" look.
+		const withZeros: LineChartData = {
+			name: 'encounters',
+			data: [
+				['2023-06-01', 10],
+				['2024-06-01', 20],
+				// current year 2025: quiet Jan (explicit 0), real data in June
+				['2025-01-01', 0],
+				['2025-06-01', 30]
+			]
+		};
+
+		it('renders the current-year line as a gap for a zero-count month', () => {
+			const [, , , currentYear] = toThisYearSeries(withZeros, 2025);
+			expect(currentYear.data[0]).toEqual(['Jan', null]);
+			expect(currentYear.data[5]).toEqual(['Jun', 30]);
+		});
+
+		it('excludes zero-count months from the previous-year summary', () => {
+			const withPrevZero: LineChartData = {
+				name: 'encounters',
+				data: [
+					['2023-03-01', 0],
+					['2024-03-01', 8]
+				]
+			};
+			const [max, min, median] = toThisYearSeries(withPrevZero, 2025);
+			// Only 2024's 8 counts as data for March; 2023's 0 is a gap, so it
+			// never drags the band's minimum down to zero.
+			expect(max.data[2]).toEqual(['Mar', 8]);
+			expect(min.data[2]).toEqual(['Mar', 8]);
+			expect(median.data[2]).toEqual(['Mar', 8]);
 		});
 	});
 });
