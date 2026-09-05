@@ -3,6 +3,7 @@ CREATE TABLE public."RingingGroups" (
 	id bigint DEFAULT nextval('public."RingingGroups_id_seq"'::regclass) NOT NULL,
 	password_hash text,
 	password_salt text,
+	public_areas TEXT[] NOT NULL DEFAULT '{}'::TEXT[],
 	slug text NOT NULL
 );
 
@@ -47,6 +48,11 @@ ADD CONSTRAINT "RingingGroups_group_name_unique" UNIQUE (group_name);
 
 ALTER TABLE public."RingingGroups"
 ADD CONSTRAINT "RingingGroups_pkey" PRIMARY KEY (id);
+
+-- Restrict public_areas to a known allowlist of area tags. Only 'summary' is
+-- supported for now (#648 req 1); widen this list as further publishable areas land.
+ALTER TABLE public."RingingGroups"
+ADD CONSTRAINT "RingingGroups_public_areas_allowlist" CHECK (public_areas <@ ARRAY['summary']::TEXT[]);
 
 ALTER TABLE public."RingingGroups"
 ADD CONSTRAINT "RingingGroups_slug_unique" UNIQUE (slug);
