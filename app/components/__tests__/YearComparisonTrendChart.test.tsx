@@ -183,6 +183,20 @@ describe('toThisYearSeries', () => {
 			const [, min] = toThisYearSeries(metric, 2025);
 			expect(min.dataset).toMatchObject({ fill: '-1' });
 		});
+
+		it('draws the band behind the median, and the median behind the current year', () => {
+			// Chart.js sorts datasets ascending by `order` then draws in reverse, so
+			// a lower `order` renders in front. The band (max + min) must sit at the
+			// back or its fill covers the median/current-year lines and hides them.
+			const [max, min, median, currentYear] = toThisYearSeries(metric, 2025);
+			const orderOf = (series: LineChartData) =>
+				(series.dataset as { order: number }).order;
+			// Band shares the highest order (furthest back).
+			expect(orderOf(max)).toBe(orderOf(min));
+			expect(orderOf(max)).toBeGreaterThan(orderOf(median));
+			// Median in front of the band, current-year line in front of everything.
+			expect(orderOf(median)).toBeGreaterThan(orderOf(currentYear));
+		});
 	});
 
 	describe('Usual: summarising previous years month-by-month', () => {

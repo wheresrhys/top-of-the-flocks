@@ -166,9 +166,21 @@ export function yearColors(
 // Builds the this-year view for one metric: the current year's monthly line
 // plus a summary of every previous year as a median line with a min–max band.
 // The band is two invisible-point lines (max, then min) where min fills back to
-// max, so chartkick/chart.js shades the range between them. Series order is
-// load-bearing: max must immediately precede min for min's `fill: '-1'` to
-// target it, and the current-year line comes last so it draws on top.
+// max, so chartkick/chart.js shades the range between them.
+//
+// Two independent orderings are at play, and both are load-bearing:
+//   - *Array* order fixes the `fill: '-1'` target: max must immediately precede
+//     min so min's fill reaches back to max (Chart.js resolves `-1` by array
+//     index, unaffected by the `order` option below).
+//   - *Draw* order (z-index) is set explicitly via each dataset's `order`.
+//     Chart.js sorts datasets ascending by `order` then draws them in *reverse*
+//     (core.controller `_drawDatasets`), and the Filler plugin paints a
+//     dataset's fill immediately before that dataset's own line — so a *lower*
+//     `order` renders in front. Without explicit `order`s every dataset ties at
+//     0 and draws by array index in reverse, which puts the band's fill (drawn
+//     with the min series) *on top of* the median and current-year lines and
+//     hides them. Giving the band the highest `order` (drawn first, at the back)
+//     and the current-year line the lowest keeps the lines visible over the band.
 export function toThisYearSeries(
 	metric: LineChartData,
 	currentYear: number
@@ -203,27 +215,29 @@ export function toThisYearSeries(
 	const currentData = MONTH_LABELS.map((_, monthIndex) =>
 		point(monthIndex, currentYearValues[monthIndex])
 	);
+	// `order` sets the draw order (lower = in front): band (max + min) at the
+	// back, median in front of it, current-year line on top — see header comment.
 	return [
 		{
 			name: 'Previous max',
 			data: maxData,
-			dataset: { fill: false, pointRadius: 0, borderWidth: 1 }
+			dataset: { fill: false, pointRadius: 0, borderWidth: 1, order: 3 }
 		},
 		{
 			name: 'Previous min',
 			data: minData,
 			// Fill back to the immediately-preceding dataset (max) to shade the band.
-			dataset: { fill: '-1', pointRadius: 0, borderWidth: 1 }
+			dataset: { fill: '-1', pointRadius: 0, borderWidth: 1, order: 3 }
 		},
 		{
 			name: 'Previous median',
 			data: medianData,
-			dataset: { fill: false, pointRadius: 0, borderDash: [6, 4] }
+			dataset: { fill: false, pointRadius: 0, borderDash: [6, 4], order: 2 }
 		},
 		{
 			name: String(currentYear),
 			data: currentData,
-			dataset: { fill: false, borderWidth: 3 }
+			dataset: { fill: false, borderWidth: 3, order: 1 }
 		}
 	];
 }
