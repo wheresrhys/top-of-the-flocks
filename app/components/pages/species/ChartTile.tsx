@@ -4,9 +4,10 @@ import { SecondaryHeading } from '@/app/components/shared/DesignSystem';
 // One chart on the species "Graphs" tab. Collapsed it is a fixed-height text
 // tile (heading + description) that sits ~300px wide in the reflowing grid;
 // clicking it expands the tile to hold the rendered chart. Expanded it spans the
-// full grid width up to `lg`, then half the grid width, and carries a small close
-// button. The parent (`SpGraphsTab`) owns which tiles are expanded and lazily
-// fetches each chart's data when it first expands.
+// full grid width at every breakpoint (the other tiles reflow around it) and
+// grows to whatever height its chart needs — no fixed height or inner scroll —
+// and carries a small close button. The parent (`SpGraphsTab`) owns which tiles
+// are expanded and lazily fetches each chart's data when it first expands.
 export function ChartTile({
 	heading,
 	description,
@@ -35,7 +36,7 @@ export function ChartTile({
 		);
 	}
 	return (
-		<div className="border-base-content/25 relative col-span-full flex h-[400px] flex-col overflow-auto rounded-md border p-4 lg:col-span-2">
+		<div className="border-base-content/25 relative col-span-full flex flex-col rounded-md border p-4">
 			<button
 				type="button"
 				onClick={onCollapse}
@@ -46,7 +47,7 @@ export function ChartTile({
 			</button>
 			<SecondaryHeading>{heading}</SecondaryHeading>
 			<p className="text-base-content/70 text-sm">{description}</p>
-			<div className="mt-2 min-h-0 flex-1">{children}</div>
+			<div className="mt-2">{children}</div>
 		</div>
 	);
 }
