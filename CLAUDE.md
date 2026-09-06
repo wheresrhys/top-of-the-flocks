@@ -90,6 +90,44 @@ There are no per-person logins. Authentication is group-scoped:
 
 **Important:** Multi-tenancy via RLS is only partially implemented. See [issue #149](https://github.com/wheresrhys/totf/issues/149) for current status. Do not assume that all tables are fully isolated — verify before adding features that rely on group isolation.
 
+### Public pages and the group summary read-path (#770)
+
+A group can opt an area of its data into public, unauthenticated view via `RingingGroups.public_areas`
+(currently only `'summary'` is allowlisted, #768) and the SECURITY DEFINER `public_aggregate_stats` RPC,
+which returns real data only when the target group has opted in — otherwise nothing, with no JWT
+required. `lib/group-summary-access.ts`'s `fetchAuthorisedAggregateStats` implements the resulting
+4-case access model for a `(viewedGroupId, viewerGroupId)` pair (own group, always via the normal
+authenticated client; a public grant via `public_aggregate_stats`, checked *before* any
+authenticated/RLS attempt — since `public_aggregate_stats` is a pure gated pass-through to
+`aggregate_stats` for the same params, this never shows an already-authorised cross-group viewer a
+degraded view, and it spares an anonymous visitor a wasted authenticated attempt; an existing
+`GroupDataSharing`-granted cross-group view via the normal authenticated client, only attempted once
+the target isn't public and the viewer actually has a session; or blocked), returning
+`{ accessLevel, rows }` — every summary-stats action function (`app/actions/summary-stats.ts`,
+`period-totals.ts`, `spp-data.ts`) routes through it (currently destructuring only `rows`) instead of
+calling `getAuthenticatedSupabaseClient()` + `aggregate_stats` directly.
+
+`lib/group-slug.ts`'s group-lookup functions (`resolveGroupIdBySlug`, `resolveGroupSlugById`,
+`resolveGroupPublicAreas`) deliberately use the plain unauthenticated `supabase` client (`lib/supabase.ts`)
+rather than `getAuthenticatedSupabaseClient()`, since `RingingGroups` is publicly `SELECT`-able — this is
+what lets an anonymous visitor's request resolve a group at all without a 500. `resolveGroupPublicAreas`
+itself never caches (a group can toggle its public-summary setting at any time), but the same group's
+public_areas gets resolved from two places in one request when an anonymous visitor is served a public
+summary — the cross-group layout's access gate below, and `fetchAuthorisedAggregateStats`'s own public
+fallback — so both route through `resolveGroupPublicAreasForRequest`, a `React.cache()`-memoised wrapper
+around it that dedupes within a single request/render pass without weakening the "always live" guarantee
+across requests.
+
+Because a shared layout (`app/(routes)/group/[groupSlug]/layout.tsx`) can't see which deeper static
+route segment a request actually matched (Next.js only gives a layout `params` for its own position in
+the route tree), `proxy.ts` (Next.js 16's renamed `middleware.ts`) stamps the real request pathname onto an `x-pathname` header for
+`/group/**` requests, which `lib/request-pathname.ts` reads back via `next/headers`. This is how the
+layout's cookie gate can carve a no-cookie exception specifically for a public group's `summary`
+subtree while still redirecting every other no-cookie request; it resolves the target group's id and
+public_areas unconditionally for any no-cookie request (not gated behind the pathname match) and ANDs
+the pathname/public_areas checks together at the end. Reuse this pathname pattern if another subtree
+ever needs a similar route-aware decision in a shared layout — don't reinvent it per route.
+
 ## Database schema
 
 Tables (PascalCase in Postgres, matching generated TypeScript types in `types/supabase.types.ts`):

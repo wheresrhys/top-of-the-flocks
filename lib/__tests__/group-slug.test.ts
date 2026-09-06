@@ -1,14 +1,23 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const { mockGetAuthenticatedSupabaseClient } = vi.hoisted(() => ({
-	mockGetAuthenticatedSupabaseClient: vi.fn()
+const { mockFrom } = vi.hoisted(() => ({
+	mockFrom: vi.fn()
 }));
 
-vi.mock('../group-auth', () => ({
-	getAuthenticatedSupabaseClient: mockGetAuthenticatedSupabaseClient
-}));
+beforeEach(() => {
+	mockFrom.mockReset();
+});
 
-import { resolveGroupIdBySlug, resolveGroupSlugById } from '../group-slug';
+vi.mock('../supabase', async (importOriginal) => {
+	const actual = await importOriginal<typeof import('../supabase')>();
+	return { ...actual, supabase: { from: mockFrom } };
+});
+
+import {
+	resolveGroupIdBySlug,
+	resolveGroupSlugById,
+	resolveGroupPublicAreas
+} from '../group-slug';
 
 function makeGroupChain(data: unknown) {
 	return {
@@ -20,8 +29,8 @@ function makeGroupChain(data: unknown) {
 	};
 }
 
-function makeClient(data: unknown) {
-	return { from: vi.fn().mockReturnValue(makeGroupChain(data)) };
+function mockClientReturning(data: unknown) {
+	mockFrom.mockReturnValue(makeGroupChain(data));
 }
 
 // Each test uses its own slug/id, distinct from every other test's — the
@@ -31,18 +40,16 @@ function makeClient(data: unknown) {
 
 describe('resolveGroupIdBySlug', () => {
 	it('resolves a slug matching an existing RingingGroups row to its numeric id', async () => {
-		const client = makeClient({ id: 42 });
-		mockGetAuthenticatedSupabaseClient.mockResolvedValue(client);
+		mockClientReturning({ id: 42 });
 
 		const result = await resolveGroupIdBySlug('resolves-slug');
 
 		expect(result).toBe(42);
-		expect(client.from).toHaveBeenCalledWith('RingingGroups');
+		expect(mockFrom).toHaveBeenCalledWith('RingingGroups');
 	});
 
 	it('returns null when no row matches the given slug', async () => {
-		const client = makeClient(null);
-		mockGetAuthenticatedSupabaseClient.mockResolvedValue(client);
+		mockClientReturning(null);
 
 		const result = await resolveGroupIdBySlug('no-match-slug');
 
@@ -50,40 +57,36 @@ describe('resolveGroupIdBySlug', () => {
 	});
 
 	it('does not issue a second Supabase query for a second call with the same resolved slug', async () => {
-		const client = makeClient({ id: 43 });
-		mockGetAuthenticatedSupabaseClient.mockResolvedValue(client);
+		mockClientReturning({ id: 43 });
 
 		await resolveGroupIdBySlug('cache-hit-slug');
 		await resolveGroupIdBySlug('cache-hit-slug');
 
-		expect(client.from).toHaveBeenCalledTimes(1);
+		expect(mockFrom).toHaveBeenCalledTimes(1);
 	});
 
 	it('re-queries Supabase for a second call with the same unresolved slug (no negative caching)', async () => {
-		const client = makeClient(null);
-		mockGetAuthenticatedSupabaseClient.mockResolvedValue(client);
+		mockClientReturning(null);
 
 		await resolveGroupIdBySlug('no-negative-cache-slug');
 		await resolveGroupIdBySlug('no-negative-cache-slug');
 
-		expect(client.from).toHaveBeenCalledTimes(2);
+		expect(mockFrom).toHaveBeenCalledTimes(2);
 	});
 });
 
 describe('resolveGroupSlugById', () => {
 	it('resolves an id matching an existing row to its slug', async () => {
-		const client = makeClient({ slug: 'resolved-slug' });
-		mockGetAuthenticatedSupabaseClient.mockResolvedValue(client);
+		mockClientReturning({ slug: 'resolved-slug' });
 
 		const result = await resolveGroupSlugById(101);
 
 		expect(result).toBe('resolved-slug');
-		expect(client.from).toHaveBeenCalledWith('RingingGroups');
+		expect(mockFrom).toHaveBeenCalledWith('RingingGroups');
 	});
 
 	it('returns null when no row matches the id', async () => {
-		const client = makeClient(null);
-		mockGetAuthenticatedSupabaseClient.mockResolvedValue(client);
+		mockClientReturning(null);
 
 		const result = await resolveGroupSlugById(102);
 
@@ -91,8 +94,7 @@ describe('resolveGroupSlugById', () => {
 	});
 
 	it("returns null when the matching row's slug is null", async () => {
-		const client = makeClient({ slug: null });
-		mockGetAuthenticatedSupabaseClient.mockResolvedValue(client);
+		mockClientReturning({ slug: null });
 
 		const result = await resolveGroupSlugById(103);
 
@@ -100,12 +102,39 @@ describe('resolveGroupSlugById', () => {
 	});
 
 	it('does not issue a second Supabase query for a second call with the same resolved id', async () => {
-		const client = makeClient({ slug: 'cache-hit-by-id' });
-		mockGetAuthenticatedSupabaseClient.mockResolvedValue(client);
+		mockClientReturning({ slug: 'cache-hit-by-id' });
 
 		await resolveGroupSlugById(104);
 		await resolveGroupSlugById(104);
 
-		expect(client.from).toHaveBeenCalledTimes(1);
+		expect(mockFrom).toHaveBeenCalledTimes(1);
+	});
+});
+
+describe('resolveGroupPublicAreas', () => {
+	it("returns the row's public_areas when the group exists", async () => {
+		mockClientReturning({ public_areas: ['summary'] });
+
+		const result = await resolveGroupPublicAreas(201);
+
+		expect(result).toEqual(['summary']);
+		expect(mockFrom).toHaveBeenCalledWith('RingingGroups');
+	});
+
+	it('returns an empty array when no row matches the id', async () => {
+		mockClientReturning(null);
+
+		const result = await resolveGroupPublicAreas(202);
+
+		expect(result).toEqual([]);
+	});
+
+	it('re-queries Supabase on every call — never caches a mutable public_areas value', async () => {
+		mockClientReturning({ public_areas: [] });
+
+		await resolveGroupPublicAreas(203);
+		await resolveGroupPublicAreas(203);
+
+		expect(mockFrom).toHaveBeenCalledTimes(2);
 	});
 });
