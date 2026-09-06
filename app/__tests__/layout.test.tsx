@@ -7,7 +7,7 @@ const {
 	mockFrom,
 	mockOrder,
 	mockGetRequestPathname,
-	mockIsPublicGroupPageRequest
+	mockResolvePublicPageViewedGroupId
 } = vi.hoisted(() => {
 	const mockOrder = vi.fn();
 	const mockSelect = vi.fn(() => ({ order: mockOrder }));
@@ -16,7 +16,7 @@ const {
 		mockFrom,
 		mockOrder,
 		mockGetRequestPathname: vi.fn(),
-		mockIsPublicGroupPageRequest: vi.fn()
+		mockResolvePublicPageViewedGroupId: vi.fn()
 	};
 });
 
@@ -39,7 +39,7 @@ vi.mock('@/lib/request-pathname', () => ({
 }));
 
 vi.mock('@/lib/public-group-access', () => ({
-	isPublicGroupPageRequest: mockIsPublicGroupPageRequest
+	resolvePublicPageViewedGroupId: mockResolvePublicPageViewedGroupId
 }));
 
 vi.mock('@/app/actions/login', () => ({
@@ -57,7 +57,7 @@ describe('root layout', () => {
 		mockOrder.mockResolvedValue({ data: mockGroups, error: null });
 		vi.mocked(getGroupCookie).mockResolvedValue(1);
 		mockGetRequestPathname.mockResolvedValue(null);
-		mockIsPublicGroupPageRequest.mockResolvedValue(false);
+		mockResolvePublicPageViewedGroupId.mockResolvedValue(null);
 	});
 
 	afterEach(() => {
@@ -83,7 +83,7 @@ describe('root layout', () => {
 		describe('a request for a public group page', () => {
 			beforeEach(() => {
 				mockGetRequestPathname.mockResolvedValue('/group/alpha/summary');
-				mockIsPublicGroupPageRequest.mockResolvedValue(true);
+				mockResolvePublicPageViewedGroupId.mockResolvedValue(1);
 			});
 
 			it('renders children', async () => {
@@ -91,9 +91,17 @@ describe('root layout', () => {
 				expect(screen.getByText('child content')).toBeDefined();
 			});
 
-			it('does not render the main nav', async () => {
+			it('renders the main nav in read-only mode, showing the viewed group name', async () => {
 				render(await AuthorisedView({ children: <p>child content</p> }));
-				expect(screen.queryByRole('navigation')).toBeNull();
+				expect(screen.getByRole('navigation')).toBeDefined();
+				expect(screen.getByText('Alpha')).toBeDefined();
+			});
+
+			it('does not render aspects that require a logged-in group', async () => {
+				render(await AuthorisedView({ children: <p>child content</p> }));
+				expect(screen.queryByRole('button', { name: 'Log out' })).toBeNull();
+				expect(screen.queryByRole('link', { name: 'Import data' })).toBeNull();
+				expect(screen.queryByRole('link', { name: 'Sessions' })).toBeNull();
 			});
 
 			it('does not render LoginModal', async () => {
@@ -105,7 +113,7 @@ describe('root layout', () => {
 		describe('a request that is not a public group page', () => {
 			beforeEach(() => {
 				mockGetRequestPathname.mockResolvedValue('/group/alpha/effort');
-				mockIsPublicGroupPageRequest.mockResolvedValue(false);
+				mockResolvePublicPageViewedGroupId.mockResolvedValue(null);
 			});
 
 			it('renders LoginModal instead of children', async () => {
@@ -135,7 +143,7 @@ describe('root layout', () => {
 		it('does not need to resolve pathname or public-page access at all', async () => {
 			await AuthorisedView({ children: <p>child content</p> });
 			expect(mockGetRequestPathname).not.toHaveBeenCalled();
-			expect(mockIsPublicGroupPageRequest).not.toHaveBeenCalled();
+			expect(mockResolvePublicPageViewedGroupId).not.toHaveBeenCalled();
 		});
 	});
 });

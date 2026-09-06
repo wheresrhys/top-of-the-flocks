@@ -8,7 +8,7 @@ import { RingingGroupProvider } from './components/layout/RingingGroupProvider';
 import { getGroupCookie } from './actions/group-cookie';
 import { LoginModal } from './components/layout/LoginModal';
 import { getRequestPathname } from '@/lib/request-pathname';
-import { isPublicGroupPageRequest } from '@/lib/public-group-access';
+import { resolvePublicPageViewedGroupId } from '@/lib/public-group-access';
 export const metadata: Metadata = {
 	title: 'Top of the Flocks',
 	description: 'Leaderboard for bird ringing data'
@@ -28,20 +28,20 @@ export async function AuthorisedView({
 }: {
 	children: React.ReactNode;
 }) {
-	const [initialGroupId, groups] = await Promise.all([
+	const [loggedInGroupId, groups] = await Promise.all([
 		getGroupCookie(),
 		fetchRingingGroups()
 	]);
 
-	if (initialGroupId) {
-		const selectedGroup = groups.find((g) => g.id === initialGroupId)!;
+	if (loggedInGroupId) {
+		const selectedGroup = groups.find((g) => g.id === loggedInGroupId)!;
 
 		return (
 			<Suspense>
-				<RingingGroupProvider initialGroupId={initialGroupId}>
+				<RingingGroupProvider initialGroupId={loggedInGroupId}>
 					<GlobalNav
 						groups={[selectedGroup]}
-						selectedGroupId={initialGroupId}
+						selectedGroupId={loggedInGroupId}
 					/>
 					{children}
 				</RingingGroupProvider>
@@ -50,12 +50,28 @@ export async function AuthorisedView({
 	}
 
 	// No session cookie — the only exception to the login gate is an
-	// anonymous request for a group's public summary subtree (#770). This
-	// bypasses RingingGroupProvider/GlobalNav entirely, same as the removed
-	// group/[groupSlug] layout's `return children` did.
+	// anonymous request for a group's public summary subtree (#770). There's
+	// no logged-in group to track (RingingGroupProvider is skipped, same as
+	// the removed group/[groupSlug] layout's `return children` did), but
+	// GlobalNav still renders in `readOnly` mode so the visitor can see whose
+	// data they're looking at — it hides every aspect that assumes a
+	// logged-in group (switcher, import, logout, authenticated-only nav
+	// links/search).
 	const pathname = await getRequestPathname();
-	if (await isPublicGroupPageRequest(pathname)) {
-		return children;
+	const publicViewedGroupId = await resolvePublicPageViewedGroupId(pathname);
+	if (publicViewedGroupId !== null) {
+		const viewedGroup = groups.find((g) => g.id === publicViewedGroupId)!;
+
+		return (
+			<Suspense>
+				<GlobalNav
+					groups={[viewedGroup]}
+					selectedGroupId={publicViewedGroupId}
+					readOnly
+				/>
+				{children}
+			</Suspense>
+		);
 	}
 
 	return <LoginModal groups={groups} />;

@@ -1,8 +1,11 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import { render, screen, cleanup, fireEvent } from '@testing-library/react';
-import { DesktopNavItems, MobileNavItems } from '../GlobalNav';
+import GlobalNav, { DesktopNavItems, MobileNavItems } from '../GlobalNav';
+import type { RingingGroupRow } from '@/app/models/db';
 
 const noOp = () => {};
+
+const mockGroups = [{ id: 1, group_name: 'Alpha' }] as RingingGroupRow[];
 
 describe('DesktopNavItems', () => {
 	afterEach(cleanup);
@@ -119,5 +122,72 @@ describe('MobileNavItems', () => {
 	it('includes Controls link', () => {
 		render(<MobileNavItems classes="" />);
 		expect(screen.getByRole('link', { name: 'Controls' })).toBeDefined();
+	});
+});
+
+describe('GlobalNav', () => {
+	afterEach(cleanup);
+
+	it('shows the branding and the selected group name regardless of readOnly', () => {
+		render(<GlobalNav groups={mockGroups} selectedGroupId={1} readOnly />);
+		expect(screen.getByText('Top of the Flocks')).toBeDefined();
+		expect(screen.getByText('Alpha')).toBeDefined();
+	});
+
+	describe('default (logged-in) view', () => {
+		it('renders the Sessions/Species nav links', () => {
+			render(<GlobalNav groups={mockGroups} selectedGroupId={1} />);
+			// Rendered twice — once in the desktop nav, once in the (hidden by
+			// default) mobile nav Expander.
+			expect(screen.getAllByRole('link', { name: 'Sessions' }).length).toBe(2);
+		});
+
+		it('renders a "Toggle user menu" button', () => {
+			render(<GlobalNav groups={mockGroups} selectedGroupId={1} />);
+			expect(
+				screen.getByRole('button', { name: 'Toggle user menu' })
+			).toBeDefined();
+		});
+
+		it('renders "Import data" and "Log out" once the user menu is expanded', () => {
+			render(<GlobalNav groups={mockGroups} selectedGroupId={1} />);
+			fireEvent.click(screen.getByRole('button', { name: 'Toggle user menu' }));
+			expect(screen.getByRole('link', { name: 'Import data' })).toBeDefined();
+			expect(screen.getByRole('button', { name: 'Log out' })).toBeDefined();
+		});
+
+		it('renders a ring-number search toggle', () => {
+			render(<GlobalNav groups={mockGroups} selectedGroupId={1} />);
+			expect(
+				screen.getByRole('button', { name: 'Search for a ring number' })
+			).toBeDefined();
+		});
+	});
+
+	describe('readOnly (anonymous public-summary view)', () => {
+		it('does not render the Sessions/Species nav links', () => {
+			render(<GlobalNav groups={mockGroups} selectedGroupId={1} readOnly />);
+			expect(screen.queryByRole('link', { name: 'Sessions' })).toBeNull();
+		});
+
+		it('does not render a "Toggle user menu" button', () => {
+			render(<GlobalNav groups={mockGroups} selectedGroupId={1} readOnly />);
+			expect(
+				screen.queryByRole('button', { name: 'Toggle user menu' })
+			).toBeNull();
+		});
+
+		it('does not render "Import data" or "Log out"', () => {
+			render(<GlobalNav groups={mockGroups} selectedGroupId={1} readOnly />);
+			expect(screen.queryByRole('link', { name: 'Import data' })).toBeNull();
+			expect(screen.queryByRole('button', { name: 'Log out' })).toBeNull();
+		});
+
+		it('does not render a ring-number search toggle', () => {
+			render(<GlobalNav groups={mockGroups} selectedGroupId={1} readOnly />);
+			expect(
+				screen.queryByRole('button', { name: 'Search for a ring number' })
+			).toBeNull();
+		});
 	});
 });

@@ -121,20 +121,25 @@ across requests.
 The root layout (`app/layout.tsx`'s `AuthorisedView`) is the single auth gate for the whole app — every
 route renders through it, so it's the only place that can make a page-aware, group-aware decision before
 anything else runs. A no-cookie request only ever falls through to `<LoginModal>` after
-`lib/public-group-access.ts`'s `isPublicGroupPageRequest(pathname)` returns `false`; that helper matches
-the pathname against the summary-subtree pattern, resolves the target group by slug, and checks its
-`public_areas`, letting the request through with bare `children` (no `GlobalNav`/`RingingGroupProvider`)
-when all three line up. Because a Server Component layout can't see which deeper static route segment a
-request actually matched (Next.js only gives a layout `params` for its own position in the route tree,
-and the root layout has no dynamic segments at all), `proxy.ts` (Next.js 16's renamed `middleware.ts`)
-stamps the real request pathname onto an `x-pathname` header for `/group/**` requests, which
-`lib/request-pathname.ts` reads back via `next/headers` — this is how the root layout can see it's being
-asked for a `/group/<slug>/summary` path despite sitting above the whole route tree. Every other request
-has no `x-pathname` header, so `isPublicGroupPageRequest` returns `false` and the existing login gate is
-unchanged. Reuse this pathname pattern (and widen `proxy.ts`'s matcher) if another subtree ever needs a
-similar route-aware decision in the root layout — don't reinvent it per route. There is deliberately no
-`app/(routes)/group/[groupSlug]/layout.tsx` any more — a nested layout can never run before the root
-layout's gate does, so any auth decision belongs in the root layout, not a subtree one.
+`lib/public-group-access.ts`'s `resolvePublicPageViewedGroupId(pathname)` returns `null`; that helper
+matches the pathname against the summary-subtree pattern, resolves the target group by slug, and checks
+its `public_areas`, returning the viewed group's id (instead of a bare boolean) when all three line up.
+`AuthorisedView` looks that id up in the same `groups` list it already fetched for the authenticated
+branch and renders `GlobalNav` in `readOnly` mode (branding + viewed-group name only — no group switcher,
+"Import data", "Log out", or authenticated-only nav links/search, none of which are reachable
+anonymously since only `'summary'` is in the public allowlist, #768) around bare `children`, skipping
+`RingingGroupProvider` entirely (there's no logged-in group to track). Because a Server Component layout
+can't see which deeper static route segment a request actually matched (Next.js only gives a layout
+`params` for its own position in the route tree, and the root layout has no dynamic segments at all),
+`proxy.ts` (Next.js 16's renamed `middleware.ts`) stamps the real request pathname onto an `x-pathname`
+header for `/group/**` requests, which `lib/request-pathname.ts` reads back via `next/headers` — this is
+how the root layout can see it's being asked for a `/group/<slug>/summary` path despite sitting above the
+whole route tree. Every other request has no `x-pathname` header, so `resolvePublicPageViewedGroupId`
+returns `null` and the existing login gate is unchanged. Reuse this pathname pattern (and widen
+`proxy.ts`'s matcher) if another subtree ever needs a similar route-aware decision in the root layout —
+don't reinvent it per route. There is deliberately no `app/(routes)/group/[groupSlug]/layout.tsx` any
+more — a nested layout can never run before the root layout's gate does, so any auth decision belongs in
+the root layout, not a subtree one.
 
 ## Database schema
 
