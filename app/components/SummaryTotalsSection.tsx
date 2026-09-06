@@ -115,7 +115,6 @@ export function SummaryTotalsSection({
 	yearlyTotals,
 	sessionTotals,
 	showAllTimeMonthTotals,
-	lazySessionTotals,
 	viewedGroup,
 	fromDate,
 	toDate,
@@ -134,26 +133,16 @@ export function SummaryTotalsSection({
 	yearlyTotals?: AggregateStatsResult[];
 	// The month summary page passes these — a leading "Session totals" tab needs
 	// both the per-day rows and a group to build session links for. undefined
-	// means "this page has no Session totals tab" (unless `lazySessionTotals` is
-	// set, see below).
+	// means "this page has no Session totals tab"
 	sessionTotals?: AggregateStatsResult[];
 	// Only the all-time page sets this — it enables the combine-years "Month
 	// totals" tab, whose data (unlike the year page's `monthTotals` prop) is
 	// fetched lazily on first selection rather than passed in, so this is just a
 	// boolean gate, not the data itself.
 	showAllTimeMonthTotals?: boolean;
-	// The all-time and year summary pages set this instead of supplying
-	// `sessionTotals` up front — it shows the Session totals tab but defers the
-	// `fetchPeriodTotals('day', fromDate, toDate)` call (scoped by the same
-	// `fromDate`/`toDate` used for Species totals) until the tab is first
-	// selected, via the same `useLazyTabData` mechanism as Species totals. The
-	// month summary page keeps fetching eagerly server-side and passing
-	// `sessionTotals` directly — untouched by this.
-	lazySessionTotals?: boolean;
 	// The viewed group whose id scopes the lazy Species-totals fetch. All three
 	// summary pages supply it; the Session totals tab additionally needs it to
-	// build session links (and to scope its own lazy fetch when
-	// `lazySessionTotals` is set).
+	// build session links.
 	viewedGroup?: ViewedGroup;
 	// The date range the Species-totals fetch is scoped to — matches the bounds
 	// the page used for its other stats. Both undefined on the all-time page
@@ -172,9 +161,7 @@ export function SummaryTotalsSection({
 	// month page (eager) or all-time/year pages (lazy, see below). Whichever is
 	// present is prepended and shown first/by default; the day page passes none
 	// and keeps Species totals as its sole/default tab.
-	const showSessionTotals =
-		(sessionTotals !== undefined || lazySessionTotals === true) &&
-		viewedGroup !== undefined;
+	const showSessionTotals = viewedGroup !== undefined;
 	const tabs = [
 		...(yearlyTotals !== undefined ? [YEAR_TOTALS_TAB] : []),
 		...(monthTotals ? [MONTH_TOTALS_TAB] : []),
@@ -229,8 +216,7 @@ export function SummaryTotalsSection({
 			}
 		);
 
-	// Session totals follow the same fetch-on-select shape as Species totals,
-	// but only when the page opted in via `lazySessionTotals` — when
+	// Session totals follow the same fetch-on-select shape as Species totals. When
 	// `sessionTotals` is already supplied (the month page's eager fetch) this
 	// never fires, since `isActive` below is gated on `sessionTotals` being
 	// undefined.
@@ -242,7 +228,6 @@ export function SummaryTotalsSection({
 	const { data: lazySessionStats, isLoading: isSessionLoading } =
 		useLazyTabData(
 			isSessionActive &&
-				lazySessionTotals === true &&
 				sessionTotals === undefined &&
 				viewedGroup !== undefined,
 			fetchSessionStats,

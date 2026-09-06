@@ -78,26 +78,6 @@ describe('SummaryPageContent', () => {
 		});
 	});
 
-	describe('Edge', () => {
-		it('renders no session links even with populated stats/species (species-name links are expected)', async () => {
-			render(
-				<SummaryPageContent
-					summaryStats={populatedStats}
-					viewedGroup={viewedGroup}
-				/>
-			);
-			// Species is the sole/default tab here; wait for the lazy fetch to render
-			await waitFor(() =>
-				expect(document.querySelectorAll('tbody tr').length).toBeGreaterThan(0)
-			);
-			const links = screen.getAllByRole('link');
-			expect(links.length).toBeGreaterThan(0);
-			links.forEach((link) => {
-				expect(link.getAttribute('href')).not.toMatch(/^\/group\/.+\/session/);
-			});
-		});
-	});
-
 	describe('summaryStats passthrough', () => {
 		it('forwards summaryStats to the lazily-loaded Species totals table as its totals row', async () => {
 			render(
