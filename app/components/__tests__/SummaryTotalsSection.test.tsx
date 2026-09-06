@@ -162,7 +162,7 @@ describe('SummaryTotalsSection', () => {
 		});
 		// TODOD: skipping because links only generated for months with data and
 		// the testfixture has empty data for each month
-		it.skip('renders 12 month rows, each linking to /summary/{year}/{month}', () => {
+		it.skip('renders 12 month rows, each linking to /group/{slug}/summary/{year}/{month}', () => {
 			render(
 				<SummaryTotalsSection
 					monthTotals={monthTotals}
@@ -171,9 +171,13 @@ describe('SummaryTotalsSection', () => {
 			);
 			expect(document.querySelectorAll('tbody tr').length).toBe(12);
 			const januaryLink = screen.getByRole('link', { name: 'January 2026' });
-			expect(januaryLink.getAttribute('href')).toBe('/summary/2026/1');
+			expect(januaryLink.getAttribute('href')).toBe(
+				'/group/alpha/summary/2026/1'
+			);
 			const decemberLink = screen.getByRole('link', { name: 'December 2026' });
-			expect(decemberLink.getAttribute('href')).toBe('/summary/2026/12');
+			expect(decemberLink.getAttribute('href')).toBe(
+				'/group/alpha/summary/2026/12'
+			);
 		});
 
 		it('lazily switches to the species totals table when its tab is clicked', async () => {
@@ -323,7 +327,7 @@ describe('SummaryTotalsSection', () => {
 			expect(screen.getByTestId('period-totals-table')).toBeTruthy();
 		});
 
-		it('renders the first column as a plain year number linking to /summary/{year}', () => {
+		it('renders the first column as a plain year number linking to /group/{slug}/summary/{year}', () => {
 			const yearlyTotals = [buildYearlyStat({ time_period: '2026-01-01' })];
 			render(
 				<SummaryTotalsSection
@@ -332,7 +336,7 @@ describe('SummaryTotalsSection', () => {
 				/>
 			);
 			const link = screen.getByRole('link', { name: '2026' });
-			expect(link.getAttribute('href')).toBe('/summary/2026');
+			expect(link.getAttribute('href')).toBe('/group/alpha/summary/2026');
 		});
 
 		it('keeps "Species totals" present and lazily switches to it on click', async () => {
@@ -519,17 +523,17 @@ describe('SummaryTotalsSection', () => {
 						screen
 							.getByRole('link', { name: 'January 2020' })
 							.getAttribute('href')
-					).toBe('/summary/2020/1');
+					).toBe('/group/alpha/summary/2020/1');
 					expect(
 						screen
 							.getByRole('link', { name: 'January 2021' })
 							.getAttribute('href')
-					).toBe('/summary/2021/1');
+					).toBe('/group/alpha/summary/2021/1');
 					expect(
 						screen
 							.getByRole('link', { name: 'August 2020' })
 							.getAttribute('href')
-					).toBe('/summary/2020/8');
+					).toBe('/group/alpha/summary/2020/8');
 					expect(
 						(
 							screen.getByRole('radio', {

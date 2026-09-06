@@ -115,8 +115,14 @@ describe('/summary/[year]', () => {
 		]);
 		const data = await fetchSummaryYearPageContent({ year: '2026' }, 1);
 		expect(data.monthTotals).toHaveLength(12);
-		expect(data.monthTotals.map((row) => row.label)[0]).toBe('January 2026');
-		expect(data.monthTotals.map((row) => row.label)[11]).toBe('December 2026');
+		expect(data.monthTotals[0]).toMatchObject({
+			year: 2026,
+			zeroIndexedMonth: 0
+		});
+		expect(data.monthTotals[11]).toMatchObject({
+			year: 2026,
+			zeroIndexedMonth: 11
+		});
 	});
 
 	it('renders without the stats section when fetchSummaryStats resolves null', async () => {
