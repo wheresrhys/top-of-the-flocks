@@ -230,6 +230,7 @@ export type Database = {
           id: number
           password_hash: string | null
           password_salt: string | null
+          public_areas: string[]
           slug: string
         }
         Insert: {
@@ -237,6 +238,7 @@ export type Database = {
           id?: number
           password_hash?: string | null
           password_salt?: string | null
+          public_areas?: string[]
           slug: string
         }
         Update: {
@@ -244,6 +246,7 @@ export type Database = {
           id?: number
           password_hash?: string | null
           password_salt?: string | null
+          public_areas?: string[]
           slug?: string
         }
         Relationships: []
@@ -403,40 +406,13 @@ export type Database = {
           species_name_filter?: string
           to_date?: string
         }
-        Returns: {
-          adult_bird_count: number
-          adult_enc_count: number
-          avg_encounters_per_session: number
-          avg_weight: number
-          avg_wing: number
-          bird_count: number
-          effort_per_encounter: string
-          effort_per_session: string
-          encounter_count: number
-          juv_bird_count: number
-          juv_enc_count: number
-          max_new_per_session: number
-          max_per_session: number
-          max_weight: number
-          max_wing: number
-          median_weight: number
-          median_wing: number
-          min_weight: number
-          min_wing: number
-          new_bird_count: number
-          new_young_bird_count: number
-          postjuv_bird_count: number
-          postjuv_enc_count: number
-          pullus_bird_count: number
-          pullus_enc_count: number
-          session_count: number
-          species_count: number
-          species_name: string
-          time_period: string
-          total_effort: string
-          unknown_age_bird_count: number
-          unknown_age_enc_count: number
-        }[]
+        Returns: Database["public"]["CompositeTypes"]["aggregate_stats_result"][]
+        SetofOptions: {
+          from: "*"
+          to: "aggregate_stats_result"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       daitch_mokotoff: { Args: { "": string }; Returns: string[] }
       dmetaphone: { Args: { "": string }; Returns: string }
@@ -530,6 +506,23 @@ export type Database = {
           species_name: string
         }[]
       }
+      public_aggregate_stats: {
+        Args: {
+          from_date?: string
+          group_by_species?: boolean
+          group_by_time_period?: string
+          ringing_group_filter?: number
+          species_name_filter?: string
+          to_date?: string
+        }
+        Returns: Database["public"]["CompositeTypes"]["aggregate_stats_result"][]
+        SetofOptions: {
+          from: "*"
+          to: "aggregate_stats_result"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       ring_sequence_controls: {
         Args: { ringing_group_filter?: number }
         Returns: {
@@ -606,6 +599,40 @@ export type Database = {
         | "MS"
     }
     CompositeTypes: {
+      aggregate_stats_result: {
+        species_name: string | null
+        time_period: string | null
+        session_count: number | null
+        total_effort: string | null
+        effort_per_session: string | null
+        effort_per_encounter: string | null
+        avg_encounters_per_session: number | null
+        max_per_session: number | null
+        species_count: number | null
+        bird_count: number | null
+        encounter_count: number | null
+        new_bird_count: number | null
+        pullus_bird_count: number | null
+        juv_bird_count: number | null
+        postjuv_bird_count: number | null
+        adult_bird_count: number | null
+        unknown_age_bird_count: number | null
+        new_young_bird_count: number | null
+        pullus_enc_count: number | null
+        juv_enc_count: number | null
+        postjuv_enc_count: number | null
+        adult_enc_count: number | null
+        unknown_age_enc_count: number | null
+        max_new_per_session: number | null
+        max_weight: number | null
+        avg_weight: number | null
+        min_weight: number | null
+        median_weight: number | null
+        max_wing: number | null
+        avg_wing: number | null
+        min_wing: number | null
+        median_wing: number | null
+      }
       top_metrics_filter_params: {
         month_filter: number | null
         year_filter: number | null

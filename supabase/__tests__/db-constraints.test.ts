@@ -368,3 +368,53 @@ describe('DB constraints — RingingGroups uniqueness (slug)', () => {
 		expect(duplicate.error?.code).toBe('23505');
 	});
 });
+
+// RingingGroups.public_areas (#768) is constrained to a known allowlist of area tags
+// (currently just 'summary') so a group can never publish an area the app doesn't
+// understand. Since the allowlist forbids any other tag, this constraint is where the
+// "no unrelated tag" guarantee that public_aggregate_stats relies on is enforced —
+// a row with a non-'summary' tag is unreachable, so public_aggregate_stats never has
+// to reason about one.
+describe('DB constraints — RingingGroups public_areas allowlist (CHECK)', () => {
+	const suffix = randomTestSuffix();
+	let groupId: number;
+	let groupClient: SupabaseClient;
+
+	beforeAll(async () => {
+		groupId = createIsolatedGroup(`db-constraints-${suffix}-public-areas`);
+		groupClient = await getAuthenticatedSupabaseClientForGroup(groupId);
+	});
+
+	afterAll(() => {
+		psql(`DELETE FROM "RingingGroups" WHERE id = ${groupId};`);
+	});
+
+	it("defaults public_areas to an empty array (a group publishes nothing until it opts in)", async () => {
+		const value = psqlScalar(`SELECT public_areas FROM "RingingGroups" WHERE id = ${groupId};`);
+		expect(value).toBe('{}');
+	});
+
+	it("allows setting public_areas to ['summary']", async () => {
+		const { error } = await groupClient
+			.from('RingingGroups')
+			.update({ public_areas: ['summary'] })
+			.eq('id', groupId);
+		expect(error).toBeNull();
+	});
+
+	it('rejects a public_areas value containing a tag outside the allowlist with a check-violation error', async () => {
+		const { error } = await groupClient
+			.from('RingingGroups')
+			.update({ public_areas: ['records'] })
+			.eq('id', groupId);
+		expect(error?.code).toBe('23514');
+	});
+
+	it("rejects a public_areas value mixing 'summary' with an unrelated tag", async () => {
+		const { error } = await groupClient
+			.from('RingingGroups')
+			.update({ public_areas: ['summary', 'records'] })
+			.eq('id', groupId);
+		expect(error?.code).toBe('23514');
+	});
+});
