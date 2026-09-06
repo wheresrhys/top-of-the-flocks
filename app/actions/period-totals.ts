@@ -1,6 +1,5 @@
 'use server';
-import { getAuthenticatedSupabaseClient } from '@/lib/group-auth';
-import { catchSupabaseErrors } from '@/lib/supabase';
+import { fetchAccessibleAggregateStats } from '@/lib/group-summary-access';
 import type { AggregateStatsResult } from '@/app/models/db';
 import type { PeriodTotalsGrouping } from '@/app/models/period-totals';
 
@@ -17,14 +16,10 @@ export async function fetchPeriodTotals(
 	fromDate?: string,
 	toDate?: string
 ): Promise<AggregateStatsResult[]> {
-	const supabase = await getAuthenticatedSupabaseClient();
-	return supabase
-		.rpc('aggregate_stats', {
-			...(fromDate ? { from_date: fromDate } : {}),
-			...(toDate ? { to_date: toDate } : {}),
-			ringing_group_filter: viewedGroupId,
-			group_by_species: false,
-			group_by_time_period: grouping
-		})
-		.then(catchSupabaseErrors) as Promise<AggregateStatsResult[]>;
+	return fetchAccessibleAggregateStats(viewedGroupId, {
+		...(fromDate ? { from_date: fromDate } : {}),
+		...(toDate ? { to_date: toDate } : {}),
+		group_by_species: false,
+		group_by_time_period: grouping
+	});
 }

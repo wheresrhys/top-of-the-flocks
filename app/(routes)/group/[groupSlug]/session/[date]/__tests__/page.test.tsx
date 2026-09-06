@@ -2,12 +2,18 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 import Page from '../page';
 
-const { mockGetAuthenticatedSupabaseClient } = vi.hoisted(() => ({
-	mockGetAuthenticatedSupabaseClient: vi.fn()
-}));
+const { mockGetAuthenticatedSupabaseClient, mockResolveGroupIdBySlug } =
+	vi.hoisted(() => ({
+		mockGetAuthenticatedSupabaseClient: vi.fn(),
+		mockResolveGroupIdBySlug: vi.fn()
+	}));
 
 vi.mock('@/lib/group-auth', () => ({
 	getAuthenticatedSupabaseClient: mockGetAuthenticatedSupabaseClient
+}));
+
+vi.mock('@/lib/group-slug', () => ({
+	resolveGroupIdBySlug: mockResolveGroupIdBySlug
 }));
 
 vi.mock('@/app/actions/session-highlights', () => ({
@@ -114,22 +120,16 @@ function makeChain(data: unknown) {
 	};
 }
 
-// The wrapper page also resolves the group's numeric id from its slug
-// (RingingGroups) — via a module-scope cache in lib/group-slug.ts, so it's
-// only fetched once per slug for the lifetime of this test file, not once
-// per test. Dispatch on table name so RingingGroups is served on demand
-// regardless of whether a given test hits the cache, without disturbing the
-// ordered queue below that the Sessions/Encounters calls are matched against.
+// The wrapper page also resolves the group's numeric id from its slug via
+// `resolveGroupIdBySlug` (`@/lib/group-slug`, mocked directly above) rather
+// than through this page's own authenticated client — see #770, which moved
+// that resolution onto an unauthenticated client so it works for a no-cookie
+// visitor too.
 function makeSessionClient(
 	sessionAndEncounterChains: ReturnType<typeof makeChain>[]
 ) {
 	let nextChainIndex = 0;
-	const from = vi.fn((table: string) => {
-		if (table === 'RingingGroups') {
-			return makeChain({ id: Number(TEST_GROUP_ID) });
-		}
-		return sessionAndEncounterChains[nextChainIndex++];
-	});
+	const from = vi.fn(() => sessionAndEncounterChains[nextChainIndex++]);
 	return { from, sessionAndEncounterChains };
 }
 
@@ -154,6 +154,7 @@ describe('session detail page', () => {
 	});
 
 	beforeEach(() => {
+		mockResolveGroupIdBySlug.mockResolvedValue(Number(TEST_GROUP_ID));
 		mockGetAuthenticatedSupabaseClient.mockResolvedValue(
 			makeDefaultSessionClient()
 		);

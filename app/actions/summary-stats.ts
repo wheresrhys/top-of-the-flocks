@@ -1,6 +1,5 @@
 'use server';
-import { getAuthenticatedSupabaseClient } from '@/lib/group-auth';
-import { catchSupabaseErrors } from '@/lib/supabase';
+import { fetchAccessibleAggregateStats } from '@/lib/group-summary-access';
 import type { AggregateStatsResult } from '@/app/models/db';
 
 /**
@@ -12,15 +11,11 @@ export async function fetchSummaryStats(
 	fromDate?: string,
 	toDate?: string
 ): Promise<AggregateStatsResult | null> {
-	const supabase = await getAuthenticatedSupabaseClient();
-	const rows = (await supabase
-		.rpc('aggregate_stats', {
-			ringing_group_filter: viewedGroupId,
-			...(fromDate ? { from_date: fromDate } : {}),
-			...(toDate ? { to_date: toDate } : {})
-		})
-		.then(catchSupabaseErrors)) as AggregateStatsResult[] | null;
-	return rows?.[0] ?? null;
+	const rows = await fetchAccessibleAggregateStats(viewedGroupId, {
+		...(fromDate ? { from_date: fromDate } : {}),
+		...(toDate ? { to_date: toDate } : {})
+	});
+	return rows[0] ?? null;
 }
 
 /**
@@ -35,16 +30,12 @@ export async function fetchPeriodStats(
 	fromDate?: string,
 	toDate?: string
 ): Promise<AggregateStatsResult[]> {
-	const supabase = await getAuthenticatedSupabaseClient();
-	return supabase
-		.rpc('aggregate_stats', {
-			ringing_group_filter: viewedGroupId,
-			group_by_species: false,
-			group_by_time_period: grouping,
-			...(fromDate ? { from_date: fromDate } : {}),
-			...(toDate ? { to_date: toDate } : {})
-		})
-		.then(catchSupabaseErrors) as Promise<AggregateStatsResult[]>;
+	return fetchAccessibleAggregateStats(viewedGroupId, {
+		group_by_species: false,
+		group_by_time_period: grouping,
+		...(fromDate ? { from_date: fromDate } : {}),
+		...(toDate ? { to_date: toDate } : {})
+	});
 }
 
 /**
@@ -56,12 +47,8 @@ export async function fetchPeriodStats(
 export async function fetchYearlyTotals(
 	viewedGroupId: number
 ): Promise<AggregateStatsResult[]> {
-	const supabase = await getAuthenticatedSupabaseClient();
-	return supabase
-		.rpc('aggregate_stats', {
-			ringing_group_filter: viewedGroupId,
-			group_by_species: false,
-			group_by_time_period: 'year'
-		})
-		.then(catchSupabaseErrors) as Promise<AggregateStatsResult[]>;
+	return fetchAccessibleAggregateStats(viewedGroupId, {
+		group_by_species: false,
+		group_by_time_period: 'year'
+	});
 }
