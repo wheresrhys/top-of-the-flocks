@@ -83,7 +83,7 @@ state-mutating.
 
 There are no per-person logins. Authentication is group-scoped:
 
-1. The selected group is stored in a `selected_group_id` HTTP-only cookie.
+1. The selected group is stored in a `TOTFSession` HTTP-only cookie (a signed JWT, `app/actions/group-cookie.ts`).
 2. Server actions call `getAuthenticatedSupabaseClient()` (`lib/group-auth.ts`), which reads the cookie and returns a Supabase client carrying a **custom JWT** embedding `app_metadata.ringing_group_id`.
 3. All RLS policies on the database read `ringing_group_id` from this JWT — so the database itself enforces data isolation.
 4. Clients are cached in an LRU cache (100 entries, 5-minute TTL) to avoid re-signing JWTs on every request.
@@ -113,20 +113,28 @@ rather than `getAuthenticatedSupabaseClient()`, since `RingingGroups` is publicl
 what lets an anonymous visitor's request resolve a group at all without a 500. `resolveGroupPublicAreas`
 itself never caches (a group can toggle its public-summary setting at any time), but the same group's
 public_areas gets resolved from two places in one request when an anonymous visitor is served a public
-summary — the cross-group layout's access gate below, and `fetchAuthorisedAggregateStats`'s own public
+summary — the root layout's public-page access gate below, and `fetchAuthorisedAggregateStats`'s own public
 fallback — so both route through `resolveGroupPublicAreasForRequest`, a `React.cache()`-memoised wrapper
 around it that dedupes within a single request/render pass without weakening the "always live" guarantee
 across requests.
 
-Because a shared layout (`app/(routes)/group/[groupSlug]/layout.tsx`) can't see which deeper static
-route segment a request actually matched (Next.js only gives a layout `params` for its own position in
-the route tree), `proxy.ts` (Next.js 16's renamed `middleware.ts`) stamps the real request pathname onto an `x-pathname` header for
-`/group/**` requests, which `lib/request-pathname.ts` reads back via `next/headers`. This is how the
-layout's cookie gate can carve a no-cookie exception specifically for a public group's `summary`
-subtree while still redirecting every other no-cookie request; it resolves the target group's id and
-public_areas unconditionally for any no-cookie request (not gated behind the pathname match) and ANDs
-the pathname/public_areas checks together at the end. Reuse this pathname pattern if another subtree
-ever needs a similar route-aware decision in a shared layout — don't reinvent it per route.
+The root layout (`app/layout.tsx`'s `AuthorisedView`) is the single auth gate for the whole app — every
+route renders through it, so it's the only place that can make a page-aware, group-aware decision before
+anything else runs. A no-cookie request only ever falls through to `<LoginModal>` after
+`lib/public-group-access.ts`'s `isPublicGroupPageRequest(pathname)` returns `false`; that helper matches
+the pathname against the summary-subtree pattern, resolves the target group by slug, and checks its
+`public_areas`, letting the request through with bare `children` (no `GlobalNav`/`RingingGroupProvider`)
+when all three line up. Because a Server Component layout can't see which deeper static route segment a
+request actually matched (Next.js only gives a layout `params` for its own position in the route tree,
+and the root layout has no dynamic segments at all), `proxy.ts` (Next.js 16's renamed `middleware.ts`)
+stamps the real request pathname onto an `x-pathname` header for `/group/**` requests, which
+`lib/request-pathname.ts` reads back via `next/headers` — this is how the root layout can see it's being
+asked for a `/group/<slug>/summary` path despite sitting above the whole route tree. Every other request
+has no `x-pathname` header, so `isPublicGroupPageRequest` returns `false` and the existing login gate is
+unchanged. Reuse this pathname pattern (and widen `proxy.ts`'s matcher) if another subtree ever needs a
+similar route-aware decision in the root layout — don't reinvent it per route. There is deliberately no
+`app/(routes)/group/[groupSlug]/layout.tsx` any more — a nested layout can never run before the root
+layout's gate does, so any auth decision belongs in the root layout, not a subtree one.
 
 ## Database schema
 

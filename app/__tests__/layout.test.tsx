@@ -3,11 +3,21 @@ import { render, screen, cleanup } from '@testing-library/react';
 import { getGroupCookie } from '@/app/actions/group-cookie';
 import { AuthorisedView } from '../layout';
 
-const { mockFrom, mockOrder } = vi.hoisted(() => {
+const {
+	mockFrom,
+	mockOrder,
+	mockGetRequestPathname,
+	mockIsPublicGroupPageRequest
+} = vi.hoisted(() => {
 	const mockOrder = vi.fn();
 	const mockSelect = vi.fn(() => ({ order: mockOrder }));
 	const mockFrom = vi.fn(() => ({ select: mockSelect }));
-	return { mockFrom, mockOrder };
+	return {
+		mockFrom,
+		mockOrder,
+		mockGetRequestPathname: vi.fn(),
+		mockIsPublicGroupPageRequest: vi.fn()
+	};
 });
 
 vi.mock('@/lib/supabase', () => ({
@@ -24,6 +34,14 @@ vi.mock('@/lib/supabase', () => ({
 	}
 }));
 
+vi.mock('@/lib/request-pathname', () => ({
+	getRequestPathname: mockGetRequestPathname
+}));
+
+vi.mock('@/lib/public-group-access', () => ({
+	isPublicGroupPageRequest: mockIsPublicGroupPageRequest
+}));
+
 vi.mock('@/app/actions/login', () => ({
 	loginGroup: vi.fn()
 }));
@@ -38,6 +56,8 @@ describe('root layout', () => {
 	beforeEach(() => {
 		mockOrder.mockResolvedValue({ data: mockGroups, error: null });
 		vi.mocked(getGroupCookie).mockResolvedValue(1);
+		mockGetRequestPathname.mockResolvedValue(null);
+		mockIsPublicGroupPageRequest.mockResolvedValue(false);
 	});
 
 	afterEach(() => {
@@ -59,6 +79,41 @@ describe('root layout', () => {
 			render(await AuthorisedView({ children: <p>child content</p> }));
 			expect(screen.queryByRole('navigation')).toBeNull();
 		});
+
+		describe('a request for a public group page', () => {
+			beforeEach(() => {
+				mockGetRequestPathname.mockResolvedValue('/group/alpha/summary');
+				mockIsPublicGroupPageRequest.mockResolvedValue(true);
+			});
+
+			it('renders children', async () => {
+				render(await AuthorisedView({ children: <p>child content</p> }));
+				expect(screen.getByText('child content')).toBeDefined();
+			});
+
+			it('does not render the main nav', async () => {
+				render(await AuthorisedView({ children: <p>child content</p> }));
+				expect(screen.queryByRole('navigation')).toBeNull();
+			});
+
+			it('does not render LoginModal', async () => {
+				render(await AuthorisedView({ children: <p>child content</p> }));
+				expect(screen.queryByRole('button', { name: 'Login' })).toBeNull();
+			});
+		});
+
+		describe('a request that is not a public group page', () => {
+			beforeEach(() => {
+				mockGetRequestPathname.mockResolvedValue('/group/alpha/effort');
+				mockIsPublicGroupPageRequest.mockResolvedValue(false);
+			});
+
+			it('renders LoginModal instead of children', async () => {
+				render(await AuthorisedView({ children: <p>child content</p> }));
+				expect(screen.queryByText('child content')).toBeNull();
+				expect(screen.getByRole('button', { name: 'Login' })).toBeDefined();
+			});
+		});
 	});
 
 	describe('authenticated (getGroupCookie returns 1)', () => {
@@ -75,6 +130,12 @@ describe('root layout', () => {
 		it('does not render LoginModal', async () => {
 			render(await AuthorisedView({ children: <p>child content</p> }));
 			expect(screen.queryByRole('button', { name: 'Login' })).toBeNull();
+		});
+
+		it('does not need to resolve pathname or public-page access at all', async () => {
+			await AuthorisedView({ children: <p>child content</p> });
+			expect(mockGetRequestPathname).not.toHaveBeenCalled();
+			expect(mockIsPublicGroupPageRequest).not.toHaveBeenCalled();
 		});
 	});
 });

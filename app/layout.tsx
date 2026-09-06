@@ -7,6 +7,8 @@ import { supabase, catchSupabaseErrors } from '@/lib/supabase';
 import { RingingGroupProvider } from './components/layout/RingingGroupProvider';
 import { getGroupCookie } from './actions/group-cookie';
 import { LoginModal } from './components/layout/LoginModal';
+import { getRequestPathname } from '@/lib/request-pathname';
+import { isPublicGroupPageRequest } from '@/lib/public-group-access';
 export const metadata: Metadata = {
 	title: 'Top of the Flocks',
 	description: 'Leaderboard for bird ringing data'
@@ -31,20 +33,32 @@ export async function AuthorisedView({
 		fetchRingingGroups()
 	]);
 
-	if (!initialGroupId) {
-		return <LoginModal groups={groups} />;
+	if (initialGroupId) {
+		const selectedGroup = groups.find((g) => g.id === initialGroupId)!;
+
+		return (
+			<Suspense>
+				<RingingGroupProvider initialGroupId={initialGroupId}>
+					<GlobalNav
+						groups={[selectedGroup]}
+						selectedGroupId={initialGroupId}
+					/>
+					{children}
+				</RingingGroupProvider>
+			</Suspense>
+		);
 	}
 
-	const selectedGroup = groups.find((g) => g.id === initialGroupId)!;
+	// No session cookie — the only exception to the login gate is an
+	// anonymous request for a group's public summary subtree (#770). This
+	// bypasses RingingGroupProvider/GlobalNav entirely, same as the removed
+	// group/[groupSlug] layout's `return children` did.
+	const pathname = await getRequestPathname();
+	if (await isPublicGroupPageRequest(pathname)) {
+		return children;
+	}
 
-	return (
-		<Suspense>
-			<RingingGroupProvider initialGroupId={initialGroupId}>
-				<GlobalNav groups={[selectedGroup]} selectedGroupId={initialGroupId} />
-				{children}
-			</RingingGroupProvider>
-		</Suspense>
-	);
+	return <LoginModal groups={groups} />;
 }
 
 export default function RootLayout({
