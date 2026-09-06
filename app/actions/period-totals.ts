@@ -1,5 +1,5 @@
 'use server';
-import { fetchAccessibleAggregateStats } from '@/lib/group-summary-access';
+import { fetchAuthorisedAggregateStats } from '@/lib/group-summary-access';
 import type { AggregateStatsResult } from '@/app/models/db';
 import type { PeriodTotalsGrouping } from '@/app/models/period-totals';
 
@@ -16,10 +16,11 @@ export async function fetchPeriodTotals(
 	fromDate?: string,
 	toDate?: string
 ): Promise<AggregateStatsResult[]> {
-	return fetchAccessibleAggregateStats(viewedGroupId, {
+	const { rows } = await fetchAuthorisedAggregateStats(viewedGroupId, {
 		...(fromDate ? { from_date: fromDate } : {}),
 		...(toDate ? { to_date: toDate } : {}),
 		group_by_species: false,
 		group_by_time_period: grouping
 	});
+	return rows;
 }

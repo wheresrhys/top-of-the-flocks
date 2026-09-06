@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation';
 import { getGroupCookie } from '@/app/actions/group-cookie';
 import {
 	resolveGroupIdBySlug,
-	resolveGroupPublicAreas
+	resolveGroupPublicAreasForRequest
 } from '@/lib/group-slug';
 import { getRequestPathname } from '@/lib/request-pathname';
 
@@ -31,15 +31,22 @@ export default async function CrossGroupLayout({
 	}
 
 	const pathname = await getRequestPathname();
-	if (pathname && SUMMARY_SUBTREE_PATTERN.test(pathname)) {
-		const { groupSlug } = await params;
-		const viewedGroupId = await resolveGroupIdBySlug(groupSlug);
-		const publicAreas = viewedGroupId
-			? await resolveGroupPublicAreas(viewedGroupId)
-			: [];
-		if (publicAreas.includes('summary')) {
-			return children;
-		}
+	const { groupSlug } = await params;
+	const viewedGroupId = await resolveGroupIdBySlug(groupSlug);
+	// Resolved unconditionally (not gated behind the pathname check below) so
+	// this and the summary read-path's own public fallback
+	// (lib/group-summary-access.ts) share one memoised lookup per request —
+	// see resolveGroupPublicAreasForRequest's own comment (lib/group-slug.ts).
+	const publicAreas = viewedGroupId
+		? await resolveGroupPublicAreasForRequest(viewedGroupId)
+		: [];
+
+	if (
+		pathname &&
+		SUMMARY_SUBTREE_PATTERN.test(pathname) &&
+		publicAreas.includes('summary')
+	) {
+		return children;
 	}
 
 	redirect('/');

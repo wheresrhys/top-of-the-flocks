@@ -1,10 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { fetchAccessibleAggregateStats } from '@/lib/group-summary-access';
+import { fetchAuthorisedAggregateStats } from '@/lib/group-summary-access';
 import type { AggregateStatsResult } from '@/app/models/db';
 import { fetchPeriodTotals } from '../period-totals';
 
 vi.mock('@/lib/group-summary-access', () => ({
-	fetchAccessibleAggregateStats: vi.fn()
+	fetchAuthorisedAggregateStats: vi.fn()
 }));
 
 const ROW = { encounter_count: 5 } as unknown as AggregateStatsResult;
@@ -15,7 +15,10 @@ describe('fetchPeriodTotals — routes through the group-summary access helper',
 	});
 
 	it('passes the grouping and date range through to the access helper', async () => {
-		vi.mocked(fetchAccessibleAggregateStats).mockResolvedValue([ROW]);
+		vi.mocked(fetchAuthorisedAggregateStats).mockResolvedValue({
+			accessLevel: 'own',
+			rows: [ROW]
+		});
 
 		const result = await fetchPeriodTotals(
 			1,
@@ -25,7 +28,7 @@ describe('fetchPeriodTotals — routes through the group-summary access helper',
 		);
 
 		expect(result).toEqual([ROW]);
-		expect(fetchAccessibleAggregateStats).toHaveBeenCalledWith(1, {
+		expect(fetchAuthorisedAggregateStats).toHaveBeenCalledWith(1, {
 			from_date: '2026-03-01',
 			to_date: '2026-03-31',
 			group_by_species: false,
@@ -34,11 +37,14 @@ describe('fetchPeriodTotals — routes through the group-summary access helper',
 	});
 
 	it('omits from/to date keys entirely when not supplied', async () => {
-		vi.mocked(fetchAccessibleAggregateStats).mockResolvedValue([]);
+		vi.mocked(fetchAuthorisedAggregateStats).mockResolvedValue({
+			accessLevel: 'blocked',
+			rows: []
+		});
 
 		await fetchPeriodTotals(1, 'year');
 
-		expect(fetchAccessibleAggregateStats).toHaveBeenCalledWith(1, {
+		expect(fetchAuthorisedAggregateStats).toHaveBeenCalledWith(1, {
 			group_by_species: false,
 			group_by_time_period: 'year'
 		});

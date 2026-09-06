@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { supabase, catchSupabaseErrors } from './supabase';
 
 // A resolved { id, slug } pair for the group whose data is currently being
@@ -80,3 +81,17 @@ export async function resolveGroupPublicAreas(id: number): Promise<string[]> {
 
 	return group?.public_areas ?? [];
 }
+
+// A group's public_areas gets resolved from more than one place in the same
+// request when an anonymous visitor is being served a public summary — the
+// cross-group layout's access gate (app/(routes)/group/[groupSlug]/layout.tsx)
+// and, for a request that gate lets through, the summary read-path's own
+// public fallback (lib/group-summary-access.ts). Both route through this
+// React `cache()`-memoised wrapper instead of calling resolveGroupPublicAreas
+// directly, so the same group's public_areas isn't queried twice in one
+// request. `cache()`'s memoisation is scoped to a single request/render pass
+// (Next.js App Router semantics) — unlike the permanent, cross-request id/slug
+// Maps above, a group toggling its public-summary setting still takes effect
+// on its very next request, so resolveGroupPublicAreas's own "always live"
+// guarantee (see above, and its dedicated test) is unaffected.
+export const resolveGroupPublicAreasForRequest = cache(resolveGroupPublicAreas);

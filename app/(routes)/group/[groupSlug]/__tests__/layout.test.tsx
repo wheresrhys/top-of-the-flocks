@@ -6,17 +6,17 @@ import CrossGroupLayout from '../layout';
 
 const {
 	mockResolveGroupIdBySlug,
-	mockResolveGroupPublicAreas,
+	mockResolveGroupPublicAreasForRequest,
 	mockGetRequestPathname
 } = vi.hoisted(() => ({
 	mockResolveGroupIdBySlug: vi.fn(),
-	mockResolveGroupPublicAreas: vi.fn(),
+	mockResolveGroupPublicAreasForRequest: vi.fn(),
 	mockGetRequestPathname: vi.fn()
 }));
 
 vi.mock('@/lib/group-slug', () => ({
 	resolveGroupIdBySlug: mockResolveGroupIdBySlug,
-	resolveGroupPublicAreas: mockResolveGroupPublicAreas
+	resolveGroupPublicAreasForRequest: mockResolveGroupPublicAreasForRequest
 }));
 
 vi.mock('@/lib/request-pathname', () => ({
@@ -35,7 +35,7 @@ describe('cross-group layout', () => {
 		vi.mocked(getGroupCookie).mockResolvedValue(1);
 		mockGetRequestPathname.mockResolvedValue('/group/alpha/summary');
 		mockResolveGroupIdBySlug.mockResolvedValue(2);
-		mockResolveGroupPublicAreas.mockResolvedValue([]);
+		mockResolveGroupPublicAreasForRequest.mockResolvedValue([]);
 	});
 
 	afterEach(() => {
@@ -57,7 +57,7 @@ describe('cross-group layout', () => {
 		it('does not need to resolve pathname or public_areas at all', async () => {
 			await renderLayout();
 			expect(mockGetRequestPathname).not.toHaveBeenCalled();
-			expect(mockResolveGroupPublicAreas).not.toHaveBeenCalled();
+			expect(mockResolveGroupPublicAreasForRequest).not.toHaveBeenCalled();
 		});
 	});
 
@@ -69,7 +69,7 @@ describe('cross-group layout', () => {
 		describe('a summary-subtree request to a public group', () => {
 			beforeEach(() => {
 				mockGetRequestPathname.mockResolvedValue('/group/alpha/summary');
-				mockResolveGroupPublicAreas.mockResolvedValue(['summary']);
+				mockResolveGroupPublicAreasForRequest.mockResolvedValue(['summary']);
 			});
 
 			it('lets the request through with no cookie', async () => {
@@ -88,7 +88,7 @@ describe('cross-group layout', () => {
 		describe('a summary-subtree request to a non-public group', () => {
 			beforeEach(() => {
 				mockGetRequestPathname.mockResolvedValue('/group/alpha/summary');
-				mockResolveGroupPublicAreas.mockResolvedValue([]);
+				mockResolveGroupPublicAreasForRequest.mockResolvedValue([]);
 			});
 
 			it('redirects to "/"', async () => {
@@ -108,7 +108,7 @@ describe('cross-group layout', () => {
 		describe('a non-summary request, even to a public group', () => {
 			beforeEach(() => {
 				mockGetRequestPathname.mockResolvedValue('/group/alpha/effort');
-				mockResolveGroupPublicAreas.mockResolvedValue(['summary']);
+				mockResolveGroupPublicAreasForRequest.mockResolvedValue(['summary']);
 			});
 
 			it('still redirects to "/" (out of scope: only summary is publishable)', async () => {
@@ -128,7 +128,7 @@ describe('cross-group layout', () => {
 			it('redirects gracefully to "/" instead of throwing', async () => {
 				await renderLayout('no-such-group');
 				expect(vi.mocked(redirect)).toHaveBeenCalledWith('/');
-				expect(mockResolveGroupPublicAreas).not.toHaveBeenCalled();
+				expect(mockResolveGroupPublicAreasForRequest).not.toHaveBeenCalled();
 			});
 		});
 	});

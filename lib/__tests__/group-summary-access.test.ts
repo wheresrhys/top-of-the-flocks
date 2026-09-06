@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { getGroupCookie } from '../../app/actions/group-cookie';
 import { getAuthenticatedSupabaseClient } from '../group-auth';
-import { resolveGroupPublicAreas } from '../group-slug';
+import { resolveGroupPublicAreasForRequest } from '../group-slug';
 import type { AggregateStatsResult } from '@/app/models/db';
 
 const { mockPublicSupabaseFrom, mockPublicSupabaseRpc } = vi.hoisted(() => ({
@@ -14,7 +14,7 @@ vi.mock('../group-auth', () => ({
 }));
 
 vi.mock('../group-slug', () => ({
-	resolveGroupPublicAreas: vi.fn()
+	resolveGroupPublicAreasForRequest: vi.fn()
 }));
 
 vi.mock('../supabase', async (importOriginal) => {
@@ -25,10 +25,7 @@ vi.mock('../supabase', async (importOriginal) => {
 	};
 });
 
-import {
-	resolveGroupSummaryAccess,
-	fetchAccessibleAggregateStats
-} from '../group-summary-access';
+import { fetchAuthorisedAggregateStats } from '../group-summary-access';
 
 // Only `encounter_count` matters to the access-resolution logic under test
 // (it's the "is there anything real here" signal); every other field is
@@ -107,10 +104,10 @@ describe('summary read-path access model', () => {
 				client as never
 			);
 
-			const result = await resolveGroupSummaryAccess(VIEWED_GROUP_ID);
+			const result = await fetchAuthorisedAggregateStats(VIEWED_GROUP_ID);
 
 			expect(result).toEqual({ accessLevel: 'own', rows: ownRows });
-			expect(resolveGroupPublicAreas).not.toHaveBeenCalled();
+			expect(resolveGroupPublicAreasForRequest).not.toHaveBeenCalled();
 		});
 
 		it("sees its own genuinely empty summary as 'own', never falls through to blocked", async () => {
@@ -121,10 +118,10 @@ describe('summary read-path access model', () => {
 				client as never
 			);
 
-			const result = await resolveGroupSummaryAccess(VIEWED_GROUP_ID);
+			const result = await fetchAuthorisedAggregateStats(VIEWED_GROUP_ID);
 
 			expect(result.accessLevel).toBe('own');
-			expect(resolveGroupPublicAreas).not.toHaveBeenCalled();
+			expect(resolveGroupPublicAreasForRequest).not.toHaveBeenCalled();
 		});
 	});
 
@@ -139,19 +136,21 @@ describe('summary read-path access model', () => {
 		});
 
 		it('target not public: blocked (gated), not a 500', async () => {
-			vi.mocked(resolveGroupPublicAreas).mockResolvedValue([]);
+			vi.mocked(resolveGroupPublicAreasForRequest).mockResolvedValue([]);
 
-			const result = await resolveGroupSummaryAccess(VIEWED_GROUP_ID);
+			const result = await fetchAuthorisedAggregateStats(VIEWED_GROUP_ID);
 
 			expect(result).toEqual({ accessLevel: 'blocked', rows: [] });
 		});
 
 		it('target public: sees target public summary data via public_aggregate_stats', async () => {
-			vi.mocked(resolveGroupPublicAreas).mockResolvedValue(['summary']);
+			vi.mocked(resolveGroupPublicAreasForRequest).mockResolvedValue([
+				'summary'
+			]);
 			const publicRows = [buildStatsRow({ encounter_count: 42 })];
 			mockPublicRpcReturning(publicRows);
 
-			const result = await resolveGroupSummaryAccess(VIEWED_GROUP_ID);
+			const result = await fetchAuthorisedAggregateStats(VIEWED_GROUP_ID);
 
 			expect(result).toEqual({ accessLevel: 'public', rows: publicRows });
 			expect(mockPublicSupabaseRpc).toHaveBeenCalledWith(
@@ -168,9 +167,9 @@ describe('summary read-path access model', () => {
 		vi.mocked(getAuthenticatedSupabaseClient).mockResolvedValue(
 			client as never
 		);
-		vi.mocked(resolveGroupPublicAreas).mockResolvedValue([]);
+		vi.mocked(resolveGroupPublicAreasForRequest).mockResolvedValue([]);
 
-		const result = await resolveGroupSummaryAccess(VIEWED_GROUP_ID);
+		const result = await fetchAuthorisedAggregateStats(VIEWED_GROUP_ID);
 
 		expect(result).toEqual({ accessLevel: 'shared', rows: sharedRows });
 		expect(mockPublicSupabaseRpc).not.toHaveBeenCalled();
@@ -185,21 +184,23 @@ describe('summary read-path access model', () => {
 		});
 
 		it('target public: sees target public summary data', async () => {
-			vi.mocked(resolveGroupPublicAreas).mockResolvedValue(['summary']);
+			vi.mocked(resolveGroupPublicAreasForRequest).mockResolvedValue([
+				'summary'
+			]);
 			const publicRows = [buildStatsRow({ encounter_count: 3 })];
 			mockPublicRpcReturning(publicRows);
 
-			const result = await resolveGroupSummaryAccess(VIEWED_GROUP_ID);
+			const result = await fetchAuthorisedAggregateStats(VIEWED_GROUP_ID);
 
 			expect(result).toEqual({ accessLevel: 'public', rows: publicRows });
 		});
 
 		it('target not public: gated gracefully, not a 500', async () => {
-			vi.mocked(resolveGroupPublicAreas).mockResolvedValue([]);
+			vi.mocked(resolveGroupPublicAreasForRequest).mockResolvedValue([]);
 
-			await expect(resolveGroupSummaryAccess(VIEWED_GROUP_ID)).resolves.toEqual(
-				{ accessLevel: 'blocked', rows: [] }
-			);
+			await expect(
+				fetchAuthorisedAggregateStats(VIEWED_GROUP_ID)
+			).resolves.toEqual({ accessLevel: 'blocked', rows: [] });
 		});
 	});
 
@@ -209,44 +210,16 @@ describe('summary read-path access model', () => {
 			vi.mocked(getAuthenticatedSupabaseClient).mockRejectedValue(
 				new Error('No group selected')
 			);
-			vi.mocked(resolveGroupPublicAreas).mockResolvedValue(['summary']);
+			vi.mocked(resolveGroupPublicAreasForRequest).mockResolvedValue([
+				'summary'
+			]);
 			const genuinelyEmptyRows = [buildStatsRow({ encounter_count: 0 })];
 			mockPublicRpcReturning(genuinelyEmptyRows);
 
-			const result = await resolveGroupSummaryAccess(VIEWED_GROUP_ID);
+			const result = await fetchAuthorisedAggregateStats(VIEWED_GROUP_ID);
 
 			expect(result.accessLevel).toBe('public');
 			expect(result.rows).toEqual(genuinelyEmptyRows);
 		});
-	});
-});
-
-describe('fetchAccessibleAggregateStats', () => {
-	beforeEach(() => {
-		vi.clearAllMocks();
-	});
-
-	it('unwraps the rows for an accessible request', async () => {
-		vi.mocked(getGroupCookie).mockResolvedValue(VIEWED_GROUP_ID);
-		const rows = [buildStatsRow({ encounter_count: 5 })];
-		vi.mocked(getAuthenticatedSupabaseClient).mockResolvedValue(
-			makeAuthenticatedClient(rows) as never
-		);
-
-		const result = await fetchAccessibleAggregateStats(VIEWED_GROUP_ID);
-
-		expect(result).toEqual(rows);
-	});
-
-	it('returns an empty array (not an error) for a blocked request', async () => {
-		vi.mocked(getGroupCookie).mockResolvedValue(99);
-		vi.mocked(getAuthenticatedSupabaseClient).mockResolvedValue(
-			makeAuthenticatedClient([buildStatsRow({ encounter_count: 0 })]) as never
-		);
-		vi.mocked(resolveGroupPublicAreas).mockResolvedValue([]);
-
-		const result = await fetchAccessibleAggregateStats(VIEWED_GROUP_ID);
-
-		expect(result).toEqual([]);
 	});
 });

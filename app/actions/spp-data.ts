@@ -1,5 +1,5 @@
 'use server';
-import { fetchAccessibleAggregateStats } from '@/lib/group-summary-access';
+import { fetchAuthorisedAggregateStats } from '@/lib/group-summary-access';
 import type { AggregateStatsResult } from '@/app/models/db';
 
 export async function fetchSpeciesData(
@@ -7,9 +7,10 @@ export async function fetchSpeciesData(
 	fromDate?: string,
 	toDate?: string
 ): Promise<AggregateStatsResult[]> {
-	return fetchAccessibleAggregateStats(viewedGroupId, {
+	const { rows } = await fetchAuthorisedAggregateStats(viewedGroupId, {
 		from_date: fromDate,
 		to_date: toDate,
 		group_by_species: true
 	});
+	return rows;
 }

@@ -2,7 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { getAuthenticatedSupabaseClient } from './group-auth';
 import { getGroupCookie } from '../app/actions/group-cookie';
 import { supabase, catchSupabaseErrors } from './supabase';
-import { resolveGroupPublicAreas } from './group-slug';
+import { resolveGroupPublicAreasForRequest } from './group-slug';
 import type { AggregateStatsResult } from '@/app/models/db';
 
 // Shared param shape for both `aggregate_stats` and `public_aggregate_stats`
@@ -19,7 +19,7 @@ export type AggregateStatsRpcParams = {
 
 export type GroupSummaryAccessLevel = 'own' | 'shared' | 'public' | 'blocked';
 
-export type GroupSummaryAccessResult = {
+export type AuthorisedSummaryResult = {
 	accessLevel: GroupSummaryAccessLevel;
 	rows: AggregateStatsResult[];
 };
@@ -63,11 +63,15 @@ function hasVisibleData(rows: AggregateStatsResult[]): boolean {
  *    (`public_areas` contains `'summary'`) -> retry via the SECURITY
  *    DEFINER `public_aggregate_stats` RPC, which needs no JWT.
  * 4. none of the above -> blocked. No rows, no throw.
+ *
+ * Returns the access decision alongside the rows (not just the rows) so a
+ * caller that cares which path served the data can destructure `accessLevel`
+ * — every existing action function currently only destructures `rows`.
  */
-export async function resolveGroupSummaryAccess(
+export async function fetchAuthorisedAggregateStats(
 	viewedGroupId: number,
 	rpcParams: AggregateStatsRpcParams = {}
-): Promise<GroupSummaryAccessResult> {
+): Promise<AuthorisedSummaryResult> {
 	const viewerGroupId = await getGroupCookie();
 
 	if (viewerGroupId === viewedGroupId) {
@@ -100,7 +104,7 @@ export async function resolveGroupSummaryAccess(
 		return { accessLevel: 'shared', rows: sharedRows };
 	}
 
-	const publicAreas = await resolveGroupPublicAreas(viewedGroupId);
+	const publicAreas = await resolveGroupPublicAreasForRequest(viewedGroupId);
 	if (publicAreas.includes('summary')) {
 		const rows = await runAggregateStats(
 			'public_aggregate_stats',
@@ -112,18 +116,4 @@ export async function resolveGroupSummaryAccess(
 	}
 
 	return { accessLevel: 'blocked', rows: [] };
-}
-
-/**
- * Thin wrapper around `resolveGroupSummaryAccess` for the common case: a
- * caller just wants the rows, and treats "blocked" the same as "no data" —
- * exactly the shape `aggregate_stats` itself already returns, so every
- * existing action function can route through this with no signature change.
- */
-export async function fetchAccessibleAggregateStats(
-	viewedGroupId: number,
-	rpcParams: AggregateStatsRpcParams = {}
-): Promise<AggregateStatsResult[]> {
-	const { rows } = await resolveGroupSummaryAccess(viewedGroupId, rpcParams);
-	return rows;
 }

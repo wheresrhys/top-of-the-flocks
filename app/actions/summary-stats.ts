@@ -1,5 +1,5 @@
 'use server';
-import { fetchAccessibleAggregateStats } from '@/lib/group-summary-access';
+import { fetchAuthorisedAggregateStats } from '@/lib/group-summary-access';
 import type { AggregateStatsResult } from '@/app/models/db';
 
 /**
@@ -11,7 +11,7 @@ export async function fetchSummaryStats(
 	fromDate?: string,
 	toDate?: string
 ): Promise<AggregateStatsResult | null> {
-	const rows = await fetchAccessibleAggregateStats(viewedGroupId, {
+	const { rows } = await fetchAuthorisedAggregateStats(viewedGroupId, {
 		...(fromDate ? { from_date: fromDate } : {}),
 		...(toDate ? { to_date: toDate } : {})
 	});
@@ -30,12 +30,13 @@ export async function fetchPeriodStats(
 	fromDate?: string,
 	toDate?: string
 ): Promise<AggregateStatsResult[]> {
-	return fetchAccessibleAggregateStats(viewedGroupId, {
+	const { rows } = await fetchAuthorisedAggregateStats(viewedGroupId, {
 		group_by_species: false,
 		group_by_time_period: grouping,
 		...(fromDate ? { from_date: fromDate } : {}),
 		...(toDate ? { to_date: toDate } : {})
 	});
+	return rows;
 }
 
 /**
@@ -47,8 +48,9 @@ export async function fetchPeriodStats(
 export async function fetchYearlyTotals(
 	viewedGroupId: number
 ): Promise<AggregateStatsResult[]> {
-	return fetchAccessibleAggregateStats(viewedGroupId, {
+	const { rows } = await fetchAuthorisedAggregateStats(viewedGroupId, {
 		group_by_species: false,
 		group_by_time_period: 'year'
 	});
+	return rows;
 }
