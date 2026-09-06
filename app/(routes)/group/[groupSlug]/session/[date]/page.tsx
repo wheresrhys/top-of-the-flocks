@@ -1,6 +1,5 @@
-import { notFound } from 'next/navigation';
 import { BootstrapPage } from '@/app/components/layout/BootstrapPage';
-import { resolveGroupIdBySlug } from '@/lib/group-slug';
+import { withGroupScope } from '@/app/components/layout/withGroupScope';
 import { getAuthenticatedSupabaseClient } from '@/lib/group-auth';
 import { catchSupabaseErrors } from '@/lib/supabase';
 import type { SessionEncounter } from '@/app/models/session';
@@ -130,25 +129,17 @@ export async function fetchSessionPageContent({
 
 type PageProps = { params: Promise<{ groupSlug: string; date: string }> };
 
-export default async function GroupSessionPage({ params }: PageProps) {
-	const { groupSlug, date } = await params;
-	const viewedGroupId = await resolveGroupIdBySlug(groupSlug);
-	if (viewedGroupId === null) {
-		notFound();
-	}
-	const viewedGroup = { id: viewedGroupId, slug: groupSlug };
-	return (
-		<BootstrapPage<DayData, PageProps, PageParams>
-			viewedGroup={viewedGroup}
-			getParams={async () => ({
-				viewedGroupId,
-				date,
-				locationId: undefined
-			})}
-			getCacheKeys={() => ['session', date]}
-			dataFetcher={fetchSessionPageContent}
-			PageComponent={SessionPageContent}
-			ttl={3600 * 24 * 7}
-		/>
-	);
-}
+export default withGroupScope<{ date: string }>(({ viewedGroup, params }) => (
+	<BootstrapPage<DayData, PageProps, PageParams>
+		viewedGroup={viewedGroup}
+		getParams={async () => ({
+			viewedGroupId: viewedGroup.id,
+			date: params.date,
+			locationId: undefined
+		})}
+		getCacheKeys={() => ['session', params.date]}
+		dataFetcher={fetchSessionPageContent}
+		PageComponent={SessionPageContent}
+		ttl={3600 * 24 * 7}
+	/>
+));

@@ -1,20 +1,11 @@
-import { notFound } from 'next/navigation';
-import { resolveGroupIdBySlug } from '@/lib/group-slug';
+import { withGroupScope } from '@/app/components/layout/withGroupScope';
 import SpeciesPage from '@/app/(routes)/species/[speciesName]/page';
 
-export default async function GroupSpeciesDetailPage(props: {
-	params: Promise<{ groupSlug: string; speciesName: string }>;
-}) {
-	const { groupSlug, speciesName } = await props.params;
-	const viewedGroupId = await resolveGroupIdBySlug(groupSlug);
-	if (viewedGroupId === null) {
-		notFound();
-	}
-	const viewedGroup = { id: viewedGroupId, slug: groupSlug };
-	return (
+export default withGroupScope<{ speciesName: string }>(
+	({ viewedGroup, params }) => (
 		<SpeciesPage
-			params={Promise.resolve({ speciesName })}
+			params={Promise.resolve({ speciesName: params.speciesName })}
 			viewedGroup={viewedGroup}
 		/>
-	);
-}
+	)
+);

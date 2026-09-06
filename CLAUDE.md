@@ -192,9 +192,17 @@ entrypoint, its content, and its data fetcher:
   component, so colocating the fetcher there risks a server/client boundary conflict.
 - **`PageContent.tsx`**, colocated alongside `page.tsx`, holds only the content component
   (`___PageContent`) and any types/helpers it needs — never the data fetcher.
-- **Group-scoped variant** (`app/(routes)/group/[groupSlug]/...`) resolves `{id, slug}` via
-  `resolveGroupIdBySlug` and delegates to the top-level `___Page` component, passing it
-  `viewedGroup`. Its own export is named `Group___Page` (e.g. `GroupHomePage`,
+- **Group-scoped variant** (`app/(routes)/group/[groupSlug]/...`) resolves `{id, slug}` and
+  delegates to the top-level `___Page` component, passing it `viewedGroup`. The resolution
+  boilerplate (await `params`, resolve the slug via `resolveGroupIdBySlug`, `notFound()` on a
+  miss, build the `viewedGroup`) is factored into `withGroupScope`
+  (`app/components/layout/withGroupScope.tsx`) — a higher-order function that wraps the page: each
+  group page is `export default withGroupScope(({ viewedGroup }) => <___Page viewedGroup={viewedGroup} />)`.
+  Pages with extra route params type them on the generic (`withGroupScope<{ speciesName: string }>`)
+  and read them off the callback's `params`; a page needing post-resolution work (e.g. the home
+  page's redirect-to-own-group) passes an `async` callback. (It's a HOF, not a React context
+  provider, because these are async server components and context is client-only.) Its own export
+  is named `Group___Page` (e.g. `GroupHomePage`,
   `GroupMistakesPage`; disambiguated where a route has more than one group-scoped variant, e.g.
   `GroupSpeciesPage` for the list vs. `GroupSpeciesDetailPage` for `species/[speciesName]`).
   Group variants don't need their own `PageContent.tsx`. A route that only exists in
