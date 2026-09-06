@@ -164,10 +164,19 @@ function expanderReducer(
 
 export default function GlobalNav({
 	groups,
-	selectedGroupId
+	selectedGroupId,
+	readOnly = false
 }: {
 	groups: RingingGroupRow[];
 	selectedGroupId: number | null;
+	// Set for an anonymous visitor viewing a group's public summary (#770) —
+	// there's no logged-in group at all, so this hides every nav aspect that
+	// assumes one: the group switcher, "Import data", "Log out", and the
+	// authenticated-only nav links/search (none of which are reachable
+	// anonymously, since only 'summary' is in the public allowlist, #768).
+	// Only the branding + viewed-group name remain, so a public visitor still
+	// knows whose data they're looking at.
+	readOnly?: boolean;
 }) {
 	const pathname = usePathname();
 	const router = useRouter();
@@ -195,12 +204,22 @@ export default function GlobalNav({
 	}, [pathname, selectedGroupId]);
 
 	useEffect(() => {
+		if (readOnly) {
+			return;
+		}
 		if (groupsCount === 1 && selectedGroupId !== firstGroupId) {
 			setRingingGroup(firstGroupId).then(() => {
 				router.refresh();
 			});
 		}
-	}, [groupsCount, firstGroupId, selectedGroupId, router, setRingingGroup]);
+	}, [
+		readOnly,
+		groupsCount,
+		firstGroupId,
+		selectedGroupId,
+		router,
+		setRingingGroup
+	]);
 
 	useEffect(() => {
 		if (expanders.search) {
@@ -227,93 +246,104 @@ export default function GlobalNav({
 					</NoPrefetchLink>
 
 					<div className="flex justify-end w-full gap-2 items-center">
-						<div className="lg:hidden flex items-center gap-2">
-							<button
-								type="button"
-								className="btn-sm btn-square"
-								aria-controls="ring-search-form-wrapper"
-								aria-label="Search for a ring number"
-								onClick={() => {
-									expandersDispatch({ type: 'toggle', id: 'search' });
-								}}
-							>
-								<span className="icon-[tabler--search] collapse-open:hidden size-7"></span>
-							</button>
-						</div>
-						<div className="md:hidden flex items-center gap-2">
-							<button
-								type="button"
-								className="collapse-toggle btn btn-outline btn-secondary btn-sm btn-square"
-								aria-controls="mobile-nav"
-								aria-label="Toggle navigation"
-								onClick={() => {
-									expandersDispatch({ type: 'toggle', id: 'mobileNav' });
-								}}
-							>
-								<span
-									className={`${expanders.mobileNav ? 'icon-[tabler--x]' : 'icon-[tabler--menu-2]'}  collapse-open:hidden size-4`}
-								></span>
-							</button>
-						</div>
-						<div className="hidden lg:flex mr-2">
-							<RingSearchForm />
-						</div>
-						<div className="hidden md:flex">
-							<DesktopNavItems
-								classes="menu menu-horizontal gap-2 p-0 text-base"
-								moreExpanded={expanders.moreMenu}
-								onMoreClick={() =>
-									expandersDispatch({ type: 'toggle', id: 'moreMenu' })
-								}
-							/>
-						</div>
-						<button
-							type="button"
-							className="collapse-toggle btn btn-outline btn-secondary btn-sm btn-square"
-							aria-controls="user-menu"
-							aria-label="Toggle user menu"
-							onClick={() => {
-								expandersDispatch({ type: 'toggle', id: 'userMenu' });
-							}}
-						>
-							<span className="icon-[tabler--users-group] size-4"></span>
-						</button>
+						{!readOnly && (
+							<>
+								<div className="lg:hidden flex items-center gap-2">
+									<button
+										type="button"
+										className="btn-sm btn-square"
+										aria-controls="ring-search-form-wrapper"
+										aria-label="Search for a ring number"
+										onClick={() => {
+											expandersDispatch({ type: 'toggle', id: 'search' });
+										}}
+									>
+										<span className="icon-[tabler--search] collapse-open:hidden size-7"></span>
+									</button>
+								</div>
+								<div className="md:hidden flex items-center gap-2">
+									<button
+										type="button"
+										className="collapse-toggle btn btn-outline btn-secondary btn-sm btn-square"
+										aria-controls="mobile-nav"
+										aria-label="Toggle navigation"
+										onClick={() => {
+											expandersDispatch({ type: 'toggle', id: 'mobileNav' });
+										}}
+									>
+										<span
+											className={`${expanders.mobileNav ? 'icon-[tabler--x]' : 'icon-[tabler--menu-2]'}  collapse-open:hidden size-4`}
+										></span>
+									</button>
+								</div>
+								<div className="hidden lg:flex mr-2">
+									<RingSearchForm />
+								</div>
+								<div className="hidden md:flex">
+									<DesktopNavItems
+										classes="menu menu-horizontal gap-2 p-0 text-base"
+										moreExpanded={expanders.moreMenu}
+										onMoreClick={() =>
+											expandersDispatch({ type: 'toggle', id: 'moreMenu' })
+										}
+									/>
+								</div>
+								<button
+									type="button"
+									className="collapse-toggle btn btn-outline btn-secondary btn-sm btn-square"
+									aria-controls="user-menu"
+									aria-label="Toggle user menu"
+									onClick={() => {
+										expandersDispatch({ type: 'toggle', id: 'userMenu' });
+									}}
+								>
+									<span className="icon-[tabler--users-group] size-4"></span>
+								</button>
+							</>
+						)}
 					</div>
 				</div>
-				<Expander id="mobile-nav" isExpanded={expanders.mobileNav}>
-					<MobileNavItems classes="p-4 text-right *:p-2 *:mt-1 *:mb-1 *:hover:bg-base-200 *:rounded" />
-				</Expander>
-				<Expander id="ring-search-form-wrapper" isExpanded={expanders.search}>
-					<div className="p-4 pt-0">
-						<RingSearchForm
-							searchInputRef={
-								searchInputRef as React.RefObject<HTMLInputElement>
-							}
-						/>
-					</div>
-				</Expander>
-				<Expander id="user-menu" isExpanded={expanders.userMenu}>
-					<div className="p-4 pt-0 flex justify-end items-center gap-4">
-						{groups.length > 1 && (
-							<GroupSwitcher
-								groups={groups}
-								selectedGroupId={selectedGroupId}
-								onChange={() => expandersDispatch({ type: 'collapseAll' })}
-							/>
-						)}
-						<NoPrefetchLink
-							href="/import"
-							className="link link-secondary text-sm"
+				{!readOnly && (
+					<>
+						<Expander id="mobile-nav" isExpanded={expanders.mobileNav}>
+							<MobileNavItems classes="p-4 text-right *:p-2 *:mt-1 *:mb-1 *:hover:bg-base-200 *:rounded" />
+						</Expander>
+						<Expander
+							id="ring-search-form-wrapper"
+							isExpanded={expanders.search}
 						>
-							Import data
-						</NoPrefetchLink>
-						<form action={logout}>
-							<button type="submit" className="link link-secondary text-sm">
-								Log out
-							</button>
-						</form>
-					</div>
-				</Expander>
+							<div className="p-4 pt-0">
+								<RingSearchForm
+									searchInputRef={
+										searchInputRef as React.RefObject<HTMLInputElement>
+									}
+								/>
+							</div>
+						</Expander>
+						<Expander id="user-menu" isExpanded={expanders.userMenu}>
+							<div className="p-4 pt-0 flex justify-end items-center gap-4">
+								{groups.length > 1 && (
+									<GroupSwitcher
+										groups={groups}
+										selectedGroupId={selectedGroupId}
+										onChange={() => expandersDispatch({ type: 'collapseAll' })}
+									/>
+								)}
+								<NoPrefetchLink
+									href="/import"
+									className="link link-secondary text-sm"
+								>
+									Import data
+								</NoPrefetchLink>
+								<form action={logout}>
+									<button type="submit" className="link link-secondary text-sm">
+										Log out
+									</button>
+								</form>
+							</div>
+						</Expander>
+					</>
+				)}
 			</nav>
 		</>
 	);

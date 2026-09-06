@@ -6,8 +6,8 @@ import { REQUEST_PATHNAME_HEADER } from '@/lib/request-pathname';
 // route tree, never a deeper static segment) — stamping it onto a request
 // header here is the standard way to make it available downstream via
 // `next/headers`. Scoped to `/group/**`, the only subtree that currently
-// needs a pathname-aware decision (`group/[groupSlug]/layout.tsx`'s public
-// summary-subtree gate, #770).
+// needs a pathname-aware decision (the root layout's public summary-subtree
+// gate, `lib/public-group-access.ts`, #770).
 export function proxy(request: NextRequest) {
 	const requestHeaders = new Headers(request.headers);
 	requestHeaders.set(REQUEST_PATHNAME_HEADER, request.nextUrl.pathname);

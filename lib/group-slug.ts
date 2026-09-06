@@ -84,7 +84,7 @@ export async function resolveGroupPublicAreas(id: number): Promise<string[]> {
 
 // A group's public_areas gets resolved from more than one place in the same
 // request when an anonymous visitor is being served a public summary — the
-// cross-group layout's access gate (app/(routes)/group/[groupSlug]/layout.tsx)
+// root layout's public-page access gate (lib/public-group-access.ts)
 // and, for a request that gate lets through, the summary read-path's own
 // public fallback (lib/group-summary-access.ts). Both route through this
 // React `cache()`-memoised wrapper instead of calling resolveGroupPublicAreas
