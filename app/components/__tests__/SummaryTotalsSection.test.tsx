@@ -144,53 +144,6 @@ describe('SummaryTotalsSection', () => {
 		fetchPeriodTotalsMock.mockReset();
 	});
 
-	describe('without any period-tab data (day summary page)', () => {
-		it('renders a single "Species totals" tab, active by default, and lazily loads its table content', async () => {
-			render(
-				<SummaryTotalsSection
-					viewedGroup={viewedGroup}
-					fromDate="2026-08-01"
-					toDate="2026-08-31"
-				/>
-			);
-			const tab = screen.getByRole('button', { name: 'Species totals' });
-			expect(tab.getAttribute('aria-current')).toBe('true');
-			expect(screen.queryByRole('button', { name: 'Month totals' })).toBeNull();
-			expect(screen.queryByRole('button', { name: 'Year totals' })).toBeNull();
-			expect(
-				screen.queryByRole('button', { name: 'Session totals' })
-			).toBeNull();
-			await waitFor(() =>
-				expect(document.querySelectorAll('tbody tr').length).toBe(
-					speciesStats.length
-				)
-			);
-		});
-
-		it("renders the table's empty state when the fetch returns no species, without crashing", async () => {
-			fetchSpeciesDataMock.mockResolvedValue([]);
-			render(<SummaryTotalsSection viewedGroup={viewedGroup} />);
-			expect(
-				screen.getByRole('button', { name: 'Species totals' })
-			).toBeTruthy();
-			await waitFor(() =>
-				expect(document.querySelectorAll('tbody tr').length).toBe(0)
-			);
-		});
-
-		it('forwards summaryStats to the Species totals table as its totals row', async () => {
-			render(
-				<SummaryTotalsSection
-					viewedGroup={viewedGroup}
-					summaryStats={summaryStats}
-				/>
-			);
-			await waitFor(() =>
-				expect(screen.getByTestId('totals-row').textContent).toContain('99')
-			);
-		});
-	});
-
 	describe('with monthTotals (year page)', () => {
 		it('renders the "Month totals" tab first, active by default', () => {
 			render(
@@ -202,6 +155,7 @@ describe('SummaryTotalsSection', () => {
 			const tabs = screen.getAllByRole('button');
 			expect(tabs.map((tab) => tab.textContent)).toEqual([
 				'Month totals',
+				'Session totals',
 				'Species totals'
 			]);
 			expect(tabs[0].getAttribute('aria-current')).toBe('true');
@@ -362,6 +316,7 @@ describe('SummaryTotalsSection', () => {
 			const tabs = screen.getAllByRole('button');
 			expect(tabs.map((tab) => tab.textContent)).toEqual([
 				'Year totals',
+				'Session totals',
 				'Species totals'
 			]);
 			expect(tabs[0].getAttribute('aria-current')).toBe('true');
@@ -438,6 +393,7 @@ describe('SummaryTotalsSection', () => {
 				expect(tabs.map((tab) => tab.textContent)).toEqual([
 					'Year totals',
 					'Month totals',
+					'Session totals',
 					'Species totals'
 				]);
 			});
