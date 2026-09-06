@@ -161,8 +161,7 @@ export function SummaryTotalsSection({
 	// month page (eager) or all-time/year pages (lazy, see below). Whichever is
 	// present is prepended and shown first/by default; the day page passes none
 	// and keeps Species totals as its sole/default tab.
-	const showSessionTotals =
-		viewedGroup !== undefined;
+	const showSessionTotals = viewedGroup !== undefined;
 	const tabs = [
 		...(yearlyTotals !== undefined ? [YEAR_TOTALS_TAB] : []),
 		...(monthTotals ? [MONTH_TOTALS_TAB] : []),
