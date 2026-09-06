@@ -63,10 +63,9 @@ export function SpMonthTotalsTab({
 			buildHref={(timePeriod) =>
 				`/species/${speciesName}/${year}/${Number(timePeriod.slice(5, 7))}`
 			}
-			buildLabel={(timePeriod) => {
-				const row = monthTotalsByTimePeriod.get(timePeriod);
-				return row ? formatMonthYearLabel(row) : '';
-			}}
+			buildLabel={(timePeriod) =>
+				formatMonthYearLabel(monthTotalsByTimePeriod.get(timePeriod))
+			}
 		/>
 	);
 }

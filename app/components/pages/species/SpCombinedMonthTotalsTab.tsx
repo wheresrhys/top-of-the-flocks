@@ -112,10 +112,9 @@ export function SpCombinedMonthTotalsTab({
 							? `/species/${speciesName}/${row.year}/${row.zeroIndexedMonth + 1}`
 							: '';
 					}}
-					buildLabel={(timePeriod) => {
-						const row = perYearRowByTimePeriod.get(timePeriod);
-						return row ? formatMonthYearLabel(row) : '';
-					}}
+					buildLabel={(timePeriod) =>
+						formatMonthYearLabel(perYearRowByTimePeriod.get(timePeriod))
+					}
 					extraControls={
 						<CombineYearsToggle
 							value={combineYears}

@@ -99,17 +99,14 @@ function AllTimeMonthTotalsTab({
 					firstColumnHeader="Month"
 					buildHref={(timePeriod) => {
 						const row = perYearRowByTimePeriod.get(timePeriod);
-						return row
-							? buildGroupSummaryHref(viewedGroup, {
-									year: row.year,
-									month: row.zeroIndexedMonth + 1
-								})
-							: '';
+						return buildGroupSummaryHref(
+							viewedGroup,
+							row && { year: row.year, month: row.zeroIndexedMonth + 1 }
+						);
 					}}
-					buildLabel={(timePeriod) => {
-						const row = perYearRowByTimePeriod.get(timePeriod);
-						return row ? formatMonthYearLabel(row) : '';
-					}}
+					buildLabel={(timePeriod) =>
+						formatMonthYearLabel(perYearRowByTimePeriod.get(timePeriod))
+					}
 					totalsStats={totalsStats}
 					extraControls={
 						<CombineYearsToggle
@@ -289,17 +286,14 @@ export function SummaryTotalsSection({
 					firstColumnHeader="Month"
 					buildHref={(timePeriod) => {
 						const row = monthTotalsByTimePeriod.get(timePeriod);
-						return row
-							? buildGroupSummaryHref(viewedGroup, {
-									year: row.year,
-									month: row.zeroIndexedMonth + 1
-								})
-							: '';
+						return buildGroupSummaryHref(
+							viewedGroup,
+							row && { year: row.year, month: row.zeroIndexedMonth + 1 }
+						);
 					}}
-					buildLabel={(timePeriod) => {
-						const row = monthTotalsByTimePeriod.get(timePeriod);
-						return row ? formatMonthYearLabel(row) : '';
-					}}
+					buildLabel={(timePeriod) =>
+						formatMonthYearLabel(monthTotalsByTimePeriod.get(timePeriod))
+					}
 					totalsStats={totalsStats}
 				/>
 			)}

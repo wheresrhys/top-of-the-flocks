@@ -16,10 +16,17 @@ export type MonthTotalsRow = {
 
 // The month name is built from integer year/zeroIndexedMonth via a *local*
 // `Date` — sidestepping the UTC-parse off-by-one that `new Date("2026-01-01")`
-// risks at the Jan/Dec boundary on negative-offset runtimes.
+// risks at the Jan/Dec boundary on negative-offset runtimes. `row` is
+// `undefined` when a caller's `Map.get(...)` row lookup misses — returning ''
+// here (rather than making every caller ternary-check first) matches the
+// existing "empty label renders as plain text" convention `buildGroupSummaryHref`
+// also follows.
 export function formatMonthYearLabel(
-	row: Pick<MonthTotalsRow, 'year' | 'zeroIndexedMonth'>
+	row: Pick<MonthTotalsRow, 'year' | 'zeroIndexedMonth'> | undefined
 ): string {
+	if (!row) {
+		return '';
+	}
 	return formatDate(new Date(row.year, row.zeroIndexedMonth, 1), 'LLLL yyyy');
 }
 
@@ -106,10 +113,14 @@ export type CombinedMonthTotalsRow = {
 	stats: AggregateStatsResult;
 };
 
-// Month name only (no year) — these rows span every year at once.
+// Month name only (no year) — these rows span every year at once. `row` is
+// `undefined` on a lookup miss, same convention as `formatMonthYearLabel`.
 export function formatMonthLabel(
-	row: Pick<CombinedMonthTotalsRow, 'zeroIndexedMonth'>
+	row: Pick<CombinedMonthTotalsRow, 'zeroIndexedMonth'> | undefined
 ): string {
+	if (!row) {
+		return '';
+	}
 	return formatDate(new Date(2000, row.zeroIndexedMonth, 1), 'LLLL');
 }
 

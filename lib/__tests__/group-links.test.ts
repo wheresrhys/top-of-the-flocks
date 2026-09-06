@@ -27,6 +27,10 @@ describe('buildGroupSummaryHref', () => {
 				''
 			);
 		});
+
+		it('returns an empty string when period is undefined', () => {
+			expect(buildGroupSummaryHref(viewedGroup, undefined)).toBe('');
+		});
 	});
 });
 

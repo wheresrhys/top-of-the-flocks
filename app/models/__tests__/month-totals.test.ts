@@ -328,6 +328,10 @@ describe('formatMonthYearLabel', () => {
 				'December 2026'
 			);
 		});
+
+		it('returns an empty string when row is undefined', () => {
+			expect(formatMonthYearLabel(undefined)).toBe('');
+		});
 	});
 });
 
@@ -336,6 +340,12 @@ describe('formatMonthLabel', () => {
 		it('formats zeroIndexedMonth as the month name only, with no year', () => {
 			expect(formatMonthLabel({ zeroIndexedMonth: 0 })).toBe('January');
 			expect(formatMonthLabel({ zeroIndexedMonth: 11 })).toBe('December');
+		});
+	});
+
+	describe('Edge', () => {
+		it('returns an empty string when row is undefined', () => {
+			expect(formatMonthLabel(undefined)).toBe('');
 		});
 	});
 });
