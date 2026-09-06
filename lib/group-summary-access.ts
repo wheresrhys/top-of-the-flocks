@@ -56,12 +56,31 @@ function hasVisibleData(rows: AggregateStatsResult[]): boolean {
  * 1. viewer's own group === target -> the viewer's existing authenticated
  *    client, unchanged, even if the result is genuinely empty (a group must
  *    always be able to see its own — possibly empty — summary).
- * 2. otherwise, attempt the viewer's existing authenticated client (covers
- *    an existing `GroupDataSharing` grant, RLS-enforced as before).
- * 3. if (2) threw (no session cookie) or came back with nothing visible,
- *    and the target has opted its summary into public view
- *    (`public_areas` contains `'summary'`) -> retry via the SECURITY
+ * 2. otherwise, check first (public-before-authenticated, #773 review) whether
+ *    the target has opted its summary into public view (`public_areas`
+ *    contains `'summary'`) -> if so, grant immediately via the SECURITY
  *    DEFINER `public_aggregate_stats` RPC, which needs no JWT.
+ *
+ *    This is deliberately checked — and granted — before any
+ *    `GroupDataSharing`-authorised attempt, even for a signed-in viewer who
+ *    genuinely holds a sharing grant to the target: `public_aggregate_stats`
+ *    is a pure gated pass-through to `aggregate_stats` for the same params
+ *    (see its own SQL comment, `supabase/schema/schemas/public/functions/
+ *    public_aggregate_stats.sql`) — for a target that has opted in, it
+ *    returns byte-identical rows to what the authenticated/RLS path would,
+ *    so a sharing-authorised viewer is never shown a degraded view by
+ *    granting on public status first. It also means an anonymous visitor
+ *    (no session cookie at all) to a public target never needs to attempt —
+ *    and have fail — an authenticated call first; the only place `rows`
+ *    might legitimately differ between the two paths (accessLevel `'shared'`
+ *    vs `'public'`) is the label, not the data, which is why no caller
+ *    currently branches on `accessLevel` for that distinction.
+ * 3. otherwise (target not public), fall through to the viewer's existing
+ *    authenticated client if they have a session at all (covers an existing
+ *    `GroupDataSharing` grant, RLS-enforced as before) — a no-cookie viewer
+ *    is short-circuited to blocked without attempting this, since
+ *    `getGroupCookie()` already tells us definitively there's no session to
+ *    authenticate.
  * 4. none of the above -> blocked. No rows, no throw.
  *
  * Returns the access decision alongside the rows (not just the rows) so a
@@ -85,25 +104,6 @@ export async function fetchAuthorisedAggregateStats(
 		return { accessLevel: 'own', rows };
 	}
 
-	let sharedRows: AggregateStatsResult[] | null = null;
-	try {
-		const client = await getAuthenticatedSupabaseClient();
-		sharedRows = await runAggregateStats(
-			'aggregate_stats',
-			client,
-			viewedGroupId,
-			rpcParams
-		);
-	} catch {
-		// No session cookie (anonymous viewer) — fall through to the public
-		// check below.
-		sharedRows = null;
-	}
-
-	if (sharedRows && hasVisibleData(sharedRows)) {
-		return { accessLevel: 'shared', rows: sharedRows };
-	}
-
 	const publicAreas = await resolveGroupPublicAreasForRequest(viewedGroupId);
 	if (publicAreas.includes('summary')) {
 		const rows = await runAggregateStats(
@@ -113,6 +113,22 @@ export async function fetchAuthorisedAggregateStats(
 			rpcParams
 		);
 		return { accessLevel: 'public', rows };
+	}
+
+	if (!viewerGroupId) {
+		return { accessLevel: 'blocked', rows: [] };
+	}
+
+	const client = await getAuthenticatedSupabaseClient();
+	const sharedRows = await runAggregateStats(
+		'aggregate_stats',
+		client,
+		viewedGroupId,
+		rpcParams
+	);
+
+	if (hasVisibleData(sharedRows)) {
+		return { accessLevel: 'shared', rows: sharedRows };
 	}
 
 	return { accessLevel: 'blocked', rows: [] };

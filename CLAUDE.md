@@ -96,12 +96,16 @@ A group can opt an area of its data into public, unauthenticated view via `Ringi
 (currently only `'summary'` is allowlisted, #768) and the SECURITY DEFINER `public_aggregate_stats` RPC,
 which returns real data only when the target group has opted in — otherwise nothing, with no JWT
 required. `lib/group-summary-access.ts`'s `fetchAuthorisedAggregateStats` implements the resulting
-4-case access model for a `(viewedGroupId, viewerGroupId)` pair (own group; an existing
-`GroupDataSharing`-granted cross-group view via the normal authenticated client; a public fallback via
-`public_aggregate_stats`; or blocked), returning `{ accessLevel, rows }` — every summary-stats action
-function (`app/actions/summary-stats.ts`, `period-totals.ts`, `spp-data.ts`) routes through it (currently
-destructuring only `rows`) instead of calling `getAuthenticatedSupabaseClient()` + `aggregate_stats`
-directly.
+4-case access model for a `(viewedGroupId, viewerGroupId)` pair (own group, always via the normal
+authenticated client; a public grant via `public_aggregate_stats`, checked *before* any
+authenticated/RLS attempt — since `public_aggregate_stats` is a pure gated pass-through to
+`aggregate_stats` for the same params, this never shows an already-authorised cross-group viewer a
+degraded view, and it spares an anonymous visitor a wasted authenticated attempt; an existing
+`GroupDataSharing`-granted cross-group view via the normal authenticated client, only attempted once
+the target isn't public and the viewer actually has a session; or blocked), returning
+`{ accessLevel, rows }` — every summary-stats action function (`app/actions/summary-stats.ts`,
+`period-totals.ts`, `spp-data.ts`) routes through it (currently destructuring only `rows`) instead of
+calling `getAuthenticatedSupabaseClient()` + `aggregate_stats` directly.
 
 `lib/group-slug.ts`'s group-lookup functions (`resolveGroupIdBySlug`, `resolveGroupSlugById`,
 `resolveGroupPublicAreas`) deliberately use the plain unauthenticated `supabase` client (`lib/supabase.ts`)

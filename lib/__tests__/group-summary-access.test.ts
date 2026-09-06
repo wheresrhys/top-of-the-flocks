@@ -160,30 +160,54 @@ describe('summary read-path access model', () => {
 		});
 	});
 
-	it('different group, logged in, existing sharing grant, target not public: sees data via existing authenticated path, unaffected by this change', async () => {
-		vi.mocked(getGroupCookie).mockResolvedValue(99);
-		const sharedRows = [buildStatsRow({ encounter_count: 17 })];
-		const client = makeAuthenticatedClient(sharedRows);
-		vi.mocked(getAuthenticatedSupabaseClient).mockResolvedValue(
-			client as never
-		);
-		vi.mocked(resolveGroupPublicAreasForRequest).mockResolvedValue([]);
+	describe('different group, logged in, existing sharing grant', () => {
+		it('target not public: sees data via the authenticated path (public check ran first, found nothing, fell through)', async () => {
+			vi.mocked(getGroupCookie).mockResolvedValue(99);
+			const sharedRows = [buildStatsRow({ encounter_count: 17 })];
+			const client = makeAuthenticatedClient(sharedRows);
+			vi.mocked(getAuthenticatedSupabaseClient).mockResolvedValue(
+				client as never
+			);
+			vi.mocked(resolveGroupPublicAreasForRequest).mockResolvedValue([]);
 
-		const result = await fetchAuthorisedAggregateStats(VIEWED_GROUP_ID);
+			const result = await fetchAuthorisedAggregateStats(VIEWED_GROUP_ID);
 
-		expect(result).toEqual({ accessLevel: 'shared', rows: sharedRows });
-		expect(mockPublicSupabaseRpc).not.toHaveBeenCalled();
+			expect(result).toEqual({ accessLevel: 'shared', rows: sharedRows });
+			expect(mockPublicSupabaseRpc).not.toHaveBeenCalled();
+		});
+
+		it('target also public: still gets its (identical) data, granted via the public path — the authenticated client is never even called', async () => {
+			vi.mocked(getGroupCookie).mockResolvedValue(99);
+			vi.mocked(resolveGroupPublicAreasForRequest).mockResolvedValue([
+				'summary'
+			]);
+			const publicRows = [buildStatsRow({ encounter_count: 17 })];
+			mockPublicRpcReturning(publicRows);
+
+			const result = await fetchAuthorisedAggregateStats(VIEWED_GROUP_ID);
+
+			// accessLevel is 'public' rather than 'shared' here — a deliberate
+			// labelling tradeoff (see fetchAuthorisedAggregateStats's own
+			// comment): public_aggregate_stats returns byte-identical rows to
+			// the authenticated path for an opted-in target, so the sharing
+			// grant is never exercised (and never needs to be) once the
+			// target is public.
+			expect(result).toEqual({ accessLevel: 'public', rows: publicRows });
+			expect(getAuthenticatedSupabaseClient).not.toHaveBeenCalled();
+		});
 	});
 
 	describe('no cookie (anonymous)', () => {
 		beforeEach(() => {
 			vi.mocked(getGroupCookie).mockResolvedValue(null);
-			vi.mocked(getAuthenticatedSupabaseClient).mockRejectedValue(
-				new Error('No group selected')
-			);
+			// Left un-mocked (would reject if called, like the real "no session
+			// cookie" case) deliberately: with the public-before-authenticated
+			// order, an anonymous viewer never reaches the authenticated
+			// attempt at all — see the two assertions below — so there's
+			// nothing here for a rejection to short-circuit past any more.
 		});
 
-		it('target public: sees target public summary data', async () => {
+		it('target public: sees target public summary data, without ever attempting the authenticated client', async () => {
 			vi.mocked(resolveGroupPublicAreasForRequest).mockResolvedValue([
 				'summary'
 			]);
@@ -193,14 +217,16 @@ describe('summary read-path access model', () => {
 			const result = await fetchAuthorisedAggregateStats(VIEWED_GROUP_ID);
 
 			expect(result).toEqual({ accessLevel: 'public', rows: publicRows });
+			expect(getAuthenticatedSupabaseClient).not.toHaveBeenCalled();
 		});
 
-		it('target not public: gated gracefully, not a 500', async () => {
+		it('target not public: gated gracefully without ever attempting the authenticated client, not a 500', async () => {
 			vi.mocked(resolveGroupPublicAreasForRequest).mockResolvedValue([]);
 
 			await expect(
 				fetchAuthorisedAggregateStats(VIEWED_GROUP_ID)
 			).resolves.toEqual({ accessLevel: 'blocked', rows: [] });
+			expect(getAuthenticatedSupabaseClient).not.toHaveBeenCalled();
 		});
 	});
 
