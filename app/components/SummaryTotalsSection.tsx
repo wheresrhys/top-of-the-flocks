@@ -10,8 +10,14 @@ import { fetchPeriodTotals } from '@/app/actions/period-totals';
 import type { AggregateStatsResult } from '@/app/models/db';
 import type { ViewedGroup } from '@/lib/group-slug';
 import {
+	buildGroupSummaryHref,
+	buildGroupSessionHref
+} from '@/lib/group-links';
+import {
 	buildCombinedMonthTotalsRows,
 	buildPerYearMonthTotalsRows,
+	formatMonthYearLabel,
+	formatMonthLabel,
 	type MonthTotalsRow
 } from '@/app/models/month-totals';
 import { CombineYearsToggle } from '@/app/components/shared/CombineYearsToggle';
@@ -38,25 +44,26 @@ const SPECIES_TOTALS_TAB = { id: 'species-totals', label: 'Species totals' };
 // returns) — toggling re-renders in place, no new fetch either way.
 function AllTimeMonthTotalsTab({
 	periodStats,
-	totalsStats
+	totalsStats,
+	viewedGroup
 }: {
 	periodStats: AggregateStatsResult[];
 	totalsStats?: AggregateStatsResult;
+	viewedGroup?: ViewedGroup;
 }) {
 	const [combineYears, setCombineYears] = useState(true);
 
-	// ON: 12 calendar-month buckets summed across every year. The month name
-	// is precomputed per bucket in the model; look it back up by the row's
-	// sentinel `time_period` (there's no year to link to, so no href).
+	// ON: 12 calendar-month buckets summed across every year. Look each row
+	// back up by its sentinel `time_period` (there's no year to link to, so no
+	// href) and format its label on demand.
 	const combinedRows = buildCombinedMonthTotalsRows(periodStats);
 	const combinedLabelByTimePeriod = new Map(
-		combinedRows.map((row) => [row.stats.time_period, row.label])
+		combinedRows.map((row) => [row.stats.time_period, formatMonthLabel(row)])
 	);
 
-	// OFF: one row per real `(year, month)` combination, unsummed. Label/href
-	// are precomputed per row in the model; look them back up by `time_period`
-	// so the shared table renders those rather than re-deriving from the date
-	// string.
+	// OFF: one row per real `(year, month)` combination, unsummed. Look each
+	// row back up by `time_period` so the shared table can derive its
+	// label/href from the raw row rather than re-deriving from the date string.
 	const perYearRows = buildPerYearMonthTotalsRows(periodStats);
 	const perYearRowByTimePeriod = new Map(
 		perYearRows.map((row) => [row.stats.time_period, row])
@@ -90,11 +97,15 @@ function AllTimeMonthTotalsTab({
 					grouping="month"
 					rows={perYearRows.map((row) => row.stats)}
 					firstColumnHeader="Month"
-					buildHref={(timePeriod) =>
-						perYearRowByTimePeriod.get(timePeriod)?.href ?? ''
-					}
+					buildHref={(timePeriod) => {
+						const row = perYearRowByTimePeriod.get(timePeriod);
+						return buildGroupSummaryHref(
+							viewedGroup,
+							row && { year: row.year, month: row.zeroIndexedMonth + 1 }
+						);
+					}}
 					buildLabel={(timePeriod) =>
-						perYearRowByTimePeriod.get(timePeriod)?.label ?? ''
+						formatMonthYearLabel(perYearRowByTimePeriod.get(timePeriod))
 					}
 					totalsStats={totalsStats}
 					extraControls={
@@ -241,9 +252,8 @@ export function SummaryTotalsSection({
 					})
 			}
 		);
-	// Label/href are precomputed per month in the model (timezone-safe); look
-	// them back up by `time_period` so the shared table renders those rather
-	// than re-deriving from the date string.
+	// Look each row back up by `time_period` so the shared table can derive its
+	// label/href from the raw row rather than re-deriving from the date string.
 	const monthTotalsByTimePeriod = new Map(
 		(monthTotals ?? []).map((row) => [row.stats.time_period, row])
 	);
@@ -262,7 +272,9 @@ export function SummaryTotalsSection({
 					rows={yearlyTotals}
 					firstColumnHeader="Year"
 					buildHref={(timePeriod) =>
-						`/summary/${new Date(timePeriod).getFullYear()}`
+						buildGroupSummaryHref(viewedGroup, {
+							year: new Date(timePeriod).getFullYear()
+						})
 					}
 					totalsStats={totalsStats}
 				/>
@@ -272,11 +284,15 @@ export function SummaryTotalsSection({
 					grouping="month"
 					rows={monthTotals.map((row) => row.stats)}
 					firstColumnHeader="Month"
-					buildHref={(timePeriod) =>
-						monthTotalsByTimePeriod.get(timePeriod)?.href ?? ''
-					}
+					buildHref={(timePeriod) => {
+						const row = monthTotalsByTimePeriod.get(timePeriod);
+						return buildGroupSummaryHref(
+							viewedGroup,
+							row && { year: row.year, month: row.zeroIndexedMonth + 1 }
+						);
+					}}
 					buildLabel={(timePeriod) =>
-						monthTotalsByTimePeriod.get(timePeriod)?.label ?? ''
+						formatMonthYearLabel(monthTotalsByTimePeriod.get(timePeriod))
 					}
 					totalsStats={totalsStats}
 				/>
@@ -290,6 +306,7 @@ export function SummaryTotalsSection({
 					<AllTimeMonthTotalsTab
 						periodStats={combinedMonthStats ?? []}
 						totalsStats={totalsStats}
+						viewedGroup={viewedGroup}
 					/>
 				))}
 			{showSessionTotals &&
@@ -301,7 +318,7 @@ export function SummaryTotalsSection({
 						rows={sessionTotals}
 						firstColumnHeader="Session"
 						buildHref={(timePeriod) =>
-							`/group/${viewedGroup.slug}/session/${timePeriod}`
+							buildGroupSessionHref(viewedGroup, timePeriod)
 						}
 						totalsStats={totalsStats}
 					/>
@@ -315,7 +332,7 @@ export function SummaryTotalsSection({
 						rows={lazySessionStats ?? []}
 						firstColumnHeader="Session"
 						buildHref={(timePeriod) =>
-							`/group/${viewedGroup.slug}/session/${timePeriod}`
+							buildGroupSessionHref(viewedGroup, timePeriod)
 						}
 						totalsStats={totalsStats}
 					/>

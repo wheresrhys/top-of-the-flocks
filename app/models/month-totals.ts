@@ -4,16 +4,31 @@ import type { AggregateStatsResult } from './db';
 
 // A single month's row for the year summary page's "Month totals" tab, and
 // (reused as-is) for the all-time page's "Combine years" OFF state — same
-// shape either way: one row per real `(year, month)` combination. `label`
-// and `href` are precomputed here (not derived downstream from `stats`) so the
-// month name is built from integer year/month via a *local* `Date` — sidestepping
-// the UTC-parse off-by-one that `new Date("2026-01-01")` risks at the Jan/Dec
-// boundary on negative-offset runtimes (see `formatPeriodTotalsLabel`).
+// shape either way: one row per real `(year, month)` combination. Pure raw
+// data only — no label/href here; callers derive those via `formatMonthYearLabel`
+// below and, for hrefs, `lib/group-links.ts` (which needs the viewing context
+// this model has no business knowing about).
 export type MonthTotalsRow = {
-	label: string;
-	href: string;
+	year: number;
+	zeroIndexedMonth: number;
 	stats: AggregateStatsResult;
 };
+
+// The month name is built from integer year/zeroIndexedMonth via a *local*
+// `Date` — sidestepping the UTC-parse off-by-one that `new Date("2026-01-01")`
+// risks at the Jan/Dec boundary on negative-offset runtimes. `row` is
+// `undefined` when a caller's `Map.get(...)` row lookup misses — returning ''
+// here (rather than making every caller ternary-check first) matches the
+// existing "empty label renders as plain text" convention `buildGroupSummaryHref`
+// also follows.
+export function formatMonthYearLabel(
+	row: Pick<MonthTotalsRow, 'year' | 'zeroIndexedMonth'> | undefined
+): string {
+	if (!row) {
+		return '';
+	}
+	return formatDate(new Date(row.year, row.zeroIndexedMonth, 1), 'LLLL yyyy');
+}
 
 // `aggregate_stats` returns `'00:00:00'` for an interval with no recorded
 // effort; mirror that convention for synthesized (zero-session) months so the
@@ -75,15 +90,15 @@ export function buildMonthTotalsRows(
 	year: number,
 	periodStats: AggregateStatsResult[]
 ): MonthTotalsRow[] {
-	return Array.from({ length: 12 }, (_unused, index) => {
-		const month = index + 1;
+	return Array.from({ length: 12 }, (_unused, zeroIndexedMonth) => {
+		const month = zeroIndexedMonth + 1;
 		const monthKey = `${year}-${String(month).padStart(2, '0')}`;
 		const matchedStats = periodStats.find(
 			(stat) => stat.time_period?.slice(0, 7) === monthKey
 		);
 		return {
-			label: formatDate(new Date(year, month - 1, 1), 'LLLL yyyy'),
-			href: `/summary/${year}/${month}`,
+			year,
+			zeroIndexedMonth,
 			stats: matchedStats ?? synthesizeZeroStats(`${monthKey}-01`)
 		};
 	});
@@ -91,13 +106,23 @@ export function buildMonthTotalsRows(
 
 // A single calendar-month row for the all-time page's "Month totals" tab, where
 // each row sums that month across every year in the group's history (all the
-// Januaries, all the Februaries, ...). There's no single year to drill into, so
-// unlike `MonthTotalsRow` there is no `href` — the label renders as plain text —
-// and the `label` is the month name only (no year).
+// Januaries, all the Februaries, ...). There's no single year to drill into
+// and no year field — pure raw data, same as `MonthTotalsRow`.
 export type CombinedMonthTotalsRow = {
-	label: string;
+	zeroIndexedMonth: number;
 	stats: AggregateStatsResult;
 };
+
+// Month name only (no year) — these rows span every year at once. `row` is
+// `undefined` on a lookup miss, same convention as `formatMonthYearLabel`.
+export function formatMonthLabel(
+	row: Pick<CombinedMonthTotalsRow, 'zeroIndexedMonth'> | undefined
+): string {
+	if (!row) {
+		return '';
+	}
+	return formatDate(new Date(2000, row.zeroIndexedMonth, 1), 'LLLL');
+}
 
 // Fields that combine additively across years for a given calendar month. Only
 // the columns the "Month totals" tab actually renders (encounters-only, so the
@@ -160,7 +185,7 @@ export function buildCombinedMonthTotalsRows(
 		}
 		stats.total_effort = secondsToPostgresInterval(effortSeconds);
 		return {
-			label: formatDate(new Date(2000, month - 1, 1), 'LLLL'),
+			zeroIndexedMonth: index,
 			stats
 		};
 	});
@@ -169,26 +194,16 @@ export function buildCombinedMonthTotalsRows(
 // The "Combine years" toggle's OFF state for the all-time "Month totals" tab:
 // one row per real `(year, month)` combination in the group's history, with no
 // combining/summing — the raw `aggregate_stats` month array (the same array
-// `buildCombinedMonthTotalsRows` folds into 12 buckets), reshaped with a
-// precomputed label/href per row and sorted chronologically regardless of
-// input order. Dataset-agnostic: `buildHref` defaults to the group-wide
-// `/summary/{year}/{month}` shape, but the species-scoped combine-years tab
-// (`SpCombinedMonthTotalsTab`) passes its own `/species/{name}/{year}/{month}`
-// builder to reuse this same sort/label logic.
+// `buildCombinedMonthTotalsRows` folds into 12 buckets), reshaped into pure
+// `MonthTotalsRow`s and sorted chronologically regardless of input order.
 export function buildPerYearMonthTotalsRows(
-	periodStats: AggregateStatsResult[],
-	buildHref: (year: number, month: number) => string = (year, month) =>
-		`/summary/${year}/${month}`
+	periodStats: AggregateStatsResult[]
 ): MonthTotalsRow[] {
 	return periodStats
-		.map((stat) => {
-			const year = Number(stat.time_period.slice(0, 4));
-			const month = Number(stat.time_period.slice(5, 7));
-			return {
-				label: formatDate(new Date(year, month - 1, 1), 'LLLL yyyy'),
-				href: buildHref(year, month),
-				stats: stat
-			};
-		})
+		.map((stat) => ({
+			year: Number(stat.time_period.slice(0, 4)),
+			zeroIndexedMonth: Number(stat.time_period.slice(5, 7)) - 1,
+			stats: stat
+		}))
 		.sort((a, b) => a.stats.time_period.localeCompare(b.stats.time_period));
 }

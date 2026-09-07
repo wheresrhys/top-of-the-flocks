@@ -5,7 +5,9 @@ import { PeriodTotalsTable } from '@/app/components/PeriodTotalsTable';
 import { useLazyTabData } from '@/app/components/shared/useLazyTabData';
 import {
 	buildCombinedMonthTotalsRows,
-	buildPerYearMonthTotalsRows
+	buildPerYearMonthTotalsRows,
+	formatMonthYearLabel,
+	formatMonthLabel
 } from '@/app/models/month-totals';
 import { CombineYearsToggle } from '@/app/components/shared/CombineYearsToggle';
 
@@ -61,21 +63,20 @@ export function SpCombinedMonthTotalsTab({
 	}
 
 	// ON: 12 calendar-month buckets summed across every year, encounters-only —
-	// unchanged from #637. The month name is precomputed per bucket in the
-	// model; look it back up by the row's sentinel `time_period` (there's no
-	// year to link to, so no href).
+	// unchanged from #637. Look each row back up by its sentinel `time_period`
+	// (there's no year to link to, so no href) and format its label on demand.
 	const combinedMonthRows = buildCombinedMonthTotalsRows(monthlyStats);
 	const combinedMonthLabelByTimePeriod = new Map(
-		combinedMonthRows.map((row) => [row.stats.time_period, row.label])
+		combinedMonthRows.map((row) => [
+			row.stats.time_period,
+			formatMonthLabel(row)
+		])
 	);
 
 	// OFF: one row per real `(year, month)` combination the species actually has
 	// data for — no zero-filling, no summing across years — linking into the
 	// species' year/month drill-down route, same shape `SpMonthTotalsTab` uses.
-	const perYearRows = buildPerYearMonthTotalsRows(
-		monthlyStats,
-		(year, month) => `/species/${speciesName}/${year}/${month}`
-	);
+	const perYearRows = buildPerYearMonthTotalsRows(monthlyStats);
 	const perYearRowByTimePeriod = new Map(
 		perYearRows.map((row) => [row.stats.time_period, row])
 	);
@@ -105,11 +106,14 @@ export function SpCombinedMonthTotalsTab({
 					grouping="month"
 					rows={perYearRows.map((row) => row.stats)}
 					firstColumnHeader="Month"
-					buildHref={(timePeriod) =>
-						perYearRowByTimePeriod.get(timePeriod)?.href ?? ''
-					}
+					buildHref={(timePeriod) => {
+						const row = perYearRowByTimePeriod.get(timePeriod);
+						return row
+							? `/species/${speciesName}/${row.year}/${row.zeroIndexedMonth + 1}`
+							: '';
+					}}
 					buildLabel={(timePeriod) =>
-						perYearRowByTimePeriod.get(timePeriod)?.label ?? ''
+						formatMonthYearLabel(perYearRowByTimePeriod.get(timePeriod))
 					}
 					extraControls={
 						<CombineYearsToggle

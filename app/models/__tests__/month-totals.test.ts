@@ -2,7 +2,9 @@ import { describe, it, expect } from 'vitest';
 import {
 	buildMonthTotalsRows,
 	buildCombinedMonthTotalsRows,
-	buildPerYearMonthTotalsRows
+	buildPerYearMonthTotalsRows,
+	formatMonthYearLabel,
+	formatMonthLabel
 } from '../month-totals';
 import {
 	formatPostgresIntervalForDisplay,
@@ -58,36 +60,12 @@ function monthStat(
 
 describe('buildMonthTotalsRows', () => {
 	describe('Usual', () => {
-		it('returns exactly 12 rows in Jan→Dec order with correct labels and hrefs', () => {
+		it('returns exactly 12 rows in Jan→Dec order with the correct year and zeroIndexedMonth', () => {
 			const rows = buildMonthTotalsRows(2026, []);
 			expect(rows).toHaveLength(12);
-			expect(rows.map((row) => row.label)).toEqual([
-				'January 2026',
-				'February 2026',
-				'March 2026',
-				'April 2026',
-				'May 2026',
-				'June 2026',
-				'July 2026',
-				'August 2026',
-				'September 2026',
-				'October 2026',
-				'November 2026',
-				'December 2026'
-			]);
-			expect(rows.map((row) => row.href)).toEqual([
-				'/summary/2026/1',
-				'/summary/2026/2',
-				'/summary/2026/3',
-				'/summary/2026/4',
-				'/summary/2026/5',
-				'/summary/2026/6',
-				'/summary/2026/7',
-				'/summary/2026/8',
-				'/summary/2026/9',
-				'/summary/2026/10',
-				'/summary/2026/11',
-				'/summary/2026/12'
+			expect(rows.every((row) => row.year === 2026)).toBe(true);
+			expect(rows.map((row) => row.zeroIndexedMonth)).toEqual([
+				0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
 			]);
 		});
 	});
@@ -145,13 +123,8 @@ describe('buildMonthTotalsRows', () => {
 			const rows = buildMonthTotalsRows(2026, marchToOctober);
 			const zeroFilled = rows
 				.filter((row) => row.stats.session_count === 0)
-				.map((row) => row.label);
-			expect(zeroFilled).toEqual([
-				'January 2026',
-				'February 2026',
-				'November 2026',
-				'December 2026'
-			]);
+				.map((row) => row.zeroIndexedMonth);
+			expect(zeroFilled).toEqual([0, 1, 10, 11]);
 		});
 
 		it('zero-fills all 12 months for a year with no sessions', () => {
@@ -162,22 +135,6 @@ describe('buildMonthTotalsRows', () => {
 				expect(row.stats.encounter_count).toBe(0);
 				expect(row.stats.bird_count).toBe(0);
 			});
-		});
-
-		it('gives zero-filled rows distinct, correct hrefs', () => {
-			const rows = buildMonthTotalsRows(2026, []);
-			const hrefs = rows.map((row) => row.href);
-			expect(new Set(hrefs).size).toBe(12);
-			expect(hrefs[0]).toBe('/summary/2026/1');
-			expect(hrefs[11]).toBe('/summary/2026/12');
-		});
-
-		it('formats and links Jan/Dec boundary months with no timezone off-by-one', () => {
-			const rows = buildMonthTotalsRows(2026, []);
-			expect(rows[0].label).toBe('January 2026');
-			expect(rows[0].href).toBe('/summary/2026/1');
-			expect(rows[11].label).toBe('December 2026');
-			expect(rows[11].href).toBe('/summary/2026/12');
 		});
 
 		it("renders a zero-filled month's total_effort as '0' via formatPostgresIntervalForDisplay", () => {
@@ -192,22 +149,11 @@ describe('buildMonthTotalsRows', () => {
 
 describe('buildCombinedMonthTotalsRows', () => {
 	describe('Usual', () => {
-		it('returns exactly 12 rows in Jan→Dec order, each labelled by month name only (no year)', () => {
+		it('returns exactly 12 rows in Jan→Dec order, with no year field', () => {
 			const rows = buildCombinedMonthTotalsRows([]);
 			expect(rows).toHaveLength(12);
-			expect(rows.map((row) => row.label)).toEqual([
-				'January',
-				'February',
-				'March',
-				'April',
-				'May',
-				'June',
-				'July',
-				'August',
-				'September',
-				'October',
-				'November',
-				'December'
+			expect(rows.map((row) => row.zeroIndexedMonth)).toEqual([
+				0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
 			]);
 		});
 	});
@@ -273,19 +219,8 @@ describe('buildCombinedMonthTotalsRows', () => {
 				monthStat(2020, 3, { session_count: 2 }),
 				monthStat(2022, 1, { session_count: 3 })
 			]);
-			expect(rows.map((row) => row.label)).toEqual([
-				'January',
-				'February',
-				'March',
-				'April',
-				'May',
-				'June',
-				'July',
-				'August',
-				'September',
-				'October',
-				'November',
-				'December'
+			expect(rows.map((row) => row.zeroIndexedMonth)).toEqual([
+				0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11
 			]);
 			expect(rows[0].stats.session_count).toBe(3);
 			expect(rows[2].stats.session_count).toBe(2);
@@ -320,10 +255,10 @@ describe('buildPerYearMonthTotalsRows', () => {
 			]);
 		});
 
-		it("formats each row's label as 'MMMM yyyy' and links to /summary/{year}/{month}", () => {
+		it('returns the year and zero-indexed month for each row', () => {
 			const rows = buildPerYearMonthTotalsRows([monthStat(2020, 1)]);
-			expect(rows[0].label).toBe('January 2020');
-			expect(rows[0].href).toBe('/summary/2020/1');
+			expect(rows[0].year).toBe(2020);
+			expect(rows[0].zeroIndexedMonth).toBe(0);
 		});
 	});
 
@@ -334,9 +269,9 @@ describe('buildPerYearMonthTotalsRows', () => {
 				monthStat(2021, 1, { session_count: 6 })
 			]);
 			expect(rows).toHaveLength(2);
-			expect(rows.map((row) => row.label)).toEqual([
-				'January 2020',
-				'January 2021'
+			expect(rows.map((row) => [row.year, row.zeroIndexedMonth])).toEqual([
+				[2020, 0],
+				[2021, 0]
 			]);
 			expect(rows.map((row) => row.stats.session_count)).toEqual([4, 6]);
 		});
@@ -367,19 +302,50 @@ describe('buildPerYearMonthTotalsRows', () => {
 				monthStat(2026, 6, { session_count: 3, encounter_count: 20 })
 			]);
 			expect(rows).toHaveLength(1);
-			expect(rows[0].label).toBe('June 2026');
-			expect(rows[0].href).toBe('/summary/2026/6');
+			expect(rows[0].year).toBe(2026);
+			expect(rows[0].zeroIndexedMonth).toBe(5);
 			expect(rows[0].stats.session_count).toBe(3);
 			expect(rows[0].stats.encounter_count).toBe(20);
 		});
+	});
+});
 
-		it('uses a supplied buildHref callback in place of the default /summary/{year}/{month} shape', () => {
-			const rows = buildPerYearMonthTotalsRows(
-				[monthStat(2020, 1)],
-				(year, month) => `/species/Robin/${year}/${month}`
+describe('formatMonthYearLabel', () => {
+	describe('Usual', () => {
+		it('formats a given year and zeroIndexedMonth as "LLLL yyyy"', () => {
+			expect(formatMonthYearLabel({ year: 2026, zeroIndexedMonth: 5 })).toBe(
+				'June 2026'
 			);
-			expect(rows[0].href).toBe('/species/Robin/2020/1');
-			expect(rows[0].label).toBe('January 2020');
+		});
+	});
+
+	describe('Edge', () => {
+		it('formats the December/January boundary with no UTC off-by-one', () => {
+			expect(formatMonthYearLabel({ year: 2026, zeroIndexedMonth: 0 })).toBe(
+				'January 2026'
+			);
+			expect(formatMonthYearLabel({ year: 2026, zeroIndexedMonth: 11 })).toBe(
+				'December 2026'
+			);
+		});
+
+		it('returns an empty string when row is undefined', () => {
+			expect(formatMonthYearLabel(undefined)).toBe('');
+		});
+	});
+});
+
+describe('formatMonthLabel', () => {
+	describe('Usual', () => {
+		it('formats zeroIndexedMonth as the month name only, with no year', () => {
+			expect(formatMonthLabel({ zeroIndexedMonth: 0 })).toBe('January');
+			expect(formatMonthLabel({ zeroIndexedMonth: 11 })).toBe('December');
+		});
+	});
+
+	describe('Edge', () => {
+		it('returns an empty string when row is undefined', () => {
+			expect(formatMonthLabel(undefined)).toBe('');
 		});
 	});
 });
