@@ -78,7 +78,7 @@ describe('PeriodTotalsTable', () => {
 				'Effort',
 				'Species',
 				'Encounters',
-				'BirdsIn the next columns, Birds are counted using the age and encounter type of their first encounter ',
+				'Birds',
 				'New',
 				'Retrap',
 				'Pulli',

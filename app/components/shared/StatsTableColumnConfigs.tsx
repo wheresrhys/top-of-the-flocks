@@ -64,8 +64,14 @@ export function createNameLinkCell<RawRowData, RowModel>(
 // differently, e.g. `Retrap` vs `Retraps`). `hasPulli` omits the Pulli column
 // entirely (rather than rendering it empty) and shifts the age-block's left
 // border onto Juv when false, per issue #545.
+
+const ENCOUNTERS_AGE_FOOTNOTE =
+	'Birds caught more than once may contribute to the total of multiple age columns';
+
 export function buildStandardColumnConfigs<RowModel>(
-	hasPulli: boolean
+	hasPulli: boolean,
+	showAggregationTooltips: boolean = false,
+	aggregateBy?: string
 ): Partial<Record<keyof RowModel, ColumnConfig>> {
 	// `RowModel` is generic here, so TS can't confirm each `StandardField` is
 	// actually a key of it inside the function body (only the caller's
@@ -78,14 +84,24 @@ export function buildStandardColumnConfigs<RowModel>(
 		},
 		retraps: {
 			label: 'Retrap',
-			...columnBlock('amber')
+			...columnBlock('amber'),
+			footnote: showAggregationTooltips
+				? aggregateBy === 'bird'
+					? 'Excludes retraps of new birds'
+					: 'Includes retraps of new birds'
+				: null
 		},
 		// Omitted entirely (rather than rendered empty) when no pulli were caught.
 		...(hasPulli
 			? {
 					pullus: {
 						label: 'Pulli',
-						...columnBlock('cyan', ageBlockStartBorder)
+						...columnBlock('cyan', ageBlockStartBorder),
+						footnote: showAggregationTooltips
+							? aggregateBy === 'bird'
+								? ''
+								: ENCOUNTERS_AGE_FOOTNOTE
+							: null
 					}
 				}
 			: {}),
@@ -93,23 +109,45 @@ export function buildStandardColumnConfigs<RowModel>(
 			label: 'Juv',
 			// If pulli is hidden, Juv becomes the first column of the age block
 			// and inherits its thicker left border.
-			...columnBlock('sky', hasPulli ? undefined : ageBlockStartBorder)
+			...columnBlock('sky', hasPulli ? undefined : ageBlockStartBorder),
+			footnote: showAggregationTooltips
+				? aggregateBy === 'bird'
+					? 'Excludes birds already caught as pulli'
+					: ENCOUNTERS_AGE_FOOTNOTE
+				: null
 		},
 		postjuv: {
 			label: 'Postjuv',
-			...columnBlock('blue')
+			...columnBlock('blue'),
+			footnote: showAggregationTooltips
+				? aggregateBy === 'bird'
+					? 'Excludes birds already caught as pulli or juv'
+					: ENCOUNTERS_AGE_FOOTNOTE
+				: null
 		},
 		adults: {
 			label: 'Adult',
-			...columnBlock('purple')
+			...columnBlock('purple'),
+			footnote: showAggregationTooltips
+				? aggregateBy === 'bird'
+					? ''
+					: ENCOUNTERS_AGE_FOOTNOTE
+				: null
 		},
 		unknownAge: {
 			label: 'Not aged',
-			...columnBlock('taupe', ageBlockEndBorder)
+			...columnBlock('taupe', ageBlockEndBorder),
+			footnote: showAggregationTooltips
+				? aggregateBy === 'bird'
+					? 'Includes birds recorded with inconsistent ages'
+					: ENCOUNTERS_AGE_FOOTNOTE
+				: null
 		},
 		newYoung: {
 			label: 'New young',
-			...columnBlock('lime')
+			...columnBlock('lime'),
+			footnote:
+				'Count of all pulli, juv or postjuv recorded for the first time in this period'
 		}
 	} as Partial<Record<keyof RowModel, ColumnConfig>>;
 }

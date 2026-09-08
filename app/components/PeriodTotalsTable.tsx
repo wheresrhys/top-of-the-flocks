@@ -29,7 +29,8 @@ import {
 function buildColumnConfigs(
 	firstColumnHeader: string,
 	hasPulli: boolean,
-	dashIndividuals: boolean
+	dashIndividuals: boolean,
+	aggregateBy: string
 ): Partial<Record<keyof PeriodTotalsRow, ColumnConfig>> {
 	return {
 		timePeriod: {
@@ -51,11 +52,9 @@ function buildColumnConfigs(
 		// the whole column renders a `'-'` placeholder rather than a number.
 		individualsCount: {
 			label: 'Birds',
-			...(dashIndividuals ? { formatter: () => '-' } : {}),
-			// TODO this should really be a footnote on every column where aggregation happens, if it happens
-			footnote: `In the next columns, Birds are counted using the age and encounter type of their first encounter ${firstColumnHeader !== 'Year' ? 'during this period' : ''}`
+			...(dashIndividuals ? { formatter: () => '-' } : {})
 		},
-		...buildStandardColumnConfigs<PeriodTotalsRow>(hasPulli)
+		...buildStandardColumnConfigs<PeriodTotalsRow>(hasPulli, true, aggregateBy)
 	};
 }
 
@@ -111,7 +110,8 @@ export function PeriodTotalsTable({
 	const columnConfigs = buildColumnConfigs(
 		firstColumnHeader,
 		hasPulli,
-		dashIndividuals
+		dashIndividuals,
+		aggregateBy
 	);
 
 	const totalsRow = totalsStats

@@ -82,7 +82,8 @@ function deriveRow(
 }
 
 function buildColumnConfigs(
-	hasPulli: boolean
+	hasPulli: boolean,
+	aggregateBy: string
 ): Partial<Record<keyof RowModel, ColumnConfig>> {
 	return {
 		speciesName: {
@@ -98,7 +99,7 @@ function buildColumnConfigs(
 		individualsCount: {
 			label: 'Individuals'
 		},
-		...buildStandardColumnConfigs<RowModel>(hasPulli)
+		...buildStandardColumnConfigs<RowModel>(hasPulli, true, aggregateBy)
 	};
 }
 
@@ -168,7 +169,7 @@ export function SpeciesTotalsTable({
 	const hasPulli = speciesStats.some(
 		(stat) => activeDeriveRow(stat).pullusCount > 0
 	);
-	const columnConfigs = buildColumnConfigs(hasPulli);
+	const columnConfigs = buildColumnConfigs(hasPulli, aggregateBy);
 
 	const totalsRow = totalsStats
 		? buildTotalsRowCells<RowModel>({

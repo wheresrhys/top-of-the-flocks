@@ -79,21 +79,23 @@ function ColumnHeader<RowModel>({
 					<div className={`tooltip ${showTooltip ? 'show' : ''}`}>
 						<button
 							type="button"
-							className="tooltip-toggle"
+							className="tooltip-toggle align-super"
 							aria-label="Tooltip"
 							onMouseOver={() => setShowTooltip(true)}
 							onMouseOut={() => setShowTooltip(false)}
 						>
-							<span className="icon-[tabler--info-circle] size-4"></span>
+							<span className="icon-[tabler--info-circle] size-3"></span>
 						</button>
-						<span
-							className="tooltip-content tooltip-shown:opacity-100 tooltip-shown:visible max-w-2xs flex"
-							role="tooltip"
-						>
-							<span className="p-2 bg-white border rounded-sm border-solid border-inherit normal-case font-normal text-xs">
-								{column.footnote}
+						{showTooltip ? (
+							<span
+								className="tooltip-content tooltip-shown:opacity-100 tooltip-shown:visible max-w-2xs flex"
+								role="tooltip"
+							>
+								<span className="p-2 bg-white border rounded-sm border-solid border-inherit normal-case font-normal text-xs">
+									{column.footnote}
+								</span>
 							</span>
-						</span>
+						) : null}
 					</div>
 				) : null}
 				{sortDirection ? (
