@@ -32,11 +32,11 @@ function notesFormatter(value: unknown): string {
 const columnConfigs = {
 	ringNo: {
 		label: 'Ring',
-		invertSort: true
+		preferSortAscending: true
 	},
 	speciesName: {
 		label: 'Species',
-		invertSort: true
+		preferSortAscending: true
 	},
 	visitDate: {
 		label: 'Visit date',
@@ -44,11 +44,11 @@ const columnConfigs = {
 	},
 	locationName: {
 		label: 'Location',
-		invertSort: true
+		preferSortAscending: true
 	},
 	notes: {
 		label: 'Notes',
-		invertSort: true,
+		preferSortAscending: true,
 		formatter: notesFormatter
 	}
 } as Record<keyof PulliRowModel, ColumnConfig>;

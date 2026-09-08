@@ -87,7 +87,7 @@ function buildColumnConfigs(
 	return {
 		speciesName: {
 			label: 'Species',
-			invertSort: true
+			preferSortAscending: true
 		},
 		sessionsCount: {
 			label: 'Sessions'

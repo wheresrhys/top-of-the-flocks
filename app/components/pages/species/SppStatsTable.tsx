@@ -42,7 +42,7 @@ const sortableColumnConfigs = speciesStatConfigs.reduce(
 		...acc,
 		[column.property]: {
 			label: column.label,
-			invertSort: column.invertSort
+			preferSortAscending: column.preferSortAscending
 		}
 	}),
 	{} as Record<keyof AggregateStatsResult, ColumnConfig>

@@ -34,7 +34,7 @@ function buildColumnConfigs(
 	return {
 		timePeriod: {
 			label: firstColumnHeader,
-			invertSort: firstColumnHeader !== 'Year'
+			preferSortAscending: firstColumnHeader !== 'Year'
 		},
 		sessionsCount: {
 			label: 'Sessions'

@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 export type ColumnConfig = {
 	label: string;
-	invertSort?: boolean;
+	preferSortAscending?: boolean;
 	formatter?: (value: unknown) => string;
 	// Applied to the column's <th>, letting callers group/emphasise columns
 	// (background colour, thicker borders, etc.) via the same config object
@@ -78,7 +78,7 @@ export function SortableTable<RawRowData, RowModel>({
 	);
 	const [sortIsInverted, setSortIsInverted] = useState<boolean>(
 		initialSortColumn
-			? columnConfigs[initialSortColumn]?.invertSort || false
+			? columnConfigs[initialSortColumn]?.preferSortAscending || false
 			: false
 	);
 
@@ -88,7 +88,7 @@ export function SortableTable<RawRowData, RowModel>({
 		} else {
 			setSortColumn(property);
 			// TODO hideously inefficient
-			setSortIsInverted(columnConfigs[property]?.invertSort || false);
+			setSortIsInverted(columnConfigs[property]?.preferSortAscending || false);
 			setSortDirection('desc');
 		}
 	}

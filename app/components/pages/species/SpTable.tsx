@@ -40,7 +40,7 @@ function dateFormatter(date: Date): string {
 const columnConfigs = {
 	ringNo: {
 		label: 'Ring',
-		invertSort: true
+		preferSortAscending: true
 	},
 	encounterCount: {
 		label: 'Count'
