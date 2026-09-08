@@ -44,12 +44,16 @@ function buildColumnConfigs(
 			formatter: (value) => formatSecondsForDisplay(value as number)
 		},
 		speciesCount: { label: 'Species' },
-		encounterCount: { label: 'Encounters' },
+		encounterCount: {
+			label: 'Encounters'
+		},
 		// On an encounters-only tab a per-period bird count is meaningless, so
 		// the whole column renders a `'-'` placeholder rather than a number.
 		individualsCount: {
-			label: 'Individuals',
-			...(dashIndividuals ? { formatter: () => '-' } : {})
+			label: 'Birds',
+			...(dashIndividuals ? { formatter: () => '-' } : {}),
+			// TODO this should really be a footnote on every column where aggregation happens, if it happens
+			footnote: `In the next columns, Birds are counted using the age and encounter type of their first encounter ${firstColumnHeader !== 'Year' ? 'during this period' : ''}`
 		},
 		...buildStandardColumnConfigs<PeriodTotalsRow>(hasPulli)
 	};
