@@ -1,5 +1,11 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
-import { render, screen, cleanup, fireEvent } from '@testing-library/react';
+import {
+	render,
+	screen,
+	cleanup,
+	fireEvent,
+	getAllByRole
+} from '@testing-library/react';
 import Page, { fetchSummaryYearMonthPageContent } from '../page';
 import alphaStats from '@/test-fixtures/snapshots/fetchSummaryStats.alpha.json';
 
@@ -146,7 +152,7 @@ describe('/summary/[year]/[month]', () => {
 			})
 		);
 		await screen.findByRole('heading', { level: 1 });
-		const tabs = screen.getAllByRole('button');
+		const tabs = getAllByRole(screen.getByRole('tablist'), 'button');
 		expect(tabs[0].textContent).toBe('Session totals');
 		expect(tabs[0].getAttribute('aria-current')).toBe('true');
 		expect(screen.getByRole('button', { name: 'Species totals' })).toBeTruthy();

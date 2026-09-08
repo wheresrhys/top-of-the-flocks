@@ -5,6 +5,7 @@ import {
 	cleanup,
 	within,
 	fireEvent,
+	getAllByRole,
 	waitFor
 } from '@testing-library/react';
 import Page, { fetchSummaryYearPageContent } from '../page';
@@ -166,7 +167,7 @@ describe('/summary/[year]', () => {
 		it('Session totals tab appears immediately after Month totals, which remains the default tab', async () => {
 			render(await Page({ params: Promise.resolve({ year: '2026' }) }));
 			await screen.findByRole('heading', { level: 1 });
-			const tabs = screen.getAllByRole('button');
+			const tabs = getAllByRole(screen.getByRole('tablist'), 'button');
 			expect(tabs.map((tab) => tab.textContent)).toEqual([
 				'Month totals',
 				'Session totals',

@@ -4,7 +4,8 @@ import {
 	screen,
 	cleanup,
 	fireEvent,
-	waitFor
+	waitFor,
+	getAllByRole
 } from '@testing-library/react';
 import { SummaryTotalsSection } from '../SummaryTotalsSection';
 import { buildMonthTotalsRows } from '@/app/models/month-totals';
@@ -152,7 +153,7 @@ describe('SummaryTotalsSection', () => {
 					viewedGroup={viewedGroup}
 				/>
 			);
-			const tabs = screen.getAllByRole('button');
+			const tabs = getAllByRole(screen.getByRole('tablist'), 'button');
 			expect(tabs.map((tab) => tab.textContent)).toEqual([
 				'Month totals',
 				'Session totals',
@@ -216,7 +217,7 @@ describe('SummaryTotalsSection', () => {
 					viewedGroup={viewedGroup}
 				/>
 			);
-			const tabs = screen.getAllByRole('button');
+			const tabs = getAllByRole(screen.getByRole('tablist'), 'button');
 			expect(tabs.map((tab) => tab.textContent)).toEqual([
 				'Session totals',
 				'Species totals'
@@ -317,7 +318,7 @@ describe('SummaryTotalsSection', () => {
 					viewedGroup={viewedGroup}
 				/>
 			);
-			const tabs = screen.getAllByRole('button');
+			const tabs = getAllByRole(screen.getByRole('tablist'), 'button');
 			expect(tabs.map((tab) => tab.textContent)).toEqual([
 				'Year totals',
 				'Session totals',
@@ -393,7 +394,7 @@ describe('SummaryTotalsSection', () => {
 		describe('Usual', () => {
 			it('renders the Month totals tab when showAllTimeMonthTotals is set, alongside Year totals and Species totals', () => {
 				render(<SummaryTotalsSection {...allTimeProps} />);
-				const tabs = screen.getAllByRole('button');
+				const tabs = getAllByRole(screen.getByRole('tablist'), 'button');
 				expect(tabs.map((tab) => tab.textContent)).toEqual([
 					'Year totals',
 					'Month totals',
@@ -629,7 +630,7 @@ describe('SummaryTotalsSection', () => {
 					viewedGroup={undefined}
 				/>
 			);
-			const tabs = screen.getAllByRole('button');
+			const tabs = getAllByRole(screen.getByRole('tablist'), 'button');
 			expect(tabs.map((tab) => tab.textContent)).toEqual(['Species totals']);
 			expect(
 				screen.queryByRole('button', { name: 'Session totals' })
