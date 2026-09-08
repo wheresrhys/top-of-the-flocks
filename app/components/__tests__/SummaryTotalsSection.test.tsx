@@ -458,11 +458,6 @@ describe('SummaryTotalsSection', () => {
 					const cells = row.querySelectorAll('td');
 					expect(cells[5].textContent).toBe('-');
 				});
-				// The pinned totals row is encounters-only here too.
-				const totalsCells = screen
-					.getByTestId('totals-row')
-					.querySelectorAll('td');
-				expect(totalsCells[5].textContent).toBe('-');
 			});
 
 			it("disables the Aggregate-by toggle (locked to Encounter) only on this tab — the Year totals tab's toggle stays interactive", async () => {

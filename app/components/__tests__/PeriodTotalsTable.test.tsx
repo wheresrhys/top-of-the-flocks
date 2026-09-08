@@ -225,11 +225,7 @@ describe('PeriodTotalsTable', () => {
 			const cells = totalsRow.querySelectorAll('td');
 			expect(cells[0].textContent?.trim()).toBe('Total');
 			expect(cells[1].textContent?.trim()).toBe('7');
-			// buildTotalsRowCells reads the raw totalsRowModel value straight
-			// through — it doesn't apply a column's `formatter` (that's only
-			// wired up for data rows via `getFormattedValue`) — so the Effort
-			// total renders as raw seconds (36h = 129600s), not "36h".
-			expect(cells[2].textContent?.trim()).toBe('129600');
+			expect(cells[2].textContent?.trim()).toBe('36h');
 		});
 
 		it('renders a "Total" row for the "month" grouping when totalsStats is supplied', () => {
