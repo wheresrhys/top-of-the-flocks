@@ -39,11 +39,11 @@ function notesFormatter(value: unknown): string {
 const columnConfigs = {
 	ringNo: {
 		label: 'Ring',
-		invertSort: true
+		preferSortAscending: true
 	},
 	speciesName: {
 		label: 'Species',
-		invertSort: true
+		preferSortAscending: true
 	},
 	visitDate: {
 		label: 'Visit date',
@@ -51,25 +51,25 @@ const columnConfigs = {
 	},
 	locationName: {
 		label: 'Location',
-		invertSort: true
+		preferSortAscending: true
 	},
 	recordType: {
 		label: 'Type',
-		invertSort: true
+		preferSortAscending: true
 	},
 	notes: {
 		label: 'Notes',
-		invertSort: true,
+		preferSortAscending: true,
 		formatter: notesFormatter
 	},
 	findingCondition: {
 		label: 'Finding condition',
-		invertSort: true,
+		preferSortAscending: true,
 		formatter: notesFormatter
 	},
 	findingCircumstances: {
 		label: 'Finding circumstances',
-		invertSort: true,
+		preferSortAscending: true,
 		formatter: notesFormatter
 	}
 } as Record<keyof ResightingsRowModel, ColumnConfig>;

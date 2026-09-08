@@ -44,37 +44,10 @@ describe('SummaryPageContent', () => {
 		expect(heading.textContent).toBe('August 2026 summary');
 	});
 
-	it('renders the youngest-age-category note immediately after the heading on the all-time page', async () => {
-		render(<SummaryPageContent />);
-		const heading = await screen.findByRole('heading', { level: 1 });
-		const note = screen.getByText(
-			'Note that birds are counted in the youngest age category they were recorded in'
-		);
-		expect(heading.nextElementSibling).toBe(note);
-	});
-
 	describe('Structure', () => {
 		it('renders nothing extra when summaryStats is undefined/null', () => {
 			render(<SummaryPageContent summaryStats={null} />);
 			expect(screen.queryByTestId('summary-stats-section')).toBeNull();
-		});
-
-		it('does not render the youngest-age-category note when year is given', () => {
-			render(<SummaryPageContent year={2026} />);
-			expect(
-				screen.queryByText(
-					'Note that birds are counted in the youngest age category they were recorded in'
-				)
-			).toBeNull();
-		});
-
-		it('does not render the youngest-age-category note when year and month are given', () => {
-			render(<SummaryPageContent year={2026} month={8} />);
-			expect(
-				screen.queryByText(
-					'Note that birds are counted in the youngest age category they were recorded in'
-				)
-			).toBeNull();
 		});
 	});
 

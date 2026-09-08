@@ -102,7 +102,7 @@ function buildColumnConfigs(
 	return {
 		species: {
 			label: 'Species',
-			invertSort: true
+			preferSortAscending: true
 		},
 		total: {
 			label: 'Total',

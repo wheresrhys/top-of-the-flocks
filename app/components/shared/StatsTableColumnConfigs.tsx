@@ -161,7 +161,9 @@ export function buildTotalsRowCells<RowModel>(
 				key={property as string}
 				className={columnConfigs[property]?.cellClassName}
 			>
-				{valueFor(property)}
+				{columnConfigs[property]?.formatter
+					? columnConfigs[property].formatter(valueFor(property))
+					: valueFor(property)}
 			</td>
 		)
 	);

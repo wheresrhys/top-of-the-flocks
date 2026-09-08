@@ -180,6 +180,13 @@ export function SummaryTotalsSection({
 		...(showSessionTotals ? [SESSION_TOTALS_TAB] : []),
 		SPECIES_TOTALS_TAB
 	];
+
+	const tabsWithTotalsRow = {
+		[YEAR_TOTALS_TAB.id]: true,
+		[MONTH_TOTALS_TAB.id]: !yearlyTotals,
+		[ALL_TIME_MONTH_TOTALS_TAB.id]: !yearlyTotals,
+		[SESSION_TOTALS_TAB.id]: !monthTotals && !yearlyTotals
+	};
 	const [activeTab, setActiveTab] = useState(tabs[0].id);
 
 	// Species totals are fetched lazily: only once the Species tab is first
@@ -276,7 +283,9 @@ export function SummaryTotalsSection({
 							year: new Date(timePeriod).getFullYear()
 						})
 					}
-					totalsStats={totalsStats}
+					totalsStats={
+						tabsWithTotalsRow[YEAR_TOTALS_TAB.id] ? totalsStats : undefined
+					}
 				/>
 			)}
 			{activeTab === MONTH_TOTALS_TAB.id && monthTotals && (
@@ -294,7 +303,9 @@ export function SummaryTotalsSection({
 					buildLabel={(timePeriod) =>
 						formatMonthYearLabel(monthTotalsByTimePeriod.get(timePeriod))
 					}
-					totalsStats={totalsStats}
+					totalsStats={
+						tabsWithTotalsRow[MONTH_TOTALS_TAB.id] ? totalsStats : undefined
+					}
 				/>
 			)}
 			{isAllTimeMonthActive &&
@@ -305,7 +316,11 @@ export function SummaryTotalsSection({
 				) : (
 					<AllTimeMonthTotalsTab
 						periodStats={combinedMonthStats ?? []}
-						totalsStats={totalsStats}
+						totalsStats={
+							tabsWithTotalsRow[ALL_TIME_MONTH_TOTALS_TAB.id]
+								? totalsStats
+								: undefined
+						}
 						viewedGroup={viewedGroup}
 					/>
 				))}
@@ -320,7 +335,9 @@ export function SummaryTotalsSection({
 						buildHref={(timePeriod) =>
 							buildGroupSessionHref(viewedGroup, timePeriod)
 						}
-						totalsStats={totalsStats}
+						totalsStats={
+							tabsWithTotalsRow[SESSION_TOTALS_TAB.id] ? totalsStats : undefined
+						}
 					/>
 				) : isSessionLoading ? (
 					<div className="flex items-center justify-center">
@@ -334,7 +351,9 @@ export function SummaryTotalsSection({
 						buildHref={(timePeriod) =>
 							buildGroupSessionHref(viewedGroup, timePeriod)
 						}
-						totalsStats={totalsStats}
+						totalsStats={
+							tabsWithTotalsRow[SESSION_TOTALS_TAB.id] ? totalsStats : undefined
+						}
 					/>
 				))}
 			{isSpeciesActive &&
@@ -345,7 +364,7 @@ export function SummaryTotalsSection({
 				) : (
 					<SpeciesTotalsTable
 						speciesStats={speciesStats ?? []}
-						totalsStats={totalsStats}
+						totalsStats={undefined}
 						period={year === undefined ? undefined : { year, month }}
 					/>
 				))}

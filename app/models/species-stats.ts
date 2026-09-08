@@ -6,14 +6,14 @@ export type SpeciesStatConfig = {
 	suffix?: string;
 	category?: string;
 	prefix?: string;
-	invertSort?: boolean;
+	preferSortAscending?: boolean;
 };
 
 export const speciesStatConfigs: SpeciesStatConfig[] = [
 	{
 		label: 'Species',
 		property: 'species_name',
-		invertSort: true
+		preferSortAscending: true
 	},
 	{
 		label: 'Birds',

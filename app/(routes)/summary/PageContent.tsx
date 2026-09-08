@@ -39,12 +39,6 @@ export function SummaryPageContent({
 	return (
 		<PageWrapper>
 			<PrimaryHeading>{buildHeading(year, month)}</PrimaryHeading>
-			{year === undefined && (
-				<p className="text-sm italic text-base-content/70">
-					Note that birds are counted in the youngest age category they were
-					recorded in
-				</p>
-			)}
 			<div className="sm:hidden">
 				<SummaryStatsSection stats={summaryStats} />
 				<HighlightsSection />

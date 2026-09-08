@@ -4,7 +4,8 @@ import { useState } from 'react';
 
 export type ColumnConfig = {
 	label: string;
-	invertSort?: boolean;
+	footnote?: string;
+	preferSortAscending?: boolean;
 	formatter?: (value: unknown) => string;
 	// Applied to the column's <th>, letting callers group/emphasise columns
 	// (background colour, thicker borders, etc.) via the same config object
@@ -53,6 +54,58 @@ type SortableTableProps<RawRowData, RowModel> = {
 	}>;
 };
 
+function ColumnHeader<RowModel>({
+	column,
+	onColumnClick,
+	sortDirection
+}: {
+	column: {
+		property: keyof RowModel;
+	} & ColumnConfig;
+	onColumnClick: (property: keyof RowModel) => void;
+	sortDirection?: 'asc' | 'desc' | null;
+}) {
+	const [showTooltip, setShowTooltip] = useState(false);
+
+	return (
+		<th
+			className={`text-wrap cursor-pointer ${column.headerClassName ?? ''}`}
+			key={column.property as string}
+			onClick={() => onColumnClick(column.property)}
+		>
+			<div className="flex items-center justify-between gap-1">
+				{column.label}
+				{column.footnote ? (
+					<div className={`tooltip ${showTooltip ? 'show' : ''}`}>
+						<button
+							type="button"
+							className="tooltip-toggle"
+							aria-label="Tooltip"
+							onMouseOver={() => setShowTooltip(true)}
+							onMouseOut={() => setShowTooltip(false)}
+						>
+							<span className="icon-[tabler--info-circle] size-4"></span>
+						</button>
+						<span
+							className="tooltip-content tooltip-shown:opacity-100 tooltip-shown:visible max-w-2xs flex"
+							role="tooltip"
+						>
+							<span className="p-2 bg-white border rounded-sm border-solid border-inherit normal-case font-normal text-xs">
+								{column.footnote}
+							</span>
+						</span>
+					</div>
+				) : null}
+				{sortDirection ? (
+					<span
+						className={`${sortDirection === 'asc' ? 'icon-[tabler--chevron-up]' : 'icon-[tabler--chevron-down]'} size-4`}
+					></span>
+				) : null}
+			</div>
+		</th>
+	);
+}
+
 export function SortableTable<RawRowData, RowModel>({
 	columnConfigs,
 	data,
@@ -78,7 +131,7 @@ export function SortableTable<RawRowData, RowModel>({
 	);
 	const [sortIsInverted, setSortIsInverted] = useState<boolean>(
 		initialSortColumn
-			? columnConfigs[initialSortColumn]?.invertSort || false
+			? columnConfigs[initialSortColumn]?.preferSortAscending || false
 			: false
 	);
 
@@ -88,7 +141,7 @@ export function SortableTable<RawRowData, RowModel>({
 		} else {
 			setSortColumn(property);
 			// TODO hideously inefficient
-			setSortIsInverted(columnConfigs[property]?.invertSort || false);
+			setSortIsInverted(columnConfigs[property]?.preferSortAscending || false);
 			setSortDirection('desc');
 		}
 	}
@@ -127,20 +180,14 @@ export function SortableTable<RawRowData, RowModel>({
 			<thead>
 				<tr>
 					{orderedColumns.map((column) => (
-						<th
-							className={`text-wrap cursor-pointer ${column.headerClassName ?? ''}`}
+						<ColumnHeader<RowModel>
 							key={column.property as string}
-							onClick={() => handleColumnClick(column.property)}
-						>
-							<div className="flex items-center justify-between gap-1">
-								{column.label}
-								{sortColumn === column.property ? (
-									<span
-										className={`${sortDirection === 'asc' ? 'icon-[tabler--chevron-up]' : 'icon-[tabler--chevron-down]'} size-4`}
-									></span>
-								) : null}
-							</div>
-						</th>
+							column={column}
+							onColumnClick={handleColumnClick}
+							sortDirection={
+								sortColumn === column.property ? sortDirection : null
+							}
+						/>
 					))}
 				</tr>
 				{totalsRow ? (

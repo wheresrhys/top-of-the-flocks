@@ -32,11 +32,11 @@ function dateFormatter(value: unknown): string {
 const columnConfigs = {
 	ringNo: {
 		label: 'Bird',
-		invertSort: true
+		preferSortAscending: true
 	},
 	speciesName: {
 		label: 'Species',
-		invertSort: true
+		preferSortAscending: true
 	},
 	lastEncounterDate: {
 		label: 'Last seen',
