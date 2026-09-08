@@ -28,7 +28,7 @@ export type PeriodTotalsRow = {
 	newYoung: number;
 };
 
-export function derivePeriodTotalsRow(
+export function derivePeriodTotalsRowByBird(
 	stat: AggregateStatsResult
 ): PeriodTotalsRow {
 	return {
@@ -50,7 +50,7 @@ export function derivePeriodTotalsRow(
 }
 
 /**
- * Encounter-based sibling of `derivePeriodTotalsRow` — same
+ * Encounter-based sibling of `derivePeriodTotalsRowByBird` — same
  * `PeriodTotalsRow` shape, but age-bucket fields are sourced from the
  * `*_enc_count` columns. `new`/`newYoung` still read
  * `new_bird_count`/`new_young_bird_count` — no `*_enc_count` variant exists

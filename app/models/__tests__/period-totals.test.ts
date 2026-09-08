@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
-	derivePeriodTotalsRow,
+	derivePeriodTotalsRowByBird,
 	derivePeriodTotalsRowByEncounter,
 	formatPeriodTotalsLabel,
 	type PeriodTotalsGrouping
@@ -47,10 +47,10 @@ function buildStat(
 	} as unknown as AggregateStatsResult;
 }
 
-describe('derivePeriodTotalsRow', () => {
+describe('derivePeriodTotalsRowByBird', () => {
 	it('maps every AggregateStatsResult bucket field to its PeriodTotalsRow counterpart', () => {
 		const stat = buildStat();
-		expect(derivePeriodTotalsRow(stat)).toEqual({
+		expect(derivePeriodTotalsRowByBird(stat)).toEqual({
 			timePeriod: '2026-08-16',
 			sessionsCount: 4,
 			effortSeconds: 64800,
@@ -70,12 +70,12 @@ describe('derivePeriodTotalsRow', () => {
 
 	it('maps species_count to speciesCount', () => {
 		const stat = buildStat({ species_count: 9 });
-		expect(derivePeriodTotalsRow(stat).speciesCount).toBe(9);
+		expect(derivePeriodTotalsRowByBird(stat).speciesCount).toBe(9);
 	});
 
 	it('maps session_count to sessionsCount and total_effort (via postgresIntervalToSeconds) to effortSeconds', () => {
 		const stat = buildStat({ session_count: 11, total_effort: '01:00:00' });
-		const row = derivePeriodTotalsRow(stat);
+		const row = derivePeriodTotalsRowByBird(stat);
 		expect(row.sessionsCount).toBe(11);
 		expect(row.effortSeconds).toBe(3600);
 	});
@@ -95,7 +95,7 @@ describe('derivePeriodTotalsRow', () => {
 			unknown_age_bird_count: 0,
 			new_young_bird_count: 0
 		});
-		expect(derivePeriodTotalsRow(stat)).toEqual({
+		expect(derivePeriodTotalsRowByBird(stat)).toEqual({
 			timePeriod: '2026-08-16',
 			sessionsCount: 0,
 			effortSeconds: 0,
@@ -115,7 +115,7 @@ describe('derivePeriodTotalsRow', () => {
 
 	it('computes retraps via the shared calculateRetraps helper', () => {
 		const stat = buildStat({ bird_count: 10, new_bird_count: 3 });
-		expect(derivePeriodTotalsRow(stat).retraps).toBe(7);
+		expect(derivePeriodTotalsRowByBird(stat).retraps).toBe(7);
 	});
 });
 

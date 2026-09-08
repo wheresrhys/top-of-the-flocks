@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { formatSecondsForDisplay } from '@/lib/postgres-interval';
 import type { AggregateStatsResult } from '@/app/models/db';
 import {
-	derivePeriodTotalsRow,
+	derivePeriodTotalsRowByBird,
 	derivePeriodTotalsRowByEncounter,
 	formatPeriodTotalsLabel,
 	type PeriodTotalsGrouping,
@@ -97,7 +97,7 @@ export function PeriodTotalsTable({
 
 	const activeDeriveRow =
 		aggregateBy === 'bird'
-			? derivePeriodTotalsRow
+			? derivePeriodTotalsRowByBird
 			: derivePeriodTotalsRowByEncounter;
 
 	const resolveLabel =
