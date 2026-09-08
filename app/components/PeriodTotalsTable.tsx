@@ -34,7 +34,7 @@ function buildColumnConfigs(
 	return {
 		timePeriod: {
 			label: firstColumnHeader,
-			invertSort: true
+			invertSort: firstColumnHeader !== 'Year'
 		},
 		sessionsCount: {
 			label: 'Sessions'
@@ -179,6 +179,7 @@ export function PeriodTotalsTable({
 				data={rows}
 				testId="period-totals-table"
 				rowDataTransform={activeDeriveRow}
+				initialSortColumn="timePeriod"
 				totalsRow={totalsRow}
 				TableBodyComponent={PeriodTotalsTableBody}
 			/>
