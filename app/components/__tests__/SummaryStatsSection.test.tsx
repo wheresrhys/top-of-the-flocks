@@ -17,7 +17,6 @@ describe('SummaryStatsSection', () => {
 		it('renders all thirteen stat labels with their values from a populated row', () => {
 			render(<SummaryStatsSection stats={populatedStats} />);
 			expect(screen.getByText('Sessions').nextSibling?.textContent).toBe('10');
-			expect(screen.getByText('Effort').nextSibling?.textContent).toBe('20h');
 			expect(screen.getByText('Species').nextSibling?.textContent).toBe('8');
 			expect(screen.getByText('Encounters').nextSibling?.textContent).toBe(
 				'70'
@@ -33,12 +32,6 @@ describe('SummaryStatsSection', () => {
 			expect(screen.getByText('Postjuvs').nextSibling?.textContent).toBe('8');
 			expect(screen.getByText('Not aged').nextSibling?.textContent).toBe('5');
 			expect(screen.getByText('New young').nextSibling?.textContent).toBe('12');
-		});
-
-		it('formats total_effort via formatPostgresIntervalForDisplay rather than the raw interval string', () => {
-			render(<SummaryStatsSection stats={populatedStats} />);
-			expect(screen.queryByText('20:00:00')).toBeNull();
-			expect(screen.getByText('Effort').nextSibling?.textContent).toBe('20h');
 		});
 
 		it('computes Retraps as bird_count - new_bird_count', () => {
@@ -60,7 +53,6 @@ describe('SummaryStatsSection', () => {
 				.map((element) => element.textContent);
 			expect(rowHeaders).toEqual([
 				'Sessions',
-				'Effort',
 				'Species',
 				'Encounters',
 				'Individuals',
@@ -80,7 +72,6 @@ describe('SummaryStatsSection', () => {
 		it('renders 0 for every stat, including Retraps and Effort, in a zero-activity period', () => {
 			render(<SummaryStatsSection stats={zeroActivityStats} />);
 			expect(screen.getByText('Sessions').nextSibling?.textContent).toBe('0');
-			expect(screen.getByText('Effort').nextSibling?.textContent).toBe('0');
 			expect(screen.getByText('Species').nextSibling?.textContent).toBe('0');
 			expect(screen.getByText('Encounters').nextSibling?.textContent).toBe('0');
 			expect(screen.getByText('Individuals').nextSibling?.textContent).toBe(
