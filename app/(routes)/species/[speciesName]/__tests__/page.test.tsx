@@ -35,6 +35,10 @@ vi.mock('@/app/components/pages/species/SpGraphsTab', () => ({
 	SpGraphsTab: () => <div data-testid="sp-graphs-tab" />
 }));
 
+vi.mock('@/app/components/pages/species/SpBiometricsTab', () => ({
+	SpBiometricsTab: () => <div data-testid="sp-biometrics-tab" />
+}));
+
 vi.mock('@/app/components/pages/species/SpYearTotalsTab', () => ({
 	SpYearTotalsTab: () => <div data-testid="sp-year-totals-tab" />
 }));
@@ -89,7 +93,7 @@ describe('species detail page', () => {
 			mockFetchPageOfBirds.mockResolvedValue(birds);
 		});
 
-		it('renders all 6 tab buttons: Bird list, Highlights, Year totals, Month totals, Session totals, Graphs', async () => {
+		it('renders all 7 tab buttons: Bird list, Highlights, Year totals, Month totals, Session totals, Biometrics, Population', async () => {
 			render(await renderSpeciesPage());
 			await screen.findByTestId('sp-individuals-tab');
 			expect(screen.getByRole('button', { name: 'Bird list' })).toBeDefined();
@@ -101,7 +105,9 @@ describe('species detail page', () => {
 			expect(
 				screen.getByRole('button', { name: 'Session totals' })
 			).toBeDefined();
-			expect(screen.getByRole('button', { name: 'Graphs' })).toBeDefined();
+			expect(screen.getByRole('button', { name: 'Biometrics' })).toBeDefined();
+			expect(screen.getByRole('button', { name: 'Population' })).toBeDefined();
+			expect(screen.queryByRole('button', { name: 'Graphs' })).toBeNull();
 			expect(screen.queryByRole('button', { name: 'Trend charts' })).toBeNull();
 			expect(screen.queryByRole('button', { name: 'Size plot' })).toBeNull();
 		});
@@ -175,19 +181,36 @@ describe('species detail page', () => {
 			});
 		});
 
-		describe('graphs tab (click to activate)', () => {
-			it('renders SpGraphsTab after clicking Graphs button', async () => {
+		describe('biometrics tab (click to activate)', () => {
+			it('renders SpBiometricsTab after clicking Biometrics button', async () => {
 				render(await renderSpeciesPage());
 				await screen.findByTestId('sp-individuals-tab');
-				fireEvent.click(screen.getByRole('button', { name: 'Graphs' }));
+				fireEvent.click(screen.getByRole('button', { name: 'Biometrics' }));
+				await screen.findByTestId('sp-biometrics-tab');
+			});
+		});
+
+		describe('graphs tab (click to activate, labelled "Population")', () => {
+			it('renders SpGraphsTab after clicking the Population button', async () => {
+				render(await renderSpeciesPage());
+				await screen.findByTestId('sp-individuals-tab');
+				fireEvent.click(screen.getByRole('button', { name: 'Population' }));
 				await screen.findByTestId('sp-graphs-tab');
 			});
 
-			it('lazily loads SpGraphsTab only once "Graphs" is selected', async () => {
+			it('lazily loads SpGraphsTab only once "Population" is selected', async () => {
 				render(await renderSpeciesPage());
 				await screen.findByTestId('sp-individuals-tab');
 				expect(screen.queryByTestId('sp-graphs-tab')).toBeNull();
-				fireEvent.click(screen.getByRole('button', { name: 'Graphs' }));
+				fireEvent.click(screen.getByRole('button', { name: 'Population' }));
+				await screen.findByTestId('sp-graphs-tab');
+			});
+
+			it("renders a 'Population' button that activates the same panel the 'graphs' tab id always did", async () => {
+				render(await renderSpeciesPage());
+				await screen.findByTestId('sp-individuals-tab');
+				expect(screen.queryByRole('button', { name: 'Graphs' })).toBeNull();
+				fireEvent.click(screen.getByRole('button', { name: 'Population' }));
 				await screen.findByTestId('sp-graphs-tab');
 			});
 		});

@@ -14,6 +14,7 @@ import { SpIndividualsTab } from '@/app/components/pages/species/SpIndividualsTa
 import { SpNotableRetrapsTab } from '@/app/components/pages/species/SpNotableRetrapsTab';
 import { SpBusiestSessionsTab } from '@/app/components/pages/species/SpBusiestSessionsTab';
 import { SpGraphsTab } from '@/app/components/pages/species/SpGraphsTab';
+import { SpBiometricsTab } from '@/app/components/pages/species/SpBiometricsTab';
 import { SpYearTotalsTab } from '@/app/components/pages/species/SpYearTotalsTab';
 import { SpMonthTotalsTab } from '@/app/components/pages/species/SpMonthTotalsTab';
 import { SpCombinedMonthTotalsTab } from '@/app/components/pages/species/SpCombinedMonthTotalsTab';
@@ -154,7 +155,8 @@ function SpeciesData({
 					...(isAllTime || isYearScoped
 						? [{ id: 'session-totals', label: 'Session totals' }]
 						: []),
-					{ id: 'graphs', label: 'Graphs' }
+					{ id: 'biometrics', label: 'Biometrics' },
+					{ id: 'graphs', label: 'Population' }
 				]}
 				activeTab={activeTab}
 				onTabChange={handleTabChange}
@@ -249,12 +251,25 @@ function SpeciesData({
 			)}
 			<ConditionalTabPanel
 				loadedTabs={loadedTabs}
+				tabId="biometrics"
+				activeTabId={activeTab}
+			>
+				<SpBiometricsTab
+					speciesStats={data.speciesStats}
+					speciesName={data.speciesName}
+					speciesId={data.speciesId}
+					viewedGroupId={viewedGroup.id}
+					fromDate={data.fromDate}
+					toDate={data.toDate}
+				/>
+			</ConditionalTabPanel>
+			<ConditionalTabPanel
+				loadedTabs={loadedTabs}
 				tabId="graphs"
 				activeTabId={activeTab}
 			>
 				<SpGraphsTab
 					speciesName={data.speciesName}
-					speciesId={data.speciesId}
 					viewedGroupId={viewedGroup.id}
 					fromDate={data.fromDate}
 					toDate={data.toDate}
