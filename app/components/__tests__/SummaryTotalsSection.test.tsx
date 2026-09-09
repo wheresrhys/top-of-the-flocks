@@ -12,7 +12,7 @@ import { buildMonthTotalsRows } from '@/app/models/month-totals';
 import speciesDataSnapshot from '@/test-fixtures/snapshots/fetchSpeciesData.alpha.json';
 import type { AggregateStatsResult } from '@/app/models/db';
 import type { ViewedGroup } from '@/lib/group-slug';
-import { getCellByHeading } from '@/app/__tests__/helpers/table';
+import { getCellTextByHeading } from '@/app/__tests__/helpers/table';
 
 const fetchSpeciesDataMock = vi.fn();
 vi.mock('@/app/actions/spp-data', () => ({
@@ -467,9 +467,7 @@ describe('SummaryTotalsSection', () => {
 				);
 				const table = screen.getByRole('table');
 				table.querySelectorAll('tbody tr').forEach((_, rowIndex) => {
-					expect(getCellByHeading(table, 'Birds', rowIndex).textContent).toBe(
-						'-'
-					);
+					expect(getCellTextByHeading(table, 'Birds', rowIndex)).toBe('-');
 				});
 			});
 
@@ -592,10 +590,10 @@ describe('SummaryTotalsSection', () => {
 					fireEvent.click(screen.getByRole('radio', { name: 'By year' }));
 					expect(document.querySelectorAll('tbody tr').length).toBe(1);
 
-					expect(getCellByHeading('Pulli', 0).textContent).toBe('2');
+					expect(getCellTextByHeading('Pulli', 0)).toBe('2');
 
 					fireEvent.click(screen.getByRole('radio', { name: 'Encounter' }));
-					expect(getCellByHeading('Pulli', 0).textContent).toBe('5');
+					expect(getCellTextByHeading('Pulli', 0)).toBe('5');
 				});
 			});
 

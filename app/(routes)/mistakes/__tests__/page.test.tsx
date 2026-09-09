@@ -3,7 +3,7 @@ import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 import Page from '../page';
 import mistakesSnapshot from '@/test-fixtures/snapshots/fetchMistakes.alpha.json';
 import type { DiscrepenciesResult } from '@/app/models/db';
-import { getCellByHeading } from '@/app/__tests__/helpers/table';
+import { getCellTextByHeading } from '@/app/__tests__/helpers/table';
 
 const { mockGetAuthenticatedSupabaseClient } = vi.hoisted(() => ({
 	mockGetAuthenticatedSupabaseClient: vi.fn()
@@ -105,7 +105,7 @@ describe('mistakes page', () => {
 	it('sorts rows by species ascending on first render', async () => {
 		render(await Page());
 		const table = await screen.findByRole('table');
-		const firstRowSpecies = getCellByHeading('Species', 0).textContent;
+		const firstRowSpecies = getCellTextByHeading('Species', 0);
 		// age tab species: Blue Tit, Kingfisher, Robin -> Blue Tit first
 		expect(firstRowSpecies).toBe('Blue Tit');
 	});

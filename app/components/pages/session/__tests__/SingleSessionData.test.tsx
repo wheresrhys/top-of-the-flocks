@@ -10,7 +10,10 @@ import { SessionTabs } from '../SingleSessionData';
 import type { SpeciesWithEncounters } from '../SingleSessionData';
 import type { NetRound } from '@/app/models/session-chronology';
 import type { SessionEncounter } from '@/app/models/session';
-import { getCellByHeading } from '@/app/__tests__/helpers/table';
+import {
+	getCellByHeading,
+	getCellTextByHeading
+} from '@/app/__tests__/helpers/table';
 
 function makeEncounter(
 	id: number,
@@ -43,7 +46,7 @@ function makeEncounter(
 
 function totalsRowCellValue(columnLabel: string): string {
 	const totalsRow = screen.getByTestId('totals-row');
-	return getCellByHeading(columnLabel, totalsRow).textContent ?? '';
+	return getCellTextByHeading(columnLabel, totalsRow) ?? '';
 }
 
 const robinEncounter = makeEncounter(1, 'Robin', '09:00:00', 3);
@@ -284,8 +287,8 @@ describe('SessionTabs', () => {
 					date="2024-09-15"
 				/>
 			);
-			expect(getCellByHeading('Juv', 'Wren').textContent).toBe('1');
-			expect(getCellByHeading('Postjuv', 'Wren').textContent).toBe('0');
+			expect(getCellTextByHeading('Juv', 'Wren')).toBe('1');
+			expect(getCellTextByHeading('Postjuv', 'Wren')).toBe('0');
 		});
 
 		it('counts an age-3, is_juv-true encounter in the juv column', () => {
@@ -302,8 +305,8 @@ describe('SessionTabs', () => {
 					date="2024-09-15"
 				/>
 			);
-			expect(getCellByHeading('Juv', 'Dunnock').textContent).toBe('1');
-			expect(getCellByHeading('Postjuv', 'Dunnock').textContent).toBe('0');
+			expect(getCellTextByHeading('Juv', 'Dunnock')).toBe('1');
+			expect(getCellTextByHeading('Postjuv', 'Dunnock')).toBe('0');
 		});
 
 		it('counts an age-code-greater-than-3, is_juv-true encounter in the juv column, not the adult column', () => {
@@ -320,8 +323,8 @@ describe('SessionTabs', () => {
 					date="2024-09-15"
 				/>
 			);
-			expect(getCellByHeading('Juv', 'Starling').textContent).toBe('1');
-			expect(getCellByHeading('Adult', 'Starling').textContent).toBe('0');
+			expect(getCellTextByHeading('Juv', 'Starling')).toBe('1');
+			expect(getCellTextByHeading('Adult', 'Starling')).toBe('0');
 		});
 
 		it('counts an age-1, is_juv-false (pulli) encounter in the pulli column, not juv', () => {
@@ -338,8 +341,8 @@ describe('SessionTabs', () => {
 					date="2024-09-15"
 				/>
 			);
-			expect(getCellByHeading('Pulli', 'Swallow').textContent).toBe('1');
-			expect(getCellByHeading('Juv', 'Swallow').textContent).toBe('0');
+			expect(getCellTextByHeading('Pulli', 'Swallow')).toBe('1');
+			expect(getCellTextByHeading('Juv', 'Swallow')).toBe('0');
 		});
 
 		it('counts an age-3, is_juv-false (bare 3) encounter in the postjuv column, not juv', () => {
@@ -356,8 +359,8 @@ describe('SessionTabs', () => {
 					date="2024-09-15"
 				/>
 			);
-			expect(getCellByHeading('Postjuv', 'Chaffinch').textContent).toBe('1');
-			expect(getCellByHeading('Juv', 'Chaffinch').textContent).toBe('0');
+			expect(getCellTextByHeading('Postjuv', 'Chaffinch')).toBe('1');
+			expect(getCellTextByHeading('Juv', 'Chaffinch')).toBe('0');
 		});
 	});
 
@@ -375,7 +378,7 @@ describe('SessionTabs', () => {
 					date="2024-09-15"
 				/>
 			);
-			expect(getCellByHeading('New young', 'Wren').textContent).toBe('1');
+			expect(getCellTextByHeading('New young', 'Wren')).toBe('1');
 		});
 
 		it('counts a new (record_type N), age-3 encounter', () => {
@@ -391,7 +394,7 @@ describe('SessionTabs', () => {
 					date="2024-09-15"
 				/>
 			);
-			expect(getCellByHeading('New young', 'Dunnock').textContent).toBe('1');
+			expect(getCellTextByHeading('New young', 'Dunnock')).toBe('1');
 		});
 
 		it('excludes a new (record_type N) encounter whose age is neither 1 nor 3', () => {
@@ -407,7 +410,7 @@ describe('SessionTabs', () => {
 					date="2024-09-15"
 				/>
 			);
-			expect(getCellByHeading('New young', 'Starling').textContent).toBe('0');
+			expect(getCellTextByHeading('New young', 'Starling')).toBe('0');
 		});
 
 		it('excludes an age-1 retrap (record_type S), despite matching the age criterion', () => {
@@ -424,7 +427,7 @@ describe('SessionTabs', () => {
 					date="2024-09-15"
 				/>
 			);
-			expect(getCellByHeading('New young', 'Swallow').textContent).toBe('0');
+			expect(getCellTextByHeading('New young', 'Swallow')).toBe('0');
 		});
 	});
 
@@ -752,16 +755,16 @@ describe('SessionTabs', () => {
 				/>
 			);
 			expect(totalsRowCellValue('Total')).toBe(
-				getCellByHeading('Total', 'Wren').textContent
+				getCellTextByHeading('Total', 'Wren')
 			);
 			expect(totalsRowCellValue('New')).toBe(
-				getCellByHeading('New', 'Wren').textContent
+				getCellTextByHeading('New', 'Wren')
 			);
 			expect(totalsRowCellValue('Pulli')).toBe(
-				getCellByHeading('Pulli', 'Wren').textContent
+				getCellTextByHeading('Pulli', 'Wren')
 			);
 			expect(totalsRowCellValue('Max Proven Age')).toBe(
-				getCellByHeading('Max Proven Age', 'Wren').textContent
+				getCellTextByHeading('Max Proven Age', 'Wren')
 			);
 		});
 

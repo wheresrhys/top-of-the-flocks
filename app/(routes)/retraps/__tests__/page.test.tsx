@@ -3,7 +3,7 @@ import { render, screen, cleanup } from '@testing-library/react';
 import Page from '../page';
 import retrapsSnapshot from '@/test-fixtures/snapshots/fetchNotableRetraps.alpha.json';
 import type { NotableRetrapsResult } from '@/app/models/db';
-import { getCellByHeading } from '@/app/__tests__/helpers/table';
+import { getCellTextByHeading } from '@/app/__tests__/helpers/table';
 
 const { mockGetAuthenticatedSupabaseClient } = vi.hoisted(() => ({
 	mockGetAuthenticatedSupabaseClient: vi.fn()
@@ -45,10 +45,10 @@ describe('retraps page', () => {
 		expect(rows.length).toBe(
 			(retrapsSnapshot as NotableRetrapsResult[]).length
 		);
-		expect(getCellByHeading(table, 'Species', 0).textContent).toBe(
+		expect(getCellTextByHeading(table, 'Species', 0)).toBe(
 			retrapsSnapshot[0].species_name
 		);
-		expect(getCellByHeading(table, 'Ring', 0).textContent?.trim()).toBe(
+		expect(getCellTextByHeading(table, 'Ring', 0)).toBe(
 			retrapsSnapshot[0].ring_no
 		);
 	});

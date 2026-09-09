@@ -8,7 +8,7 @@ import {
 } from '@testing-library/react';
 import { SpCombinedMonthTotalsTab } from '../SpCombinedMonthTotalsTab';
 import type { AggregateStatsResult } from '@/app/models/db';
-import { getCellByHeading } from '@/app/__tests__/helpers/table';
+import { getCellTextByHeading } from '@/app/__tests__/helpers/table';
 
 vi.mock('@/app/actions/sp-data', () => ({
 	fetchSpeciesPeriodTotals: vi.fn()
@@ -121,7 +121,7 @@ describe('SpCombinedMonthTotalsTab', () => {
 				// Hide default: only January (the sole nonzero folded bucket) shows.
 				expect(document.querySelectorAll('tbody tr').length).toBe(1);
 			});
-			expect(getCellByHeading('Encounters', 'January').textContent).toBe('75');
+			expect(getCellTextByHeading('Encounters', 'January')).toBe('75');
 		});
 
 		it('shows a loading state before the fetch resolves', async () => {
@@ -197,9 +197,7 @@ describe('SpCombinedMonthTotalsTab', () => {
 			expect(encounterToggle.disabled).toBe(true);
 			const table = screen.getByRole('table');
 			table.querySelectorAll('tbody tr').forEach((_, rowIndex) => {
-				expect(getCellByHeading(table, 'Birds', rowIndex).textContent).toBe(
-					'-'
-				);
+				expect(getCellTextByHeading(table, 'Birds', rowIndex)).toBe('-');
 			});
 		});
 	});
@@ -300,13 +298,13 @@ describe('species all-time Month totals tab — Combine years toggle', () => {
 				(screen.getByRole('radio', { name: 'Bird' }) as HTMLInputElement)
 					.checked
 			).toBe(true);
-			expect(getCellByHeading('Pulli', 0)?.textContent).toBe('2');
+			expect(getCellTextByHeading('Pulli', 0)).toBe('2');
 
 			fireEvent.click(screen.getByRole('radio', { name: 'Encounter' }));
-			expect(getCellByHeading('Pulli', 0)?.textContent).toBe('5');
+			expect(getCellTextByHeading('Pulli', 0)).toBe('5');
 
 			fireEvent.click(screen.getByRole('radio', { name: 'Bird' }));
-			expect(getCellByHeading('Pulli', 0)?.textContent).toBe('2');
+			expect(getCellTextByHeading('Pulli', 0)).toBe('2');
 		});
 
 		it('switching the toggle back on restores the combined, encounters-only view and disables the bird/encounter toggle again', async () => {

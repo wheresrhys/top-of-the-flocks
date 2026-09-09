@@ -2,7 +2,10 @@ import { describe, it, expect, afterEach } from 'vitest';
 import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 import { PeriodTotalsTable } from '../PeriodTotalsTable';
 import type { AggregateStatsResult } from '@/app/models/db';
-import { getCellByHeading } from '@/app/__tests__/helpers/table';
+import {
+	getCellByHeading,
+	getCellTextByHeading
+} from '@/app/__tests__/helpers/table';
 
 // The real header <th>s live in the `<thead>` row without a `data-testid` —
 // `above-header-row` (the "Aggregate by" toggle row) and `totals-row` are
@@ -183,8 +186,8 @@ describe('PeriodTotalsTable', () => {
 					buildHref={() => '/summary/2026'}
 				/>
 			);
-			expect(getCellByHeading('Sessions', 0).textContent).toBe('0');
-			expect(getCellByHeading('Effort', 0).textContent).toBe('0');
+			expect(getCellTextByHeading('Sessions', 0)).toBe('0');
+			expect(getCellTextByHeading('Effort', 0)).toBe('0');
 		});
 	});
 
@@ -220,15 +223,9 @@ describe('PeriodTotalsTable', () => {
 				/>
 			);
 			const totalsRow = screen.getByTestId('totals-row');
-			expect(getCellByHeading('Year', totalsRow).textContent?.trim()).toBe(
-				'Total'
-			);
-			expect(getCellByHeading('Sessions', totalsRow).textContent?.trim()).toBe(
-				'7'
-			);
-			expect(getCellByHeading('Effort', totalsRow).textContent?.trim()).toBe(
-				'36h'
-			);
+			expect(getCellTextByHeading('Year', totalsRow)).toBe('Total');
+			expect(getCellTextByHeading('Sessions', totalsRow)).toBe('7');
+			expect(getCellTextByHeading('Effort', totalsRow)).toBe('36h');
 		});
 
 		it('renders a "Total" row for the "month" grouping when totalsStats is supplied', () => {
@@ -287,8 +284,8 @@ describe('PeriodTotalsTable', () => {
 					buildHref={(timePeriod) => `/summary/2026/${timePeriod}`}
 				/>
 			);
-			expect(getCellByHeading('Sessions', 0).textContent).toBe('4');
-			expect(getCellByHeading('Effort', 0).textContent).toBe('18h');
+			expect(getCellTextByHeading('Sessions', 0)).toBe('4');
+			expect(getCellTextByHeading('Effort', 0)).toBe('18h');
 		});
 
 		it('sorts the Effort column numerically, not by the formatted string', () => {
@@ -374,12 +371,12 @@ describe('PeriodTotalsTable', () => {
 				);
 				// retraps (enc 55 - new 30 = 25), then the encounter-derived
 				// age-bucket columns.
-				expect(getCellByHeading('Retrap', 0).textContent).toBe('25');
-				expect(getCellByHeading('Pulli', 0).textContent).toBe('9');
-				expect(getCellByHeading('Juv', 0).textContent).toBe('8');
-				expect(getCellByHeading('Postjuv', 0).textContent).toBe('7');
-				expect(getCellByHeading('Adult', 0).textContent).toBe('6');
-				expect(getCellByHeading('Not aged', 0).textContent).toBe('4');
+				expect(getCellTextByHeading('Retrap', 0)).toBe('25');
+				expect(getCellTextByHeading('Pulli', 0)).toBe('9');
+				expect(getCellTextByHeading('Juv', 0)).toBe('8');
+				expect(getCellTextByHeading('Postjuv', 0)).toBe('7');
+				expect(getCellTextByHeading('Adult', 0)).toBe('6');
+				expect(getCellTextByHeading('Not aged', 0)).toBe('4');
 			});
 		});
 
@@ -401,9 +398,7 @@ describe('PeriodTotalsTable', () => {
 				);
 				const table = screen.getByRole('table');
 				table.querySelectorAll('tbody tr').forEach((_, rowIndex) => {
-					expect(getCellByHeading(table, 'Birds', rowIndex).textContent).toBe(
-						'-'
-					);
+					expect(getCellTextByHeading(table, 'Birds', rowIndex)).toBe('-');
 				});
 			});
 
@@ -421,7 +416,7 @@ describe('PeriodTotalsTable', () => {
 					/>
 				);
 				const totalsRow = screen.getByTestId('totals-row');
-				expect(getCellByHeading('Birds', totalsRow).textContent).toBe('-');
+				expect(getCellTextByHeading('Birds', totalsRow)).toBe('-');
 			});
 
 			it('renders the first column as plain text, not a link, when no href is available for a row', () => {
@@ -486,8 +481,7 @@ describe('PeriodTotalsTable', () => {
 					/>
 				);
 
-				const cell = (heading: string) =>
-					getCellByHeading(heading, 0).textContent;
+				const cell = (heading: string) => getCellTextByHeading(heading, 0);
 
 				expect(cell('Species')).toBe(String(stat.species_count));
 				expect(cell('Encounters')).toBe(String(stat.encounter_count));

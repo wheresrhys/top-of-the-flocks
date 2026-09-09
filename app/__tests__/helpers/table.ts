@@ -118,3 +118,35 @@ export function getCellByHeading(
 	}
 	return cells[columnIndex];
 }
+
+/**
+ * Trimmed textContent of the cell under headingText, in the given row.
+ * Same signature as getCellByHeading.
+ */
+export function getCellTextByHeading(
+	headingText: string,
+	row: number | string | Element
+): string;
+export function getCellTextByHeading(
+	container: HTMLElement,
+	headingText: string,
+	row: number | string | Element
+): string;
+export function getCellTextByHeading(
+	containerOrHeadingText: HTMLElement | string,
+	headingTextOrRow: string | number | Element,
+	maybeRow?: number | string | Element
+): string {
+	const cell =
+		typeof containerOrHeadingText === 'string'
+			? getCellByHeading(
+					containerOrHeadingText,
+					headingTextOrRow as number | string | Element
+				)
+			: getCellByHeading(
+					containerOrHeadingText,
+					headingTextOrRow as string,
+					maybeRow as number | string | Element
+				);
+	return (cell.textContent ?? '').trim();
+}

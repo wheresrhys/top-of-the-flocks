@@ -4,7 +4,7 @@ import Page, { fetchResightingsPageContent } from '../page';
 import resightingsSnapshot from '@/test-fixtures/snapshots/fetchResightings.alpha.json';
 import type { ResightingEncounter } from '@/app/models/session';
 import { RESIGHTING_RECORD_TYPES } from '@/lib/demon-import';
-import { getCellByHeading } from '@/app/__tests__/helpers/table';
+import { getCellTextByHeading } from '@/app/__tests__/helpers/table';
 
 const { mockGetAuthenticatedSupabaseClient } = vi.hoisted(() => ({
 	mockGetAuthenticatedSupabaseClient: vi.fn()
@@ -123,11 +123,10 @@ describe('resightings page', () => {
 			row.textContent?.includes('ARESIGHT01')
 		)!;
 		expect(
-			getCellByHeading(table, 'Finding condition', rowWithValues).textContent
+			getCellTextByHeading(table, 'Finding condition', rowWithValues)
 		).toBe('8');
 		expect(
-			getCellByHeading(table, 'Finding circumstances', rowWithValues)
-				.textContent
+			getCellTextByHeading(table, 'Finding circumstances', rowWithValues)
 		).toBe('2');
 	});
 
@@ -144,12 +143,14 @@ describe('resightings page', () => {
 			row.textContent?.includes('ARESIGHT02')
 		)!;
 		expect(
-			getCellByHeading(table, 'Finding condition', rowWithNoRecoveryDetails)
-				.textContent
+			getCellTextByHeading(table, 'Finding condition', rowWithNoRecoveryDetails)
 		).toBe('–');
 		expect(
-			getCellByHeading(table, 'Finding circumstances', rowWithNoRecoveryDetails)
-				.textContent
+			getCellTextByHeading(
+				table,
+				'Finding circumstances',
+				rowWithNoRecoveryDetails
+			)
 		).toBe('–');
 	});
 
@@ -177,9 +178,7 @@ describe('resightings page', () => {
 		const rowWithNoNotes = rows.find((row) =>
 			row.textContent?.includes('ARESIGHT02')
 		)!;
-		expect(getCellByHeading(table, 'Notes', rowWithNoNotes).textContent).toBe(
-			'–'
-		);
+		expect(getCellTextByHeading(table, 'Notes', rowWithNoNotes)).toBe('–');
 	});
 
 	it('renders empty state gracefully when there are no resightings', async () => {

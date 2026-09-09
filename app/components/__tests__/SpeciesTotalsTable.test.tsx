@@ -3,7 +3,10 @@ import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 import { SpeciesTotalsTable } from '../SpeciesTotalsTable';
 import speciesDataSnapshot from '@/test-fixtures/snapshots/fetchSpeciesData.alpha.json';
 import type { AggregateStatsResult } from '@/app/models/db';
-import { getCellByHeading } from '@/app/__tests__/helpers/table';
+import {
+	getCellByHeading,
+	getCellTextByHeading
+} from '@/app/__tests__/helpers/table';
 
 const speciesStats = speciesDataSnapshot as unknown as AggregateStatsResult[];
 
@@ -245,7 +248,7 @@ describe('SpeciesTotalsTable', () => {
 		it('renders 0 when session_count is 0', () => {
 			const stats = [makeStat({ species_name: 'Robin', session_count: 0 })];
 			render(<SpeciesTotalsTable speciesStats={stats} />);
-			expect(getCellByHeading('Sessions', 0).textContent?.trim()).toBe('0');
+			expect(getCellTextByHeading('Sessions', 0)).toBe('0');
 		});
 	});
 
@@ -463,17 +466,17 @@ describe('SpeciesTotalsTable', () => {
 		it('defaults to bird-based counts and re-renders the standard-block columns from encounter-based data when "Encounter" is clicked', () => {
 			render(<SpeciesTotalsTable speciesStats={stats} />);
 
-			expect(getCellByHeading('New', 0).textContent).toBe('3');
-			expect(getCellByHeading('Retrap', 0).textContent).toBe('1'); // bird_count - new
-			expect(getCellByHeading('Pulli', 0).textContent).toBe('1');
-			expect(getCellByHeading('Adult', 0).textContent).toBe('0');
+			expect(getCellTextByHeading('New', 0)).toBe('3');
+			expect(getCellTextByHeading('Retrap', 0)).toBe('1'); // bird_count - new
+			expect(getCellTextByHeading('Pulli', 0)).toBe('1');
+			expect(getCellTextByHeading('Adult', 0)).toBe('0');
 
 			fireEvent.click(screen.getByRole('radio', { name: 'Encounter' }));
 
-			expect(getCellByHeading('New', 0).textContent).toBe('3'); // unaffected by toggle
-			expect(getCellByHeading('Retrap', 0).textContent).toBe('2'); // encounter_count - new
-			expect(getCellByHeading('Pulli', 0).textContent).toBe('1'); // from pullus_enc_count
-			expect(getCellByHeading('Adult', 0).textContent).toBe('1'); // from adult_enc_count
+			expect(getCellTextByHeading('New', 0)).toBe('3'); // unaffected by toggle
+			expect(getCellTextByHeading('Retrap', 0)).toBe('2'); // encounter_count - new
+			expect(getCellTextByHeading('Pulli', 0)).toBe('1'); // from pullus_enc_count
+			expect(getCellTextByHeading('Adult', 0)).toBe('1'); // from adult_enc_count
 		});
 
 		it('leaves the Species/Sessions/Encounters/Individuals columns unaffected by the toggle', () => {
@@ -484,14 +487,14 @@ describe('SpeciesTotalsTable', () => {
 				'Encounters',
 				'Individuals'
 			];
-			const before = unaffectedHeadings.map(
-				(heading) => getCellByHeading(heading, 0).textContent
+			const before = unaffectedHeadings.map((heading) =>
+				getCellTextByHeading(heading, 0)
 			);
 
 			fireEvent.click(screen.getByRole('radio', { name: 'Encounter' }));
 
-			const after = unaffectedHeadings.map(
-				(heading) => getCellByHeading(heading, 0).textContent
+			const after = unaffectedHeadings.map((heading) =>
+				getCellTextByHeading(heading, 0)
 			);
 			expect(after).toEqual(before);
 		});
