@@ -98,68 +98,61 @@ describe('SpMonthTotalsTab', () => {
 		);
 	});
 
-	it('zero-fills all 12 calendar months even when the RPC returned data for only some', async () => {
+	it('renders a row for a month that has sessions, linking to /species/{name}/{year}/{month}', async () => {
 		render(
 			<SpMonthTotalsTab speciesName="Robin" viewedGroupId={1} year={2026} />
 		);
 		await waitFor(() => {
-			expect(document.querySelectorAll('tbody tr').length).toBe(12);
+			// Only March has sessions in the default mock; the rest are
+			// zero-filled and hidden by default.
+			expect(document.querySelectorAll('tbody tr').length).toBe(1);
 		});
-	});
-
-	it('renders a row per month, each one that has sessions linking to /species/{name}/{year}/{month}', async () => {
-		render(
-			<SpMonthTotalsTab speciesName="Robin" viewedGroupId={1} year={2026} />
-		);
-		await waitFor(() => {
-			expect(document.querySelectorAll('tbody tr').length).toBe(12);
-		});
-		expect(screen.getByText('January 2026')).not.toBeNull();
-		expect(screen.queryByRole('link', { name: 'January 2026' })).toBeNull();
 		const marchLink = screen.getByRole('link', { name: 'March 2026' });
 		expect(marchLink.getAttribute('href')).toBe('/species/Robin/2026/3');
-		expect(screen.getByText('December 2026')).not.toBeNull();
-		expect(screen.queryByRole('link', { name: 'December 2026' })).toBeNull();
 	});
 
 	describe('empty months toggle', () => {
-		it('renders all 12 months by default (Show)', async () => {
+		it('renders only months with data by default (Hide)', async () => {
 			render(
 				<SpMonthTotalsTab speciesName="Robin" viewedGroupId={1} year={2026} />
 			);
 			await waitFor(() => {
-				expect(document.querySelectorAll('tbody tr').length).toBe(12);
+				expect(document.querySelectorAll('tbody tr').length).toBe(1);
 			});
 			expect(
-				(screen.getByRole('radio', { name: 'Show' }) as HTMLInputElement)
+				(screen.getByRole('radio', { name: 'Hide' }) as HTMLInputElement)
 					.checked
 			).toBe(true);
-		});
-
-		it('hides zero-session months when toggled to Hide', async () => {
-			render(
-				<SpMonthTotalsTab speciesName="Robin" viewedGroupId={1} year={2026} />
-			);
-			await waitFor(() => {
-				expect(document.querySelectorAll('tbody tr').length).toBe(12);
-			});
-			fireEvent.click(screen.getByRole('radio', { name: 'Hide' }));
 			// Only March has sessions in the default mock.
-			expect(document.querySelectorAll('tbody tr').length).toBe(1);
 			expect(screen.getByText('March 2026')).not.toBeNull();
 		});
 
-		it('restores all 12 months when toggled back to Show', async () => {
+		it('shows all 12 months when toggled to Show', async () => {
 			render(
 				<SpMonthTotalsTab speciesName="Robin" viewedGroupId={1} year={2026} />
 			);
 			await waitFor(() => {
-				expect(document.querySelectorAll('tbody tr').length).toBe(12);
+				expect(document.querySelectorAll('tbody tr').length).toBe(1);
 			});
-			fireEvent.click(screen.getByRole('radio', { name: 'Hide' }));
-			expect(document.querySelectorAll('tbody tr').length).toBe(1);
 			fireEvent.click(screen.getByRole('radio', { name: 'Show' }));
 			expect(document.querySelectorAll('tbody tr').length).toBe(12);
+			expect(screen.getByText('January 2026')).not.toBeNull();
+			expect(screen.queryByRole('link', { name: 'January 2026' })).toBeNull();
+			expect(screen.getByText('December 2026')).not.toBeNull();
+			expect(screen.queryByRole('link', { name: 'December 2026' })).toBeNull();
+		});
+
+		it('restores hidden months when toggled back to Hide', async () => {
+			render(
+				<SpMonthTotalsTab speciesName="Robin" viewedGroupId={1} year={2026} />
+			);
+			await waitFor(() => {
+				expect(document.querySelectorAll('tbody tr').length).toBe(1);
+			});
+			fireEvent.click(screen.getByRole('radio', { name: 'Show' }));
+			expect(document.querySelectorAll('tbody tr').length).toBe(12);
+			fireEvent.click(screen.getByRole('radio', { name: 'Hide' }));
+			expect(document.querySelectorAll('tbody tr').length).toBe(1);
 		});
 
 		it('has no visible effect for a year with no empty months', async () => {
@@ -179,7 +172,7 @@ describe('SpMonthTotalsTab', () => {
 			await waitFor(() => {
 				expect(document.querySelectorAll('tbody tr').length).toBe(12);
 			});
-			fireEvent.click(screen.getByRole('radio', { name: 'Hide' }));
+			fireEvent.click(screen.getByRole('radio', { name: 'Show' }));
 			expect(document.querySelectorAll('tbody tr').length).toBe(12);
 		});
 
@@ -193,10 +186,8 @@ describe('SpMonthTotalsTab', () => {
 				<SpMonthTotalsTab speciesName="Robin" viewedGroupId={1} year={2026} />
 			);
 			await waitFor(() => {
-				expect(document.querySelectorAll('tbody tr').length).toBe(12);
+				expect(document.querySelectorAll('tbody tr').length).toBe(1);
 			});
-			fireEvent.click(screen.getByRole('radio', { name: 'Hide' }));
-			expect(document.querySelectorAll('tbody tr').length).toBe(1);
 			expect(screen.getByText('August 2026')).not.toBeNull();
 		});
 	});

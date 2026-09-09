@@ -56,9 +56,8 @@ export function SpCombinedMonthTotalsTab({
 	// keeps it mounted via `isActive`).
 	const [combineYears, setCombineYears] = useState(true);
 	// Independent of `combineYears` — applies to whichever view is shown, and
-	// resets to Show (`false`) on tab remount alongside `combineYears`. Defaults
-	// to Show, preserving the always-render-all-months baseline.
-	const [hideEmptyMonths, setHideEmptyMonths] = useState(false);
+	// resets to Hide (`true`) on tab remount alongside `combineYears`.
+	const [hideEmptyMonths, setHideEmptyMonths] = useState(true);
 
 	if (isLoading || monthlyStats === undefined) {
 		return (
