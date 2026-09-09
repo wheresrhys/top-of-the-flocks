@@ -11,40 +11,6 @@ afterEach(() => {
 });
 
 describe('SpStats', () => {
-	describe('Weight category', () => {
-		it('shows min-max range with avg and median', () => {
-			render(
-				<SpStats
-					birds={birds}
-					speciesStats={speciesStats}
-					speciesId={1}
-					speciesName="Robin"
-					viewedGroup={{ id: 1, slug: 'alpha' }}
-				/>
-			);
-			expect(
-				screen.getByText(/Weight:.*16\.5-21g.*avg: 18\.3g.*median: 18g/i)
-			).toBeDefined();
-		});
-	});
-
-	describe('Wing category', () => {
-		it('shows min-max range with avg and median', () => {
-			render(
-				<SpStats
-					birds={birds}
-					speciesStats={speciesStats}
-					speciesId={1}
-					speciesName="Robin"
-					viewedGroup={{ id: 1, slug: 'alpha' }}
-				/>
-			);
-			expect(
-				screen.getByText(/Wing:.*72-80mm.*avg: 74\.2mm.*median: 74mm/i)
-			).toBeDefined();
-		});
-	});
-
 	describe('Edge', () => {
 		it('does not render a "Top sessions" line', () => {
 			render(
@@ -57,6 +23,20 @@ describe('SpStats', () => {
 				/>
 			);
 			expect(screen.queryByText('Top sessions:')).toBeNull();
+		});
+
+		it('does not render Weight or Wing sentences in the intro block', () => {
+			render(
+				<SpStats
+					birds={birds}
+					speciesStats={speciesStats}
+					speciesId={1}
+					speciesName="Robin"
+					viewedGroup={{ id: 1, slug: 'alpha' }}
+				/>
+			);
+			expect(screen.queryByText(/Weight:/)).toBeNull();
+			expect(screen.queryByText(/Wing:/)).toBeNull();
 		});
 	});
 });

@@ -23,64 +23,19 @@ const statsByCategory: Record<string, SpeciesStatConfig[]> =
 		{} as Record<string, SpeciesStatConfig[]>
 	);
 
-type MeasurementCategoryProps = {
-	label: string;
-	min: number | null;
-	max: number | null;
-	avg: number | null;
-	median: number | null;
-	suffix: string;
-};
-
-function MeasurementCategory({
-	label,
-	min,
-	max,
-	avg,
-	median,
-	suffix
-}: MeasurementCategoryProps) {
-	return (
-		<li className="flex items-center gap-2 flex-wrap">
-			{label}: {min}-{max}
-			{suffix} (avg: {avg}
-			{suffix}, median: {median}
-			{suffix})
-		</li>
-	);
-}
-
 function StatsByCategory({
 	speciesStats
 }: {
 	speciesStats: AggregateStatsResult;
 }) {
 	return categoryOrder.map((categoryName) => {
-		if (categoryName === 'Weight') {
-			return (
-				<MeasurementCategory
-					key="Weight"
-					label="Weight"
-					min={speciesStats.min_weight}
-					max={speciesStats.max_weight}
-					avg={speciesStats.avg_weight}
-					median={speciesStats.median_weight}
-					suffix="g"
-				/>
-			);
-		}
-		if (categoryName === 'Wing') {
-			return (
-				<MeasurementCategory
-					key="Wing"
-					label="Wing"
-					min={speciesStats.min_wing}
-					max={speciesStats.max_wing}
-					avg={speciesStats.avg_wing}
-					median={speciesStats.median_wing}
-					suffix="mm"
-				/>
-			);
+		// Weight/Wing have their own dedicated "Biometrics" tab (#783) — skip
+		// them here rather than falling through to the generic badge-list
+		// rendering below. `categoryOrder`/`statsByCategory` still include
+		// these categories since `speciesStatConfigs` (app/models/species-stats.ts)
+		// keeps the Weight/Wing entries for SppStatsTable.tsx's benefit.
+		if (categoryName === 'Weight' || categoryName === 'Wing') {
+			return null;
 		}
 		const subStats = statsByCategory[categoryName];
 		return (

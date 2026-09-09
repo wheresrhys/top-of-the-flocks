@@ -8,21 +8,18 @@ import {
 } from '@testing-library/react';
 import { SpGraphsTab } from '../SpGraphsTab';
 import type { AggregateStatsResult } from '@/app/models/db';
-import type { SexedGraphableBird } from '../WeightAndWingChart';
 
 // chartkick registers Chart.js as a side effect; nothing renders a real canvas
 // here because the presentational chart components are mocked below.
 vi.mock('chartkick/chart.js', () => ({}));
 
 vi.mock('@/app/actions/sp-data', () => ({
-	getSpeciesStatsHistory: vi.fn(),
-	fetchGraphableEncounterData: vi.fn()
+	getSpeciesStatsHistory: vi.fn()
 }));
 
 vi.mock('../StatsHistoryChart', () => ({
 	getCounts: () => [{ name: 'counts', data: [] }],
-	getYoungsters: () => [{ name: 'young', data: [] }],
-	getSizes: () => [{ name: 'sizes', data: [] }]
+	getYoungsters: () => [{ name: 'young', data: [] }]
 }));
 
 vi.mock('@/app/components/YearComparisonTrendChart', () => ({
@@ -31,13 +28,8 @@ vi.mock('@/app/components/YearComparisonTrendChart', () => ({
 	)
 }));
 
-vi.mock('../WeightAndWingChart', () => ({
-	WingWeightScatterChart: () => <div data-testid="scatter-chart" />
-}));
-
 const props = {
 	speciesName: 'Robin',
-	speciesId: 42,
 	viewedGroupId: 1
 };
 
@@ -52,36 +44,35 @@ describe('SpGraphsTab', () => {
 	});
 
 	beforeEach(async () => {
-		const { getSpeciesStatsHistory, fetchGraphableEncounterData } =
-			await loadActions();
+		const { getSpeciesStatsHistory } = await loadActions();
 		vi.mocked(getSpeciesStatsHistory).mockResolvedValue(
 			[] as AggregateStatsResult[]
 		);
-		vi.mocked(fetchGraphableEncounterData).mockResolvedValue(
-			[] as SexedGraphableBird[]
-		);
 	});
 
-	describe('Usual: initial collapsed grid', () => {
-		it('renders a text tile per chart and fetches nothing until a tile is expanded', async () => {
-			const { getSpeciesStatsHistory, fetchGraphableEncounterData } =
-				await loadActions();
+	describe('Structure: remaining tiles only', () => {
+		it('renders only the Totals and Young tiles — no Biometrics trends or Wing vs weight tiles', () => {
 			render(<SpGraphsTab {...props} />);
 			expect(screen.getByRole('button', { name: /Totals/ })).toBeDefined();
 			expect(screen.getByRole('button', { name: /Young/ })).toBeDefined();
 			expect(
-				screen.getByRole('button', { name: /Biometrics trends/ })
-			).toBeDefined();
+				screen.queryByRole('button', { name: /Biometrics trends/ })
+			).toBeNull();
 			expect(
-				screen.getByRole('button', { name: /Wing vs weight/ })
-			).toBeDefined();
+				screen.queryByRole('button', { name: /Wing vs weight/ })
+			).toBeNull();
+		});
+	});
+
+	describe('Usual: initial collapsed grid', () => {
+		it('renders a text tile per chart and fetches nothing until a tile is expanded', async () => {
+			const { getSpeciesStatsHistory } = await loadActions();
+			render(<SpGraphsTab {...props} />);
 			expect(
 				screen.getByText('Bird and encounter counts over time')
 			).toBeDefined();
 			expect(screen.queryByTestId('trend-chart')).toBeNull();
-			expect(screen.queryByTestId('scatter-chart')).toBeNull();
 			expect(getSpeciesStatsHistory).not.toHaveBeenCalled();
-			expect(fetchGraphableEncounterData).not.toHaveBeenCalled();
 		});
 	});
 
@@ -101,24 +92,6 @@ describe('SpGraphsTab', () => {
 			expect(
 				screen.getByRole('button', { name: 'Close Totals' })
 			).toBeDefined();
-		});
-	});
-
-	describe('Structure: expanding the scatter tile', () => {
-		it('fetches graphable encounter data (not stats history) and renders the scatter chart', async () => {
-			const { getSpeciesStatsHistory, fetchGraphableEncounterData } =
-				await loadActions();
-			render(<SpGraphsTab {...props} />);
-			fireEvent.click(screen.getByRole('button', { name: /Wing vs weight/ }));
-			await screen.findByTestId('scatter-chart');
-			expect(fetchGraphableEncounterData).toHaveBeenCalledTimes(1);
-			expect(fetchGraphableEncounterData).toHaveBeenCalledWith(
-				42,
-				1,
-				undefined,
-				undefined
-			);
-			expect(getSpeciesStatsHistory).not.toHaveBeenCalled();
 		});
 	});
 
@@ -169,9 +142,7 @@ describe('SpGraphsTab', () => {
 			render(
 				<SpGraphsTab {...props} fromDate="2024-01-01" toDate="2024-12-31" />
 			);
-			fireEvent.click(
-				screen.getByRole('button', { name: /Biometrics trends/ })
-			);
+			fireEvent.click(screen.getByRole('button', { name: /Young/ }));
 			await screen.findByTestId('trend-chart');
 			expect(getSpeciesStatsHistory).toHaveBeenCalledWith(
 				'Robin',

@@ -1,21 +1,13 @@
 'use client';
 import { useState } from 'react';
 import 'chartkick/chart.js';
-import {
-	getSpeciesStatsHistory,
-	fetchGraphableEncounterData
-} from '@/app/actions/sp-data';
+import { getSpeciesStatsHistory } from '@/app/actions/sp-data';
 import type { AggregateStatsResult } from '@/app/models/db';
 import {
 	getCounts,
-	getYoungsters,
-	getSizes
+	getYoungsters
 } from '@/app/components/pages/species/StatsHistoryChart';
 import { YearComparisonTrendChart } from '@/app/components/YearComparisonTrendChart';
-import {
-	WingWeightScatterChart,
-	type SexedGraphableBird
-} from '@/app/components/pages/species/WeightAndWingChart';
 import { ChartTile } from '@/app/components/pages/species/ChartTile';
 
 function Spinner() {
@@ -26,21 +18,22 @@ function Spinner() {
 	);
 }
 
-// The single "Graphs" tab on the species page: a reflowing grid of chart tiles.
-// Each tile is text-only until clicked, at which point it expands to render its
-// chart and the click triggers the underlying data fetch. Data is memoised at
-// this level — the three trend tiles share one `getSpeciesStatsHistory` query and
-// the scatter tile has its own `fetchGraphableEncounterData` query, each fired at
-// most once regardless of how often its tiles are expanded/collapsed.
+// The "Population" tab on the species page (label only — id stays `graphs`,
+// #783): a reflowing grid of population-count chart tiles. Each tile is
+// text-only until clicked, at which point it expands to render its chart and
+// the click triggers the underlying data fetch. Data is memoised at this
+// level — the two trend tiles share one `getSpeciesStatsHistory` query,
+// fired at most once regardless of how often its tiles are expanded/collapsed.
+// The biometrics-related tiles (wing/weight trend, wing-vs-weight scatter)
+// moved to the "Biometrics" tab (SpBiometricsTab.tsx) with their own,
+// independent fetch state.
 export function SpGraphsTab({
 	speciesName,
-	speciesId,
 	viewedGroupId,
 	fromDate,
 	toDate
 }: {
 	speciesName: string;
-	speciesId: number;
 	viewedGroupId: number;
 	fromDate?: string;
 	toDate?: string;
@@ -57,21 +50,6 @@ export function SpGraphsTab({
 		getSpeciesStatsHistory(speciesName, viewedGroupId, fromDate, toDate).then(
 			setStatsHistory
 		);
-	}
-
-	const [scatterData, setScatterData] = useState<SexedGraphableBird[] | null>(
-		null
-	);
-	const [scatterRequested, setScatterRequested] = useState(false);
-	function loadScatterData() {
-		if (scatterRequested) return;
-		setScatterRequested(true);
-		fetchGraphableEncounterData(
-			speciesId,
-			viewedGroupId,
-			fromDate,
-			toDate
-		).then(setScatterData);
 	}
 
 	const charts: {
@@ -101,30 +79,6 @@ export function SpGraphsTab({
 			renderChart: () =>
 				statsHistory ? (
 					<YearComparisonTrendChart series={getYoungsters(statsHistory)} />
-				) : (
-					<Spinner />
-				)
-		},
-		{
-			id: 'biometrics',
-			heading: 'Biometrics trends',
-			description: 'Wing and weight plotted over time',
-			load: loadStatsHistory,
-			renderChart: () =>
-				statsHistory ? (
-					<YearComparisonTrendChart series={getSizes(statsHistory)} />
-				) : (
-					<Spinner />
-				)
-		},
-		{
-			id: 'wing-vs-weight',
-			heading: 'Wing vs weight',
-			description: 'Scatter plot, split by age or sex',
-			load: loadScatterData,
-			renderChart: () =>
-				scatterData ? (
-					<WingWeightScatterChart birds={scatterData} />
 				) : (
 					<Spinner />
 				)
