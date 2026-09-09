@@ -1,5 +1,7 @@
 'use client';
 
+import { useId } from 'react';
+
 export type AggregateByValue = 'bird' | 'encounter';
 
 const OPTIONS: { value: AggregateByValue; label: string }[] = [
@@ -23,6 +25,11 @@ export function AggregateByToggle({
 	// the options can't be changed — used by tabs whose aggregation is fixed.
 	disabled?: boolean;
 }) {
+	// Scoped with useId() — multiple `PeriodTotalsTable`s can be mounted at once
+	// (species page tabs stay mounted-but-hidden rather than unmounting), so a
+	// static id/name would collide across instances and break the label/radio
+	// association and native radio grouping.
+	const instanceId = useId();
 	return (
 		<div className="flex items-center justify-center gap-2">
 			<span>Aggregate by:</span>
@@ -30,15 +37,15 @@ export function AggregateByToggle({
 				{OPTIONS.map((option) => (
 					<label
 						key={option.value}
-						htmlFor={`aggregate-by-toggle-${option.value}`}
+						htmlFor={`${instanceId}-aggregate-by-toggle-${option.value}`}
 						className={`btn btn-sm btn-text has-checked:btn-active${
 							disabled ? ' btn-disabled pointer-events-none' : ''
 						}`}
 					>
 						<span>{option.label}</span>
 						<input
-							id={`aggregate-by-toggle-${option.value}`}
-							name="aggregate-by-toggle"
+							id={`${instanceId}-aggregate-by-toggle-${option.value}`}
+							name={`${instanceId}-aggregate-by-toggle`}
 							type="radio"
 							className="hidden"
 							checked={value === option.value}

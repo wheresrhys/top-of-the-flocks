@@ -115,6 +115,7 @@ export function PeriodTotalsTable({
 	const resolveLabel =
 		buildLabel ??
 		((timePeriod: string) => formatPeriodTotalsLabel(grouping, timePeriod));
+
 	const hasPulli = rows.some((stat) => activeDeriveRow(stat).pullus > 0);
 	const columnConfigs = buildColumnConfigs({
 		firstColumnHeader,
@@ -177,7 +178,6 @@ export function PeriodTotalsTable({
 			</tbody>
 		);
 	}
-
 	return (
 		<>
 			<div data-test-id="above-header-row" className="m-2 flex gap-4">
