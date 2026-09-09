@@ -155,6 +155,14 @@ it is non-empty, warn the user about each before selecting/spawning** (see the s
 dead-worker prune under "State file" above); a pruned worker has also already been discounted from
 the cap and solo-run accounting in this same response, so plan against the numbers as returned.
 
+The tool caches each PR/issue's comment/branch-classification results in-process, keyed by its own
+`updatedAt` — an item that hasn't changed since the last call in this session reuses its cached
+result instead of re-paying for the underlying `gh api comments`/branch-lookup calls. This is
+transparent on a normal refill call (§4 step 3, or the idle-loop refill) — just call with
+`freeSlots` as usual. On a **manual re-check** (§4.5), pass `forceRescan: true` instead, so the
+call bypasses the cache entirely and reflects live GitHub state even for items that look
+unchanged — that's the whole point of a user-requested re-check.
+
 ## 1. Maintain open PRs — resolve conflicts + address feedback (first call on the budget)
 
 A PR appears in `prsNeedingMaintenance` because it either has merge conflicts (`mergeable` was
@@ -298,7 +306,9 @@ If the user issues any re-check-like command — e.g. "check again", "re-check",
 again", "any new work?", "refresh", "poll github" — immediately re-run selection from scratch
 against live GitHub state (§1 maintenance first, then §2 tickets) **without** waiting for a
 completion, and spawn workers for every newly-eligible unit up to the free slots (cap still 4;
-solo-run rule still applies; count workers already running). Report what the re-scan found:
+solo-run rule still applies; count workers already running). Call `swarm_plan_batch` with
+`forceRescan: true` for this call specifically, so it bypasses its per-item cache and reflects
+live GitHub state rather than whatever it last saw. Report what the re-scan found:
 - If new work is eligible, spawn it and report each unit started (as in §4 step 2).
 - If nothing new is eligible, say so plainly (e.g. "re-checked — still N blocked, M in-flight,
   nothing newly available") and stay idle.
@@ -396,7 +406,11 @@ Confirm each removal; report anything skipped (e.g. a worktree with unpushed cha
 - On any re-check-like command from the user ("check again", "rescan", "any new work?"), re-run
   selection against live GitHub immediately — without waiting for a completion — and fill idle
   slots with newly-eligible work; report if the scan found nothing. Never disturbs running
-  workers.
+  workers. Always call `swarm_plan_batch` with `forceRescan: true` for this specific call, so the
+  user's request for a live check isn't quietly served from cache.
+- `swarm_plan_batch` caches per-PR/issue results in-process keyed by `updatedAt`; a normal refill
+  call (completion-triggered or idle-loop) benefits from this automatically and needs no extra
+  argument — only a manual re-check forces a bypass.
 - On any stop-like command from the user, suppress refilling immediately, then confirm via
   `AskUserQuestion` whether to **halt all now** (`TaskStop` every live worker) or **drain** (let
   running workers finish), and do exactly that. Never assume which.

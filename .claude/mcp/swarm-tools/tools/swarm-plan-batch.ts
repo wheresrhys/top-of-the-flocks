@@ -222,6 +222,7 @@ interface GhPrListItem {
 	mergeable: string;
 	reviews: ReviewLike[];
 	commits: { committedDate: string }[];
+	updatedAt: string;
 }
 
 interface GhIssueListItem {
@@ -230,6 +231,27 @@ interface GhIssueListItem {
 	labels: { name: string }[];
 	blockedBy: { nodes: { state: string }[] };
 	blocking: { nodes: { state: string }[] };
+	updatedAt: string;
+}
+
+/**
+ * Process-lifetime caches keyed by `updatedAt` (GitHub bumps this on any label/comment/review
+ * change), so a PR/issue that hasn't changed since the last `swarm_plan_batch` call reuses its
+ * previously-computed result instead of re-paying for the comment/branch-lookup calls below.
+ * `resetSwarmPlanBatchCaches` clears all three — called both by `forceRescan` and by tests that
+ * reuse fixture numbers across cases.
+ */
+const prFeedbackCache = new Map<number, { updatedAt: string; hasFeedback: boolean }>();
+const issueClosedByPrCache = new Map<number, { updatedAt: string; closedByPrs: boolean }>();
+const issueBranchClassificationCache = new Map<
+	number,
+	{ updatedAt: string; branch: string; classification: ReturnType<typeof classifyStaleBranchPrs> }
+>();
+
+export function resetSwarmPlanBatchCaches(): void {
+	prFeedbackCache.clear();
+	issueClosedByPrCache.clear();
+	issueBranchClassificationCache.clear();
 }
 
 /** `gh pr list --head <branch> --state all --json number,state`. `state` is OPEN | CLOSED | MERGED. */
@@ -265,7 +287,7 @@ export async function findMaintenanceCandidates(): Promise<MaintenanceCandidate[
 		'--state',
 		'open',
 		'--json',
-		'number,title,headRefName,labels,reviews,mergeable,commits',
+		'number,title,headRefName,labels,reviews,mergeable,commits,updatedAt',
 	]);
 	const candidates: MaintenanceCandidate[] = [];
 	for (const pr of prs) {
@@ -274,18 +296,24 @@ export async function findMaintenanceCandidates(): Promise<MaintenanceCandidate[
 		const headCommitDate = pr.commits.at(-1)?.committedDate ?? '';
 		let hasFeedback = hasOutstandingReviewFeedback(pr.reviews ?? [], headCommitDate);
 		if (!hasFeedback) {
-			const comments = await ghJson<InlineCommentLike[]>([
-				'api',
-				`repos/{owner}/{repo}/pulls/${pr.number}/comments`,
-			]).catch(() => []);
-			hasFeedback = hasOutstandingInlineFeedback(comments, headCommitDate);
-		}
-		if (!hasFeedback) {
-			const issueComments = await ghJson<IssueCommentLike[]>([
-				'api',
-				`repos/{owner}/{repo}/issues/${pr.number}/comments`,
-			]).catch(() => []);
-			hasFeedback = hasOutstandingIssueCommentFeedback(issueComments, headCommitDate);
+			const cached = prFeedbackCache.get(pr.number);
+			if (cached && cached.updatedAt === pr.updatedAt) {
+				hasFeedback = cached.hasFeedback;
+			} else {
+				const comments = await ghJson<InlineCommentLike[]>([
+					'api',
+					`repos/{owner}/{repo}/pulls/${pr.number}/comments`,
+				]).catch(() => []);
+				hasFeedback = hasOutstandingInlineFeedback(comments, headCommitDate);
+				if (!hasFeedback) {
+					const issueComments = await ghJson<IssueCommentLike[]>([
+						'api',
+						`repos/{owner}/{repo}/issues/${pr.number}/comments`,
+					]).catch(() => []);
+					hasFeedback = hasOutstandingIssueCommentFeedback(issueComments, headCommitDate);
+				}
+				prFeedbackCache.set(pr.number, { updatedAt: pr.updatedAt, hasFeedback });
+			}
 		}
 		if (!hasConflict && !hasFeedback) continue;
 		const reason: MaintenanceCandidate['reason'] =
@@ -304,7 +332,7 @@ export async function findTicketCandidates(runningIssueNumbers: Set<number>): Pr
 		'--label',
 		'ready',
 		'--json',
-		'number,title,labels,blockedBy,blocking',
+		'number,title,labels,blockedBy,blocking,updatedAt',
 	]);
 	const branches = await listBranches();
 	const candidates: TicketCandidate[] = [];
@@ -318,17 +346,28 @@ export async function findTicketCandidates(runningIssueNumbers: Set<number>): Pr
 			// The branch alone would exclude this issue. Only now (i.e. solely for issues that
 			// would otherwise be dropped as in-flight) pay for the extra per-branch PR lookup, to
 			// tell an actively-worked branch from a stale leftover of a closed-not-merged PR.
-			const branchPrs = await ghJson<GhPrHeadItem[]>([
-				'pr',
-				'list',
-				'--head',
-				existingBranch,
-				'--state',
-				'all',
-				'--json',
-				'number,state',
-			]).catch(() => []);
-			const classification = classifyStaleBranchPrs(branchPrs);
+			const cachedBranch = issueBranchClassificationCache.get(issue.number);
+			let classification: ReturnType<typeof classifyStaleBranchPrs>;
+			if (cachedBranch && cachedBranch.updatedAt === issue.updatedAt && cachedBranch.branch === existingBranch) {
+				classification = cachedBranch.classification;
+			} else {
+				const branchPrs = await ghJson<GhPrHeadItem[]>([
+					'pr',
+					'list',
+					'--head',
+					existingBranch,
+					'--state',
+					'all',
+					'--json',
+					'number,state',
+				]).catch(() => []);
+				classification = classifyStaleBranchPrs(branchPrs);
+				issueBranchClassificationCache.set(issue.number, {
+					updatedAt: issue.updatedAt,
+					branch: existingBranch,
+					classification,
+				});
+			}
 			if (typeof classification === 'object') {
 				staleClosedPrTickets.push({
 					number: issue.number,
@@ -342,16 +381,24 @@ export async function findTicketCandidates(runningIssueNumbers: Set<number>): Pr
 			// disqualifies the issue from being auto-implemented either way.
 			continue;
 		}
-		const closedByPrs = await ghJson<{ closedByPullRequestsReferences: unknown[] }>([
-			'issue',
-			'view',
-			String(issue.number),
-			'--json',
-			'closedByPullRequestsReferences',
-		])
-			.then((r) => r.closedByPullRequestsReferences ?? [])
-			.catch(() => []);
-		if (closedByPrs.length > 0) continue;
+		const cachedClosedBy = issueClosedByPrCache.get(issue.number);
+		let hasClosedByPrs: boolean;
+		if (cachedClosedBy && cachedClosedBy.updatedAt === issue.updatedAt) {
+			hasClosedByPrs = cachedClosedBy.closedByPrs;
+		} else {
+			const closedByPrs = await ghJson<{ closedByPullRequestsReferences: unknown[] }>([
+				'issue',
+				'view',
+				String(issue.number),
+				'--json',
+				'closedByPullRequestsReferences',
+			])
+				.then((r) => r.closedByPullRequestsReferences ?? [])
+				.catch(() => []);
+			hasClosedByPrs = closedByPrs.length > 0;
+			issueClosedByPrCache.set(issue.number, { updatedAt: issue.updatedAt, closedByPrs: hasClosedByPrs });
+		}
+		if (hasClosedByPrs) continue;
 		const labels = issue.labels.map((l) => l.name);
 		const model = getModelLabel(labels) ?? 'sonnet';
 		const blockingCount = issue.blocking.nodes.filter((node) => node.state === 'OPEN').length;
@@ -406,8 +453,13 @@ async function isSoloRunCurrentlyActive(running: SwarmWorkerEntry[]): Promise<Ex
  * (`isSoloRunCurrentlyActive` sees only the surviving live workers) — fixing both raised impacts of
  * #579 at this single point. The `pruned` report is passed straight through for the orchestrator to
  * warn on.
+ *
+ * `forceRescan` clears the per-item caches (see `resetSwarmPlanBatchCaches`) before planning, so a
+ * manual re-check always reflects live GitHub state instead of a cached result from an earlier
+ * call in this same process.
  */
-export async function planBatch(freeSlots: number) {
+export async function planBatch(freeSlots: number, forceRescan = false) {
+	if (forceRescan) resetSwarmPlanBatchCaches();
 	const { workers: runningEntries, pruned } = await listStateWithPruneReport();
 	const soloRunLabel = await isSoloRunCurrentlyActive(runningEntries);
 	const soloRunActive = soloRunLabel !== null;
@@ -457,9 +509,10 @@ export function registerSwarmPlanBatchTool(server: McpServer) {
 		'swarm_plan_batch',
 		{
 			description:
-				"Pre-filtered, pre-ranked PR-maintenance and ready-ticket lists for swarm's §1+§2 selection, already applying the unblocked/not-in-flight/solo-run rules and truncated to freeSlots. Also returns staleClosedPrTickets — ready tickets excluded only because a feature/<issue>-* branch from a closed-not-merged PR still exists — for the orchestrator to prompt on before reusing/replacing. `pruned` lists worker entries auto-removed from state this call as presumed-dead (missing worktree, or no worktree activity past the staleness threshold) — warn the user on any non-empty list before selecting.",
+				"Pre-filtered, pre-ranked PR-maintenance and ready-ticket lists for swarm's §1+§2 selection, already applying the unblocked/not-in-flight/solo-run rules and truncated to freeSlots. Also returns staleClosedPrTickets — ready tickets excluded only because a feature/<issue>-* branch from a closed-not-merged PR still exists — for the orchestrator to prompt on before reusing/replacing. `pruned` lists worker entries auto-removed from state this call as presumed-dead (missing worktree, or no worktree activity past the staleness threshold) — warn the user on any non-empty list before selecting. Per-item feedback/branch-classification results are cached in-process across calls, keyed by each PR/issue's own `updatedAt` — pass `forceRescan: true` (e.g. on a user-requested re-check) to bypass the cache and recompute everything from live GitHub state.",
 			inputSchema: {
 				freeSlots: z.number(),
+				forceRescan: z.boolean().optional(),
 			},
 			outputSchema: {
 				soloRunActive: z.boolean(),
@@ -498,8 +551,8 @@ export function registerSwarmPlanBatchTool(server: McpServer) {
 				pruned: z.array(prunedEntrySchema),
 			},
 		},
-		async ({ freeSlots }) => {
-			const structuredContent = await planBatch(freeSlots);
+		async ({ freeSlots, forceRescan }) => {
+			const structuredContent = await planBatch(freeSlots, forceRescan);
 			return { content: [{ type: 'text', text: JSON.stringify(structuredContent) }], structuredContent };
 		}
 	);
