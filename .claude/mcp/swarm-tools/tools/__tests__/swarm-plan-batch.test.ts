@@ -26,6 +26,7 @@ import {
 	findTicketCandidates,
 	classifyStaleBranchPrs,
 	planBatch,
+	resetSwarmPlanBatchCaches,
 	type MaintenanceCandidate,
 	type TicketCandidate,
 } from '../swarm-plan-batch';
@@ -237,6 +238,7 @@ describe('findMaintenanceCandidates', () => {
 
 	afterEach(() => {
 		mockGhJson.mockReset();
+		resetSwarmPlanBatchCaches();
 	});
 
 	const pr = {
@@ -247,6 +249,7 @@ describe('findMaintenanceCandidates', () => {
 		mergeable: 'MERGEABLE',
 		reviews: [],
 		commits: [{ committedDate: '2026-01-05T00:00:00Z' }],
+		updatedAt: '2026-01-06T00:00:00Z',
 	};
 
 	// Usual
@@ -290,6 +293,54 @@ describe('findMaintenanceCandidates', () => {
 		const candidates = await findMaintenanceCandidates();
 
 		expect(candidates).toEqual([]);
+	});
+
+	describe('per-PR feedback cache', () => {
+		// Usual — a second call with the same `updatedAt` reuses the cached result instead of
+		// re-fetching comments.
+		it('skips the comment lookups on a second call when updatedAt is unchanged', async () => {
+			mockGhJson
+				.mockResolvedValueOnce([pr]) // pr list, call 1
+				.mockResolvedValueOnce([]) // inline comments, call 1
+				.mockResolvedValueOnce([
+					{ user: { login: 'wheresrhys' }, body: 'fix this', created_at: '2026-01-06T01:00:00Z' },
+				]); // issue comments, call 1
+
+			const first = await findMaintenanceCandidates();
+			expect(first).toHaveLength(1);
+			expect(mockGhJson).toHaveBeenCalledTimes(3);
+
+			mockGhJson.mockReset();
+			mockGhJson.mockResolvedValueOnce([pr]); // pr list, call 2 — same updatedAt, no comment calls
+
+			const second = await findMaintenanceCandidates();
+
+			expect(second).toHaveLength(1);
+			expect(mockGhJson).toHaveBeenCalledTimes(1);
+		});
+
+		// Structure — a changed updatedAt invalidates the cache and re-fetches comments.
+		it('re-fetches comments once updatedAt changes', async () => {
+			mockGhJson
+				.mockResolvedValueOnce([pr])
+				.mockResolvedValueOnce([])
+				.mockResolvedValueOnce([
+					{ user: { login: 'wheresrhys' }, body: 'fix this', created_at: '2026-01-06T01:00:00Z' },
+				]);
+			await findMaintenanceCandidates();
+			mockGhJson.mockReset();
+
+			const updatedPr = { ...pr, updatedAt: '2026-02-01T00:00:00Z' };
+			mockGhJson
+				.mockResolvedValueOnce([updatedPr])
+				.mockResolvedValueOnce([]) // inline comments re-fetched
+				.mockResolvedValueOnce([]); // issue comments re-fetched, feedback now gone
+
+			const result = await findMaintenanceCandidates();
+
+			expect(result).toEqual([]);
+			expect(mockGhJson).toHaveBeenCalledTimes(3);
+		});
 	});
 });
 
@@ -339,6 +390,7 @@ describe('findTicketCandidates', () => {
 	afterEach(() => {
 		mockGhJson.mockReset();
 		mockListBranches.mockReset();
+		resetSwarmPlanBatchCaches();
 	});
 
 	const issue = {
@@ -347,6 +399,7 @@ describe('findTicketCandidates', () => {
 		labels: [{ name: 'ready' }, { name: 'opus' }],
 		blockedBy: { nodes: [] },
 		blocking: { nodes: [] },
+		updatedAt: '2026-01-06T00:00:00Z',
 	};
 
 	/**
@@ -450,6 +503,71 @@ describe('findTicketCandidates', () => {
 				closedPrNumber: 625,
 			},
 		]);
+	});
+
+	describe('per-issue caches', () => {
+		// Usual — a second call with the same updatedAt reuses the cached branch classification.
+		it('skips the per-branch PR lookup on a second call when the issue updatedAt is unchanged', async () => {
+			stubGh({ issues: [issue], branchPrs: [{ number: 610, state: 'CLOSED' }] });
+			mockListBranches.mockResolvedValue(['feature/600-do-the-thing']);
+
+			const first = await findTicketCandidates(new Set());
+			expect(first.staleClosedPrTickets).toHaveLength(1);
+			expect(mockGhJson).toHaveBeenCalledTimes(2); // issue list + pr list --head
+
+			mockGhJson.mockReset();
+			mockGhJson.mockImplementation((args: string[]) => {
+				if (args[0] === 'issue' && args[1] === 'list') return Promise.resolve([issue]);
+				return Promise.reject(new Error('should not be called — cache should short-circuit'));
+			});
+
+			const second = await findTicketCandidates(new Set());
+
+			expect(second.staleClosedPrTickets).toEqual(first.staleClosedPrTickets);
+			expect(mockGhJson).toHaveBeenCalledTimes(1); // issue list only
+		});
+
+		// Structure — the closedByPullRequestsReferences check (no existing branch) is cached the
+		// same way.
+		it('skips the closedByPullRequestsReferences lookup on a second call when unchanged', async () => {
+			stubGh({ issues: [issue], closedByPrs: [] });
+			mockListBranches.mockResolvedValue(['feature/999-unrelated']);
+
+			const first = await findTicketCandidates(new Set());
+			expect(first.candidates).toHaveLength(1);
+			expect(mockGhJson).toHaveBeenCalledTimes(2); // issue list + issue view
+
+			mockGhJson.mockReset();
+			mockGhJson.mockImplementation((args: string[]) => {
+				if (args[0] === 'issue' && args[1] === 'list') return Promise.resolve([issue]);
+				return Promise.reject(new Error('should not be called — cache should short-circuit'));
+			});
+			mockListBranches.mockResolvedValue(['feature/999-unrelated']);
+
+			const second = await findTicketCandidates(new Set());
+
+			expect(second.candidates).toEqual(first.candidates);
+			expect(mockGhJson).toHaveBeenCalledTimes(1); // issue list only
+		});
+
+		// Edge — a changed updatedAt invalidates the cache and re-runs the per-branch lookup.
+		it('re-runs the per-branch PR lookup once the issue updatedAt changes', async () => {
+			stubGh({ issues: [issue], branchPrs: [{ number: 610, state: 'CLOSED' }] });
+			mockListBranches.mockResolvedValue(['feature/600-do-the-thing']);
+			await findTicketCandidates(new Set());
+			mockGhJson.mockReset();
+			mockListBranches.mockReset();
+
+			const updatedIssue = { ...issue, updatedAt: '2026-02-01T00:00:00Z' };
+			stubGh({ issues: [updatedIssue], branchPrs: [{ number: 610, state: 'OPEN' }] });
+			mockListBranches.mockResolvedValue(['feature/600-do-the-thing']);
+
+			const result = await findTicketCandidates(new Set());
+
+			// Now in-flight (OPEN PR) rather than the previously-cached stale-closed classification.
+			expect(result.staleClosedPrTickets).toEqual([]);
+			expect(result.candidates).toEqual([]);
+		});
 	});
 });
 
@@ -571,6 +689,7 @@ describe('planBatch', () => {
 		mockGhJson.mockReset();
 		mockListBranches.mockReset();
 		mockListState.mockReset();
+		resetSwarmPlanBatchCaches();
 	});
 
 	/** Dispatches ghJson by command shape so each source (pr/issue list, issue/pr view) is stubbed independently. */
@@ -679,5 +798,44 @@ describe('planBatch', () => {
 
 		expect(result.soloRunActive).toBe(true);
 		expect(result.soloRunLabel).toBe('db-migration');
+	});
+
+	// forceRescan clears the per-item caches before planning, so a manual re-check always hits
+	// live GitHub state rather than a result cached from an earlier call in this process.
+	it('forceRescan bypasses a cached feedback result from an earlier call', async () => {
+		mockListState.mockResolvedValue({ workers: [], pruned: [] });
+		mockListBranches.mockResolvedValue([]);
+		const pr = {
+			number: 700,
+			title: 'Some PR',
+			headRefName: 'feature/700-x',
+			labels: [],
+			mergeable: 'MERGEABLE',
+			reviews: [],
+			commits: [{ committedDate: '2026-01-05T00:00:00Z' }],
+			updatedAt: '2026-01-06T00:00:00Z',
+		};
+		mockGhJson.mockImplementation((args: string[]) => {
+			if (args[0] === 'pr' && args[1] === 'list') return Promise.resolve([pr]);
+			if (args[0] === 'issue' && args[1] === 'list') return Promise.resolve([]);
+			if (args[0] === 'api' && args[1].includes('pulls'))
+				return Promise.resolve([
+					{ user: { login: 'wheresrhys' }, body: 'fix this', created_at: '2026-01-06T01:00:00Z' },
+				]);
+			return Promise.resolve([]);
+		});
+
+		const first = await planBatch(4);
+		expect(first.prsNeedingMaintenance.map((p) => p.number)).toContain(700);
+		mockGhJson.mockClear();
+
+		await planBatch(4); // cached — no comment lookups expected
+		const cachedCallCount = mockGhJson.mock.calls.length;
+
+		mockGhJson.mockClear();
+		await planBatch(4, true); // forceRescan — cache bypassed, comment lookups happen again
+		const forcedCallCount = mockGhJson.mock.calls.length;
+
+		expect(forcedCallCount).toBeGreaterThan(cachedCallCount);
 	});
 });
