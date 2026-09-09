@@ -1,6 +1,10 @@
 import { describe, it, expect, afterEach } from 'vitest';
 import { render, screen, cleanup, within } from '@testing-library/react';
-import { SpeciesHeading, buildSpeciesHeadingText } from '../PageContent';
+import {
+	SpeciesHeading,
+	buildSpeciesHeadingText,
+	getDefaultSpeciesTabId
+} from '../PageContent';
 
 describe('SpeciesHeading', () => {
 	afterEach(() => {
@@ -108,6 +112,18 @@ describe('SpeciesHeading', () => {
 			expect(
 				screen.getByRole('link', { name: 'All time' }).getAttribute('href')
 			).toBe('/species/Lesser Redpoll');
+		});
+	});
+
+	describe('getDefaultSpeciesTabId', () => {
+		it('returns "year-totals" when isAllTime is true', () => {
+			expect(getDefaultSpeciesTabId(true, false)).toBe('year-totals');
+		});
+		it('returns "month-totals" when isYearScoped is true and isAllTime is false', () => {
+			expect(getDefaultSpeciesTabId(false, true)).toBe('month-totals');
+		});
+		it('returns "session-totals" when neither isAllTime nor isYearScoped is true (month-scoped)', () => {
+			expect(getDefaultSpeciesTabId(false, false)).toBe('session-totals');
 		});
 	});
 

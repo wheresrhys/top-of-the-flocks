@@ -103,7 +103,7 @@ describe('/species/[speciesName]/[year]', () => {
 
 		it('renders the period-scoped heading "{species} {year}" with an "All time" link', async () => {
 			render(await renderYearPage());
-			await screen.findByTestId('sp-individuals-tab');
+			await screen.findByTestId('sp-month-totals-tab');
 			const heading = screen.getByRole('heading', { level: 1 });
 			expect(heading.textContent).toContain('Robin 2026');
 			expect(
@@ -115,41 +115,58 @@ describe('/species/[speciesName]/[year]', () => {
 
 		it('renders the species tabs and stats for the scoped data', async () => {
 			render(await renderYearPage());
-			await screen.findByTestId('sp-individuals-tab');
+			await screen.findByTestId('sp-month-totals-tab');
 			expect(screen.getByRole('button', { name: 'Bird list' })).toBeDefined();
 			expect(screen.getByTestId('headline-stats')).toBeDefined();
 		});
 
-		it('shows a "Month totals" tab and not a "Year totals" tab', async () => {
-			render(await renderYearPage());
-			await screen.findByTestId('sp-individuals-tab');
-			expect(
-				screen.getByRole('button', { name: 'Month totals' })
-			).toBeDefined();
-			expect(screen.queryByRole('button', { name: 'Year totals' })).toBeNull();
-		});
+		describe('tab order and defaults (year-scoped page)', () => {
+			it('renders tab buttons in the order Month totals, Session totals, Highlights, Biometrics, Population, Bird list (no Year totals)', async () => {
+				render(await renderYearPage());
+				await screen.findByTestId('sp-month-totals-tab');
+				const labels = within(screen.getByRole('tablist'))
+					.getAllByRole('button')
+					.map((button) => button.textContent);
+				expect(labels).toEqual([
+					'Month totals',
+					'Session totals',
+					'Highlights',
+					'Biometrics',
+					'Population',
+					'Bird list'
+				]);
+				expect(
+					screen.queryByRole('button', { name: 'Year totals' })
+				).toBeNull();
+			});
 
-		it('renders SpMonthTotalsTab after clicking the Month totals button', async () => {
-			render(await renderYearPage());
-			await screen.findByTestId('sp-individuals-tab');
-			fireEvent.click(screen.getByRole('button', { name: 'Month totals' }));
-			await screen.findByTestId('sp-month-totals-tab');
-		});
+			it('renders SpMonthTotalsTab on initial render without clicking (eager default)', async () => {
+				render(await renderYearPage());
+				await screen.findByTestId('sp-month-totals-tab');
+			});
 
-		it("does not show the all-time 'Month totals' tab on the year-scoped species page", async () => {
-			render(await renderYearPage());
-			await screen.findByTestId('sp-individuals-tab');
-			expect(
-				screen.getAllByRole('button', { name: 'Month totals' })
-			).toHaveLength(1);
-			fireEvent.click(screen.getByRole('button', { name: 'Month totals' }));
-			await screen.findByTestId('sp-month-totals-tab');
-			expect(screen.queryByTestId('sp-combined-month-totals-tab')).toBeNull();
+			it('does not mount SpIndividualsTab until the Bird list tab is clicked', async () => {
+				render(await renderYearPage());
+				await screen.findByTestId('sp-month-totals-tab');
+				expect(screen.queryByTestId('sp-individuals-tab')).toBeNull();
+				fireEvent.click(screen.getByRole('button', { name: 'Bird list' }));
+				await screen.findByTestId('sp-individuals-tab');
+			});
+
+			it("has exactly one 'Month totals' button and it's the year-scoped variant, not the all-time combined one", async () => {
+				render(await renderYearPage());
+				await screen.findByTestId('sp-month-totals-tab');
+				expect(
+					screen.getAllByRole('button', { name: 'Month totals' })
+				).toHaveLength(1);
+				expect(screen.getByTestId('sp-month-totals-tab')).toBeDefined();
+				expect(screen.queryByTestId('sp-combined-month-totals-tab')).toBeNull();
+			});
 		});
 
 		it('shows a "Session totals" tab on the year-scoped species page', async () => {
 			render(await renderYearPage());
-			await screen.findByTestId('sp-individuals-tab');
+			await screen.findByTestId('sp-month-totals-tab');
 			expect(
 				screen.getByRole('button', { name: 'Session totals' })
 			).toBeDefined();
@@ -157,7 +174,7 @@ describe('/species/[speciesName]/[year]', () => {
 
 		it('lazily loads SpSessionTotalsTab only once "Session totals" is selected, consistent with the other tabs', async () => {
 			render(await renderYearPage());
-			await screen.findByTestId('sp-individuals-tab');
+			await screen.findByTestId('sp-month-totals-tab');
 			expect(screen.queryByTestId('sp-session-totals-tab')).toBeNull();
 			fireEvent.click(screen.getByRole('button', { name: 'Session totals' }));
 			await screen.findByTestId('sp-session-totals-tab');

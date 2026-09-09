@@ -45,6 +45,24 @@ export type FullFatPageData = {
 export type ThinPageData = { speciesId: number } & PeriodScope;
 export type PageData = FullFatPageData | ThinPageData;
 
+// The tab eagerly mounted (and initially active) at each route depth: the
+// first totals tab shown for that depth. Mirrors the route-depth cascade the
+// `tabs` array uses (all-time → Year totals, year-scoped → Month totals,
+// month-scoped → Session totals) so the first visible tab is loaded on initial
+// page load instead of always eager-loading the Bird list.
+export function getDefaultSpeciesTabId(
+	isAllTime: boolean,
+	isYearScoped: boolean
+): 'year-totals' | 'month-totals' | 'session-totals' {
+	if (isAllTime) {
+		return 'year-totals';
+	}
+	if (isYearScoped) {
+		return 'month-totals';
+	}
+	return 'session-totals';
+}
+
 export function buildSpeciesHeadingText(
 	speciesName: string,
 	year?: number,
@@ -156,30 +174,29 @@ function SpeciesData({
 	data: FullFatPageData;
 	viewedGroup: ViewedGroup;
 }) {
-	const [loadedTabs, setLoadedTabs] = useState<Set<string>>(
-		new Set(['bird-list'])
-	);
-	const [activeTab, setActiveTab] = useState('bird-list');
-
-	function handleTabChange(tab: string) {
-		setLoadedTabs((prev) => new Set([...prev, tab]));
-		setActiveTab(tab);
-	}
-
 	// Cascading period tab, same convention `SummaryTotalsSection` uses: the
 	// all-time page gets "Year totals" (drilling into a year), the year-scoped
 	// page gets "Month totals" instead (drilling into a month); the month-scoped
 	// page gets neither.
 	const isAllTime = data.year === undefined;
 	const isYearScoped = data.year !== undefined && data.month === undefined;
+	const defaultTabId = getDefaultSpeciesTabId(isAllTime, isYearScoped);
+
+	const [loadedTabs, setLoadedTabs] = useState<Set<string>>(
+		new Set([defaultTabId])
+	);
+	const [activeTab, setActiveTab] = useState<string>(defaultTabId);
+
+	function handleTabChange(tab: string) {
+		setLoadedTabs((prev) => new Set([...prev, tab]));
+		setActiveTab(tab);
+	}
 
 	return (
 		<>
 			<SpStats {...data} viewedGroup={viewedGroup} />
 			<TabNav
 				tabs={[
-					{ id: 'bird-list', label: 'Bird list' },
-					{ id: 'highlights', label: 'Highlights' },
 					...(isAllTime ? [{ id: 'year-totals', label: 'Year totals' }] : []),
 					...(isAllTime
 						? [{ id: 'all-time-month-totals', label: 'Month totals' }]
@@ -187,49 +204,15 @@ function SpeciesData({
 					...(isYearScoped
 						? [{ id: 'month-totals', label: 'Month totals' }]
 						: []),
-					...(isAllTime || isYearScoped
-						? [{ id: 'session-totals', label: 'Session totals' }]
-						: []),
+					{ id: 'session-totals', label: 'Session totals' },
+					{ id: 'highlights', label: 'Highlights' },
 					{ id: 'biometrics', label: 'Biometrics' },
-					{ id: 'graphs', label: 'Population' }
+					{ id: 'graphs', label: 'Population' },
+					{ id: 'bird-list', label: 'Bird list' }
 				]}
 				activeTab={activeTab}
 				onTabChange={handleTabChange}
 			/>
-			<ConditionalTabPanel
-				loadedTabs={loadedTabs}
-				tabId="bird-list"
-				activeTabId={activeTab}
-			>
-				<SpIndividualsTab
-					speciesId={data.speciesId}
-					viewedGroupId={viewedGroup.id}
-					birds={data.birds}
-					birdCount={data.speciesStats.bird_count ?? 0}
-					fromDate={data.fromDate}
-					toDate={data.toDate}
-				/>
-			</ConditionalTabPanel>
-			<ConditionalTabPanel
-				loadedTabs={loadedTabs}
-				tabId="highlights"
-				activeTabId={activeTab}
-			>
-				<SpNotableRetrapsTab
-					speciesName={data.speciesName}
-					viewedGroupId={viewedGroup.id}
-					fromDate={data.fromDate}
-					toDate={data.toDate}
-				/>
-				<SpBusiestSessionsTab
-					speciesName={data.speciesName}
-					viewedGroupId={viewedGroup.id}
-					viewedGroup={viewedGroup}
-					year={data.year}
-					month={data.month}
-					isActive={activeTab === 'highlights'}
-				/>
-			</ConditionalTabPanel>
 			{isAllTime && (
 				<ConditionalTabPanel
 					loadedTabs={loadedTabs}
@@ -270,20 +253,38 @@ function SpeciesData({
 					/>
 				</ConditionalTabPanel>
 			)}
-			{(isAllTime || isYearScoped) && (
-				<ConditionalTabPanel
-					loadedTabs={loadedTabs}
-					tabId="session-totals"
-					activeTabId={activeTab}
-				>
-					<SpSessionTotalsTab
-						speciesName={data.speciesName}
-						viewedGroup={viewedGroup}
-						fromDate={data.fromDate}
-						toDate={data.toDate}
-					/>
-				</ConditionalTabPanel>
-			)}
+			<ConditionalTabPanel
+				loadedTabs={loadedTabs}
+				tabId="session-totals"
+				activeTabId={activeTab}
+			>
+				<SpSessionTotalsTab
+					speciesName={data.speciesName}
+					viewedGroup={viewedGroup}
+					fromDate={data.fromDate}
+					toDate={data.toDate}
+				/>
+			</ConditionalTabPanel>
+			<ConditionalTabPanel
+				loadedTabs={loadedTabs}
+				tabId="highlights"
+				activeTabId={activeTab}
+			>
+				<SpNotableRetrapsTab
+					speciesName={data.speciesName}
+					viewedGroupId={viewedGroup.id}
+					fromDate={data.fromDate}
+					toDate={data.toDate}
+				/>
+				<SpBusiestSessionsTab
+					speciesName={data.speciesName}
+					viewedGroupId={viewedGroup.id}
+					viewedGroup={viewedGroup}
+					year={data.year}
+					month={data.month}
+					isActive={activeTab === 'highlights'}
+				/>
+			</ConditionalTabPanel>
 			<ConditionalTabPanel
 				loadedTabs={loadedTabs}
 				tabId="biometrics"
@@ -306,6 +307,20 @@ function SpeciesData({
 				<SpGraphsTab
 					speciesName={data.speciesName}
 					viewedGroupId={viewedGroup.id}
+					fromDate={data.fromDate}
+					toDate={data.toDate}
+				/>
+			</ConditionalTabPanel>
+			<ConditionalTabPanel
+				loadedTabs={loadedTabs}
+				tabId="bird-list"
+				activeTabId={activeTab}
+			>
+				<SpIndividualsTab
+					speciesId={data.speciesId}
+					viewedGroupId={viewedGroup.id}
+					birds={data.birds}
+					birdCount={data.speciesStats.bird_count ?? 0}
 					fromDate={data.fromDate}
 					toDate={data.toDate}
 				/>
