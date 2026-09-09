@@ -14,9 +14,10 @@ description: >-
   a task touches `supabase/schema/` and `e2e-exclusive` where it touches a path in
   `e2e/mutating-spec-triggers.json`, and expresses inter-task dependencies as GitHub native
   "blocked by" links. When run under a named tracking issue, each created ticket is filed as its
-  GitHub sub-issue. Drafting is parallelised across subagents, but the flesh-out-ticket
-  confirmation gate still fires for every ticket in the main thread — the full ticket markdown is
-  always shown before that gate, never a squashed summary. Triggers: "ticketify", "/ticketify",
+  GitHub sub-issue. Drafting and creation are both parallelised across subagents — each subagent
+  creates its own ticket directly and reports back a one-line receipt (issue number + URL); there
+  is no per-ticket full-markdown confirmation gate in the main thread (the upfront whole-list
+  review and sizing plan are the human checkpoints instead). Triggers: "ticketify", "/ticketify",
   "ticketify this", "break this task down into tickets", "create tickets for all these tasks",
   "turn this task list into issues".
 ---
@@ -50,7 +51,7 @@ large task with no item boundaries. Handle each differently:
 
 ### 1. Review the whole list (conversational)
 Run this **once, up front**, before any drafting. It is distinct from both the scope-selection
-step (§2) and the per-ticket confirmation gate (§5).
+step (§2) and the per-ticket creation receipt (§5).
 
 - Read the full task source: the skill argument if pasted (or step 0's proposed decomposition),
   otherwise a named GitHub tracking issue's body. Parse into an ordered list of items — treat each
@@ -77,8 +78,8 @@ step (§2) and the per-ticket confirmation gate (§5).
 
 ### 2. Scope selection
 - Present the reviewed list back to the user (one-line summary per task) and let them trim or
-  confirm which tasks are in scope. This is scope selection — it is NOT the per-ticket
-  confirmation gate (that comes later, per ticket).
+  confirm which tasks are in scope. This is scope selection — tickets are created straight after
+  drafting (§4), with only a lightweight receipt (§5) afterward, not a further approval step.
 
 ### 3. High-level sizing plan (before detailed drafting)
 Before fleshing any ticket in full, give the user a fast, coarse size estimate per in-scope task
@@ -96,62 +97,45 @@ so oversized tickets get caught before the cost of full drafting (§4) is spent 
 - Loop until the user is satisfied with the plan. Apply any accepted split/merge/trim to the
   working task list before proceeding to §4.
 
-### 4. Draft each ticket (parallelise)
+### 4. Draft and create each ticket (parallelise)
 For each in-scope task, produce a draft using `flesh-out-ticket` steps 1–5 (flesh out, stack-layer
-identification, small-commit breakdown, USE test enumeration, model-label choice). Do NOT create
-issues yet.
+identification, small-commit breakdown, USE test enumeration, model-label choice), then create the
+issue immediately — there is no per-ticket confirmation gate before creation in this workflow (see
+Rules for why this deliberately diverges from `flesh-out-ticket`'s standalone default).
 
-When there are more than ~3 tasks, fan out to `general-purpose` subagents to draft concurrently:
+When there are more than ~3 tasks, fan out to `general-purpose` subagents to draft **and create**
+concurrently:
 - Give each subagent exactly ONE task to draft, **plus the full parsed task list for reference**
-  so it can identify dependencies on other tasks.
-- Instruct each subagent to **draft only**: it MUST NOT create any GitHub issue and MUST NOT try
-  to confirm with the user (subagents cannot prompt the user). It returns **only** the structured
-  fields below — no narrative wrapper, no meta-commentary, no "here's what I found" prose around
-  them. The main thread is what shows the ticket to the user; a subagent's commentary is not a
-  substitute for that and must not be pasted in its place.
+  (so it can identify dependencies on other tasks) and the `parentIssue` number if this run is
+  scoped under a tracking issue.
+- Instruct each subagent to draft the ticket (title/body/labels/model-label per
+  `flesh-out-ticket` steps 1–5), then call `mcp__swarm-tools__create_ticket` itself with `title`,
+  `body`, `modelLabel`, `extraLabels` (`db-migration` if it touches `supabase/schema/`,
+  `e2e-exclusive` if it touches a path in `e2e/mutating-spec-triggers.json`), and `parentIssue` if
+  given (the tool links the sub-issue itself). Do NOT pass `blockedBy` yet — sibling issue numbers
+  aren't known at draft time; that's wired up in §6.
+- Each subagent returns **only** these compact fields — no full body, no narrative wrapper, no
+  meta-commentary:
   - `title` — the fleshed title.
-  - `body` — the fleshed markdown (motivation/scope/acceptance/out-of-scope/reuse + commit
-    breakdown + test enumeration).
-  - `touchesDbSchema` — whether it touches `supabase/schema/` (drives the `db-migration` label).
-  - `touchesE2eMutatingTrigger` — whether it touches a path listed in
-    `e2e/mutating-spec-triggers.json` (drives the `e2e-exclusive` label).
-  - `modelLabel` + one-line justification (`fable`|`sonnet`|`opus`).
+  - `issueNumber` and `issueUrl` — from `create_ticket`'s response.
   - `dependsOn` — the other tasks (identified by summary) this task is blocked by.
 
-### 5. Confirm each ticket — HARD GATE, propagated from flesh-out-ticket
-Back in the **main thread**, order the drafts in dependency order (blockers before the tickets
-they block). For each draft, run `flesh-out-ticket` step 6's confirmation gate:
+### 5. Receipt — lightweight checkpoint
+As each subagent's ticket lands, print one line in the main thread: `#<issueNumber> <title> —
+<issueUrl>`. This is a visibility checkpoint, not a pre-creation approval — the ticket already
+exists by the time the user sees it. If the user wants to change a ticket's content after seeing
+its receipt, that's a normal follow-up `gh issue edit`, outside this workflow.
 
-1. Print the **complete** ticket markdown (title + every section, verbatim, exactly as it will be
-   filed) as its own normal chat message. Never summarize or squash it — the user is reviewing
-   the actual ticket text, not a paraphrase of it, regardless of whether it came from a subagent
-   draft (§4) or was drafted inline.
-2. Only after that full text is visible, call **AskUserQuestion** with a short decision-only
-   question ("Confirm & create / Edit / Change model label") plus the proposed model label and
-   justification. The AskUserQuestion question text is for the decision prompt only — it must
-   never carry ticket content itself.
-3. Loop on edits until the user confirms.
+### 6. Wire up dependencies (incremental)
+Maintain a running `task summary → issueNumber` map, updated as each subagent returns. As soon as
+a ticket's `dependsOn` summaries are all present in the map, call
+`mcp__swarm-tools__link_ticket_dependencies` with `{issueNumber, blockedBy}` immediately (the tool
+runs the single comma-joined `gh issue edit --add-blocked-by` call) — don't wait for every ticket
+to land first. After the last subagent returns, do one final pass over any tickets whose
+`dependsOn` wasn't fully resolvable yet to catch stragglers. (This is orthogonal to sub-issue
+membership — `blocked-by` sequences siblings, sub-issue links them to the parent.)
 
-This gate is mandatory for every ticket. Parallel drafting in step 4 must never bypass it — the
-user confirms and can give feedback on each WIP ticket individually.
-
-### 6. Create issues
-On each confirmation, run `flesh-out-ticket` step 7: call `mcp__swarm-tools__create_ticket` with
-`title`, `body`, `modelLabel`, `extraLabels` (`db-migration` if `touchesDbSchema`, `e2e-exclusive`
-if `touchesE2eMutatingTrigger`), and `parentIssue` if this run is scoped under a tracking issue
-(the tool links the sub-issue itself). Record the mapping `task → issue number` from the
-returned `issueNumber`.
-
-### 7. Wire up dependencies (second pass)
-Once every confirmed issue exists (so all issue numbers are known), resolve each ticket's
-`dependsOn` tasks to their issue numbers and apply the GitHub "blocked by" links by calling
-`mcp__swarm-tools__link_ticket_dependencies` with `{issueNumber, blockedBy}` (the tool runs the
-single comma-joined `gh issue edit --add-blocked-by` call; an empty `blockedBy` is a no-op).
-(A second pass is used so creation order and missing-number problems don't arise. This is
-orthogonal to sub-issue membership — `blocked-by` sequences siblings, sub-issue links them to
-the parent.)
-
-### 8. Report
+### 7. Report
 Summarise: each created issue URL, its labels, its sub-issue parent (if any), and its blocked-by
 links.
 
@@ -163,12 +147,19 @@ links.
 - The sizing plan (§3) runs after scope selection and before any full drafting; it gives a rough
   per-ticket size estimate and lets the user drill into or resize any ticket before the cost of
   full fleshing is spent.
-- One issue per task. Reuse `flesh-out-ticket` for the per-ticket work — do not reinvent its
-  fleshing, confirmation gate, labelling, or creation logic.
+- One issue per task. Reuse `flesh-out-ticket`'s fleshing and labelling logic for the per-ticket
+  work — do not reinvent it. Unlike a standalone `flesh-out-ticket` run, ticketify does NOT reuse
+  its confirmation gate: creation happens immediately after drafting, with no per-ticket
+  pre-creation approval step. This is a deliberate trade — the full-markdown gate reprinted every
+  ticket's body in the main thread, which dominated this skill's token cost for batches of more
+  than a couple of tasks. The whole-list review (§1) and sizing plan (§3) already give the user
+  two upfront checkpoints over the same content before any ticket is created, so a third
+  per-ticket repeat of the same review was judged redundant; §5's one-line receipt is the
+  remaining visibility (not approval) step.
 - Every issue: one model label (`fable`|`sonnet`|`opus`) + `ready`, plus `db-migration` when it
   touches `supabase/schema/` and/or `e2e-exclusive` when it touches a path in
   `e2e/mutating-spec-triggers.json`, plus any blocked-by links and (when scoped under a tracking
   issue) sub-issue membership.
-- The per-ticket confirmation gate is non-negotiable and runs in the main thread, even when
-  drafting was parallelised — and it always shows the full ticket text before asking, never a
-  summary.
+- Dependency links (§6) are applied incrementally as issue numbers become known, not in a single
+  batch after every ticket exists — `link_ticket_dependencies` only ever needs one issue's own
+  `blockedBy` list, never a global view of all created tickets.
