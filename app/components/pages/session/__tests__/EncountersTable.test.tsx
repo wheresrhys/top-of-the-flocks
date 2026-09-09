@@ -1,13 +1,8 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import {
-	render,
-	screen,
-	cleanup,
-	fireEvent,
-	within
-} from '@testing-library/react';
+import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 import { EncountersTable } from '../EncountersTable';
 import type { SessionEncounter } from '@/app/models/session';
+import { getCellTextByHeading } from '@/app/__tests__/helpers/table';
 
 function makeEncounter(
 	id: number,
@@ -76,16 +71,6 @@ const headerLabels = () =>
 	screen.getAllByRole('columnheader').map((header) => header.textContent);
 
 const bodyRows = () => document.querySelectorAll('tbody tr');
-
-function columnCellValue(columnLabel: string, rowText: string): string {
-	const headers = screen.getAllByRole('columnheader');
-	const columnIndex = headers.findIndex(
-		(header) => header.textContent === columnLabel
-	);
-	const row = screen.getByText(rowText).closest('tr') as HTMLElement;
-	const cells = within(row).getAllByRole('cell');
-	return cells[columnIndex].textContent ?? '';
-}
 
 describe('EncountersTable', () => {
 	afterEach(() => {
@@ -189,14 +174,14 @@ describe('EncountersTable', () => {
 				render(
 					<EncountersTable encounters={[makeEncounter(1, { fat: '2' })]} />
 				);
-				expect(columnCellValue('Fat', 'RING1')).toBe('2');
+				expect(getCellTextByHeading('Fat', 'RING1')).toBe('2');
 			});
 
 			it('renders an empty cell when fat is null', () => {
 				render(
 					<EncountersTable encounters={[makeEncounter(1, { fat: null })]} />
 				);
-				expect(columnCellValue('Fat', 'RING1')).toBe('');
+				expect(getCellTextByHeading('Fat', 'RING1')).toBe('');
 			});
 
 			it('renders the encounter pectoral muscle score value in the Pectoral muscle column', () => {
@@ -205,7 +190,7 @@ describe('EncountersTable', () => {
 						encounters={[makeEncounter(1, { pectoral_muscle: 3 })]}
 					/>
 				);
-				expect(columnCellValue('Pectoral muscle', 'RING1')).toBe('3');
+				expect(getCellTextByHeading('Pectoral muscle', 'RING1')).toBe('3');
 			});
 
 			it('renders an empty cell when pectoral_muscle is null', () => {
@@ -214,7 +199,7 @@ describe('EncountersTable', () => {
 						encounters={[makeEncounter(1, { pectoral_muscle: null })]}
 					/>
 				);
-				expect(columnCellValue('Pectoral muscle', 'RING1')).toBe('');
+				expect(getCellTextByHeading('Pectoral muscle', 'RING1')).toBe('');
 			});
 
 			it('renders the encounter primary_moult raw value in the Primary moult column', () => {
@@ -223,7 +208,7 @@ describe('EncountersTable', () => {
 						encounters={[makeEncounter(1, { primary_moult: '5' })]}
 					/>
 				);
-				expect(columnCellValue('Primary moult', 'RING1')).toBe('5');
+				expect(getCellTextByHeading('Primary moult', 'RING1')).toBe('5');
 			});
 
 			it('renders an empty cell when primary_moult is null', () => {
@@ -232,7 +217,7 @@ describe('EncountersTable', () => {
 						encounters={[makeEncounter(1, { primary_moult: null })]}
 					/>
 				);
-				expect(columnCellValue('Primary moult', 'RING1')).toBe('');
+				expect(getCellTextByHeading('Primary moult', 'RING1')).toBe('');
 			});
 
 			it('renders the encounter old_greater_coverts numeric value in the OGC column', () => {
@@ -241,7 +226,7 @@ describe('EncountersTable', () => {
 						encounters={[makeEncounter(1, { old_greater_coverts: 1 })]}
 					/>
 				);
-				expect(columnCellValue('OGC', 'RING1')).toBe('1');
+				expect(getCellTextByHeading('OGC', 'RING1')).toBe('1');
 			});
 
 			it('renders an empty cell when old_greater_coverts is null', () => {
@@ -250,7 +235,7 @@ describe('EncountersTable', () => {
 						encounters={[makeEncounter(1, { old_greater_coverts: null })]}
 					/>
 				);
-				expect(columnCellValue('OGC', 'RING1')).toBe('');
+				expect(getCellTextByHeading('OGC', 'RING1')).toBe('');
 			});
 		});
 	});
@@ -308,7 +293,7 @@ describe('EncountersTable', () => {
 			});
 			const scoreColumnValues = () =>
 				['Fat', 'Pectoral muscle', 'Primary moult', 'OGC'].map((label) =>
-					columnCellValue(label, 'RING1')
+					getCellTextByHeading(label, 'RING1')
 				);
 
 			// Net-rounds view: size="responsive", no Time column, Species shown.

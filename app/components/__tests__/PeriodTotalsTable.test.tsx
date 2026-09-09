@@ -2,6 +2,10 @@ import { describe, it, expect, afterEach } from 'vitest';
 import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 import { PeriodTotalsTable } from '../PeriodTotalsTable';
 import type { AggregateStatsResult } from '@/app/models/db';
+import {
+	getCellByHeading,
+	getCellTextByHeading
+} from '@/app/__tests__/helpers/table';
 
 // The real header <th>s live in the `<thead>` row without a `data-testid` —
 // `above-header-row` (the "Aggregate by" toggle row) and `totals-row` are
@@ -182,11 +186,8 @@ describe('PeriodTotalsTable', () => {
 					buildHref={() => '/summary/2026'}
 				/>
 			);
-			const row = document.querySelector('tbody tr');
-			expect(row?.textContent).toContain('0');
-			const cells = row?.querySelectorAll('td');
-			expect(cells?.[1].textContent).toBe('0');
-			expect(cells?.[2].textContent).toBe('0');
+			expect(getCellTextByHeading('Sessions', 0)).toBe('0');
+			expect(getCellTextByHeading('Effort', 0)).toBe('0');
 		});
 	});
 
@@ -222,10 +223,9 @@ describe('PeriodTotalsTable', () => {
 				/>
 			);
 			const totalsRow = screen.getByTestId('totals-row');
-			const cells = totalsRow.querySelectorAll('td');
-			expect(cells[0].textContent?.trim()).toBe('Total');
-			expect(cells[1].textContent?.trim()).toBe('7');
-			expect(cells[2].textContent?.trim()).toBe('36h');
+			expect(getCellTextByHeading('Year', totalsRow)).toBe('Total');
+			expect(getCellTextByHeading('Sessions', totalsRow)).toBe('7');
+			expect(getCellTextByHeading('Effort', totalsRow)).toBe('36h');
 		});
 
 		it('renders a "Total" row for the "month" grouping when totalsStats is supplied', () => {
@@ -284,9 +284,8 @@ describe('PeriodTotalsTable', () => {
 					buildHref={(timePeriod) => `/summary/2026/${timePeriod}`}
 				/>
 			);
-			const cells = document.querySelectorAll('tbody tr td');
-			expect(cells[1].textContent).toBe('4');
-			expect(cells[2].textContent).toBe('18h');
+			expect(getCellTextByHeading('Sessions', 0)).toBe('4');
+			expect(getCellTextByHeading('Effort', 0)).toBe('18h');
 		});
 
 		it('sorts the Effort column numerically, not by the formatted string', () => {
@@ -370,17 +369,14 @@ describe('PeriodTotalsTable', () => {
 						aggregationFixedTo="encounter"
 					/>
 				);
-				const cells = document
-					.querySelector('tbody tr')
-					?.querySelectorAll('td') as NodeListOf<HTMLTableCellElement>;
-				// 6 new, 7 retraps (enc 55 - new 30 = 25), 8 pullus_enc, 9 juv_enc,
-				// 10 postjuv_enc, 11 adult_enc, 12 unknown_age_enc.
-				expect(cells[7].textContent).toBe('25');
-				expect(cells[8].textContent).toBe('9');
-				expect(cells[9].textContent).toBe('8');
-				expect(cells[10].textContent).toBe('7');
-				expect(cells[11].textContent).toBe('6');
-				expect(cells[12].textContent).toBe('4');
+				// retraps (enc 55 - new 30 = 25), then the encounter-derived
+				// age-bucket columns.
+				expect(getCellTextByHeading('Retrap', 0)).toBe('25');
+				expect(getCellTextByHeading('Pulli', 0)).toBe('9');
+				expect(getCellTextByHeading('Juv', 0)).toBe('8');
+				expect(getCellTextByHeading('Postjuv', 0)).toBe('7');
+				expect(getCellTextByHeading('Adult', 0)).toBe('6');
+				expect(getCellTextByHeading('Not aged', 0)).toBe('4');
 			});
 		});
 
@@ -400,10 +396,9 @@ describe('PeriodTotalsTable', () => {
 						dashIndividuals
 					/>
 				);
-				const dataRows = document.querySelectorAll('tbody tr');
-				dataRows.forEach((row) => {
-					const cells = row.querySelectorAll('td');
-					expect(cells[5].textContent).toBe('-');
+				const table = screen.getByRole('table');
+				table.querySelectorAll('tbody tr').forEach((_, rowIndex) => {
+					expect(getCellTextByHeading(table, 'Birds', rowIndex)).toBe('-');
 				});
 			});
 
@@ -420,10 +415,8 @@ describe('PeriodTotalsTable', () => {
 						totalsStats={encStat({ bird_count: 123 })}
 					/>
 				);
-				const totalsCells = screen
-					.getByTestId('totals-row')
-					.querySelectorAll('td');
-				expect(totalsCells[5].textContent).toBe('-');
+				const totalsRow = screen.getByTestId('totals-row');
+				expect(getCellTextByHeading('Birds', totalsRow)).toBe('-');
 			});
 
 			it('renders the first column as plain text, not a link, when no href is available for a row', () => {
@@ -439,11 +432,9 @@ describe('PeriodTotalsTable', () => {
 					/>
 				);
 				expect(screen.queryByRole('link', { name: 'January' })).toBeNull();
-				const firstCell = document
-					.querySelector('tbody tr')
-					?.querySelector('td');
-				expect(firstCell?.textContent).toBe('January');
-				expect(firstCell?.querySelector('a')).toBeNull();
+				const firstCell = getCellByHeading('Month', 0);
+				expect(firstCell.textContent).toBe('January');
+				expect(firstCell.querySelector('a')).toBeNull();
 			});
 		});
 	});
@@ -490,40 +481,32 @@ describe('PeriodTotalsTable', () => {
 					/>
 				);
 
-				const getCells = () =>
-					document
-						.querySelector('tbody tr')
-						?.querySelectorAll('td') as NodeListOf<HTMLTableCellElement>;
+				const cell = (heading: string) => getCellTextByHeading(heading, 0);
 
-				// Indices: 0 label, 1 sessions, 2 effort, 3 species, 4 encounters,
-				// 5 individuals, 6 new, 7 retraps, 8 pullus, 9 juvs, 10 postjuv,
-				// 11 adults, 12 unknownAge.
-				let cells = getCells();
-				expect(cells[3].textContent).toBe(String(stat.species_count));
-				expect(cells[4].textContent).toBe(String(stat.encounter_count));
-				expect(cells[5].textContent).toBe(String(stat.bird_count));
-				expect(cells[6].textContent).toBe('6'); // new (unaffected by toggle)
-				expect(cells[7].textContent).toBe('4'); // retraps: bird_count - new
-				expect(cells[8].textContent).toBe('2'); // pullus_bird_count
-				expect(cells[9].textContent).toBe('1'); // juv_bird_count
-				expect(cells[10].textContent).toBe('1'); // postjuv_bird_count
-				expect(cells[11].textContent).toBe('3'); // adult_bird_count
-				expect(cells[12].textContent).toBe('0'); // unknown_age_bird_count
+				expect(cell('Species')).toBe(String(stat.species_count));
+				expect(cell('Encounters')).toBe(String(stat.encounter_count));
+				expect(cell('Birds')).toBe(String(stat.bird_count));
+				expect(cell('New')).toBe('6'); // unaffected by toggle
+				expect(cell('Retrap')).toBe('4'); // bird_count - new
+				expect(cell('Pulli')).toBe('2'); // pullus_bird_count
+				expect(cell('Juv')).toBe('1'); // juv_bird_count
+				expect(cell('Postjuv')).toBe('1'); // postjuv_bird_count
+				expect(cell('Adult')).toBe('3'); // adult_bird_count
+				expect(cell('Not aged')).toBe('0'); // unknown_age_bird_count
 
 				fireEvent.click(screen.getByRole('radio', { name: 'Encounter' }));
 
-				cells = getCells();
 				// Unaffected columns stay the same after switching.
-				expect(cells[3].textContent).toBe(String(stat.species_count));
-				expect(cells[4].textContent).toBe(String(stat.encounter_count));
-				expect(cells[5].textContent).toBe(String(stat.bird_count));
-				expect(cells[6].textContent).toBe('6'); // new (still unaffected)
-				expect(cells[7].textContent).toBe('8'); // retraps: encounter_count - new
-				expect(cells[8].textContent).toBe('3'); // pullus_enc_count
-				expect(cells[9].textContent).toBe('2'); // juv_enc_count
-				expect(cells[10].textContent).toBe('2'); // postjuv_enc_count
-				expect(cells[11].textContent).toBe('4'); // adult_enc_count
-				expect(cells[12].textContent).toBe('1'); // unknown_age_enc_count
+				expect(cell('Species')).toBe(String(stat.species_count));
+				expect(cell('Encounters')).toBe(String(stat.encounter_count));
+				expect(cell('Birds')).toBe(String(stat.bird_count));
+				expect(cell('New')).toBe('6'); // still unaffected
+				expect(cell('Retrap')).toBe('8'); // encounter_count - new
+				expect(cell('Pulli')).toBe('3'); // pullus_enc_count
+				expect(cell('Juv')).toBe('2'); // juv_enc_count
+				expect(cell('Postjuv')).toBe('2'); // postjuv_enc_count
+				expect(cell('Adult')).toBe('4'); // adult_enc_count
+				expect(cell('Not aged')).toBe('1'); // unknown_age_enc_count
 			});
 		});
 	});

@@ -3,6 +3,7 @@ import { render, screen, cleanup } from '@testing-library/react';
 import Page from '../page';
 import retrapsSnapshot from '@/test-fixtures/snapshots/fetchNotableRetraps.alpha.json';
 import type { NotableRetrapsResult } from '@/app/models/db';
+import { getCellTextByHeading } from '@/app/__tests__/helpers/table';
 
 const { mockGetAuthenticatedSupabaseClient } = vi.hoisted(() => ({
 	mockGetAuthenticatedSupabaseClient: vi.fn()
@@ -44,10 +45,12 @@ describe('retraps page', () => {
 		expect(rows.length).toBe(
 			(retrapsSnapshot as NotableRetrapsResult[]).length
 		);
-		const firstRow = rows[0];
-		const cells = firstRow.querySelectorAll('td');
-		expect(cells[0].textContent).toBe(retrapsSnapshot[0].species_name);
-		expect(cells[1].textContent?.trim()).toBe(retrapsSnapshot[0].ring_no);
+		expect(getCellTextByHeading(table, 'Species', 0)).toBe(
+			retrapsSnapshot[0].species_name
+		);
+		expect(getCellTextByHeading(table, 'Ring', 0)).toBe(
+			retrapsSnapshot[0].ring_no
+		);
 	});
 
 	it('renders empty table when no data', async () => {

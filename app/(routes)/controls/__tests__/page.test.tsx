@@ -3,6 +3,7 @@ import { render, screen, cleanup } from '@testing-library/react';
 import Page from '../page';
 import controlsSnapshot from '@/test-fixtures/snapshots/fetchRingSequenceControls.alpha.json';
 import type { RingSequenceControlRow } from '@/app/actions/ring-sequences';
+import { getCellTextByHeading } from '@/app/__tests__/helpers/table';
 
 const { mockGetAuthenticatedSupabaseClient } = vi.hoisted(() => ({
 	mockGetAuthenticatedSupabaseClient: vi.fn()
@@ -44,11 +45,15 @@ describe('controls page', () => {
 		expect(rows.length).toBe(
 			(controlsSnapshot as RingSequenceControlRow[]).length
 		);
-		const firstRow = rows[0];
-		const cells = firstRow.querySelectorAll('td');
-		expect(cells[0].textContent?.trim()).toBe(controlsSnapshot[0].ring_no);
-		expect(cells[1].textContent).toBe(controlsSnapshot[0].species_name);
-		expect(cells[2].textContent).toBe(controlsSnapshot[0].first_date);
+		expect(getCellTextByHeading(table, 'Ring', 0)).toBe(
+			controlsSnapshot[0].ring_no
+		);
+		expect(getCellTextByHeading(table, 'Species', 0)).toBe(
+			controlsSnapshot[0].species_name
+		);
+		expect(getCellTextByHeading(table, 'First date', 0)).toBe(
+			controlsSnapshot[0].first_date
+		);
 	});
 
 	it('renders empty state when no data', async () => {

@@ -3,6 +3,7 @@ import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 import Page, { fetchPulliPageContent } from '../page';
 import pulliEncountersSnapshot from '@/test-fixtures/snapshots/fetchPulliEncounters.alpha.json';
 import type { PulliEncounter } from '@/app/models/session';
+import { getCellTextByHeading } from '@/app/__tests__/helpers/table';
 
 const { mockGetAuthenticatedSupabaseClient } = vi.hoisted(() => ({
 	mockGetAuthenticatedSupabaseClient: vi.fn()
@@ -93,12 +94,7 @@ describe('pulli page', () => {
 	it('renders a null notes cell gracefully when extra_text is null', async () => {
 		render(await Page());
 		const table = await screen.findByRole('table');
-		const rows = [...table.querySelectorAll('tbody tr')];
-		const rowWithNoNotes = rows.find((row) =>
-			row.textContent?.includes('APULLI02')
-		)!;
-		const notesCell = rowWithNoNotes.querySelectorAll('td')[4];
-		expect(notesCell.textContent).toBe('–');
+		expect(getCellTextByHeading(table, 'Notes', 'APULLI02')).toBe('–');
 	});
 
 	it('renders empty state gracefully when there are no pulli encounters', async () => {
