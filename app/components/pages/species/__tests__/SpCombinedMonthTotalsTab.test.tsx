@@ -396,15 +396,11 @@ describe('species all-time Month totals tab — Combine years toggle', () => {
 			);
 			// Combined: with only one contributing year, the January bucket's
 			// summed value equals that single year's own value.
-			const combinedJanuaryRow = screen.getByText('January').closest('tr');
-			const combinedCells = combinedJanuaryRow?.querySelectorAll('td') ?? [];
-			expect(combinedCells[3]?.textContent).toBe('30');
+			expect(getCellTextByHeading('Encounters', 'January')).toBe('30');
 
 			fireEvent.click(screen.getByRole('radio', { name: 'By year' }));
 			expect(document.querySelectorAll('tbody tr').length).toBe(1);
-			const perYearRow = document.querySelector('tbody tr');
-			const perYearCells = perYearRow?.querySelectorAll('td') ?? [];
-			expect(perYearCells[3]?.textContent).toBe('30');
+			expect(getCellTextByHeading('Encounters', 'January')).toBe('30');
 		});
 
 		it('toggling combine-years on and off repeatedly does not trigger any additional fetch of species period totals', async () => {

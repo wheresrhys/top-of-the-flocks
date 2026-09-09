@@ -14,7 +14,6 @@ export type PeriodTotalsGrouping = 'year' | 'month' | 'day';
 export type PeriodTotalsRow = {
 	timePeriod: string;
 	sessionsCount: number;
-	effortSeconds: number;
 	speciesCount: number;
 	encounterCount: number;
 	individualsCount: number;
@@ -34,7 +33,6 @@ export function derivePeriodTotalsRowByBird(
 	return {
 		timePeriod: stat.time_period,
 		sessionsCount: stat.session_count,
-		effortSeconds: postgresIntervalToSeconds(stat.total_effort),
 		speciesCount: stat.species_count,
 		encounterCount: stat.encounter_count,
 		individualsCount: stat.bird_count,
@@ -63,7 +61,6 @@ export function derivePeriodTotalsRowByEncounter(
 	return {
 		timePeriod: stat.time_period,
 		sessionsCount: stat.session_count,
-		effortSeconds: postgresIntervalToSeconds(stat.total_effort),
 		speciesCount: stat.species_count,
 		encounterCount: stat.encounter_count,
 		individualsCount: stat.bird_count,

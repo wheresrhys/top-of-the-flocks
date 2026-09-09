@@ -47,10 +47,6 @@ function buildColumnConfigs({
 		sessionsCount: {
 			label: 'Sessions'
 		},
-		effortSeconds: {
-			label: 'Effort',
-			formatter: (value) => formatSecondsForDisplay(value as number)
-		},
 		...(showSpeciesColumn ? { speciesCount: { label: 'Species' } } : {}),
 		encounterCount: {
 			label: 'Encounters'

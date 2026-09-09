@@ -14,10 +14,6 @@ export function SummaryStatsSection({
 
 	const rows: { label: string; value: number | string }[] = [
 		{ label: 'Sessions', value: stats.session_count },
-		{
-			label: 'Effort',
-			value: formatPostgresIntervalForDisplay(stats.total_effort)
-		},
 		{ label: 'Species', value: stats.species_count },
 		{ label: 'Encounters', value: stats.encounter_count },
 		{ label: 'Individuals', value: stats.bird_count },

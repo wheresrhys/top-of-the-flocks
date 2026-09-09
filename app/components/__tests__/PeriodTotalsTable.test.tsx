@@ -79,7 +79,6 @@ describe('PeriodTotalsTable', () => {
 			expect(headers.map((header) => header.textContent)).toEqual([
 				'Year',
 				'Sessions',
-				'Effort',
 				'Species',
 				'Encounters',
 				'Birds',
@@ -187,7 +186,6 @@ describe('PeriodTotalsTable', () => {
 				/>
 			);
 			expect(getCellTextByHeading('Sessions', 0)).toBe('0');
-			expect(getCellTextByHeading('Effort', 0)).toBe('0');
 		});
 	});
 
@@ -225,7 +223,6 @@ describe('PeriodTotalsTable', () => {
 			const totalsRow = screen.getByTestId('totals-row');
 			expect(getCellTextByHeading('Year', totalsRow)).toBe('Total');
 			expect(getCellTextByHeading('Sessions', totalsRow)).toBe('7');
-			expect(getCellTextByHeading('Effort', totalsRow)).toBe('36h');
 		});
 
 		it('renders a "Total" row for the "month" grouping when totalsStats is supplied', () => {
@@ -268,7 +265,7 @@ describe('PeriodTotalsTable', () => {
 		});
 	});
 
-	describe('Sessions and Effort columns', () => {
+	describe('Sessions column', () => {
 		it('renders session_count and formatted total_effort for each grouping', () => {
 			render(
 				<PeriodTotalsTable
@@ -285,29 +282,6 @@ describe('PeriodTotalsTable', () => {
 				/>
 			);
 			expect(getCellTextByHeading('Sessions', 0)).toBe('4');
-			expect(getCellTextByHeading('Effort', 0)).toBe('18h');
-		});
-
-		it('sorts the Effort column numerically, not by the formatted string', () => {
-			const rows = [
-				buildStat({ time_period: '2025-01-01', total_effort: '02:30:00' }),
-				buildStat({ time_period: '2026-01-01', total_effort: '09:00:00' })
-			];
-			render(
-				<PeriodTotalsTable
-					grouping="year"
-					rows={rows}
-					firstColumnHeader="Year"
-					buildHref={(timePeriod) => `/summary/${timePeriod.slice(0, 4)}`}
-				/>
-			);
-			fireEvent.click(screen.getByText('Effort'));
-			const tableRows = document.querySelectorAll('tbody tr');
-			// Descending on first click: the 9h row ranks above the 2h 30m row,
-			// which would sort the wrong way under string comparison ("2h 30m" >
-			// "9h" lexicographically).
-			expect(tableRows[0].textContent).toContain('2026');
-			expect(tableRows[1].textContent).toContain('2025');
 		});
 	});
 
