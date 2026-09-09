@@ -131,7 +131,8 @@ describe('SpMonthTotalsTab', () => {
 				expect(document.querySelectorAll('tbody tr').length).toBe(12);
 			});
 			expect(
-				(screen.getByRole('radio', { name: 'Show' }) as HTMLInputElement).checked
+				(screen.getByRole('radio', { name: 'Show' }) as HTMLInputElement)
+					.checked
 			).toBe(true);
 		});
 

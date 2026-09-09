@@ -93,7 +93,10 @@ export function SpCombinedMonthTotalsTab({
 	const extraControls = (
 		<>
 			<CombineYearsToggle value={combineYears} onChange={setCombineYears} />
-			<EmptyMonthsToggle value={hideEmptyMonths} onChange={setHideEmptyMonths} />
+			<EmptyMonthsToggle
+				value={hideEmptyMonths}
+				onChange={setHideEmptyMonths}
+			/>
 		</>
 	);
 
@@ -102,9 +105,10 @@ export function SpCombinedMonthTotalsTab({
 			{combineYears ? (
 				<PeriodTotalsTable
 					grouping="month"
-					rows={filterEmptyMonthTotalsRows(combinedMonthRows, hideEmptyMonths).map(
-						(row) => row.stats
-					)}
+					rows={filterEmptyMonthTotalsRows(
+						combinedMonthRows,
+						hideEmptyMonths
+					).map((row) => row.stats)}
 					firstColumnHeader="Month"
 					buildHref={() => ''}
 					buildLabel={(timePeriod) =>
