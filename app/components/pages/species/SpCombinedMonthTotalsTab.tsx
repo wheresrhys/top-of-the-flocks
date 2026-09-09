@@ -110,6 +110,7 @@ export function SpCombinedMonthTotalsTab({
 						hideEmptyMonths
 					).map((row) => row.stats)}
 					firstColumnHeader="Month"
+					showSpeciesColumn={false}
 					buildHref={() => ''}
 					buildLabel={(timePeriod) =>
 						combinedMonthLabelByTimePeriod.get(timePeriod) ?? ''
@@ -121,6 +122,7 @@ export function SpCombinedMonthTotalsTab({
 			) : (
 				<PeriodTotalsTable
 					grouping="month"
+					showSpeciesColumn={false}
 					rows={filterEmptyMonthTotalsRows(perYearRows, hideEmptyMonths).map(
 						(row) => row.stats
 					)}

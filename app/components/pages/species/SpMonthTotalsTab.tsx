@@ -70,6 +70,7 @@ export function SpMonthTotalsTab({
 			grouping="month"
 			rows={visibleRows.map((row) => row.stats)}
 			firstColumnHeader="Month"
+			showSpeciesColumn={false}
 			buildHref={(timePeriod) =>
 				`/species/${speciesName}/${year}/${Number(timePeriod.slice(5, 7))}`
 			}

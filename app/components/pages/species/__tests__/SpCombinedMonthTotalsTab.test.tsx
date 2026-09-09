@@ -140,7 +140,7 @@ describe('SpCombinedMonthTotalsTab', () => {
 			});
 			const januaryRow = screen.getByText('January').closest('tr');
 			const cells = januaryRow?.querySelectorAll('td') ?? [];
-			expect(cells[4]?.textContent).toBe('75');
+			expect(cells[3]?.textContent).toBe('75');
 		});
 
 		it('shows a loading state before the fetch resolves', async () => {
@@ -194,7 +194,7 @@ describe('SpCombinedMonthTotalsTab', () => {
 			});
 			const januaryRow = screen.getByText('January').closest('tr');
 			const cells = januaryRow?.querySelectorAll('td') ?? [];
-			expect(cells[4]?.textContent).toBe('0');
+			expect(cells[3]?.textContent).toBe('0');
 		});
 
 		it("disables the AggregateByToggle and renders the birds/individuals column as '-'", async () => {
@@ -215,7 +215,7 @@ describe('SpCombinedMonthTotalsTab', () => {
 			expect(encounterToggle.disabled).toBe(true);
 			document.querySelectorAll('tbody tr').forEach((row) => {
 				const cells = row.querySelectorAll('td');
-				expect(cells[5]?.textContent).toBe('-');
+				expect(cells[4]?.textContent).toBe('-');
 			});
 		});
 	});
@@ -308,7 +308,7 @@ describe('species all-time Month totals tab — Combine years toggle', () => {
 			expect(document.querySelectorAll('tbody tr').length).toBe(1);
 
 			const getPullusCell = () =>
-				document.querySelector('tbody tr')?.querySelectorAll('td')[8];
+				document.querySelector('tbody tr')?.querySelectorAll('td')[7];
 			// Unlocked, the toggle defaults to 'Bird' (matching every other
 			// unlocked `PeriodTotalsTable` usage), so the bird-based count is
 			// already showing without needing to click anything.
@@ -415,13 +415,13 @@ describe('species all-time Month totals tab — Combine years toggle', () => {
 			// summed value equals that single year's own value.
 			const combinedJanuaryRow = screen.getByText('January').closest('tr');
 			const combinedCells = combinedJanuaryRow?.querySelectorAll('td') ?? [];
-			expect(combinedCells[4]?.textContent).toBe('30');
+			expect(combinedCells[3]?.textContent).toBe('30');
 
 			fireEvent.click(screen.getByRole('radio', { name: 'By year' }));
 			expect(document.querySelectorAll('tbody tr').length).toBe(1);
 			const perYearRow = document.querySelector('tbody tr');
 			const perYearCells = perYearRow?.querySelectorAll('td') ?? [];
-			expect(perYearCells[4]?.textContent).toBe('30');
+			expect(perYearCells[3]?.textContent).toBe('30');
 		});
 
 		it("a species with no recorded data shows 12 zero-filled rows when combined, and 'No data recorded.' when combine-years is off, without erroring", async () => {

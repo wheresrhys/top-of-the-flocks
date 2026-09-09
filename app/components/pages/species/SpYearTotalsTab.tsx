@@ -37,6 +37,7 @@ export function SpYearTotalsTab({
 			grouping="year"
 			rows={yearTotals}
 			firstColumnHeader="Year"
+			showSpeciesColumn={false}
 			buildHref={(timePeriod) =>
 				`/species/${speciesName}/${timePeriod.slice(0, 4)}`
 			}

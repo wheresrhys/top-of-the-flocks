@@ -26,12 +26,19 @@ import {
 	type AggregateByValue
 } from './shared/AggregateByToggle';
 
-function buildColumnConfigs(
-	firstColumnHeader: string,
-	hasPulli: boolean,
-	dashIndividuals: boolean,
-	aggregateBy: string
-): Partial<Record<keyof PeriodTotalsRow, ColumnConfig>> {
+function buildColumnConfigs({
+	firstColumnHeader,
+	hasPulli,
+	dashIndividuals,
+	aggregateBy,
+	showSpeciesColumn
+}: {
+	firstColumnHeader: string;
+	hasPulli: boolean;
+	dashIndividuals: boolean;
+	aggregateBy: string;
+	showSpeciesColumn: boolean;
+}): Partial<Record<keyof PeriodTotalsRow, ColumnConfig>> {
 	return {
 		timePeriod: {
 			label: firstColumnHeader,
@@ -44,7 +51,7 @@ function buildColumnConfigs(
 			label: 'Effort',
 			formatter: (value) => formatSecondsForDisplay(value as number)
 		},
-		speciesCount: { label: 'Species' },
+		...(showSpeciesColumn ? { speciesCount: { label: 'Species' } } : {}),
 		encounterCount: {
 			label: 'Encounters'
 		},
@@ -67,7 +74,8 @@ export function PeriodTotalsTable({
 	totalsStats,
 	aggregationFixedTo,
 	dashIndividuals = false,
-	extraControls
+	extraControls,
+	showSpeciesColumn = true
 }: {
 	grouping: PeriodTotalsGrouping;
 	rows: AggregateStatsResult[];
@@ -87,6 +95,7 @@ export function PeriodTotalsTable({
 	// Optional extra controls rendered above the table, e.g. a toggle to switch
 	// between combined-months and per-year-months views.
 	extraControls?: React.ReactNode;
+	showSpeciesColumn?: boolean;
 }) {
 	// Local to this table (not persisted across tab switches) — resets to
 	// 'bird' whenever `SummaryTotalsSection` remounts this table for a
@@ -107,12 +116,13 @@ export function PeriodTotalsTable({
 		buildLabel ??
 		((timePeriod: string) => formatPeriodTotalsLabel(grouping, timePeriod));
 	const hasPulli = rows.some((stat) => activeDeriveRow(stat).pullus > 0);
-	const columnConfigs = buildColumnConfigs(
+	const columnConfigs = buildColumnConfigs({
 		firstColumnHeader,
 		hasPulli,
 		dashIndividuals,
-		aggregateBy
-	);
+		aggregateBy,
+		showSpeciesColumn
+	});
 
 	const totalsRow = totalsStats
 		? buildTotalsRowCells<PeriodTotalsRow>({
