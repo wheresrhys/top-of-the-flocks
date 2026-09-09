@@ -4,8 +4,10 @@ import { fetchSpeciesPeriodTotals } from '@/app/actions/sp-data';
 import { PeriodTotalsTable } from '@/app/components/PeriodTotalsTable';
 import {
 	buildMonthTotalsRows,
+	filterEmptyMonthTotalsRows,
 	formatMonthYearLabel
 } from '@/app/models/month-totals';
+import { EmptyMonthsToggle } from '@/app/components/shared/EmptyMonthsToggle';
 import type { AggregateStatsResult } from '@/app/models/db';
 
 export function SpMonthTotalsTab({
@@ -23,6 +25,10 @@ export function SpMonthTotalsTab({
 }) {
 	const [monthlyStats, setMonthlyStats] = useState<AggregateStatsResult[]>([]);
 	const [isLoaded, setIsLoaded] = useState(false);
+	// Plain local state — `SpeciesPageContent`'s `ConditionalTabPanel` unmounts
+	// this tab on every tab switch, so the toggle naturally resets to Show
+	// (`false`) each time the tab is revisited, with no extra code needed.
+	const [hideEmptyMonths, setHideEmptyMonths] = useState(false);
 
 	useEffect(() => {
 		if (isLoaded) return;
@@ -54,17 +60,27 @@ export function SpMonthTotalsTab({
 	const monthTotalsByTimePeriod = new Map(
 		monthTotalsRows.map((row) => [row.stats.time_period, row])
 	);
+	const visibleRows = filterEmptyMonthTotalsRows(
+		monthTotalsRows,
+		hideEmptyMonths
+	);
 
 	return (
 		<PeriodTotalsTable
 			grouping="month"
-			rows={monthTotalsRows.map((row) => row.stats)}
+			rows={visibleRows.map((row) => row.stats)}
 			firstColumnHeader="Month"
 			buildHref={(timePeriod) =>
 				`/species/${speciesName}/${year}/${Number(timePeriod.slice(5, 7))}`
 			}
 			buildLabel={(timePeriod) =>
 				formatMonthYearLabel(monthTotalsByTimePeriod.get(timePeriod))
+			}
+			extraControls={
+				<EmptyMonthsToggle
+					value={hideEmptyMonths}
+					onChange={setHideEmptyMonths}
+				/>
 			}
 		/>
 	);

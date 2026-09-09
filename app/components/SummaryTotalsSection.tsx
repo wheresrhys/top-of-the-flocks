@@ -16,11 +16,13 @@ import {
 import {
 	buildCombinedMonthTotalsRows,
 	buildPerYearMonthTotalsRows,
+	filterEmptyMonthTotalsRows,
 	formatMonthYearLabel,
 	formatMonthLabel,
 	type MonthTotalsRow
 } from '@/app/models/month-totals';
 import { CombineYearsToggle } from '@/app/components/shared/CombineYearsToggle';
+import { EmptyMonthsToggle } from '@/app/components/shared/EmptyMonthsToggle';
 
 const MONTH_TOTALS_TAB = { id: 'month-totals', label: 'Month totals' };
 // The all-time page's combine-years month tab — distinct from `MONTH_TOTALS_TAB`
@@ -52,6 +54,9 @@ function AllTimeMonthTotalsTab({
 	viewedGroup?: ViewedGroup;
 }) {
 	const [combineYears, setCombineYears] = useState(true);
+	// Sibling of `combineYears` — independent state, applies to whichever view is
+	// shown, and resets to Show (`false`) on tab remount alongside it.
+	const [hideEmptyMonths, setHideEmptyMonths] = useState(false);
 
 	// ON: 12 calendar-month buckets summed across every year. Look each row
 	// back up by its sentinel `time_period` (there's no year to link to, so no
@@ -69,12 +74,24 @@ function AllTimeMonthTotalsTab({
 		perYearRows.map((row) => [row.stats.time_period, row])
 	);
 
+	const extraControls = (
+		<>
+			<CombineYearsToggle value={combineYears} onChange={setCombineYears} />
+			<EmptyMonthsToggle
+				value={hideEmptyMonths}
+				onChange={setHideEmptyMonths}
+			/>
+		</>
+	);
+
 	return (
 		<>
 			{combineYears ? (
 				<PeriodTotalsTable
 					grouping="month"
-					rows={combinedRows.map((row) => row.stats)}
+					rows={filterEmptyMonthTotalsRows(combinedRows, hideEmptyMonths).map(
+						(row) => row.stats
+					)}
 					firstColumnHeader="Month"
 					// No single year to drill into — an empty href renders the
 					// month label as plain text rather than a link.
@@ -85,17 +102,14 @@ function AllTimeMonthTotalsTab({
 					totalsStats={totalsStats}
 					aggregationFixedTo="encounter"
 					dashIndividuals
-					extraControls={
-						<CombineYearsToggle
-							value={combineYears}
-							onChange={setCombineYears}
-						/>
-					}
+					extraControls={extraControls}
 				/>
 			) : (
 				<PeriodTotalsTable
 					grouping="month"
-					rows={perYearRows.map((row) => row.stats)}
+					rows={filterEmptyMonthTotalsRows(perYearRows, hideEmptyMonths).map(
+						(row) => row.stats
+					)}
 					firstColumnHeader="Month"
 					buildHref={(timePeriod) => {
 						const row = perYearRowByTimePeriod.get(timePeriod);
@@ -108,15 +122,59 @@ function AllTimeMonthTotalsTab({
 						formatMonthYearLabel(perYearRowByTimePeriod.get(timePeriod))
 					}
 					totalsStats={totalsStats}
-					extraControls={
-						<CombineYearsToggle
-							value={combineYears}
-							onChange={setCombineYears}
-						/>
-					}
+					extraControls={extraControls}
 				/>
 			)}
 		</>
+	);
+}
+
+// The year summary page's "Month totals" tab content. Extracted from
+// `SummaryTotalsSection`'s inline JSX purely so its `hideEmptyMonths` state
+// resets on tab remount — `SummaryTotalsSection` itself never unmounts across
+// tab switches, so keeping the state up there would persist it for the whole
+// page view (same reason `AllTimeMonthTotalsTab` gives for its own state). The
+// rows are pre-built and passed in; this component only owns the toggle and
+// applies the filter.
+function YearMonthTotalsTab({
+	monthTotals,
+	totalsStats,
+	viewedGroup
+}: {
+	monthTotals: MonthTotalsRow[];
+	totalsStats?: AggregateStatsResult;
+	viewedGroup?: ViewedGroup;
+}) {
+	const [hideEmptyMonths, setHideEmptyMonths] = useState(false);
+
+	const monthTotalsByTimePeriod = new Map(
+		monthTotals.map((row) => [row.stats.time_period, row])
+	);
+	const visibleRows = filterEmptyMonthTotalsRows(monthTotals, hideEmptyMonths);
+
+	return (
+		<PeriodTotalsTable
+			grouping="month"
+			rows={visibleRows.map((row) => row.stats)}
+			firstColumnHeader="Month"
+			buildHref={(timePeriod) => {
+				const row = monthTotalsByTimePeriod.get(timePeriod);
+				return buildGroupSummaryHref(
+					viewedGroup,
+					row && { year: row.year, month: row.zeroIndexedMonth + 1 }
+				);
+			}}
+			buildLabel={(timePeriod) =>
+				formatMonthYearLabel(monthTotalsByTimePeriod.get(timePeriod))
+			}
+			totalsStats={totalsStats}
+			extraControls={
+				<EmptyMonthsToggle
+					value={hideEmptyMonths}
+					onChange={setHideEmptyMonths}
+				/>
+			}
+		/>
 	);
 }
 
@@ -259,12 +317,6 @@ export function SummaryTotalsSection({
 					})
 			}
 		);
-	// Look each row back up by `time_period` so the shared table can derive its
-	// label/href from the raw row rather than re-deriving from the date string.
-	const monthTotalsByTimePeriod = new Map(
-		(monthTotals ?? []).map((row) => [row.stats.time_period, row])
-	);
-
 	// The totals row always reflects the page's own aggregate stats, regardless
 	// of which tab/table is currently active — `undefined` (not `null`) means
 	// "no totals row" to each table's `totalsStats` prop.
@@ -289,23 +341,12 @@ export function SummaryTotalsSection({
 				/>
 			)}
 			{activeTab === MONTH_TOTALS_TAB.id && monthTotals && (
-				<PeriodTotalsTable
-					grouping="month"
-					rows={monthTotals.map((row) => row.stats)}
-					firstColumnHeader="Month"
-					buildHref={(timePeriod) => {
-						const row = monthTotalsByTimePeriod.get(timePeriod);
-						return buildGroupSummaryHref(
-							viewedGroup,
-							row && { year: row.year, month: row.zeroIndexedMonth + 1 }
-						);
-					}}
-					buildLabel={(timePeriod) =>
-						formatMonthYearLabel(monthTotalsByTimePeriod.get(timePeriod))
-					}
+				<YearMonthTotalsTab
+					monthTotals={monthTotals}
 					totalsStats={
 						tabsWithTotalsRow[MONTH_TOTALS_TAB.id] ? totalsStats : undefined
 					}
+					viewedGroup={viewedGroup}
 				/>
 			)}
 			{isAllTimeMonthActive &&

@@ -1,5 +1,11 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
-import { render, screen, cleanup, waitFor } from '@testing-library/react';
+import {
+	render,
+	screen,
+	cleanup,
+	waitFor,
+	fireEvent
+} from '@testing-library/react';
 import { SpMonthTotalsTab } from '../SpMonthTotalsTab';
 import type { AggregateStatsResult } from '@/app/models/db';
 
@@ -114,5 +120,84 @@ describe('SpMonthTotalsTab', () => {
 		expect(marchLink.getAttribute('href')).toBe('/species/Robin/2026/3');
 		expect(screen.getByText('December 2026')).not.toBeNull();
 		expect(screen.queryByRole('link', { name: 'December 2026' })).toBeNull();
+	});
+
+	describe('empty months toggle', () => {
+		it('renders all 12 months by default (Show)', async () => {
+			render(
+				<SpMonthTotalsTab speciesName="Robin" viewedGroupId={1} year={2026} />
+			);
+			await waitFor(() => {
+				expect(document.querySelectorAll('tbody tr').length).toBe(12);
+			});
+			expect(
+				(screen.getByRole('radio', { name: 'Show' }) as HTMLInputElement)
+					.checked
+			).toBe(true);
+		});
+
+		it('hides zero-session months when toggled to Hide', async () => {
+			render(
+				<SpMonthTotalsTab speciesName="Robin" viewedGroupId={1} year={2026} />
+			);
+			await waitFor(() => {
+				expect(document.querySelectorAll('tbody tr').length).toBe(12);
+			});
+			fireEvent.click(screen.getByRole('radio', { name: 'Hide' }));
+			// Only March has sessions in the default mock.
+			expect(document.querySelectorAll('tbody tr').length).toBe(1);
+			expect(screen.getByText('March 2026')).not.toBeNull();
+		});
+
+		it('restores all 12 months when toggled back to Show', async () => {
+			render(
+				<SpMonthTotalsTab speciesName="Robin" viewedGroupId={1} year={2026} />
+			);
+			await waitFor(() => {
+				expect(document.querySelectorAll('tbody tr').length).toBe(12);
+			});
+			fireEvent.click(screen.getByRole('radio', { name: 'Hide' }));
+			expect(document.querySelectorAll('tbody tr').length).toBe(1);
+			fireEvent.click(screen.getByRole('radio', { name: 'Show' }));
+			expect(document.querySelectorAll('tbody tr').length).toBe(12);
+		});
+
+		it('has no visible effect for a year with no empty months', async () => {
+			const { fetchSpeciesPeriodTotals } =
+				await import('@/app/actions/sp-data');
+			vi.mocked(fetchSpeciesPeriodTotals).mockResolvedValue(
+				Array.from({ length: 12 }, (_unused, index) =>
+					buildMonthlyStat({
+						time_period: `2026-${String(index + 1).padStart(2, '0')}-01`,
+						session_count: 2
+					})
+				)
+			);
+			render(
+				<SpMonthTotalsTab speciesName="Robin" viewedGroupId={1} year={2026} />
+			);
+			await waitFor(() => {
+				expect(document.querySelectorAll('tbody tr').length).toBe(12);
+			});
+			fireEvent.click(screen.getByRole('radio', { name: 'Hide' }));
+			expect(document.querySelectorAll('tbody tr').length).toBe(12);
+		});
+
+		it('shows exactly one month for a year that is empty except one', async () => {
+			const { fetchSpeciesPeriodTotals } =
+				await import('@/app/actions/sp-data');
+			vi.mocked(fetchSpeciesPeriodTotals).mockResolvedValue([
+				buildMonthlyStat({ time_period: '2026-08-01', session_count: 3 })
+			]);
+			render(
+				<SpMonthTotalsTab speciesName="Robin" viewedGroupId={1} year={2026} />
+			);
+			await waitFor(() => {
+				expect(document.querySelectorAll('tbody tr').length).toBe(12);
+			});
+			fireEvent.click(screen.getByRole('radio', { name: 'Hide' }));
+			expect(document.querySelectorAll('tbody tr').length).toBe(1);
+			expect(screen.getByText('August 2026')).not.toBeNull();
+		});
 	});
 });
