@@ -322,6 +322,18 @@ Page-level tests render async server components directly with `await Page({ para
 
 Snapshot fixture data lives in `test-fixtures/snapshots/` — use these as mock return values rather than inventing data inline.
 
+**Fixing tests after a component default changes:** when a default prop/state value changes (e.g. a
+toggle's initial value flips), don't force old assertions to keep passing by adding a click/toggle
+to reach the old value — only tests whose stated purpose *is* that toggle should drive state via
+clicks. For every other test, a full-dataset row count used merely as an incidental "did it load"
+load-signal should just be corrected to whatever the new default actually renders. Toggle-specific
+describe blocks should be inverted (default-state assertions swap direction; a click now reveals the
+old default instead of the new one). Watch for genuinely redundant tests this exposes (e.g. a
+zero-fill assertion already covered by a model-level unit test) — delete rather than contort. Also
+watch for corner cases the new default introduces that are worth a dedicated test in their own right
+(e.g. a component that renders no controls at all once its default filters every row away, so the
+"reveal" toggle becomes unreachable in that state).
+
 ### DB integration tests (`supabase/__tests__/`)
 
 Test RPC functions and RLS policies against the real local database. Require `npm run db:seed:e2e` to populate test data before running. Use a separate Vitest node environment (no happy-dom).
