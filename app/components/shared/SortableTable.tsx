@@ -4,7 +4,7 @@ import { useState } from 'react';
 
 export type ColumnConfig = {
 	label: string;
-	footnote?: string;
+	tooltip?: string;
 	preferSortAscending?: boolean;
 	formatter?: (value: unknown) => string;
 	// Applied to the column's <th>, letting callers group/emphasise columns
@@ -75,7 +75,7 @@ function ColumnHeader<RowModel>({
 		>
 			<div className="flex items-center justify-between gap-1">
 				{column.label}
-				{column.footnote ? (
+				{column.tooltip ? (
 					<div className={`tooltip ${showTooltip ? 'show' : ''}`}>
 						<button
 							type="button"
@@ -92,7 +92,7 @@ function ColumnHeader<RowModel>({
 								role="tooltip"
 							>
 								<span className="p-2 bg-white border rounded-sm border-solid border-inherit normal-case font-normal text-xs">
-									{column.footnote}
+									{column.tooltip}
 								</span>
 							</span>
 						) : null}
