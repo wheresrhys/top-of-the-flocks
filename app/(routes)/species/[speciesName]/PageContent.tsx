@@ -3,10 +3,10 @@ import { useState } from 'react';
 import { format } from 'date-fns';
 import {
 	PageWrapper,
-	PrimaryHeading
+	PrimaryHeading,
+	Standfirst
 } from '@/app/components/shared/DesignSystem';
 import { NoPrefetchLink } from '@/app/components/shared/NoPrefetchLink';
-import { SpStats } from '@/app/components/pages/species/SpStats';
 import { type EnrichedBirdOfSpecies } from '@/app/models/bird';
 import type { AggregateStatsResult } from '@/app/models/db';
 import type { ViewedGroup } from '@/lib/group-slug';
@@ -135,11 +135,11 @@ export function SpeciesHeading({
 					</>
 				)}
 			</PrimaryHeading>
-			{counts && (
-				<p className="text-base-content/70 text-sm">
-					{buildSpeciesCountsSentence(counts)}
-				</p>
-			)}
+			<Standfirst testId="species-counts">
+				{counts
+					? buildSpeciesCountsSentence(counts)
+					: 'Not authorised to view any ringing data for this species'}
+			</Standfirst>
 		</>
 	);
 }
@@ -194,7 +194,6 @@ function SpeciesData({
 
 	return (
 		<>
-			<SpStats {...data} viewedGroup={viewedGroup} />
 			<TabNav
 				tabs={[
 					...(isAllTime ? [{ id: 'year-totals', label: 'Year totals' }] : []),
@@ -270,12 +269,6 @@ function SpeciesData({
 				tabId="highlights"
 				activeTabId={activeTab}
 			>
-				<SpNotableRetrapsTab
-					speciesName={data.speciesName}
-					viewedGroupId={viewedGroup.id}
-					fromDate={data.fromDate}
-					toDate={data.toDate}
-				/>
 				<SpBusiestSessionsTab
 					speciesName={data.speciesName}
 					viewedGroupId={viewedGroup.id}
@@ -283,6 +276,12 @@ function SpeciesData({
 					year={data.year}
 					month={data.month}
 					isActive={activeTab === 'highlights'}
+				/>
+				<SpNotableRetrapsTab
+					speciesName={data.speciesName}
+					viewedGroupId={viewedGroup.id}
+					fromDate={data.fromDate}
+					toDate={data.toDate}
 				/>
 			</ConditionalTabPanel>
 			<ConditionalTabPanel

@@ -7,7 +7,8 @@ import type { LocationRow } from '@/app/models/db';
 import {
 	PageWrapper,
 	PrimaryHeading,
-	printLocationName
+	printLocationName,
+	Standfirst
 } from '@/app/components/shared/DesignSystem';
 import Link from 'next/link';
 import { format as formatDate } from 'date-fns';
@@ -193,9 +194,9 @@ export function SessionPageContent({
 				{formatDate(new Date(date), 'EEE do MMMM yyyy')}
 			</PrimaryHeading>
 
-			<p className="text-lg" data-testid="session-stats">
+			<Standfirst testId="session-stats">
 				{buildSessionSummarySentence(dayData.encounters, speciesList.length)}
-			</p>
+			</Standfirst>
 			<Locations
 				locations={dayData.locations}
 				date={date}

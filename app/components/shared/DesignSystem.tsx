@@ -16,6 +16,23 @@ export function SecondaryHeading({ children }: { children: React.ReactNode }) {
 		</h2>
 	);
 }
+
+export function Standfirst({
+	children,
+	testId
+}: {
+	children: React.ReactNode;
+	testId?: string;
+}) {
+	return (
+		<p
+			data-testid={testId}
+			className="text-base-content text-base sm:text-lg sm:mt-2 sm:mb-2"
+		>
+			{children}
+		</p>
+	);
+}
 export function BoxyList({
 	children,
 	testId

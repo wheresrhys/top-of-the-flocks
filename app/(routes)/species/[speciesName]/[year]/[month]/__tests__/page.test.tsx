@@ -107,7 +107,6 @@ describe('/species/[speciesName]/[year]/[month]', () => {
 			render(await renderMonthPage());
 			await screen.findByTestId('sp-session-totals-tab');
 			expect(screen.getByRole('button', { name: 'Bird list' })).toBeDefined();
-			expect(screen.getByTestId('headline-stats')).toBeDefined();
 		});
 
 		it('shows neither a "Year totals" nor a "Month totals" tab', async () => {

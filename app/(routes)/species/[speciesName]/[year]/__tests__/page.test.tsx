@@ -117,7 +117,6 @@ describe('/species/[speciesName]/[year]', () => {
 			render(await renderYearPage());
 			await screen.findByTestId('sp-month-totals-tab');
 			expect(screen.getByRole('button', { name: 'Bird list' })).toBeDefined();
-			expect(screen.getByTestId('headline-stats')).toBeDefined();
 		});
 
 		describe('tab order and defaults (year-scoped page)', () => {

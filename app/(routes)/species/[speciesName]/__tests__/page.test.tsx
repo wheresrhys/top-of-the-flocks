@@ -247,13 +247,5 @@ describe('species detail page', () => {
 			);
 			expect(screen.queryByRole('button', { name: 'Bird list' })).toBeNull();
 		});
-
-		it('does not render SpStats', async () => {
-			render(await renderSpeciesPage());
-			await screen.findByText(
-				'Not authorised to view any encounter data for this species'
-			);
-			expect(screen.queryByTestId('headline-stats')).toBeNull();
-		});
 	});
 });
