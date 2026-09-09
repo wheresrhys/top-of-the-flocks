@@ -60,34 +60,69 @@ export function buildSpeciesHeadingText(
 	return `${speciesName} ${format(monthDate, 'LLLL')} ${year}`;
 }
 
+// Counts sentence rendered under the heading when species stats are available
+// (#784). `null` counts (a possible shape for `AggregateStatsResult`'s count
+// columns) are treated as 0 for both the number shown and the singular/plural
+// check, following the `${n} ${n === 1 ? 'singular' : 'plural'}` idiom used by
+// `buildYearsAgoCopy` (app/components/highlights/counts/renderers.tsx).
+export type SpeciesHeadingCounts = {
+	birdCount: number | null;
+	encounterCount: number | null;
+	sessionCount: number | null;
+};
+
+function buildSpeciesCountsSentence({
+	birdCount,
+	encounterCount,
+	sessionCount
+}: SpeciesHeadingCounts): string {
+	const birds = birdCount ?? 0;
+	const encounters = encounterCount ?? 0;
+	const sessions = sessionCount ?? 0;
+	return `${birds} ${birds === 1 ? 'bird' : 'birds'} encountered ${encounters} ${encounters === 1 ? 'time' : 'times'} at ${sessions} ${sessions === 1 ? 'Session' : 'Sessions'}`;
+}
+
 // Period-aware heading shared by the all-time, year and year+month species routes.
 // When a period is in play it appends an "All time" link back to the unscoped
 // `/species/{name}` page (mirroring #614's `{species} {period} [All time]` spec);
 // with no period it renders the bare species name, matching today's behaviour.
+// The optional `counts` prop (#784) renders a second, muted-caption line
+// reporting the species' totals for the period in view — only passed by
+// `SpeciesPageContent` on the `FullFatPageData` branch, since the "not
+// authorised" branch has no species stats to report.
 export function SpeciesHeading({
 	speciesName,
 	year,
-	month
+	month,
+	counts
 }: {
 	speciesName: string;
 	year?: number;
 	month?: number;
+	counts?: SpeciesHeadingCounts;
 }) {
 	return (
-		<PrimaryHeading>
-			{buildSpeciesHeadingText(speciesName, year, month)}
-			{year !== undefined && (
-				<>
-					{' '}
-					<NoPrefetchLink
-						className="link text-lg align-middle"
-						href={`/species/${speciesName}`}
-					>
-						All time
-					</NoPrefetchLink>
-				</>
+		<>
+			<PrimaryHeading>
+				{buildSpeciesHeadingText(speciesName, year, month)}
+				{year !== undefined && (
+					<>
+						{' '}
+						<NoPrefetchLink
+							className="link text-lg align-middle"
+							href={`/species/${speciesName}`}
+						>
+							All time
+						</NoPrefetchLink>
+					</>
+				)}
+			</PrimaryHeading>
+			{counts && (
+				<p className="text-base-content/70 text-sm">
+					{buildSpeciesCountsSentence(counts)}
+				</p>
 			)}
-		</PrimaryHeading>
+		</>
 	);
 }
 
@@ -298,6 +333,15 @@ export function SpeciesPageContent({
 				speciesName={speciesName}
 				year={year === undefined ? undefined : Number(year)}
 				month={month === undefined ? undefined : Number(month)}
+				counts={
+					fullFatTypeGuard(data)
+						? {
+								birdCount: data.speciesStats.bird_count,
+								encounterCount: data.speciesStats.encounter_count,
+								sessionCount: data.speciesStats.session_count
+							}
+						: undefined
+				}
 			/>
 			{fullFatTypeGuard(data) ? (
 				<SpeciesData data={data} viewedGroup={viewedGroup} />

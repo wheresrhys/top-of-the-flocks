@@ -29,12 +29,18 @@ function StatsByCategory({
 	speciesStats: AggregateStatsResult;
 }) {
 	return categoryOrder.map((categoryName) => {
-		// Weight/Wing have their own dedicated "Biometrics" tab (#783) — skip
-		// them here rather than falling through to the generic badge-list
+		// Weight/Wing have their own dedicated "Biometrics" tab (#783), and
+		// Totals (Birds/Encounters/Sessions/Max per session) is now reported
+		// by the heading's counts sentence instead (#784) — skip all three
+		// here rather than falling through to the generic badge-list
 		// rendering below. `categoryOrder`/`statsByCategory` still include
 		// these categories since `speciesStatConfigs` (app/models/species-stats.ts)
-		// keeps the Weight/Wing entries for SppStatsTable.tsx's benefit.
-		if (categoryName === 'Weight' || categoryName === 'Wing') {
+		// keeps their entries for SppStatsTable.tsx's benefit.
+		if (
+			categoryName === 'Weight' ||
+			categoryName === 'Wing' ||
+			categoryName === 'Totals'
+		) {
 			return null;
 		}
 		const subStats = statsByCategory[categoryName];

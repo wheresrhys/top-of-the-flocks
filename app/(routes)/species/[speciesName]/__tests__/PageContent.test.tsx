@@ -14,6 +14,18 @@ describe('SpeciesHeading', () => {
 			expect(heading.textContent).toBe('Robin');
 			expect(screen.queryByRole('link', { name: 'All time' })).toBeNull();
 		});
+
+		it('renders a counts sentence below the heading when counts are given', () => {
+			render(
+				<SpeciesHeading
+					speciesName="Robin"
+					counts={{ birdCount: 59, encounterCount: 89, sessionCount: 24 }}
+				/>
+			);
+			expect(
+				screen.getByText('59 birds encountered 89 times at 24 Sessions')
+			).toBeTruthy();
+		});
 	});
 
 	describe('Structure: year only', () => {
@@ -24,6 +36,24 @@ describe('SpeciesHeading', () => {
 			const link = within(heading).getByRole('link', { name: 'All time' });
 			expect(link.getAttribute('href')).toBe('/species/Robin');
 		});
+
+		it('renders the year heading, the "All time" link and a counts sentence', () => {
+			render(
+				<SpeciesHeading
+					speciesName="Robin"
+					year={2026}
+					counts={{ birdCount: 12, encounterCount: 18, sessionCount: 5 }}
+				/>
+			);
+			const heading = screen.getByRole('heading', { level: 1 });
+			expect(heading.textContent).toContain('Robin 2026');
+			expect(
+				within(heading).getByRole('link', { name: 'All time' })
+			).toBeTruthy();
+			expect(
+				screen.getByText('12 birds encountered 18 times at 5 Sessions')
+			).toBeTruthy();
+		});
 	});
 
 	describe('Structure: year + month', () => {
@@ -33,6 +63,34 @@ describe('SpeciesHeading', () => {
 			expect(heading.textContent).toContain('Robin August 2026');
 			const link = within(heading).getByRole('link', { name: 'All time' });
 			expect(link.getAttribute('href')).toBe('/species/Robin');
+		});
+
+		it('renders the month heading, the "All time" link and a counts sentence', () => {
+			render(
+				<SpeciesHeading
+					speciesName="Robin"
+					year={2026}
+					month={8}
+					counts={{ birdCount: 3, encounterCount: 4, sessionCount: 2 }}
+				/>
+			);
+			const heading = screen.getByRole('heading', { level: 1 });
+			expect(heading.textContent).toContain('Robin August 2026');
+			expect(
+				within(heading).getByRole('link', { name: 'All time' })
+			).toBeTruthy();
+			expect(
+				screen.getByText('3 birds encountered 4 times at 2 Sessions')
+			).toBeTruthy();
+		});
+	});
+
+	describe('Structure: no counts / unauthorised branch', () => {
+		it('renders only the heading line, with no counts sentence', () => {
+			render(<SpeciesHeading speciesName="Robin" year={2026} />);
+			const heading = screen.getByRole('heading', { level: 1 });
+			expect(heading.textContent).toContain('Robin 2026');
+			expect(screen.queryByText(/encountered/)).toBeNull();
 		});
 	});
 
@@ -50,6 +108,60 @@ describe('SpeciesHeading', () => {
 			expect(
 				screen.getByRole('link', { name: 'All time' }).getAttribute('href')
 			).toBe('/species/Lesser Redpoll');
+		});
+	});
+
+	describe('Edge: counts sentence formatting', () => {
+		it('renders "0 birds encountered 0 times at 0 Sessions" for zero counts', () => {
+			render(
+				<SpeciesHeading
+					speciesName="Robin"
+					counts={{ birdCount: 0, encounterCount: 0, sessionCount: 0 }}
+				/>
+			);
+			expect(
+				screen.getByText('0 birds encountered 0 times at 0 Sessions')
+			).toBeTruthy();
+		});
+
+		it('treats null counts as 0 without throwing', () => {
+			render(
+				<SpeciesHeading
+					speciesName="Robin"
+					counts={{
+						birdCount: null,
+						encounterCount: null,
+						sessionCount: null
+					}}
+				/>
+			);
+			expect(
+				screen.getByText('0 birds encountered 0 times at 0 Sessions')
+			).toBeTruthy();
+		});
+
+		it('renders "1 bird encountered 1 time at 1 Session" for singular counts', () => {
+			render(
+				<SpeciesHeading
+					speciesName="Robin"
+					counts={{ birdCount: 1, encounterCount: 1, sessionCount: 1 }}
+				/>
+			);
+			expect(
+				screen.getByText('1 bird encountered 1 time at 1 Session')
+			).toBeTruthy();
+		});
+
+		it('singularises only the counts that are exactly 1 in a mixed set', () => {
+			render(
+				<SpeciesHeading
+					speciesName="Robin"
+					counts={{ birdCount: 1, encounterCount: 2, sessionCount: 1 }}
+				/>
+			);
+			expect(
+				screen.getByText('1 bird encountered 2 times at 1 Session')
+			).toBeTruthy();
 		});
 	});
 
