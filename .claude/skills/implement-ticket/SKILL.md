@@ -3,9 +3,9 @@ name: implement-ticket
 description: >-
   Implements a specific GitHub issue by number, from scoping through to PR(s). Multi-stack
   tickets (DB + UI) produce multiple PRs; only the final PR closes the issue. Runs relevant
-  tests, opens PR(s) with "Closes #<n>", and posts behaviour-change diagrams via the
-  mermaid-diff skill. Model- and tree-agnostic — it does not pick a model or manage
-  parallelism (that's /swarm's job), so it works standalone on one ticket. Triggers:
+  tests and opens PR(s) with "Closes #<n>". Model- and tree-agnostic — it does not pick a
+  model or manage parallelism (that's /swarm's job), so it works standalone on one ticket.
+  Triggers:
   "implement ticket", "/implement-ticket <n>", "implement issue #<n>", or when a subagent
   is delegated a ticket to implement.
 ---
@@ -56,9 +56,6 @@ Read the issue body carefully. Identify:
   states)
 - **Dependencies**: does this require a prior ticket to be merged first? If a hard dependency is
   unmerged, stop and report rather than building on top of it.
-- **Model label**: note the ticket's model label (`opus`/`sonnet`/`fable`) from the issue's
-  labels — `gh issue view` already surfaces it. Reuse this value in step 7 rather than
-  re-fetching it later.
 
 In interactive mode, ask the user clarifying questions (via `AskUserQuestion`) for anything that
 would materially affect the implementation approach — exact UI layout or copy, reuse vs build
@@ -194,20 +191,6 @@ For each PR:
 Do **not** add `Closes #<number>` to any PR except the last one in a multi-PR sequence. The issue
 tracks the whole piece of work — it stays open until all increments are merged.
 
-### 7. Add behaviour-change diagrams to opus/fable PRs only
-
-Only invoke the mermaid-diff skill when the ticket's model label (noted in step 2) is `opus` or
-`fable` — the diagrams add real value for fiddly/multi-constraint or foundational work, where a
-reviewer benefits from a behaviour-change visualization, but are noise on routine
-`sonnet`-labelled tickets. For a `sonnet`-labelled ticket, skip this step entirely: no
-invocation, no PR comment.
-
-For an `opus`/`fable`-labelled ticket, once a PR is open, invoke the **`mermaid-diff`** skill for
-it (pass the PR number). Since you have just implemented the change, it draws on this session's
-context — the code you wrote and the decisions you made — rather than a cold GitHub read, so the
-diagrams reflect what actually shipped. It posts the Mermaid behaviour-change diagram(s) as a PR
-comment. Do this per PR in a multi-PR sequence.
-
 ## Rules
 
 - One issue per run. Never work on `main`.
@@ -216,9 +199,6 @@ comment. Do this per PR in a multi-PR sequence.
   implementation's exploration does.
 - No PR on red tests — fix or report back, never push a failing PR.
 - `Closes #<number>` only on the final PR of a sequence; the tracked issue stays open until then.
-- mermaid-diff runs once per PR, right after that PR opens, and only for `opus`/`fable`-labelled
-  tickets — never from a cold GitHub read later, and skipped entirely (no invocation, no PR
-  comment) for `sonnet`-labelled tickets.
 - A `db-migration` PR always carries the top-of-body "do not merge before pushing" warning, and
   the same warning is always repeated in the result handed back to the caller.
 - The PR that would carry `Closes #<number>` always re-checks the issue's live state
