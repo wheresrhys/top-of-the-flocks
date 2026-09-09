@@ -1,5 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, cleanup, within } from '@testing-library/react';
+import {
+	render,
+	screen,
+	cleanup,
+	within,
+	fireEvent
+} from '@testing-library/react';
 import Page, { fetchSpeciesYearMonthPageContent } from '../page';
 import spPageSnapshot from '@/test-fixtures/snapshots/fetchSpPageData.alpha.robin.json';
 import type { FullFatPageData } from '@/app/(routes)/species/[speciesName]/PageContent';
@@ -37,6 +43,10 @@ vi.mock('@/app/components/pages/species/SpStatsHistoryTab', () => ({
 
 vi.mock('@/app/components/pages/species/SpWeightWingTab', () => ({
 	SpWeightWingTab: () => <div data-testid="sp-weight-wing-tab" />
+}));
+
+vi.mock('@/app/components/pages/species/SpSessionTotalsTab', () => ({
+	SpSessionTotalsTab: () => <div data-testid="sp-session-totals-tab" />
 }));
 
 const { birds, speciesStats } = spPageSnapshot as unknown as FullFatPageData;
@@ -83,7 +93,7 @@ describe('/species/[speciesName]/[year]/[month]', () => {
 
 		it('renders the "{species} {long month} {year}" heading with an "All time" link', async () => {
 			render(await renderMonthPage());
-			await screen.findByTestId('sp-individuals-tab');
+			await screen.findByTestId('sp-session-totals-tab');
 			const heading = screen.getByRole('heading', { level: 1 });
 			expect(heading.textContent).toContain('Robin August 2026');
 			expect(
@@ -95,31 +105,68 @@ describe('/species/[speciesName]/[year]/[month]', () => {
 
 		it('renders the species tabs and stats for the scoped data', async () => {
 			render(await renderMonthPage());
-			await screen.findByTestId('sp-individuals-tab');
+			await screen.findByTestId('sp-session-totals-tab');
 			expect(screen.getByRole('button', { name: 'Bird list' })).toBeDefined();
 			expect(screen.getByTestId('headline-stats')).toBeDefined();
 		});
 
 		it('shows neither a "Year totals" nor a "Month totals" tab', async () => {
 			render(await renderMonthPage());
-			await screen.findByTestId('sp-individuals-tab');
+			await screen.findByTestId('sp-session-totals-tab');
 			expect(screen.queryByRole('button', { name: 'Year totals' })).toBeNull();
 			expect(screen.queryByRole('button', { name: 'Month totals' })).toBeNull();
 		});
 
 		it("does not show the all-time 'Month totals' tab on the month-scoped species page", async () => {
 			render(await renderMonthPage());
-			await screen.findByTestId('sp-individuals-tab');
+			await screen.findByTestId('sp-session-totals-tab');
 			expect(screen.queryByRole('button', { name: 'Month totals' })).toBeNull();
 			expect(screen.queryByTestId('sp-combined-month-totals-tab')).toBeNull();
 		});
 
-		it('does not show a "Session totals" tab on the month-scoped species page', async () => {
-			render(await renderMonthPage());
-			await screen.findByTestId('sp-individuals-tab');
-			expect(
-				screen.queryByRole('button', { name: 'Session totals' })
-			).toBeNull();
+		describe('tab order and defaults (month-scoped page)', () => {
+			it('renders tab buttons in the order Session totals, Highlights, Biometrics, Population, Bird list (no Year/Month totals)', async () => {
+				render(await renderMonthPage());
+				await screen.findByTestId('sp-session-totals-tab');
+				const labels = within(screen.getByRole('tablist'))
+					.getAllByRole('button')
+					.map((button) => button.textContent);
+				expect(labels).toEqual([
+					'Session totals',
+					'Highlights',
+					'Biometrics',
+					'Population',
+					'Bird list'
+				]);
+			});
+
+			it('renders SpSessionTotalsTab on initial render without clicking (eager default)', async () => {
+				render(await renderMonthPage());
+				await screen.findByTestId('sp-session-totals-tab');
+			});
+
+			it('shows a "Session totals" button on the month-scoped page', async () => {
+				render(await renderMonthPage());
+				await screen.findByTestId('sp-session-totals-tab');
+				expect(
+					screen.getByRole('button', { name: 'Session totals' })
+				).toBeDefined();
+			});
+
+			it('renders SpSessionTotalsTab after clicking the Session totals button', async () => {
+				render(await renderMonthPage());
+				await screen.findByTestId('sp-session-totals-tab');
+				fireEvent.click(screen.getByRole('button', { name: 'Session totals' }));
+				await screen.findByTestId('sp-session-totals-tab');
+			});
+
+			it('does not mount SpIndividualsTab until the Bird list tab is clicked', async () => {
+				render(await renderMonthPage());
+				await screen.findByTestId('sp-session-totals-tab');
+				expect(screen.queryByTestId('sp-individuals-tab')).toBeNull();
+				fireEvent.click(screen.getByRole('button', { name: 'Bird list' }));
+				await screen.findByTestId('sp-individuals-tab');
+			});
 		});
 	});
 
@@ -174,6 +221,12 @@ describe('/species/[speciesName]/[year]/[month]', () => {
 			expect(
 				within(heading).getByRole('link', { name: 'All time' })
 			).toBeDefined();
+			// not-authorised/zero-encounters branch renders no tab buttons at all
+			expect(screen.queryByRole('tablist')).toBeNull();
+			expect(
+				screen.queryByRole('button', { name: 'Session totals' })
+			).toBeNull();
+			expect(screen.queryByRole('button', { name: 'Bird list' })).toBeNull();
 		});
 	});
 

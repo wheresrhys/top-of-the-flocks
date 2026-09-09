@@ -1,5 +1,11 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, cleanup, fireEvent } from '@testing-library/react';
+import {
+	render,
+	screen,
+	cleanup,
+	fireEvent,
+	within
+} from '@testing-library/react';
 import Page from '../page';
 import spPageSnapshot from '@/test-fixtures/snapshots/fetchSpPageData.alpha.robin.json';
 import type { FullFatPageData } from '../PageContent';
@@ -93,72 +99,77 @@ describe('species detail page', () => {
 			mockFetchPageOfBirds.mockResolvedValue(birds);
 		});
 
-		it('renders all 7 tab buttons: Bird list, Highlights, Year totals, Month totals, Session totals, Biometrics, Population', async () => {
-			render(await renderSpeciesPage());
-			await screen.findByTestId('sp-individuals-tab');
-			expect(screen.getByRole('button', { name: 'Bird list' })).toBeDefined();
-			expect(screen.getByRole('button', { name: 'Highlights' })).toBeDefined();
-			expect(screen.getByRole('button', { name: 'Year totals' })).toBeDefined();
-			expect(
-				screen.getByRole('button', { name: 'Month totals' })
-			).toBeDefined();
-			expect(
-				screen.getByRole('button', { name: 'Session totals' })
-			).toBeDefined();
-			expect(screen.getByRole('button', { name: 'Biometrics' })).toBeDefined();
-			expect(screen.getByRole('button', { name: 'Population' })).toBeDefined();
-			expect(screen.queryByRole('button', { name: 'Graphs' })).toBeNull();
-			expect(screen.queryByRole('button', { name: 'Trend charts' })).toBeNull();
-			expect(screen.queryByRole('button', { name: 'Size plot' })).toBeNull();
-		});
+		describe('tab order and defaults (all-time page)', () => {
+			it('renders tab buttons in the order Year totals, Month totals, Session totals, Highlights, Biometrics, Population, Bird list', async () => {
+				render(await renderSpeciesPage());
+				await screen.findByTestId('sp-year-totals-tab');
+				const labels = within(screen.getByRole('tablist'))
+					.getAllByRole('button')
+					.map((button) => button.textContent);
+				expect(labels).toEqual([
+					'Year totals',
+					'Month totals',
+					'Session totals',
+					'Highlights',
+					'Biometrics',
+					'Population',
+					'Bird list'
+				]);
+				expect(screen.queryByRole('button', { name: 'Graphs' })).toBeNull();
+				expect(
+					screen.queryByRole('button', { name: 'Trend charts' })
+				).toBeNull();
+				expect(screen.queryByRole('button', { name: 'Size plot' })).toBeNull();
+			});
 
-		it('shows a "Session totals" tab on the all-time species page', async () => {
-			render(await renderSpeciesPage());
-			await screen.findByTestId('sp-individuals-tab');
-			expect(
-				screen.getByRole('button', { name: 'Session totals' })
-			).toBeDefined();
+			it('renders SpYearTotalsTab on initial render without clicking (eager default)', async () => {
+				render(await renderSpeciesPage());
+				await screen.findByTestId('sp-year-totals-tab');
+			});
+
+			it('does not mount SpIndividualsTab until the Bird list tab is clicked (now lazy)', async () => {
+				render(await renderSpeciesPage());
+				await screen.findByTestId('sp-year-totals-tab');
+				expect(screen.queryByTestId('sp-individuals-tab')).toBeNull();
+				fireEvent.click(screen.getByRole('button', { name: 'Bird list' }));
+				await screen.findByTestId('sp-individuals-tab');
+			});
+
+			it('keeps Bird list mounted after being clicked once even when another tab is reselected', async () => {
+				render(await renderSpeciesPage());
+				await screen.findByTestId('sp-year-totals-tab');
+				fireEvent.click(screen.getByRole('button', { name: 'Bird list' }));
+				await screen.findByTestId('sp-individuals-tab');
+				fireEvent.click(screen.getByRole('button', { name: 'Year totals' }));
+				await screen.findByTestId('sp-year-totals-tab');
+				// bird-list panel stays mounted (hidden) once loaded
+				expect(screen.getByTestId('sp-individuals-tab')).toBeDefined();
+			});
 		});
 
 		it("shows both 'Year totals' and 'Month totals' tabs on the all-time species page", async () => {
 			render(await renderSpeciesPage());
-			await screen.findByTestId('sp-individuals-tab');
+			await screen.findByTestId('sp-year-totals-tab');
 			expect(screen.getByRole('button', { name: 'Year totals' })).toBeDefined();
 			expect(
 				screen.getByRole('button', { name: 'Month totals' })
 			).toBeDefined();
-		});
-
-		describe('bird-list tab (default active)', () => {
-			it('renders SpIndividualsTab', async () => {
-				render(await renderSpeciesPage());
-				await screen.findByTestId('sp-individuals-tab');
-			});
 		});
 
 		describe('highlights tab (click to activate)', () => {
 			it('renders both SpNotableRetrapsTab and SpBusiestSessionsTab after clicking Highlights button', async () => {
 				render(await renderSpeciesPage());
-				await screen.findByTestId('sp-individuals-tab');
+				await screen.findByTestId('sp-year-totals-tab');
 				fireEvent.click(screen.getByRole('button', { name: 'Highlights' }));
 				await screen.findByTestId('sp-notable-retraps-tab');
 				await screen.findByTestId('sp-busiest-sessions-tab');
 			});
 		});
 
-		describe('year-totals tab (click to activate)', () => {
-			it('renders SpYearTotalsTab after clicking Year totals button', async () => {
-				render(await renderSpeciesPage());
-				await screen.findByTestId('sp-individuals-tab');
-				fireEvent.click(screen.getByRole('button', { name: 'Year totals' }));
-				await screen.findByTestId('sp-year-totals-tab');
-			});
-		});
-
 		describe('month-totals tab (click to activate)', () => {
 			it('renders SpCombinedMonthTotalsTab after clicking Month totals button', async () => {
 				render(await renderSpeciesPage());
-				await screen.findByTestId('sp-individuals-tab');
+				await screen.findByTestId('sp-year-totals-tab');
 				fireEvent.click(screen.getByRole('button', { name: 'Month totals' }));
 				await screen.findByTestId('sp-combined-month-totals-tab');
 			});
@@ -167,14 +178,14 @@ describe('species detail page', () => {
 		describe('session-totals tab (click to activate)', () => {
 			it('renders SpSessionTotalsTab after clicking Session totals button', async () => {
 				render(await renderSpeciesPage());
-				await screen.findByTestId('sp-individuals-tab');
+				await screen.findByTestId('sp-year-totals-tab');
 				fireEvent.click(screen.getByRole('button', { name: 'Session totals' }));
 				await screen.findByTestId('sp-session-totals-tab');
 			});
 
 			it('lazily loads SpSessionTotalsTab only once "Session totals" is selected, consistent with the other tabs', async () => {
 				render(await renderSpeciesPage());
-				await screen.findByTestId('sp-individuals-tab');
+				await screen.findByTestId('sp-year-totals-tab');
 				expect(screen.queryByTestId('sp-session-totals-tab')).toBeNull();
 				fireEvent.click(screen.getByRole('button', { name: 'Session totals' }));
 				await screen.findByTestId('sp-session-totals-tab');
@@ -184,7 +195,7 @@ describe('species detail page', () => {
 		describe('biometrics tab (click to activate)', () => {
 			it('renders SpBiometricsTab after clicking Biometrics button', async () => {
 				render(await renderSpeciesPage());
-				await screen.findByTestId('sp-individuals-tab');
+				await screen.findByTestId('sp-year-totals-tab');
 				fireEvent.click(screen.getByRole('button', { name: 'Biometrics' }));
 				await screen.findByTestId('sp-biometrics-tab');
 			});
@@ -193,14 +204,14 @@ describe('species detail page', () => {
 		describe('graphs tab (click to activate, labelled "Population")', () => {
 			it('renders SpGraphsTab after clicking the Population button', async () => {
 				render(await renderSpeciesPage());
-				await screen.findByTestId('sp-individuals-tab');
+				await screen.findByTestId('sp-year-totals-tab');
 				fireEvent.click(screen.getByRole('button', { name: 'Population' }));
 				await screen.findByTestId('sp-graphs-tab');
 			});
 
 			it('lazily loads SpGraphsTab only once "Population" is selected', async () => {
 				render(await renderSpeciesPage());
-				await screen.findByTestId('sp-individuals-tab');
+				await screen.findByTestId('sp-year-totals-tab');
 				expect(screen.queryByTestId('sp-graphs-tab')).toBeNull();
 				fireEvent.click(screen.getByRole('button', { name: 'Population' }));
 				await screen.findByTestId('sp-graphs-tab');
@@ -208,7 +219,7 @@ describe('species detail page', () => {
 
 			it("renders a 'Population' button that activates the same panel the 'graphs' tab id always did", async () => {
 				render(await renderSpeciesPage());
-				await screen.findByTestId('sp-individuals-tab');
+				await screen.findByTestId('sp-year-totals-tab');
 				expect(screen.queryByRole('button', { name: 'Graphs' })).toBeNull();
 				fireEvent.click(screen.getByRole('button', { name: 'Population' }));
 				await screen.findByTestId('sp-graphs-tab');

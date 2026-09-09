@@ -7,12 +7,14 @@ test('shows species name as heading', { tag: '@all' }, async ({ page }) => {
 
 test('alpha: shows bird list tab with birds', { tag: '@alpha' }, async ({ page }) => {
 	await page.goto('/species/Robin')
-	await expect(page.getByRole('button', { name: 'Bird list' })).toBeVisible()
+	// Bird list is now the last tab and lazily mounted, so click it first
+	await page.getByRole('button', { name: 'Bird list' }).click()
 	await expect(page.getByTestId('infinite-scroll-loader')).toBeVisible()
 })
 
 test('alpha: loads more birds on scroll past loader', { tag: '@alpha' }, async ({ page }) => {
 	await page.goto('/species/Robin')
+	await page.getByRole('button', { name: 'Bird list' }).click()
 	const loader = page.getByTestId('infinite-scroll-loader')
 	await expect(loader).toBeVisible()
 	await loader.scrollIntoViewIfNeeded()
@@ -21,7 +23,7 @@ test('alpha: loads more birds on scroll past loader', { tag: '@alpha' }, async (
 
 test('beta: shows Robin with limited data', { tag: '@beta' }, async ({ page }) => {
 	await page.goto('/species/Robin')
-	await expect(page.getByRole('button', { name: 'Bird list' })).toBeVisible()
+	await page.getByRole('button', { name: 'Bird list' }).click()
 	await expect(page.getByTestId('infinite-scroll-loader')).not.toBeVisible()
 })
 
