@@ -1,7 +1,6 @@
 import { BootstrapPage } from '@/app/components/layout/BootstrapPage';
 import { getAuthenticatedSupabaseClient } from '@/lib/group-auth';
 import { catchSupabaseErrors } from '@/lib/supabase';
-import { getTopPeriodsByMetric } from '@/app/actions/top-performers';
 import { fetchPageOfBirds } from '@/app/actions/sp-data';
 import {
 	SpeciesPageContent,
@@ -10,33 +9,10 @@ import {
 	type PageData
 } from './PageContent';
 
-import type {
-	AggregateStatsResult,
-	TopMetricsFilterParams,
-	TopPeriodsResult
-} from '@/app/models/db';
+import type { AggregateStatsResult } from '@/app/models/db';
 import type { ViewedGroup } from '@/lib/group-slug';
 
 type PageProps = { params: Promise<PageParams> };
-
-function getTopSessions(
-	species: string,
-	viewedGroupId: number,
-	year?: number,
-	month?: number
-) {
-	return getTopPeriodsByMetric({
-		temporal_unit: 'day',
-		metric_name: 'encounters',
-		filters: {
-			species_filter: species,
-			ringing_group_filter: viewedGroupId,
-			...(year !== undefined ? { year_filter: year } : {}),
-			...(month !== undefined ? { month_filter: month } : {})
-		} as TopMetricsFilterParams,
-		result_limit: 5
-	}) as Promise<TopPeriodsResult[]>;
-}
 
 async function getSpeciesStats(
 	species: string,
@@ -57,10 +33,11 @@ async function getSpeciesStats(
 
 // Shared core fetcher for all three species route levels. Given a resolved
 // `PeriodScope` it threads the date range into the encounter-level fetchers
-// (birds + aggregate stats) and the year/month into the top-session filter, and
-// echoes the period back on the returned data so the client can build the
-// heading and scope its own tab fetches. The unscoped route passes an empty
-// period, reproducing today's all-time behaviour exactly.
+// (birds + aggregate stats), and echoes the period back on the returned data
+// so the client can build the heading and scope its own tab fetches
+// (including the Highlights tab's Busiest sessions section, which fetches
+// lazily by year/month rather than eagerly here). The unscoped route passes
+// an empty period, reproducing today's all-time behaviour exactly.
 export async function fetchSpeciesPageContentForPeriod(
 	params: PageParams,
 	viewedGroupId: number,
@@ -77,8 +54,7 @@ export async function fetchSpeciesPageContentForPeriod(
 	if (!speciesId) {
 		throw new Error(`Species ${params.speciesName} not found`);
 	}
-	const [topSessions, birds, speciesStats] = await Promise.all([
-		getTopSessions(params.speciesName, viewedGroupId, year, month),
+	const [birds, speciesStats] = await Promise.all([
 		fetchPageOfBirds(speciesId, viewedGroupId, 0, fromDate, toDate),
 		getSpeciesStats(params.speciesName, viewedGroupId, fromDate, toDate)
 	]);
@@ -92,7 +68,6 @@ export async function fetchSpeciesPageContentForPeriod(
 		};
 	}
 	return {
-		topSessions,
 		birds,
 		speciesStats: speciesStats[0],
 		speciesId,

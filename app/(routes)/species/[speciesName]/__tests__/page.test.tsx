@@ -4,22 +4,15 @@ import Page from '../page';
 import spPageSnapshot from '@/test-fixtures/snapshots/fetchSpPageData.alpha.robin.json';
 import type { FullFatPageData } from '../PageContent';
 
-const {
-	mockGetAuthenticatedSupabaseClient,
-	mockGetTopPeriodsByMetric,
-	mockFetchPageOfBirds
-} = vi.hoisted(() => ({
-	mockGetAuthenticatedSupabaseClient: vi.fn(),
-	mockGetTopPeriodsByMetric: vi.fn(),
-	mockFetchPageOfBirds: vi.fn()
-}));
+const { mockGetAuthenticatedSupabaseClient, mockFetchPageOfBirds } = vi.hoisted(
+	() => ({
+		mockGetAuthenticatedSupabaseClient: vi.fn(),
+		mockFetchPageOfBirds: vi.fn()
+	})
+);
 
 vi.mock('@/lib/group-auth', () => ({
 	getAuthenticatedSupabaseClient: mockGetAuthenticatedSupabaseClient
-}));
-
-vi.mock('@/app/actions/top-performers', () => ({
-	getTopPeriodsByMetric: mockGetTopPeriodsByMetric
 }));
 
 vi.mock('@/app/actions/sp-data', () => ({
@@ -32,6 +25,10 @@ vi.mock('@/app/components/pages/species/SpIndividualsTab', () => ({
 
 vi.mock('@/app/components/pages/species/SpNotableRetrapsTab', () => ({
 	SpNotableRetrapsTab: () => <div data-testid="sp-notable-retraps-tab" />
+}));
+
+vi.mock('@/app/components/pages/species/SpBusiestSessionsTab', () => ({
+	SpBusiestSessionsTab: () => <div data-testid="sp-busiest-sessions-tab" />
 }));
 
 vi.mock('@/app/components/pages/species/SpGraphsTab', () => ({
@@ -52,8 +49,7 @@ vi.mock('@/app/components/pages/species/SpSessionTotalsTab', () => ({
 	SpSessionTotalsTab: () => <div data-testid="sp-session-totals-tab" />
 }));
 
-const { topSessions, birds, speciesStats } =
-	spPageSnapshot as unknown as FullFatPageData;
+const { birds, speciesStats } = spPageSnapshot as unknown as FullFatPageData;
 
 function makeSpeciesClient() {
 	const fromChain = {
@@ -90,15 +86,14 @@ describe('species detail page', () => {
 	describe('with full data (Robin fixture)', () => {
 		beforeEach(() => {
 			mockGetAuthenticatedSupabaseClient.mockResolvedValue(makeSpeciesClient());
-			mockGetTopPeriodsByMetric.mockResolvedValue(topSessions);
 			mockFetchPageOfBirds.mockResolvedValue(birds);
 		});
 
-		it('renders all 6 tab buttons: Bird list, Retraps, Year totals, Month totals, Session totals, Graphs', async () => {
+		it('renders all 6 tab buttons: Bird list, Highlights, Year totals, Month totals, Session totals, Graphs', async () => {
 			render(await renderSpeciesPage());
 			await screen.findByTestId('sp-individuals-tab');
 			expect(screen.getByRole('button', { name: 'Bird list' })).toBeDefined();
-			expect(screen.getByRole('button', { name: 'Retraps' })).toBeDefined();
+			expect(screen.getByRole('button', { name: 'Highlights' })).toBeDefined();
 			expect(screen.getByRole('button', { name: 'Year totals' })).toBeDefined();
 			expect(
 				screen.getByRole('button', { name: 'Month totals' })
@@ -135,12 +130,13 @@ describe('species detail page', () => {
 			});
 		});
 
-		describe('retraps tab (click to activate)', () => {
-			it('renders SpNotableRetrapsTab after clicking Retraps button', async () => {
+		describe('highlights tab (click to activate)', () => {
+			it('renders both SpNotableRetrapsTab and SpBusiestSessionsTab after clicking Highlights button', async () => {
 				render(await renderSpeciesPage());
 				await screen.findByTestId('sp-individuals-tab');
-				fireEvent.click(screen.getByRole('button', { name: 'Retraps' }));
+				fireEvent.click(screen.getByRole('button', { name: 'Highlights' }));
 				await screen.findByTestId('sp-notable-retraps-tab');
+				await screen.findByTestId('sp-busiest-sessions-tab');
 			});
 		});
 
@@ -200,7 +196,6 @@ describe('species detail page', () => {
 	describe('not authorised state (data has speciesId only, no birds)', () => {
 		beforeEach(() => {
 			mockGetAuthenticatedSupabaseClient.mockResolvedValue(makeSpeciesClient());
-			mockGetTopPeriodsByMetric.mockResolvedValue([]);
 			mockFetchPageOfBirds.mockResolvedValue([]);
 		});
 

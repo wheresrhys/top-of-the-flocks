@@ -8,10 +8,11 @@ import {
 import { NoPrefetchLink } from '@/app/components/shared/NoPrefetchLink';
 import { SpStats } from '@/app/components/pages/species/SpStats';
 import { type EnrichedBirdOfSpecies } from '@/app/models/bird';
-import type { AggregateStatsResult, TopPeriodsResult } from '@/app/models/db';
+import type { AggregateStatsResult } from '@/app/models/db';
 import type { ViewedGroup } from '@/lib/group-slug';
 import { SpIndividualsTab } from '@/app/components/pages/species/SpIndividualsTab';
 import { SpNotableRetrapsTab } from '@/app/components/pages/species/SpNotableRetrapsTab';
+import { SpBusiestSessionsTab } from '@/app/components/pages/species/SpBusiestSessionsTab';
 import { SpGraphsTab } from '@/app/components/pages/species/SpGraphsTab';
 import { SpYearTotalsTab } from '@/app/components/pages/species/SpYearTotalsTab';
 import { SpMonthTotalsTab } from '@/app/components/pages/species/SpMonthTotalsTab';
@@ -24,9 +25,9 @@ import { TabNav } from '@/app/components/TabNav';
 export type PageParams = { speciesName: string; year?: string; month?: string };
 
 // A resolved period passed to `fetchSpeciesPageContentForPeriod`. `year`/`month`
-// drive the heading and top-session filtering; `fromDate`/`toDate` (a
-// `yyyy-MM-dd` range) scope the encounter-level fetchers. All optional — an
-// all-time page passes none.
+// drive the heading and the Highlights tab's Busiest sessions filtering;
+// `fromDate`/`toDate` (a `yyyy-MM-dd` range) scope the encounter-level
+// fetchers. All optional — an all-time page passes none.
 export type PeriodScope = {
 	year?: number;
 	month?: number;
@@ -35,7 +36,6 @@ export type PeriodScope = {
 };
 
 export type FullFatPageData = {
-	topSessions: TopPeriodsResult[];
 	birds: EnrichedBirdOfSpecies[];
 	speciesStats: AggregateStatsResult;
 	speciesId: number;
@@ -143,7 +143,7 @@ function SpeciesData({
 			<TabNav
 				tabs={[
 					{ id: 'bird-list', label: 'Bird list' },
-					{ id: 'retraps', label: 'Retraps' },
+					{ id: 'highlights', label: 'Highlights' },
 					...(isAllTime ? [{ id: 'year-totals', label: 'Year totals' }] : []),
 					...(isAllTime
 						? [{ id: 'all-time-month-totals', label: 'Month totals' }]
@@ -175,7 +175,7 @@ function SpeciesData({
 			</ConditionalTabPanel>
 			<ConditionalTabPanel
 				loadedTabs={loadedTabs}
-				tabId="retraps"
+				tabId="highlights"
 				activeTabId={activeTab}
 			>
 				<SpNotableRetrapsTab
@@ -183,6 +183,14 @@ function SpeciesData({
 					viewedGroupId={viewedGroup.id}
 					fromDate={data.fromDate}
 					toDate={data.toDate}
+				/>
+				<SpBusiestSessionsTab
+					speciesName={data.speciesName}
+					viewedGroupId={viewedGroup.id}
+					viewedGroup={viewedGroup}
+					year={data.year}
+					month={data.month}
+					isActive={activeTab === 'highlights'}
 				/>
 			</ConditionalTabPanel>
 			{isAllTime && (
