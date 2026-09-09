@@ -468,3 +468,167 @@ describe('species all-time Month totals tab — Combine years toggle', () => {
 		});
 	});
 });
+
+describe('SpCombinedMonthTotalsTab — empty months toggle', () => {
+	afterEach(() => {
+		cleanup();
+	});
+
+	beforeEach(async () => {
+		const { fetchSpeciesPeriodTotals } = await import('@/app/actions/sp-data');
+		vi.mocked(fetchSpeciesPeriodTotals).mockReset();
+		vi.mocked(fetchSpeciesPeriodTotals).mockResolvedValue([
+			buildMonthlyStat({ time_period: '2020-01-01', session_count: 4 })
+		]);
+	});
+
+	describe('Usual', () => {
+		it('renders all 12 months by default (Show)', async () => {
+			render(
+				<SpCombinedMonthTotalsTab
+					speciesName="Robin"
+					viewedGroupId={1}
+					isActive={true}
+				/>
+			);
+			await waitFor(() =>
+				expect(document.querySelectorAll('tbody tr').length).toBe(12)
+			);
+			expect(
+				(screen.getByRole('radio', { name: 'Show' }) as HTMLInputElement)
+					.checked
+			).toBe(true);
+		});
+	});
+
+	describe('Structure', () => {
+		it('hides zero-session months in the combined view when toggled to Hide', async () => {
+			render(
+				<SpCombinedMonthTotalsTab
+					speciesName="Robin"
+					viewedGroupId={1}
+					isActive={true}
+				/>
+			);
+			await waitFor(() =>
+				expect(document.querySelectorAll('tbody tr').length).toBe(12)
+			);
+			fireEvent.click(screen.getByRole('radio', { name: 'Hide' }));
+			// Only January is folded from a real year; the rest are synthesized.
+			expect(document.querySelectorAll('tbody tr').length).toBe(1);
+			expect(screen.getByText('January')).toBeTruthy();
+		});
+
+		it('hides zero-session months in the by-year view when toggled to Hide', async () => {
+			const { fetchSpeciesPeriodTotals } =
+				await import('@/app/actions/sp-data');
+			vi.mocked(fetchSpeciesPeriodTotals).mockResolvedValue([
+				buildMonthlyStat({ time_period: '2020-01-01', session_count: 4 }),
+				buildMonthlyStat({ time_period: '2020-08-01', session_count: 0 })
+			]);
+			render(
+				<SpCombinedMonthTotalsTab
+					speciesName="Robin"
+					viewedGroupId={1}
+					isActive={true}
+				/>
+			);
+			await waitFor(() =>
+				expect(document.querySelectorAll('tbody tr').length).toBe(12)
+			);
+			fireEvent.click(screen.getByRole('radio', { name: 'By year' }));
+			expect(document.querySelectorAll('tbody tr').length).toBe(2);
+			fireEvent.click(screen.getByRole('radio', { name: 'Hide' }));
+			// The August row (session_count 0) is dropped; January (4) stays.
+			expect(document.querySelectorAll('tbody tr').length).toBe(1);
+			expect(screen.getByText('January 2020')).toBeTruthy();
+		});
+	});
+
+	describe('Edge', () => {
+		it('has no visible effect when no calendar month is empty across any year', async () => {
+			const { fetchSpeciesPeriodTotals } =
+				await import('@/app/actions/sp-data');
+			vi.mocked(fetchSpeciesPeriodTotals).mockResolvedValue(
+				Array.from({ length: 12 }, (_unused, index) =>
+					buildMonthlyStat({
+						time_period: `2020-${String(index + 1).padStart(2, '0')}-01`,
+						session_count: 3
+					})
+				)
+			);
+			render(
+				<SpCombinedMonthTotalsTab
+					speciesName="Robin"
+					viewedGroupId={1}
+					isActive={true}
+				/>
+			);
+			await waitFor(() =>
+				expect(document.querySelectorAll('tbody tr').length).toBe(12)
+			);
+			fireEvent.click(screen.getByRole('radio', { name: 'Hide' }));
+			expect(document.querySelectorAll('tbody tr').length).toBe(12);
+		});
+
+		it('shows only the months with data when all but one calendar month is empty across all years', async () => {
+			const { fetchSpeciesPeriodTotals } =
+				await import('@/app/actions/sp-data');
+			vi.mocked(fetchSpeciesPeriodTotals).mockResolvedValue([
+				buildMonthlyStat({ time_period: '2020-08-01', session_count: 5 }),
+				buildMonthlyStat({ time_period: '2021-08-01', session_count: 2 })
+			]);
+			render(
+				<SpCombinedMonthTotalsTab
+					speciesName="Robin"
+					viewedGroupId={1}
+					isActive={true}
+				/>
+			);
+			await waitFor(() =>
+				expect(document.querySelectorAll('tbody tr').length).toBe(12)
+			);
+			fireEvent.click(screen.getByRole('radio', { name: 'Hide' }));
+			// Both years fold into the single August bucket.
+			expect(document.querySelectorAll('tbody tr').length).toBe(1);
+			expect(screen.getByText('August')).toBeTruthy();
+		});
+
+		it('toggling combine-years does not reset the empty-months toggle, and vice versa', async () => {
+			const { fetchSpeciesPeriodTotals } =
+				await import('@/app/actions/sp-data');
+			vi.mocked(fetchSpeciesPeriodTotals).mockResolvedValue([
+				buildMonthlyStat({ time_period: '2020-01-01', session_count: 4 })
+			]);
+			render(
+				<SpCombinedMonthTotalsTab
+					speciesName="Robin"
+					viewedGroupId={1}
+					isActive={true}
+				/>
+			);
+			await waitFor(() =>
+				expect(document.querySelectorAll('tbody tr').length).toBe(12)
+			);
+			// Hide, then flip combine-years — empty-months stays Hide.
+			fireEvent.click(screen.getByRole('radio', { name: 'Hide' }));
+			fireEvent.click(screen.getByRole('radio', { name: 'By year' }));
+			expect(
+				(screen.getByRole('radio', { name: 'Hide' }) as HTMLInputElement)
+					.checked
+			).toBe(true);
+			// Flip combine-years back — still Hide.
+			fireEvent.click(screen.getByRole('radio', { name: 'Combined' }));
+			expect(
+				(screen.getByRole('radio', { name: 'Hide' }) as HTMLInputElement)
+					.checked
+			).toBe(true);
+			// And combine-years is unaffected by toggling empty-months.
+			fireEvent.click(screen.getByRole('radio', { name: 'Show' }));
+			expect(
+				(screen.getByRole('radio', { name: 'Combined' }) as HTMLInputElement)
+					.checked
+			).toBe(true);
+		});
+	});
+});

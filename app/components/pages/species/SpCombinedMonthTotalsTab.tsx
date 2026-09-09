@@ -6,10 +6,12 @@ import { useLazyTabData } from '@/app/components/shared/useLazyTabData';
 import {
 	buildCombinedMonthTotalsRows,
 	buildPerYearMonthTotalsRows,
+	filterEmptyMonthTotalsRows,
 	formatMonthYearLabel,
 	formatMonthLabel
 } from '@/app/models/month-totals';
 import { CombineYearsToggle } from '@/app/components/shared/CombineYearsToggle';
+import { EmptyMonthsToggle } from '@/app/components/shared/EmptyMonthsToggle';
 
 // The all-time species page's combine-years "Month totals" tab — the
 // species-scoped counterpart to `SummaryTotalsSection`'s
@@ -53,6 +55,10 @@ export function SpCombinedMonthTotalsTab({
 	// itself never unmounts across tab switches (`SpeciesPageContent`'s tab nav
 	// keeps it mounted via `isActive`).
 	const [combineYears, setCombineYears] = useState(true);
+	// Independent of `combineYears` — applies to whichever view is shown, and
+	// resets to Show (`false`) on tab remount alongside `combineYears`. Defaults
+	// to Show, preserving the always-render-all-months baseline.
+	const [hideEmptyMonths, setHideEmptyMonths] = useState(false);
 
 	if (isLoading || monthlyStats === undefined) {
 		return (
@@ -81,12 +87,24 @@ export function SpCombinedMonthTotalsTab({
 		perYearRows.map((row) => [row.stats.time_period, row])
 	);
 
+	// Both toggles are independent state; the empty-months filter applies to
+	// whichever row array is currently displayed. Combined and by-year both carry
+	// both controls.
+	const extraControls = (
+		<>
+			<CombineYearsToggle value={combineYears} onChange={setCombineYears} />
+			<EmptyMonthsToggle value={hideEmptyMonths} onChange={setHideEmptyMonths} />
+		</>
+	);
+
 	return (
 		<>
 			{combineYears ? (
 				<PeriodTotalsTable
 					grouping="month"
-					rows={combinedMonthRows.map((row) => row.stats)}
+					rows={filterEmptyMonthTotalsRows(combinedMonthRows, hideEmptyMonths).map(
+						(row) => row.stats
+					)}
 					firstColumnHeader="Month"
 					buildHref={() => ''}
 					buildLabel={(timePeriod) =>
@@ -94,17 +112,14 @@ export function SpCombinedMonthTotalsTab({
 					}
 					aggregationFixedTo="encounter"
 					dashIndividuals
-					extraControls={
-						<CombineYearsToggle
-							value={combineYears}
-							onChange={setCombineYears}
-						/>
-					}
+					extraControls={extraControls}
 				/>
 			) : (
 				<PeriodTotalsTable
 					grouping="month"
-					rows={perYearRows.map((row) => row.stats)}
+					rows={filterEmptyMonthTotalsRows(perYearRows, hideEmptyMonths).map(
+						(row) => row.stats
+					)}
 					firstColumnHeader="Month"
 					buildHref={(timePeriod) => {
 						const row = perYearRowByTimePeriod.get(timePeriod);
@@ -115,12 +130,7 @@ export function SpCombinedMonthTotalsTab({
 					buildLabel={(timePeriod) =>
 						formatMonthYearLabel(perYearRowByTimePeriod.get(timePeriod))
 					}
-					extraControls={
-						<CombineYearsToggle
-							value={combineYears}
-							onChange={setCombineYears}
-						/>
-					}
+					extraControls={extraControls}
 				/>
 			)}
 		</>
