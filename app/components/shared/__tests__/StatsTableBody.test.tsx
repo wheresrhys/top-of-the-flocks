@@ -8,6 +8,7 @@ import {
 } from '@testing-library/react';
 import { createStatsTableBody } from '../StatsTableBody';
 import type { ColumnConfig, RowModelWithRawData } from '../SortableTable';
+import { getRowByText } from '@/app/__tests__/helpers/table';
 
 afterEach(() => {
 	cleanup();
@@ -74,7 +75,7 @@ describe('createStatsTableBody', () => {
 
 		it('renders the first-column cell and the remaining data columns', () => {
 			renderBody(flatBody, rows);
-			const robinRow = screen.getByText('Robin').closest('tr') as HTMLElement;
+			const robinRow = getRowByText('Robin');
 			expect(within(robinRow).getByTestId('name').textContent).toBe('Robin');
 			// name is the first column; count is the sole remaining data column.
 			expect(robinRow.textContent).toContain('3');
@@ -82,7 +83,7 @@ describe('createStatsTableBody', () => {
 
 		it('applies each column config cellClassName to its data cell', () => {
 			renderBody(flatBody, rows);
-			const robinRow = screen.getByText('Robin').closest('tr') as HTMLElement;
+			const robinRow = getRowByText('Robin');
 			const cells = within(robinRow).getAllByRole('cell');
 			// [0] = first-column (name) cell, [1] = count cell.
 			expect(cells[1].className).toContain('font-bold');
@@ -111,14 +112,14 @@ describe('createStatsTableBody', () => {
 
 		it('expands a row on click to show its ExpandedContentComponent output', () => {
 			renderBody(accordionBody, rows);
-			const robinRow = screen.getByText('Robin').closest('tr') as HTMLElement;
+			const robinRow = getRowByText('Robin');
 			fireEvent.click(within(robinRow).getByRole('button'));
 			expect(screen.getByTestId('detail').textContent).toBe('robin-detail');
 		});
 
 		it('collapses an expanded row when its toggle is clicked again', () => {
 			renderBody(accordionBody, rows);
-			const robinRow = screen.getByText('Robin').closest('tr') as HTMLElement;
+			const robinRow = getRowByText('Robin');
 			const toggle = within(robinRow).getByRole('button');
 			fireEvent.click(toggle);
 			expect(screen.getByTestId('detail')).not.toBeNull();
@@ -128,8 +129,8 @@ describe('createStatsTableBody', () => {
 
 		it('switches the expansion to a different row when that row is clicked', () => {
 			renderBody(accordionBody, rows);
-			const robinRow = screen.getByText('Robin').closest('tr') as HTMLElement;
-			const wrenRow = screen.getByText('Wren').closest('tr') as HTMLElement;
+			const robinRow = getRowByText('Robin');
+			const wrenRow = getRowByText('Wren');
 			fireEvent.click(within(robinRow).getByRole('button'));
 			expect(screen.getByTestId('detail').textContent).toBe('robin-detail');
 			fireEvent.click(within(wrenRow).getByRole('button'));

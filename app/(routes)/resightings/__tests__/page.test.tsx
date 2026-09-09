@@ -4,6 +4,7 @@ import Page, { fetchResightingsPageContent } from '../page';
 import resightingsSnapshot from '@/test-fixtures/snapshots/fetchResightings.alpha.json';
 import type { ResightingEncounter } from '@/app/models/session';
 import { RESIGHTING_RECORD_TYPES } from '@/lib/demon-import';
+import { getCellByHeading } from '@/app/__tests__/helpers/table';
 
 const { mockGetAuthenticatedSupabaseClient } = vi.hoisted(() => ({
 	mockGetAuthenticatedSupabaseClient: vi.fn()
@@ -121,9 +122,13 @@ describe('resightings page', () => {
 		const rowWithValues = rows.find((row) =>
 			row.textContent?.includes('ARESIGHT01')
 		)!;
-		const cells = rowWithValues.querySelectorAll('td');
-		expect(cells[6].textContent).toBe('8');
-		expect(cells[7].textContent).toBe('2');
+		expect(
+			getCellByHeading(table, 'Finding condition', rowWithValues).textContent
+		).toBe('8');
+		expect(
+			getCellByHeading(table, 'Finding circumstances', rowWithValues)
+				.textContent
+		).toBe('2');
 	});
 
 	it('renders empty-value placeholders when finding_condition/finding_circumstances are null', async () => {
@@ -138,9 +143,14 @@ describe('resightings page', () => {
 		const rowWithNoRecoveryDetails = rows.find((row) =>
 			row.textContent?.includes('ARESIGHT02')
 		)!;
-		const cells = rowWithNoRecoveryDetails.querySelectorAll('td');
-		expect(cells[6].textContent).toBe('–');
-		expect(cells[7].textContent).toBe('–');
+		expect(
+			getCellByHeading(table, 'Finding condition', rowWithNoRecoveryDetails)
+				.textContent
+		).toBe('–');
+		expect(
+			getCellByHeading(table, 'Finding circumstances', rowWithNoRecoveryDetails)
+				.textContent
+		).toBe('–');
 	});
 
 	it('re-sorts rows when a column header is clicked', async () => {
@@ -167,8 +177,9 @@ describe('resightings page', () => {
 		const rowWithNoNotes = rows.find((row) =>
 			row.textContent?.includes('ARESIGHT02')
 		)!;
-		const notesCell = rowWithNoNotes.querySelectorAll('td')[5];
-		expect(notesCell.textContent).toBe('–');
+		expect(getCellByHeading(table, 'Notes', rowWithNoNotes).textContent).toBe(
+			'–'
+		);
 	});
 
 	it('renders empty state gracefully when there are no resightings', async () => {

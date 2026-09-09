@@ -322,6 +322,16 @@ Page-level tests render async server components directly with `await Page({ para
 
 Snapshot fixture data lives in `test-fixtures/snapshots/` — use these as mock return values rather than inventing data inline.
 
+**Asserting on table cells:** never index into cells by raw position (`cells[6]`,
+`querySelectorAll('td')[8]`) — a reordered or added column silently breaks an unrelated
+assertion. Use the shared helpers in `app/__tests__/helpers/table.ts` instead:
+`getColumnIndex(container?, headingText)`, `getRowByText(container?, rowText)`, and
+`getCellByHeading(container?, headingText, row)` where `row` is a row-text string, a 0-based
+data-row index, or a resolved row element (e.g. `screen.getByTestId('totals-row')`). The
+`container` param is optional on all three — omit it to default to the sole
+`screen.getByRole('table')` in the rendered output; pass it explicitly only when a test renders
+more than one table at once.
+
 **Fixing tests after a component default changes:** when a default prop/state value changes (e.g. a
 toggle's initial value flips), don't force old assertions to keep passing by adding a click/toggle
 to reach the old value — only tests whose stated purpose *is* that toggle should drive state via

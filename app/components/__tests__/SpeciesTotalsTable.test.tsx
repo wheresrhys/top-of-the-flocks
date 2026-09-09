@@ -3,6 +3,7 @@ import { render, screen, cleanup, fireEvent } from '@testing-library/react';
 import { SpeciesTotalsTable } from '../SpeciesTotalsTable';
 import speciesDataSnapshot from '@/test-fixtures/snapshots/fetchSpeciesData.alpha.json';
 import type { AggregateStatsResult } from '@/app/models/db';
+import { getCellByHeading } from '@/app/__tests__/helpers/table';
 
 const speciesStats = speciesDataSnapshot as unknown as AggregateStatsResult[];
 
@@ -244,10 +245,7 @@ describe('SpeciesTotalsTable', () => {
 		it('renders 0 when session_count is 0', () => {
 			const stats = [makeStat({ species_name: 'Robin', session_count: 0 })];
 			render(<SpeciesTotalsTable speciesStats={stats} />);
-			const rows = document.querySelectorAll('tbody tr');
-			const cells = rows[0].querySelectorAll('td');
-			// cells[0] is the species-name link cell; Sessions is the next column.
-			expect(cells[1].textContent?.trim()).toBe('0');
+			expect(getCellByHeading('Sessions', 0).textContent?.trim()).toBe('0');
 		});
 	});
 
@@ -256,14 +254,11 @@ describe('SpeciesTotalsTable', () => {
 			const stats = [makeStat({ species_name: 'Robin', pullus_bird_count: 1 })];
 			render(<SpeciesTotalsTable speciesStats={stats} />);
 			const headers = getColumnHeaders();
-			const cells = screen.getAllByRole('cell');
 
-			const columnStyle = (label: string) => {
-				const index = headers.findIndex(
-					(header) => header.textContent === label
-				);
-				return { header: headers[index], cell: cells[index] };
-			};
+			const columnStyle = (label: string) => ({
+				header: headers.find((header) => header.textContent === label),
+				cell: getCellByHeading(label, 0)
+			});
 
 			const expectations: [string, string][] = [
 				['New', 'bg-green-50'],
@@ -276,7 +271,7 @@ describe('SpeciesTotalsTable', () => {
 			];
 			expectations.forEach(([label, className]) => {
 				const { header, cell } = columnStyle(label);
-				expect(header.className).toContain(className);
+				expect(header?.className).toContain(className);
 				expect(cell.className).toContain(className);
 			});
 		});
@@ -465,45 +460,40 @@ describe('SpeciesTotalsTable', () => {
 			})
 		];
 
-		function getRowCells(): HTMLTableCellElement[] {
-			return Array.from(
-				document.querySelector('tbody tr')?.querySelectorAll('td') ?? []
-			) as HTMLTableCellElement[];
-		}
-
 		it('defaults to bird-based counts and re-renders the standard-block columns from encounter-based data when "Encounter" is clicked', () => {
 			render(<SpeciesTotalsTable speciesStats={stats} />);
 
-			// Column order: Species, Sessions, Encounters, Individuals, New,
-			// Retrap, Pulli, Juv, Postjuv, Adult, Not aged, New young.
-			let cells = getRowCells();
-			expect(cells[4].textContent).toBe('3'); // New
-			expect(cells[5].textContent).toBe('1'); // Retrap: bird_count - new
-			expect(cells[6].textContent).toBe('1'); // Pulli
-			expect(cells[9].textContent).toBe('0'); // Adult
+			expect(getCellByHeading('New', 0).textContent).toBe('3');
+			expect(getCellByHeading('Retrap', 0).textContent).toBe('1'); // bird_count - new
+			expect(getCellByHeading('Pulli', 0).textContent).toBe('1');
+			expect(getCellByHeading('Adult', 0).textContent).toBe('0');
 
 			fireEvent.click(screen.getByRole('radio', { name: 'Encounter' }));
 
-			cells = getRowCells();
-			expect(cells[4].textContent).toBe('3'); // New (unaffected by toggle)
-			expect(cells[5].textContent).toBe('2'); // Retrap: encounter_count - new
-			expect(cells[6].textContent).toBe('1'); // Pulli (from pullus_enc_count)
-			expect(cells[9].textContent).toBe('1'); // Adult (from adult_enc_count)
+			expect(getCellByHeading('New', 0).textContent).toBe('3'); // unaffected by toggle
+			expect(getCellByHeading('Retrap', 0).textContent).toBe('2'); // encounter_count - new
+			expect(getCellByHeading('Pulli', 0).textContent).toBe('1'); // from pullus_enc_count
+			expect(getCellByHeading('Adult', 0).textContent).toBe('1'); // from adult_enc_count
 		});
 
 		it('leaves the Species/Sessions/Encounters/Individuals columns unaffected by the toggle', () => {
 			render(<SpeciesTotalsTable speciesStats={stats} />);
-			const cellsBefore = getRowCells();
-			const unaffected = [0, 1, 2, 3].map(
-				(index) => cellsBefore[index].textContent
+			const unaffectedHeadings = [
+				'Species',
+				'Sessions',
+				'Encounters',
+				'Individuals'
+			];
+			const before = unaffectedHeadings.map(
+				(heading) => getCellByHeading(heading, 0).textContent
 			);
 
 			fireEvent.click(screen.getByRole('radio', { name: 'Encounter' }));
 
-			const cellsAfter = getRowCells();
-			expect(
-				[0, 1, 2, 3].map((index) => cellsAfter[index].textContent)
-			).toEqual(unaffected);
+			const after = unaffectedHeadings.map(
+				(heading) => getCellByHeading(heading, 0).textContent
+			);
+			expect(after).toEqual(before);
 		});
 
 		it('recomputes Pullus column visibility when toggling to a variant with a different zero-vs-nonzero pullus count', () => {

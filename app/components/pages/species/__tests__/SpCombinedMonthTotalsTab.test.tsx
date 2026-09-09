@@ -8,6 +8,7 @@ import {
 } from '@testing-library/react';
 import { SpCombinedMonthTotalsTab } from '../SpCombinedMonthTotalsTab';
 import type { AggregateStatsResult } from '@/app/models/db';
+import { getCellByHeading } from '@/app/__tests__/helpers/table';
 
 vi.mock('@/app/actions/sp-data', () => ({
 	fetchSpeciesPeriodTotals: vi.fn()
@@ -120,9 +121,7 @@ describe('SpCombinedMonthTotalsTab', () => {
 				// Hide default: only January (the sole nonzero folded bucket) shows.
 				expect(document.querySelectorAll('tbody tr').length).toBe(1);
 			});
-			const januaryRow = screen.getByText('January').closest('tr');
-			const cells = januaryRow?.querySelectorAll('td') ?? [];
-			expect(cells[3]?.textContent).toBe('75');
+			expect(getCellByHeading('Encounters', 'January').textContent).toBe('75');
 		});
 
 		it('shows a loading state before the fetch resolves', async () => {
@@ -196,9 +195,11 @@ describe('SpCombinedMonthTotalsTab', () => {
 			}) as HTMLInputElement;
 			expect(encounterToggle.checked).toBe(true);
 			expect(encounterToggle.disabled).toBe(true);
-			document.querySelectorAll('tbody tr').forEach((row) => {
-				const cells = row.querySelectorAll('td');
-				expect(cells[4]?.textContent).toBe('-');
+			const table = screen.getByRole('table');
+			table.querySelectorAll('tbody tr').forEach((_, rowIndex) => {
+				expect(getCellByHeading(table, 'Birds', rowIndex).textContent).toBe(
+					'-'
+				);
 			});
 		});
 	});
@@ -292,8 +293,6 @@ describe('species all-time Month totals tab — Combine years toggle', () => {
 			fireEvent.click(screen.getByRole('radio', { name: 'By year' }));
 			expect(document.querySelectorAll('tbody tr').length).toBe(1);
 
-			const getPullusCell = () =>
-				document.querySelector('tbody tr')?.querySelectorAll('td')[7];
 			// Unlocked, the toggle defaults to 'Bird' (matching every other
 			// unlocked `PeriodTotalsTable` usage), so the bird-based count is
 			// already showing without needing to click anything.
@@ -301,13 +300,13 @@ describe('species all-time Month totals tab — Combine years toggle', () => {
 				(screen.getByRole('radio', { name: 'Bird' }) as HTMLInputElement)
 					.checked
 			).toBe(true);
-			expect(getPullusCell()?.textContent).toBe('2');
+			expect(getCellByHeading('Pulli', 0)?.textContent).toBe('2');
 
 			fireEvent.click(screen.getByRole('radio', { name: 'Encounter' }));
-			expect(getPullusCell()?.textContent).toBe('5');
+			expect(getCellByHeading('Pulli', 0)?.textContent).toBe('5');
 
 			fireEvent.click(screen.getByRole('radio', { name: 'Bird' }));
-			expect(getPullusCell()?.textContent).toBe('2');
+			expect(getCellByHeading('Pulli', 0)?.textContent).toBe('2');
 		});
 
 		it('switching the toggle back on restores the combined, encounters-only view and disables the bird/encounter toggle again', async () => {

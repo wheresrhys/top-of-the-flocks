@@ -10,6 +10,7 @@ import { SessionTabs } from '../SingleSessionData';
 import type { SpeciesWithEncounters } from '../SingleSessionData';
 import type { NetRound } from '@/app/models/session-chronology';
 import type { SessionEncounter } from '@/app/models/session';
+import { getCellByHeading } from '@/app/__tests__/helpers/table';
 
 function makeEncounter(
 	id: number,
@@ -40,24 +41,9 @@ function makeEncounter(
 	} as unknown as SessionEncounter;
 }
 
-function columnCellValue(columnLabel: string, rowText: string): string {
-	const headers = screen.getAllByRole('columnheader');
-	const columnIndex = headers.findIndex(
-		(header) => header.textContent === columnLabel
-	);
-	const row = screen.getByText(rowText).closest('tr') as HTMLElement;
-	const cells = within(row).getAllByRole('cell');
-	return cells[columnIndex].textContent ?? '';
-}
-
 function totalsRowCellValue(columnLabel: string): string {
-	const headers = screen.getAllByRole('columnheader');
-	const columnIndex = headers.findIndex(
-		(header) => header.textContent === columnLabel
-	);
 	const totalsRow = screen.getByTestId('totals-row');
-	const cells = totalsRow.querySelectorAll('td');
-	return cells[columnIndex]?.textContent ?? '';
+	return getCellByHeading(columnLabel, totalsRow).textContent ?? '';
 }
 
 const robinEncounter = makeEncounter(1, 'Robin', '09:00:00', 3);
@@ -298,8 +284,8 @@ describe('SessionTabs', () => {
 					date="2024-09-15"
 				/>
 			);
-			expect(columnCellValue('Juv', 'Wren')).toBe('1');
-			expect(columnCellValue('Postjuv', 'Wren')).toBe('0');
+			expect(getCellByHeading('Juv', 'Wren').textContent).toBe('1');
+			expect(getCellByHeading('Postjuv', 'Wren').textContent).toBe('0');
 		});
 
 		it('counts an age-3, is_juv-true encounter in the juv column', () => {
@@ -316,8 +302,8 @@ describe('SessionTabs', () => {
 					date="2024-09-15"
 				/>
 			);
-			expect(columnCellValue('Juv', 'Dunnock')).toBe('1');
-			expect(columnCellValue('Postjuv', 'Dunnock')).toBe('0');
+			expect(getCellByHeading('Juv', 'Dunnock').textContent).toBe('1');
+			expect(getCellByHeading('Postjuv', 'Dunnock').textContent).toBe('0');
 		});
 
 		it('counts an age-code-greater-than-3, is_juv-true encounter in the juv column, not the adult column', () => {
@@ -334,8 +320,8 @@ describe('SessionTabs', () => {
 					date="2024-09-15"
 				/>
 			);
-			expect(columnCellValue('Juv', 'Starling')).toBe('1');
-			expect(columnCellValue('Adult', 'Starling')).toBe('0');
+			expect(getCellByHeading('Juv', 'Starling').textContent).toBe('1');
+			expect(getCellByHeading('Adult', 'Starling').textContent).toBe('0');
 		});
 
 		it('counts an age-1, is_juv-false (pulli) encounter in the pulli column, not juv', () => {
@@ -352,8 +338,8 @@ describe('SessionTabs', () => {
 					date="2024-09-15"
 				/>
 			);
-			expect(columnCellValue('Pulli', 'Swallow')).toBe('1');
-			expect(columnCellValue('Juv', 'Swallow')).toBe('0');
+			expect(getCellByHeading('Pulli', 'Swallow').textContent).toBe('1');
+			expect(getCellByHeading('Juv', 'Swallow').textContent).toBe('0');
 		});
 
 		it('counts an age-3, is_juv-false (bare 3) encounter in the postjuv column, not juv', () => {
@@ -370,8 +356,8 @@ describe('SessionTabs', () => {
 					date="2024-09-15"
 				/>
 			);
-			expect(columnCellValue('Postjuv', 'Chaffinch')).toBe('1');
-			expect(columnCellValue('Juv', 'Chaffinch')).toBe('0');
+			expect(getCellByHeading('Postjuv', 'Chaffinch').textContent).toBe('1');
+			expect(getCellByHeading('Juv', 'Chaffinch').textContent).toBe('0');
 		});
 	});
 
@@ -389,7 +375,7 @@ describe('SessionTabs', () => {
 					date="2024-09-15"
 				/>
 			);
-			expect(columnCellValue('New young', 'Wren')).toBe('1');
+			expect(getCellByHeading('New young', 'Wren').textContent).toBe('1');
 		});
 
 		it('counts a new (record_type N), age-3 encounter', () => {
@@ -405,7 +391,7 @@ describe('SessionTabs', () => {
 					date="2024-09-15"
 				/>
 			);
-			expect(columnCellValue('New young', 'Dunnock')).toBe('1');
+			expect(getCellByHeading('New young', 'Dunnock').textContent).toBe('1');
 		});
 
 		it('excludes a new (record_type N) encounter whose age is neither 1 nor 3', () => {
@@ -421,7 +407,7 @@ describe('SessionTabs', () => {
 					date="2024-09-15"
 				/>
 			);
-			expect(columnCellValue('New young', 'Starling')).toBe('0');
+			expect(getCellByHeading('New young', 'Starling').textContent).toBe('0');
 		});
 
 		it('excludes an age-1 retrap (record_type S), despite matching the age criterion', () => {
@@ -438,7 +424,7 @@ describe('SessionTabs', () => {
 					date="2024-09-15"
 				/>
 			);
-			expect(columnCellValue('New young', 'Swallow')).toBe('0');
+			expect(getCellByHeading('New young', 'Swallow').textContent).toBe('0');
 		});
 	});
 
@@ -525,13 +511,9 @@ describe('SessionTabs', () => {
 					date="2024-09-15"
 				/>
 			);
-			const headers = screen.getAllByRole('columnheader');
-			const totalIndex = headers.findIndex(
-				(header) => header.textContent === 'Total'
+			expect(getCellByHeading('Total', 'Robin').className).toContain(
+				'font-bold'
 			);
-			const robinRow = screen.getByText('Robin').closest('tr') as HTMLElement;
-			const cells = within(robinRow).getAllByRole('cell');
-			expect(cells[totalIndex].className).toContain('font-bold');
 		});
 
 		it('applies a distinct background colour to each of the New/Retrap/Juv/Postjuv/Adult/Unaged/New young columns', () => {
@@ -770,14 +752,16 @@ describe('SessionTabs', () => {
 				/>
 			);
 			expect(totalsRowCellValue('Total')).toBe(
-				columnCellValue('Total', 'Wren')
+				getCellByHeading('Total', 'Wren').textContent
 			);
-			expect(totalsRowCellValue('New')).toBe(columnCellValue('New', 'Wren'));
+			expect(totalsRowCellValue('New')).toBe(
+				getCellByHeading('New', 'Wren').textContent
+			);
 			expect(totalsRowCellValue('Pulli')).toBe(
-				columnCellValue('Pulli', 'Wren')
+				getCellByHeading('Pulli', 'Wren').textContent
 			);
 			expect(totalsRowCellValue('Max Proven Age')).toBe(
-				columnCellValue('Max Proven Age', 'Wren')
+				getCellByHeading('Max Proven Age', 'Wren').textContent
 			);
 		});
 
