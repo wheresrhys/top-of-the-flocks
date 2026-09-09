@@ -746,4 +746,187 @@ describe('SummaryTotalsSection', () => {
 			consoleError.mockRestore();
 		});
 	});
+
+	describe('empty months toggle - year month totals tab', () => {
+		// Two populated months (March, July); the other ten are zero-filled.
+		const populatedMonthTotals = buildMonthTotalsRows(2026, [
+			buildYearlyStat({ time_period: '2026-03-01', session_count: 5 }),
+			buildYearlyStat({ time_period: '2026-07-01', session_count: 2 })
+		]);
+
+		it('renders all 12 months by default (Show)', () => {
+			render(
+				<SummaryTotalsSection
+					monthTotals={populatedMonthTotals}
+					viewedGroup={viewedGroup}
+				/>
+			);
+			expect(document.querySelectorAll('tbody tr').length).toBe(12);
+			expect(
+				(screen.getByRole('radio', { name: 'Show' }) as HTMLInputElement)
+					.checked
+			).toBe(true);
+		});
+
+		it('hides zero-session months when toggled to Hide', () => {
+			render(
+				<SummaryTotalsSection
+					monthTotals={populatedMonthTotals}
+					viewedGroup={viewedGroup}
+				/>
+			);
+			fireEvent.click(screen.getByRole('radio', { name: 'Hide' }));
+			expect(document.querySelectorAll('tbody tr').length).toBe(2);
+			expect(screen.getByText('March 2026')).toBeTruthy();
+			expect(screen.getByText('July 2026')).toBeTruthy();
+		});
+
+		it('has no visible effect for a year with no empty months', () => {
+			const allMonths = buildMonthTotalsRows(
+				2026,
+				Array.from({ length: 12 }, (_unused, index) =>
+					buildYearlyStat({
+						time_period: `2026-${String(index + 1).padStart(2, '0')}-01`,
+						session_count: 3
+					})
+				)
+			);
+			render(
+				<SummaryTotalsSection
+					monthTotals={allMonths}
+					viewedGroup={viewedGroup}
+				/>
+			);
+			fireEvent.click(screen.getByRole('radio', { name: 'Hide' }));
+			expect(document.querySelectorAll('tbody tr').length).toBe(12);
+		});
+
+		it('shows exactly one month for a year that is empty except one', () => {
+			const oneMonth = buildMonthTotalsRows(2026, [
+				buildYearlyStat({ time_period: '2026-08-01', session_count: 4 })
+			]);
+			render(
+				<SummaryTotalsSection
+					monthTotals={oneMonth}
+					viewedGroup={viewedGroup}
+				/>
+			);
+			fireEvent.click(screen.getByRole('radio', { name: 'Hide' }));
+			expect(document.querySelectorAll('tbody tr').length).toBe(1);
+			expect(screen.getByText('August 2026')).toBeTruthy();
+		});
+
+		it('resets to Show after switching to another tab and back', async () => {
+			render(
+				<SummaryTotalsSection
+					monthTotals={populatedMonthTotals}
+					viewedGroup={viewedGroup}
+				/>
+			);
+			fireEvent.click(screen.getByRole('radio', { name: 'Hide' }));
+			expect(document.querySelectorAll('tbody tr').length).toBe(2);
+
+			fireEvent.click(screen.getByRole('button', { name: 'Species totals' }));
+			await waitFor(() =>
+				expect(document.querySelectorAll('tbody tr').length).toBe(
+					speciesStats.length
+				)
+			);
+			fireEvent.click(screen.getByRole('button', { name: 'Month totals' }));
+			expect(document.querySelectorAll('tbody tr').length).toBe(12);
+			expect(
+				(screen.getByRole('radio', { name: 'Show' }) as HTMLInputElement)
+					.checked
+			).toBe(true);
+		});
+	});
+
+	describe('empty months toggle - all-time month totals tab', () => {
+		const allTimeProps = {
+			yearlyTotals: [buildYearlyStat()],
+			showAllTimeMonthTotals: true,
+			viewedGroup
+		};
+
+		it('renders all 12 months by default (Show)', async () => {
+			render(<SummaryTotalsSection {...allTimeProps} />);
+			fireEvent.click(screen.getByRole('button', { name: 'Month totals' }));
+			await waitFor(() =>
+				expect(document.querySelectorAll('tbody tr').length).toBe(12)
+			);
+			expect(
+				(screen.getByRole('radio', { name: 'Show' }) as HTMLInputElement)
+					.checked
+			).toBe(true);
+		});
+
+		it('hides zero-session months in the combined view when toggled to Hide', async () => {
+			render(<SummaryTotalsSection {...allTimeProps} />);
+			fireEvent.click(screen.getByRole('button', { name: 'Month totals' }));
+			await waitFor(() =>
+				expect(document.querySelectorAll('tbody tr').length).toBe(12)
+			);
+			fireEvent.click(screen.getByRole('radio', { name: 'Hide' }));
+			// monthlyPeriodStats folds to two non-empty months: January and August.
+			expect(document.querySelectorAll('tbody tr').length).toBe(2);
+			expect(screen.getByText('January')).toBeTruthy();
+			expect(screen.getByText('August')).toBeTruthy();
+		});
+
+		it('hides zero-session months in the by-year view when toggled to Hide', async () => {
+			fetchPeriodStatsMock.mockResolvedValue([
+				buildYearlyStat({ time_period: '2020-01-01', session_count: 4 }),
+				buildYearlyStat({ time_period: '2020-08-01', session_count: 0 })
+			]);
+			render(<SummaryTotalsSection {...allTimeProps} />);
+			fireEvent.click(screen.getByRole('button', { name: 'Month totals' }));
+			await waitFor(() =>
+				expect(document.querySelectorAll('tbody tr').length).toBe(12)
+			);
+			fireEvent.click(screen.getByRole('radio', { name: 'By year' }));
+			expect(document.querySelectorAll('tbody tr').length).toBe(2);
+			fireEvent.click(screen.getByRole('radio', { name: 'Hide' }));
+			// The August row (session_count 0) is dropped; January (4) stays.
+			expect(document.querySelectorAll('tbody tr').length).toBe(1);
+			expect(screen.getByText('January 2020')).toBeTruthy();
+		});
+
+		it('has no visible effect when no calendar month is empty across any year', async () => {
+			fetchPeriodStatsMock.mockResolvedValue(
+				Array.from({ length: 12 }, (_unused, index) =>
+					buildYearlyStat({
+						time_period: `2020-${String(index + 1).padStart(2, '0')}-01`,
+						session_count: 3
+					})
+				)
+			);
+			render(<SummaryTotalsSection {...allTimeProps} />);
+			fireEvent.click(screen.getByRole('button', { name: 'Month totals' }));
+			await waitFor(() =>
+				expect(document.querySelectorAll('tbody tr').length).toBe(12)
+			);
+			fireEvent.click(screen.getByRole('radio', { name: 'Hide' }));
+			expect(document.querySelectorAll('tbody tr').length).toBe(12);
+		});
+
+		it('resets to Show after switching to another tab and back', async () => {
+			render(<SummaryTotalsSection {...allTimeProps} />);
+			fireEvent.click(screen.getByRole('button', { name: 'Month totals' }));
+			await waitFor(() =>
+				expect(document.querySelectorAll('tbody tr').length).toBe(12)
+			);
+			fireEvent.click(screen.getByRole('radio', { name: 'Hide' }));
+			expect(document.querySelectorAll('tbody tr').length).toBe(2);
+
+			fireEvent.click(screen.getByRole('button', { name: 'Year totals' }));
+			fireEvent.click(screen.getByRole('button', { name: 'Month totals' }));
+			await waitFor(() =>
+				expect(document.querySelectorAll('tbody tr').length).toBe(12)
+			);
+			expect(
+				(screen.getByRole('radio', { name: 'Show' }) as HTMLInputElement)
+					.checked
+			).toBe(true);
+		});
+	});
 });
