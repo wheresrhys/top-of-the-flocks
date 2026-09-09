@@ -3,6 +3,7 @@ import {
 	buildMonthTotalsRows,
 	buildCombinedMonthTotalsRows,
 	buildPerYearMonthTotalsRows,
+	filterEmptyMonthTotalsRows,
 	formatMonthYearLabel,
 	formatMonthLabel
 } from '../month-totals';
@@ -306,6 +307,79 @@ describe('buildPerYearMonthTotalsRows', () => {
 			expect(rows[0].zeroIndexedMonth).toBe(5);
 			expect(rows[0].stats.session_count).toBe(3);
 			expect(rows[0].stats.encounter_count).toBe(20);
+		});
+	});
+});
+
+describe('filterEmptyMonthTotalsRows', () => {
+	describe('Usual', () => {
+		it('returns all rows unchanged when hideEmptyMonths is false', () => {
+			const rows = buildMonthTotalsRows(2026, [
+				monthStat(2026, 3, { session_count: 5 })
+			]);
+			expect(filterEmptyMonthTotalsRows(rows, false)).toEqual(rows);
+		});
+	});
+
+	describe('Structure', () => {
+		it('filters out rows with session_count === 0 when hideEmptyMonths is true', () => {
+			const rows = buildMonthTotalsRows(2026, [
+				monthStat(2026, 3, { session_count: 5 }),
+				monthStat(2026, 7, { session_count: 2 })
+			]);
+			const filtered = filterEmptyMonthTotalsRows(rows, true);
+			expect(filtered.every((row) => row.stats.session_count !== 0)).toBe(true);
+		});
+
+		it('keeps rows with session_count > 0 when hideEmptyMonths is true', () => {
+			const rows = buildMonthTotalsRows(2026, [
+				monthStat(2026, 3, { session_count: 5 }),
+				monthStat(2026, 7, { session_count: 2 })
+			]);
+			const filtered = filterEmptyMonthTotalsRows(rows, true);
+			expect(filtered.map((row) => row.zeroIndexedMonth)).toEqual([2, 6]);
+		});
+	});
+
+	describe('Edge', () => {
+		it('returns an empty array when every row is empty and hideEmptyMonths is true', () => {
+			const rows = buildMonthTotalsRows(2026, []);
+			expect(filterEmptyMonthTotalsRows(rows, true)).toEqual([]);
+		});
+
+		it('returns all 12 rows unchanged when no month is empty (toggle has no visible effect)', () => {
+			const allMonths = Array.from({ length: 12 }, (_unused, index) =>
+				monthStat(2026, index + 1, { session_count: index + 1 })
+			);
+			const rows = buildMonthTotalsRows(2026, allMonths);
+			expect(filterEmptyMonthTotalsRows(rows, true)).toHaveLength(12);
+		});
+
+		it('returns exactly one row when every month but one is empty', () => {
+			const rows = buildMonthTotalsRows(2026, [
+				monthStat(2026, 8, { session_count: 4 })
+			]);
+			const filtered = filterEmptyMonthTotalsRows(rows, true);
+			expect(filtered).toHaveLength(1);
+			expect(filtered[0].zeroIndexedMonth).toBe(7);
+		});
+
+		it('does not mutate the input array', () => {
+			const rows = buildMonthTotalsRows(2026, [
+				monthStat(2026, 3, { session_count: 5 })
+			]);
+			const originalLength = rows.length;
+			filterEmptyMonthTotalsRows(rows, true);
+			expect(rows).toHaveLength(originalLength);
+		});
+
+		it('filters combined-month rows by session_count too (generic over both row shapes)', () => {
+			const combinedRows = buildCombinedMonthTotalsRows([
+				monthStat(2020, 1, { session_count: 4 }),
+				monthStat(2021, 8, { session_count: 2 })
+			]);
+			const filtered = filterEmptyMonthTotalsRows(combinedRows, true);
+			expect(filtered.map((row) => row.zeroIndexedMonth)).toEqual([0, 7]);
 		});
 	});
 });

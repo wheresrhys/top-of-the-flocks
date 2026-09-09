@@ -191,6 +191,22 @@ export function buildCombinedMonthTotalsRows(
 	});
 }
 
+// Post-processing filter shared by every month-totals table's "Empty months:
+// hide/show" toggle. When `hideEmptyMonths` is true it drops the synthetic
+// zero-session rows `buildMonthTotalsRows`/`buildCombinedMonthTotalsRows`
+// zero-fill in (a month with genuine sessions never has `session_count === 0`,
+// so this only removes synthesized months); when false it returns the rows
+// untouched, preserving today's always-render-all-months baseline. Generic over
+// both `MonthTotalsRow` and `CombinedMonthTotalsRow` since both carry a
+// `stats.session_count`. Pure — never mutates the input array. Callers apply it
+// after building rows; the builders themselves stay unaware of the toggle.
+export function filterEmptyMonthTotalsRows<
+	T extends { stats: Pick<AggregateStatsResult, 'session_count'> }
+>(rows: T[], hideEmptyMonths: boolean): T[] {
+	if (!hideEmptyMonths) return rows;
+	return rows.filter((row) => row.stats.session_count !== 0);
+}
+
 // The "Combine years" toggle's OFF state for the all-time "Month totals" tab:
 // one row per real `(year, month)` combination in the group's history, with no
 // combining/summing — the raw `aggregate_stats` month array (the same array
