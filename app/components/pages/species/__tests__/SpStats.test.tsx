@@ -4,8 +4,7 @@ import { SpStats } from '../SpStats';
 import spPageSnapshot from '@/test-fixtures/snapshots/fetchSpPageData.alpha.robin.json';
 import type { FullFatPageData } from '@/app/(routes)/species/[speciesName]/PageContent';
 
-const { topSessions, birds, speciesStats } =
-	spPageSnapshot as unknown as FullFatPageData;
+const { birds, speciesStats } = spPageSnapshot as unknown as FullFatPageData;
 
 afterEach(() => {
 	cleanup();
@@ -16,7 +15,6 @@ describe('SpStats', () => {
 		it('shows min-max range with avg and median', () => {
 			render(
 				<SpStats
-					topSessions={topSessions}
 					birds={birds}
 					speciesStats={speciesStats}
 					speciesId={1}
@@ -34,7 +32,6 @@ describe('SpStats', () => {
 		it('shows min-max range with avg and median', () => {
 			render(
 				<SpStats
-					topSessions={topSessions}
 					birds={birds}
 					speciesStats={speciesStats}
 					speciesId={1}
@@ -45,6 +42,21 @@ describe('SpStats', () => {
 			expect(
 				screen.getByText(/Wing:.*72-80mm.*avg: 74\.2mm.*median: 74mm/i)
 			).toBeDefined();
+		});
+	});
+
+	describe('Edge', () => {
+		it('does not render a "Top sessions" line', () => {
+			render(
+				<SpStats
+					birds={birds}
+					speciesStats={speciesStats}
+					speciesId={1}
+					speciesName="Robin"
+					viewedGroup={{ id: 1, slug: 'alpha' }}
+				/>
+			);
+			expect(screen.queryByText('Top sessions:')).toBeNull();
 		});
 	});
 });

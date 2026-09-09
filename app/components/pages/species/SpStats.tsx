@@ -3,7 +3,6 @@ import {
 	UnwrappedBadgeList
 } from '@/app/components/shared/DesignSystem';
 import type { FullFatPageData } from '@/app/(routes)/species/[speciesName]/PageContent';
-import { StatOutput } from '@/app/components/shared/StatOutput';
 import type { AggregateStatsResult } from '@/app/models/db';
 import type { SpeciesStatConfig } from '@/app/models/species-stats';
 import { speciesStatConfigs } from '@/app/models/species-stats';
@@ -99,10 +98,8 @@ function StatsByCategory({
 }
 
 export function SpStats({
-	topSessions,
 	birds,
-	speciesStats,
-	viewedGroup
+	speciesStats
 }: FullFatPageData & { viewedGroup: ViewedGroup }) {
 	if (!speciesStats) return null;
 	// const NotableRetrapsBirds =
@@ -157,20 +154,6 @@ export function SpStats({
 			) : (
 				<li>No birds retrapped</li>
 			)} */}
-			<li className="flex items-center gap-2 flex-wrap">
-				<span className="text-nowrap">Top sessions:</span>{' '}
-				{topSessions.map((session) => (
-					<StatOutput
-						key={session.visit_date}
-						value={session.metric_value}
-						visitDate={session.visit_date}
-						temporalUnit="day"
-						classes="badge badge-outline"
-						dateFormat="d MMM yyyy"
-						viewedGroup={viewedGroup}
-					/>
-				))}
-			</li>
 		</BoxyList>
 	);
 }

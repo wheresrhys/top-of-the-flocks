@@ -10,22 +10,15 @@ import Page, { fetchSpeciesYearPageContent } from '../page';
 import spPageSnapshot from '@/test-fixtures/snapshots/fetchSpPageData.alpha.robin.json';
 import type { FullFatPageData } from '@/app/(routes)/species/[speciesName]/PageContent';
 
-const {
-	mockGetAuthenticatedSupabaseClient,
-	mockGetTopPeriodsByMetric,
-	mockFetchPageOfBirds
-} = vi.hoisted(() => ({
-	mockGetAuthenticatedSupabaseClient: vi.fn(),
-	mockGetTopPeriodsByMetric: vi.fn(),
-	mockFetchPageOfBirds: vi.fn()
-}));
+const { mockGetAuthenticatedSupabaseClient, mockFetchPageOfBirds } = vi.hoisted(
+	() => ({
+		mockGetAuthenticatedSupabaseClient: vi.fn(),
+		mockFetchPageOfBirds: vi.fn()
+	})
+);
 
 vi.mock('@/lib/group-auth', () => ({
 	getAuthenticatedSupabaseClient: mockGetAuthenticatedSupabaseClient
-}));
-
-vi.mock('@/app/actions/top-performers', () => ({
-	getTopPeriodsByMetric: mockGetTopPeriodsByMetric
 }));
 
 vi.mock('@/app/actions/sp-data', () => ({
@@ -38,6 +31,10 @@ vi.mock('@/app/components/pages/species/SpIndividualsTab', () => ({
 
 vi.mock('@/app/components/pages/species/SpNotableRetrapsTab', () => ({
 	SpNotableRetrapsTab: () => <div data-testid="sp-notable-retraps-tab" />
+}));
+
+vi.mock('@/app/components/pages/species/SpBusiestSessionsTab', () => ({
+	SpBusiestSessionsTab: () => <div data-testid="sp-busiest-sessions-tab" />
 }));
 
 vi.mock('@/app/components/pages/species/SpStatsHistoryTab', () => ({
@@ -62,8 +59,7 @@ vi.mock('@/app/components/pages/species/SpWeightWingTab', () => ({
 	SpWeightWingTab: () => <div data-testid="sp-weight-wing-tab" />
 }));
 
-const { topSessions, birds, speciesStats } =
-	spPageSnapshot as unknown as FullFatPageData;
+const { birds, speciesStats } = spPageSnapshot as unknown as FullFatPageData;
 
 function makeSpeciesClient(
 	speciesId: number | null = spPageSnapshot.speciesId
@@ -96,14 +92,12 @@ function renderYearPage(speciesName = 'Robin', year = '2026') {
 describe('/species/[speciesName]/[year]', () => {
 	afterEach(() => {
 		cleanup();
-		mockGetTopPeriodsByMetric.mockReset();
 		mockFetchPageOfBirds.mockReset();
 	});
 
 	describe('Usual: species with encounters in the year', () => {
 		beforeEach(() => {
 			mockGetAuthenticatedSupabaseClient.mockResolvedValue(makeSpeciesClient());
-			mockGetTopPeriodsByMetric.mockResolvedValue(topSessions);
 			mockFetchPageOfBirds.mockResolvedValue(birds);
 		});
 
@@ -173,7 +167,6 @@ describe('/species/[speciesName]/[year]', () => {
 	describe('date-range plumbing', () => {
 		beforeEach(() => {
 			mockGetAuthenticatedSupabaseClient.mockResolvedValue(makeSpeciesClient());
-			mockGetTopPeriodsByMetric.mockResolvedValue(topSessions);
 			mockFetchPageOfBirds.mockResolvedValue(birds);
 		});
 
@@ -191,17 +184,12 @@ describe('/species/[speciesName]/[year]', () => {
 			);
 		});
 
-		it('threads year_filter into the top-sessions filter and the range into aggregate stats', async () => {
+		it('threads the whole-year range into aggregate stats', async () => {
 			const client = makeSpeciesClient();
 			mockGetAuthenticatedSupabaseClient.mockResolvedValue(client);
 			await fetchSpeciesYearPageContent(
 				{ speciesName: 'Robin', year: '2026' },
 				1
-			);
-			expect(mockGetTopPeriodsByMetric).toHaveBeenCalledWith(
-				expect.objectContaining({
-					filters: expect.objectContaining({ year_filter: 2026 })
-				})
 			);
 			expect(client.rpc).toHaveBeenCalledWith(
 				'aggregate_stats',
@@ -216,7 +204,6 @@ describe('/species/[speciesName]/[year]', () => {
 	describe('Structure: species with zero encounters in the year', () => {
 		beforeEach(() => {
 			mockGetAuthenticatedSupabaseClient.mockResolvedValue(makeSpeciesClient());
-			mockGetTopPeriodsByMetric.mockResolvedValue([]);
 			mockFetchPageOfBirds.mockResolvedValue([]);
 		});
 
@@ -239,7 +226,6 @@ describe('/species/[speciesName]/[year]', () => {
 			mockGetAuthenticatedSupabaseClient.mockResolvedValue(
 				makeSpeciesClient(null)
 			);
-			mockGetTopPeriodsByMetric.mockResolvedValue([]);
 			mockFetchPageOfBirds.mockResolvedValue([]);
 		});
 
