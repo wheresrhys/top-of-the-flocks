@@ -8,7 +8,7 @@ description: >-
   exclusive-resource-labelled unit of work (`db-migration` or `e2e-exclusive`) completely solo —
   no other worker runs concurrently with it (this repo shares one local Supabase instance across
   worktrees). Each ticket subagent runs the implement-ticket skill (branch,
-  commits, tests, PR with "Closes #<n>", mermaid-diff). Runs as a continuously-refilling pool
+  commits, tests, PR with "Closes #<n>"). Runs as a continuously-refilling pool
   of up to 4 worker subagents (the orchestrator doesn't count): each completion triggers a
   re-select + respawn until no eligible work remains; while idle, a "check again" command forces
   a fresh GitHub re-scan for newly-available work. A stop command prompts the user to confirm
@@ -259,7 +259,7 @@ For each selected issue, launch an Agent (default background, so they run in par
 
 Append a `kind: "ticket"` entry (see State file) for this worker right after spawning it.
 
-The subagent owns branch/commits/tests/PR/mermaid-diff via `implement-ticket`, including the
+The subagent owns branch/commits/tests/PR via `implement-ticket`, including the
 test-isolation rule for any DB integration tests it writes. swarm does not duplicate that
 logic — it only pins the branch base to `origin/main` and enforces the exclusive-resource cap so
 parallel worktrees don't build on a stale checkout or collide on the shared local Supabase
@@ -274,9 +274,7 @@ time):
 2. **Report** that unit:
    - **Maintained PRs**: PR → conflicts resolved? → feedback addressed (+ reviewer reply URL) →
      commit pushed → now mergeable? (or "no-op, nothing outstanding").
-   - **Tickets**: issue → branch → PR URL → test status → whether mermaid-diff posted. Posted
-     for `opus`/`fable`-labelled tickets; "skipped (sonnet)" is the expected, normal outcome for
-     `sonnet`-labelled tickets — not a failure to flag.
+   - **Tickets**: issue → branch → PR URL → test status.
    - Flag anything that failed tests, still conflicts after the merge, couldn't open a PR, or
      couldn't push so the user can intervene.
 3. **Refill** — unless termination has been requested (see below), immediately re-run selection
