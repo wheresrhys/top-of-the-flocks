@@ -55,7 +55,7 @@ function AllTimeMonthTotalsTab({
 }) {
 	const [combineYears, setCombineYears] = useState(true);
 	// Sibling of `combineYears` — independent state, applies to whichever view is
-	// shown, and resets to Show (`false`) on tab remount alongside it.
+	// shown, and resets to Hide (`true`) on tab remount alongside it.
 	const [hideEmptyMonths, setHideEmptyMonths] = useState(true);
 
 	// ON: 12 calendar-month buckets summed across every year. Look each row

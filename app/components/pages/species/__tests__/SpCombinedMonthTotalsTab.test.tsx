@@ -82,26 +82,6 @@ describe('SpCombinedMonthTotalsTab', () => {
 			);
 		});
 
-		it('renders 12 calendar-month rows, Jan through Dec, folded across every recorded year for the species', async () => {
-			const { fetchSpeciesPeriodTotals } =
-				await import('@/app/actions/sp-data');
-			vi.mocked(fetchSpeciesPeriodTotals).mockResolvedValue([
-				buildMonthlyStat({ time_period: '2020-01-01' }),
-				buildMonthlyStat({ time_period: '2021-01-01' }),
-				buildMonthlyStat({ time_period: '2020-08-01' })
-			]);
-			render(
-				<SpCombinedMonthTotalsTab
-					speciesName="Robin"
-					viewedGroupId={1}
-					isActive={true}
-				/>
-			);
-			await waitFor(() => {
-				expect(document.querySelectorAll('tbody tr').length).toBe(12);
-			});
-		});
-
 		it("renders the folded rows through PeriodTotalsTable with month labels consistent with the group-wide 'Month totals' convention", async () => {
 			render(
 				<SpCombinedMonthTotalsTab
@@ -111,7 +91,8 @@ describe('SpCombinedMonthTotalsTab', () => {
 				/>
 			);
 			await waitFor(() => {
-				expect(document.querySelectorAll('tbody tr').length).toBe(12);
+				// Hide default: only January (the sole nonzero folded bucket) shows.
+				expect(document.querySelectorAll('tbody tr').length).toBe(1);
 			});
 			// Combine-years labels are month name only — no year, no link.
 			expect(screen.getByText('January')).toBeTruthy();
@@ -136,7 +117,8 @@ describe('SpCombinedMonthTotalsTab', () => {
 				/>
 			);
 			await waitFor(() => {
-				expect(document.querySelectorAll('tbody tr').length).toBe(12);
+				// Hide default: only January (the sole nonzero folded bucket) shows.
+				expect(document.querySelectorAll('tbody tr').length).toBe(1);
 			});
 			const januaryRow = screen.getByText('January').closest('tr');
 			const cells = januaryRow?.querySelectorAll('td') ?? [];
@@ -178,7 +160,7 @@ describe('SpCombinedMonthTotalsTab', () => {
 			expect(fetchSpeciesPeriodTotals).not.toHaveBeenCalled();
 		});
 
-		it('renders all 12 months with zero-filled stats when the species has no recorded history at all', async () => {
+		it('shows "No data recorded." rather than erroring when the species has no recorded history at all', async () => {
 			const { fetchSpeciesPeriodTotals } =
 				await import('@/app/actions/sp-data');
 			vi.mocked(fetchSpeciesPeriodTotals).mockResolvedValue([]);
@@ -190,11 +172,11 @@ describe('SpCombinedMonthTotalsTab', () => {
 				/>
 			);
 			await waitFor(() => {
-				expect(document.querySelectorAll('tbody tr').length).toBe(12);
+				// Every zero-filled month is empty, so Hide default filters all 12
+				// away.
+				expect(screen.getByText('No data recorded.')).toBeTruthy();
 			});
-			const januaryRow = screen.getByText('January').closest('tr');
-			const cells = januaryRow?.querySelectorAll('td') ?? [];
-			expect(cells[3]?.textContent).toBe('0');
+			expect(document.querySelectorAll('tbody tr').length).toBe(0);
 		});
 
 		it("disables the AggregateByToggle and renders the birds/individuals column as '-'", async () => {
@@ -206,7 +188,8 @@ describe('SpCombinedMonthTotalsTab', () => {
 				/>
 			);
 			await waitFor(() => {
-				expect(document.querySelectorAll('tbody tr').length).toBe(12);
+				// Hide default: only January (the sole nonzero folded bucket) shows.
+				expect(document.querySelectorAll('tbody tr').length).toBe(1);
 			});
 			const encounterToggle = screen.getByRole('radio', {
 				name: 'Encounter'
@@ -246,7 +229,9 @@ describe('species all-time Month totals tab — Combine years toggle', () => {
 				/>
 			);
 			await waitFor(() =>
-				expect(document.querySelectorAll('tbody tr').length).toBe(12)
+				// Hide default: only January and August (the nonzero folded
+				// buckets) show.
+				expect(document.querySelectorAll('tbody tr').length).toBe(2)
 			);
 			expect(
 				(screen.getByRole('radio', { name: 'Combined' }) as HTMLInputElement)
@@ -267,7 +252,7 @@ describe('species all-time Month totals tab — Combine years toggle', () => {
 				/>
 			);
 			await waitFor(() =>
-				expect(document.querySelectorAll('tbody tr').length).toBe(12)
+				expect(document.querySelectorAll('tbody tr').length).toBe(2)
 			);
 
 			fireEvent.click(screen.getByRole('radio', { name: 'By year' }));
@@ -302,7 +287,7 @@ describe('species all-time Month totals tab — Combine years toggle', () => {
 				/>
 			);
 			await waitFor(() =>
-				expect(document.querySelectorAll('tbody tr').length).toBe(12)
+				expect(document.querySelectorAll('tbody tr').length).toBe(1)
 			);
 			fireEvent.click(screen.getByRole('radio', { name: 'By year' }));
 			expect(document.querySelectorAll('tbody tr').length).toBe(1);
@@ -334,14 +319,14 @@ describe('species all-time Month totals tab — Combine years toggle', () => {
 				/>
 			);
 			await waitFor(() =>
-				expect(document.querySelectorAll('tbody tr').length).toBe(12)
+				expect(document.querySelectorAll('tbody tr').length).toBe(2)
 			);
 
 			fireEvent.click(screen.getByRole('radio', { name: 'By year' }));
 			expect(document.querySelectorAll('tbody tr').length).toBe(3);
 
 			fireEvent.click(screen.getByRole('radio', { name: 'Combined' }));
-			expect(document.querySelectorAll('tbody tr').length).toBe(12);
+			expect(document.querySelectorAll('tbody tr').length).toBe(2);
 			expect(
 				(screen.getByRole('radio', { name: 'Encounter' }) as HTMLInputElement)
 					.disabled
@@ -359,7 +344,7 @@ describe('species all-time Month totals tab — Combine years toggle', () => {
 				/>
 			);
 			await waitFor(() =>
-				expect(document.querySelectorAll('tbody tr').length).toBe(12)
+				expect(document.querySelectorAll('tbody tr').length).toBe(2)
 			);
 			// `CombineYearsToggle`'s exact copy/markup (shared with
 			// `SummaryTotalsSection`'s `AllTimeMonthTotalsTab`) rather than a
@@ -378,7 +363,7 @@ describe('species all-time Month totals tab — Combine years toggle', () => {
 				/>
 			);
 			await waitFor(() =>
-				expect(document.querySelectorAll('tbody tr').length).toBe(12)
+				expect(document.querySelectorAll('tbody tr').length).toBe(2)
 			);
 			fireEvent.click(screen.getByRole('radio', { name: 'By year' }));
 
@@ -409,7 +394,8 @@ describe('species all-time Month totals tab — Combine years toggle', () => {
 				/>
 			);
 			await waitFor(() =>
-				expect(document.querySelectorAll('tbody tr').length).toBe(12)
+				// Hide default: only the single nonzero folded January bucket shows.
+				expect(document.querySelectorAll('tbody tr').length).toBe(1)
 			);
 			// Combined: with only one contributing year, the January bucket's
 			// summed value equals that single year's own value.
@@ -424,27 +410,6 @@ describe('species all-time Month totals tab — Combine years toggle', () => {
 			expect(perYearCells[3]?.textContent).toBe('30');
 		});
 
-		it("a species with no recorded data shows 12 zero-filled rows when combined, and 'No data recorded.' when combine-years is off, without erroring", async () => {
-			const { fetchSpeciesPeriodTotals } =
-				await import('@/app/actions/sp-data');
-			vi.mocked(fetchSpeciesPeriodTotals).mockResolvedValue([]);
-			render(
-				<SpCombinedMonthTotalsTab
-					speciesName="Robin"
-					viewedGroupId={1}
-					isActive={true}
-				/>
-			);
-			await waitFor(() =>
-				expect(document.querySelectorAll('tbody tr').length).toBe(12)
-			);
-
-			fireEvent.click(screen.getByRole('radio', { name: 'By year' }));
-
-			expect(screen.getByText('No data recorded.')).toBeTruthy();
-			expect(document.querySelectorAll('tbody tr').length).toBe(0);
-		});
-
 		it('toggling combine-years on and off repeatedly does not trigger any additional fetch of species period totals', async () => {
 			const { fetchSpeciesPeriodTotals } =
 				await import('@/app/actions/sp-data');
@@ -456,7 +421,7 @@ describe('species all-time Month totals tab — Combine years toggle', () => {
 				/>
 			);
 			await waitFor(() =>
-				expect(document.querySelectorAll('tbody tr').length).toBe(12)
+				expect(document.querySelectorAll('tbody tr').length).toBe(2)
 			);
 			expect(fetchSpeciesPeriodTotals).toHaveBeenCalledTimes(1);
 
@@ -483,7 +448,7 @@ describe('SpCombinedMonthTotalsTab — empty months toggle', () => {
 	});
 
 	describe('Usual', () => {
-		it('renders all 12 months by default (Show)', async () => {
+		it('renders only months with data by default (Hide)', async () => {
 			render(
 				<SpCombinedMonthTotalsTab
 					speciesName="Robin"
@@ -492,17 +457,20 @@ describe('SpCombinedMonthTotalsTab — empty months toggle', () => {
 				/>
 			);
 			await waitFor(() =>
-				expect(document.querySelectorAll('tbody tr').length).toBe(12)
+				// Only January is folded from a real year; the rest are synthesized
+				// and hidden by default.
+				expect(document.querySelectorAll('tbody tr').length).toBe(1)
 			);
 			expect(
-				(screen.getByRole('radio', { name: 'Show' }) as HTMLInputElement)
+				(screen.getByRole('radio', { name: 'Hide' }) as HTMLInputElement)
 					.checked
 			).toBe(true);
+			expect(screen.getByText('January')).toBeTruthy();
 		});
 	});
 
 	describe('Structure', () => {
-		it('hides zero-session months in the combined view when toggled to Hide', async () => {
+		it('shows zero-session months in the combined view when toggled to Show', async () => {
 			render(
 				<SpCombinedMonthTotalsTab
 					speciesName="Robin"
@@ -511,15 +479,14 @@ describe('SpCombinedMonthTotalsTab — empty months toggle', () => {
 				/>
 			);
 			await waitFor(() =>
-				expect(document.querySelectorAll('tbody tr').length).toBe(12)
+				expect(document.querySelectorAll('tbody tr').length).toBe(1)
 			);
-			fireEvent.click(screen.getByRole('radio', { name: 'Hide' }));
-			// Only January is folded from a real year; the rest are synthesized.
-			expect(document.querySelectorAll('tbody tr').length).toBe(1);
+			fireEvent.click(screen.getByRole('radio', { name: 'Show' }));
+			expect(document.querySelectorAll('tbody tr').length).toBe(12);
 			expect(screen.getByText('January')).toBeTruthy();
 		});
 
-		it('hides zero-session months in the by-year view when toggled to Hide', async () => {
+		it('shows zero-session months in the by-year view when toggled to Show', async () => {
 			const { fetchSpeciesPeriodTotals } =
 				await import('@/app/actions/sp-data');
 			vi.mocked(fetchSpeciesPeriodTotals).mockResolvedValue([
@@ -534,14 +501,16 @@ describe('SpCombinedMonthTotalsTab — empty months toggle', () => {
 				/>
 			);
 			await waitFor(() =>
-				expect(document.querySelectorAll('tbody tr').length).toBe(12)
+				// The August row (session_count 0) is dropped by default; January
+				// (4) stays.
+				expect(document.querySelectorAll('tbody tr').length).toBe(1)
 			);
 			fireEvent.click(screen.getByRole('radio', { name: 'By year' }));
-			expect(document.querySelectorAll('tbody tr').length).toBe(2);
-			fireEvent.click(screen.getByRole('radio', { name: 'Hide' }));
-			// The August row (session_count 0) is dropped; January (4) stays.
 			expect(document.querySelectorAll('tbody tr').length).toBe(1);
 			expect(screen.getByText('January 2020')).toBeTruthy();
+			fireEvent.click(screen.getByRole('radio', { name: 'Show' }));
+			expect(document.querySelectorAll('tbody tr').length).toBe(2);
+			expect(screen.getByText('August 2020')).toBeTruthy();
 		});
 	});
 
@@ -565,13 +534,14 @@ describe('SpCombinedMonthTotalsTab — empty months toggle', () => {
 				/>
 			);
 			await waitFor(() =>
+				// Hide default has nothing to filter, since no month is empty.
 				expect(document.querySelectorAll('tbody tr').length).toBe(12)
 			);
-			fireEvent.click(screen.getByRole('radio', { name: 'Hide' }));
+			fireEvent.click(screen.getByRole('radio', { name: 'Show' }));
 			expect(document.querySelectorAll('tbody tr').length).toBe(12);
 		});
 
-		it('shows only the months with data when all but one calendar month is empty across all years', async () => {
+		it('shows only the months with data by default when all but one calendar month is empty across all years', async () => {
 			const { fetchSpeciesPeriodTotals } =
 				await import('@/app/actions/sp-data');
 			vi.mocked(fetchSpeciesPeriodTotals).mockResolvedValue([
@@ -586,11 +556,9 @@ describe('SpCombinedMonthTotalsTab — empty months toggle', () => {
 				/>
 			);
 			await waitFor(() =>
-				expect(document.querySelectorAll('tbody tr').length).toBe(12)
+				// Both years fold into the single August bucket.
+				expect(document.querySelectorAll('tbody tr').length).toBe(1)
 			);
-			fireEvent.click(screen.getByRole('radio', { name: 'Hide' }));
-			// Both years fold into the single August bucket.
-			expect(document.querySelectorAll('tbody tr').length).toBe(1);
 			expect(screen.getByText('August')).toBeTruthy();
 		});
 
@@ -608,10 +576,10 @@ describe('SpCombinedMonthTotalsTab — empty months toggle', () => {
 				/>
 			);
 			await waitFor(() =>
-				expect(document.querySelectorAll('tbody tr').length).toBe(12)
+				expect(document.querySelectorAll('tbody tr').length).toBe(1)
 			);
-			// Hide, then flip combine-years — empty-months stays Hide.
-			fireEvent.click(screen.getByRole('radio', { name: 'Hide' }));
+			// Hide is already the default. Flip combine-years — empty-months
+			// stays Hide.
 			fireEvent.click(screen.getByRole('radio', { name: 'By year' }));
 			expect(
 				(screen.getByRole('radio', { name: 'Hide' }) as HTMLInputElement)

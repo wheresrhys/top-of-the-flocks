@@ -26,8 +26,8 @@ export function SpMonthTotalsTab({
 	const [monthlyStats, setMonthlyStats] = useState<AggregateStatsResult[]>([]);
 	const [isLoaded, setIsLoaded] = useState(false);
 	// Plain local state — `SpeciesPageContent`'s `ConditionalTabPanel` unmounts
-	// this tab on every tab switch, so the toggle naturally resets to Show
-	// (`false`) each time the tab is revisited, with no extra code needed.
+	// this tab on every tab switch, so the toggle naturally resets to Hide
+	// (`true`) each time the tab is revisited, with no extra code needed.
 	const [hideEmptyMonths, setHideEmptyMonths] = useState(true);
 
 	useEffect(() => {
