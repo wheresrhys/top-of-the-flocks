@@ -6,6 +6,13 @@ import {
 	type DefaultPageProps
 } from '../BootstrapPage';
 
+// Re-exported so `page.tsx` files that import `defaultGetParams` alongside
+// `BootstrapPage` from the same module (to merge route params with an extra
+// search param, e.g. #803's `?tabId=`) keep working under this whole-module
+// mock — `vi.mock('./app/components/layout/BootstrapPage')` (vitest.setup.tsx)
+// replaces every named export with whatever this file defines.
+export { defaultGetParams };
+
 export function BootstrapPage<
 	DataType,
 	PagePropsType = DefaultPageProps,
