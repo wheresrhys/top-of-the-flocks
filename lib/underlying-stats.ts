@@ -39,6 +39,10 @@ export const monthStatsCache = new Map<
 	number,
 	StatsCacheEntry<AggregateStatsResult[] | null>
 >();
+export const effortHistoryCache = new Map<
+	number,
+	StatsCacheEntry<AggregateStatsResult[] | null>
+>();
 
 export async function fetchStatsVersion(
 	supabase: Awaited<ReturnType<typeof getAuthenticatedSupabaseClient>>,
@@ -154,6 +158,32 @@ export async function fetchMonthStats(
 				.rpc('aggregate_stats', {
 					ringing_group_filter: viewedGroupId,
 					group_by_species: true,
+					group_by_time_period: 'month'
+				})
+				.then(catchSupabaseErrors) as Promise<AggregateStatsResult[] | null>
+	);
+}
+
+// The unfiltered-by-species sibling of fetchMonthStats: group_by_species:
+// false (no species_name_filter) rather than true, so each row is one
+// group-wide month total instead of one per species+month. Feeds the
+// species page's effort-context series (ringing effort isn't a property of
+// the species being viewed, it's a property of the session) — reused across
+// the Population and Biometrics tabs within a session, so it's cached via
+// the same fetchWithVersionCache mechanism as fetchYearStats/fetchMonthStats
+// (unlike fetchPayOffStats, which remains deliberately uncached — see the
+// comment above it) via its own dedicated effortHistoryCache Map.
+export async function fetchGroupEffortHistory(
+	viewedGroupId: number
+): Promise<AggregateStatsResult[] | null> {
+	return fetchWithVersionCache(
+		effortHistoryCache,
+		viewedGroupId,
+		(supabase) =>
+			supabase
+				.rpc('aggregate_stats', {
+					ringing_group_filter: viewedGroupId,
+					group_by_species: false,
 					group_by_time_period: 'month'
 				})
 				.then(catchSupabaseErrors) as Promise<AggregateStatsResult[] | null>

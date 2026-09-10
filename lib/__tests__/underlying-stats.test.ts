@@ -518,3 +518,157 @@ describe('fetchMonthStats', () => {
 		});
 	});
 });
+
+// fetchGroupEffortHistory shares fetchMonthStats' exact aggregate_stats /
+// caching shape, just group_by_species: false (unfiltered by species) rather
+// than true — reuse the same monthlyRows fixture and mock scaffolding.
+describe('fetchGroupEffortHistory', () => {
+	it('calls aggregate_stats with group_by_time_period "month" and group_by_species false, with no species_name_filter', async () => {
+		const { fetchGroupEffortHistory } = await importUnderlyingStats();
+		const { client, mockRpc } = makeAggregateStatsClient({
+			data: monthlyRows,
+			error: null
+		});
+		mockGetAuthenticatedSupabaseClient.mockResolvedValue(client);
+
+		const result = await fetchGroupEffortHistory(GROUP_ID);
+
+		expect(mockRpc).toHaveBeenCalledWith('aggregate_stats', {
+			ringing_group_filter: GROUP_ID,
+			group_by_species: false,
+			group_by_time_period: 'month'
+		});
+		const callArgs = mockRpc.mock.calls[0][1];
+		expect(callArgs).not.toHaveProperty('species_name_filter');
+		expect(result).toEqual(monthlyRows);
+	});
+
+	it('scopes the call to the given viewedGroupId via ringing_group_filter', async () => {
+		const { fetchGroupEffortHistory } = await importUnderlyingStats();
+		const { client, mockRpc } = makeAggregateStatsClient({
+			data: monthlyRows,
+			error: null
+		});
+		mockGetAuthenticatedSupabaseClient.mockResolvedValue(client);
+
+		await fetchGroupEffortHistory(OTHER_GROUP_ID);
+
+		expect(mockRpc).toHaveBeenCalledWith(
+			'aggregate_stats',
+			expect.objectContaining({ ringing_group_filter: OTHER_GROUP_ID })
+		);
+	});
+
+	it('returns an empty array for a group with no sessions at all', async () => {
+		const { fetchGroupEffortHistory } = await importUnderlyingStats();
+		const { client } = makeAggregateStatsClient({ data: [], error: null });
+		mockGetAuthenticatedSupabaseClient.mockResolvedValue(client);
+
+		const result = await fetchGroupEffortHistory(GROUP_ID);
+
+		expect(result).toEqual([]);
+	});
+
+	// See the equivalent fetchYearStats/fetchMonthStats tests above for why
+	// this asserts a throw rather than a null return.
+	it('throws when the RPC call errors', async () => {
+		const { fetchGroupEffortHistory } = await importUnderlyingStats();
+		const { client } = makeAggregateStatsClient({
+			data: null,
+			error: { message: 'boom' }
+		});
+		mockGetAuthenticatedSupabaseClient.mockResolvedValue(client);
+
+		await expect(fetchGroupEffortHistory(GROUP_ID)).rejects.toThrow(
+			'Failed to fetch data: boom'
+		);
+	});
+
+	// Mirrors fetchMonthStats' caching describe block above — same
+	// fetchWithVersionCache mechanism, keyed off effortHistoryCache.
+	describe('caching', () => {
+		it('returns the cached result on a second call when the stats version is unchanged', async () => {
+			const { fetchGroupEffortHistory } = await importUnderlyingStats();
+			const { client, mockRpc } = makeAggregateStatsClient({
+				data: monthlyRows,
+				error: null
+			});
+			mockGetAuthenticatedSupabaseClient.mockResolvedValue(client);
+
+			await fetchGroupEffortHistory(GROUP_ID);
+			await fetchGroupEffortHistory(GROUP_ID);
+
+			expect(mockRpc).toHaveBeenCalledTimes(1);
+			expect(mockEncountersLimit).toHaveBeenCalledTimes(2);
+		});
+
+		it('re-fetches when the stats version (max Encounters.id) has advanced since the cached entry', async () => {
+			const { fetchGroupEffortHistory } = await importUnderlyingStats();
+			const { client, mockRpc } = makeAggregateStatsClient({
+				data: monthlyRows,
+				error: null
+			});
+			mockGetAuthenticatedSupabaseClient.mockResolvedValue(client);
+
+			await fetchGroupEffortHistory(GROUP_ID);
+			statsVersion = 101;
+			await fetchGroupEffortHistory(GROUP_ID);
+
+			expect(mockRpc).toHaveBeenCalledTimes(2);
+		});
+
+		it('re-fetches when the cached entry has passed its TTL even if the version is unchanged', async () => {
+			const { fetchGroupEffortHistory } = await importUnderlyingStats();
+			const { client, mockRpc } = makeAggregateStatsClient({
+				data: monthlyRows,
+				error: null
+			});
+			mockGetAuthenticatedSupabaseClient.mockResolvedValue(client);
+			const now = Date.now();
+			const dateNowSpy = vi.spyOn(Date, 'now').mockReturnValue(now);
+
+			await fetchGroupEffortHistory(GROUP_ID);
+			dateNowSpy.mockReturnValue(now + TTL_MS + 1);
+			await fetchGroupEffortHistory(GROUP_ID);
+
+			expect(mockRpc).toHaveBeenCalledTimes(2);
+		});
+
+		it('keeps separate cache entries per viewedGroupId', async () => {
+			const { fetchGroupEffortHistory } = await importUnderlyingStats();
+			const { client, mockRpc } = makeAggregateStatsClient({
+				data: monthlyRows,
+				error: null
+			});
+			mockGetAuthenticatedSupabaseClient.mockResolvedValue(client);
+
+			await fetchGroupEffortHistory(GROUP_ID);
+			await fetchGroupEffortHistory(OTHER_GROUP_ID);
+
+			expect(mockRpc).toHaveBeenCalledTimes(2);
+		});
+
+		it('does not share a cache entry with fetchMonthStats for the same group', async () => {
+			const { fetchGroupEffortHistory, fetchMonthStats } =
+				await importUnderlyingStats();
+			const { client, mockRpc } = makeAggregateStatsClient({
+				data: monthlyRows,
+				error: null
+			});
+			mockGetAuthenticatedSupabaseClient.mockResolvedValue(client);
+
+			await fetchGroupEffortHistory(GROUP_ID);
+			await fetchMonthStats(GROUP_ID);
+
+			expect(mockRpc).toHaveBeenCalledTimes(2);
+			expect(mockRpc).toHaveBeenCalledWith(
+				'aggregate_stats',
+				expect.objectContaining({ group_by_species: false })
+			);
+			expect(mockRpc).toHaveBeenCalledWith(
+				'aggregate_stats',
+				expect.objectContaining({ group_by_species: true })
+			);
+		});
+	});
+});
