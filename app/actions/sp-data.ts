@@ -7,6 +7,8 @@ import {
 } from '@/app/models/bird';
 import { getAuthenticatedSupabaseClient } from '@/lib/group-auth';
 import { catchSupabaseErrors } from '@/lib/supabase';
+import { fetchGroupEffortHistory } from '@/lib/underlying-stats';
+import { postgresIntervalToHours } from '@/lib/postgres-interval';
 import type { NotableRetrapsResult } from '@/app/models/db';
 import { getSexOfBird, type EncounterOfBird } from '@/app/models/bird';
 import type { GraphableBird } from '@/app/components/pages/species/WeightAndWingChart';
@@ -190,6 +192,30 @@ export async function getSpeciesStatsHistory(
 			...(toDate ? { to_date: toDate } : {})
 		})
 		.then(catchSupabaseErrors) as Promise<AggregateStatsResult[]>;
+}
+
+/**
+ * Group-wide (not species-filtered) monthly ringing-effort history for the
+ * species page's Population/Biometrics tabs — effort is a property of a
+ * session, not of the species caught in it, so this wraps
+ * `fetchGroupEffortHistory` (`lib/underlying-stats.ts`, cached across both
+ * tabs within a session) rather than filtering by species. Shapes the raw
+ * `total_effort` interval into fractional hours and pairs it with
+ * `time_period`, matching the `[time_period, value]` tuple shape
+ * `YearComparisonTrendChart`'s existing series already use (see
+ * `getCounts`/`getYoungsters` in
+ * `app/components/pages/species/StatsHistoryChart.tsx`), so it can be zipped
+ * against a species-filtered series by `time_period`.
+ */
+export async function getGroupEffortHistory(
+	viewedGroupId: number
+): Promise<[string, number][]> {
+	const statsHistory = await fetchGroupEffortHistory(viewedGroupId);
+	if (!statsHistory) return [];
+	return statsHistory.map((row): [string, number] => [
+		row.time_period,
+		postgresIntervalToHours(row.total_effort)
+	]);
 }
 
 /**

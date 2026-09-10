@@ -4,15 +4,28 @@ import {
 	fetchNotableRetraps,
 	fetchGraphableEncounterData,
 	getSpeciesStatsHistory,
-	fetchSpeciesPeriodTotals
+	fetchSpeciesPeriodTotals,
+	getGroupEffortHistory
 } from '../sp-data';
+import type { AggregateStatsResult } from '@/app/models/db';
 
-const { mockGetAuthenticatedSupabaseClient } = vi.hoisted(() => ({
-	mockGetAuthenticatedSupabaseClient: vi.fn()
-}));
+const { mockGetAuthenticatedSupabaseClient, mockFetchGroupEffortHistory } =
+	vi.hoisted(() => ({
+		mockGetAuthenticatedSupabaseClient: vi.fn(),
+		mockFetchGroupEffortHistory: vi.fn()
+	}));
 
 vi.mock('@/lib/group-auth', () => ({
 	getAuthenticatedSupabaseClient: mockGetAuthenticatedSupabaseClient
+}));
+
+// getGroupEffortHistory delegates the RPC call + caching to
+// fetchGroupEffortHistory (lib/underlying-stats.ts) — that function's own
+// RPC-args/caching behaviour is covered by lib/__tests__/underlying-stats.test.ts,
+// so here it's mocked directly and these tests only assert the
+// interval->hours conversion + [time_period, hours] pair shaping.
+vi.mock('@/lib/underlying-stats', () => ({
+	fetchGroupEffortHistory: mockFetchGroupEffortHistory
 }));
 
 const SPECIES_ID = 1;
@@ -243,6 +256,71 @@ describe('sp-data actions', () => {
 
 			expect(rpcCalls[0].args).not.toHaveProperty('from_date');
 			expect(rpcCalls[0].args).not.toHaveProperty('to_date');
+		});
+	});
+
+	describe('getGroupEffortHistory', () => {
+		function effortRow(
+			time_period: string,
+			total_effort: string
+		): AggregateStatsResult {
+			return {
+				time_period,
+				total_effort
+			} as AggregateStatsResult;
+		}
+
+		it('converts aggregate_stats rows into [time_period, hours] pairs in the same order', async () => {
+			mockFetchGroupEffortHistory.mockResolvedValue([
+				effortRow('2023-01', '05:30:00'),
+				effortRow('2023-02', '02:00:00')
+			]);
+
+			const result = await getGroupEffortHistory(GROUP_ID);
+
+			expect(mockFetchGroupEffortHistory).toHaveBeenCalledWith(GROUP_ID);
+			expect(result).toEqual([
+				['2023-01', 5.5],
+				['2023-02', 2]
+			]);
+		});
+
+		it('converts a typical multi-hour interval to the correct fractional-hour number', async () => {
+			mockFetchGroupEffortHistory.mockResolvedValue([
+				effortRow('2023-01', '05:30:00')
+			]);
+
+			const result = await getGroupEffortHistory(GROUP_ID);
+
+			expect(result).toEqual([['2023-01', 5.5]]);
+		});
+
+		it('returns 0 hours for a month whose total_effort is "00:00:00"', async () => {
+			mockFetchGroupEffortHistory.mockResolvedValue([
+				effortRow('2023-01', '00:00:00')
+			]);
+
+			const result = await getGroupEffortHistory(GROUP_ID);
+
+			expect(result).toEqual([['2023-01', 0]]);
+		});
+
+		it('returns [] when fetchGroupEffortHistory resolves null', async () => {
+			mockFetchGroupEffortHistory.mockResolvedValue(null);
+
+			const result = await getGroupEffortHistory(GROUP_ID);
+
+			expect(result).toEqual([]);
+		});
+
+		it('converts an interval spanning whole days to its total hour count', async () => {
+			mockFetchGroupEffortHistory.mockResolvedValue([
+				effortRow('2023-01', '2 days 03:00:00')
+			]);
+
+			const result = await getGroupEffortHistory(GROUP_ID);
+
+			expect(result).toEqual([['2023-01', 51]]);
 		});
 	});
 
