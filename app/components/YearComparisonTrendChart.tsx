@@ -1,5 +1,6 @@
 'use client';
 import { useId, useState } from 'react';
+import Link from 'next/link';
 import { LineChart, type LineChartData } from 'react-chartkick';
 import 'chartkick/chart.js';
 import { SecondaryHeading } from '@/app/components/shared/DesignSystem';
@@ -106,6 +107,34 @@ const MODE_OPTIONS: { value: ChartMode; label: string }[] = [
 	{ value: 'compare-years', label: 'Compare years' },
 	{ value: 'this-year', label: 'This year' }
 ];
+
+const NORMALIZE_OPTIONS: { value: boolean; label: string }[] = [
+	{ value: false, label: 'No' },
+	{ value: true, label: 'Yes' }
+];
+
+// Divides each metric's `[date, value]` point by that date's ringing-effort
+// hours from `effortHistory` (a single, species-agnostic series keyed by the
+// same date convention as `series`), turning a raw count/measurement into an
+// effort-normalized rate (e.g. "encounters per hour"). A `null` value is left
+// as a gap rather than manufactured into a `0`. A date whose effort-hours
+// lookup is `0`, missing, or otherwise falsy maps to an explicit `0` — never
+// `NaN`/`Infinity`.
+export function normalizeSeriesByEffort(
+	series: LineChartData[],
+	effortHistory: LineChartData
+): LineChartData[] {
+	const effortHoursByDate = new Map(effortHistory.data);
+	return series.map((metric) => ({
+		...metric,
+		data: metric.data.map(([date, value]) => {
+			if (value == null) return [date, null] as [string, number | null];
+			const effortHours = effortHoursByDate.get(date);
+			if (!effortHours) return [date, 0] as [string, number | null];
+			return [date, value / effortHours] as [string, number | null];
+		})
+	}));
+}
 
 // Regroups one metric's `[date, value]` points into one series per calendar
 // year. Every returned series carries all twelve months in Jan→Dec order (with
@@ -302,59 +331,107 @@ export function YearComparisonTrendChart({
 	series,
 	xtitle = 'Year',
 	ytitle = 'Value',
-	min = 0
+	min = 0,
+	effortHistory,
+	compareYearsUrl
 }: {
 	series: LineChartData[];
 	xtitle?: string;
 	ytitle?: string;
 	min?: number | null;
+	// A single, species-agnostic series of `[date, effortHours]` pairs, keyed
+	// with the same date convention as `series`. When passed, a "Normalize"
+	// toggle appears that divides every metric's values by effort hours.
+	effortHistory?: LineChartData;
+	// When passed, replaces the all-time/compare-years/this-year mode
+	// switcher with a single "Compare years" link to a dedicated page, and the
+	// chart renders in a fixed `'all-time'` mode (there's no switcher left to
+	// pick another mode).
+	compareYearsUrl?: string;
 }) {
 	const [mode, setMode] = useState<ChartMode>('all-time');
+	const [normalize, setNormalize] = useState(false);
 	// Unique per instance so several of these charts on one page (e.g. multiple
 	// expanded species-graph tiles) don't share a radio group.
 	const toggleName = useId();
 	const currentYear = new Date().getFullYear();
-	const allTimeColors = series.map((_, metricIndex) =>
+	const effectiveSeries =
+		normalize && effortHistory
+			? normalizeSeriesByEffort(series, effortHistory)
+			: series;
+	const effectiveYtitle =
+		normalize && effortHistory ? `${ytitle} per hour` : ytitle;
+	const allTimeColors = effectiveSeries.map((_, metricIndex) =>
 		metricBaseColor(metricIndex)
 	);
 	return (
 		<div className="flex flex-col">
-			<div className="mb-2 flex justify-end">
-				<div className="border-base-content/20 flex gap-0.5 rounded-field border p-0.5">
-					{MODE_OPTIONS.map((option) => (
-						<label
-							key={option.value}
-							htmlFor={`${toggleName}-${option.value}`}
-							className="btn btn-sm btn-text has-checked:btn-active"
-						>
-							<span>{option.label}</span>
-							<input
-								id={`${toggleName}-${option.value}`}
-								name={toggleName}
-								type="radio"
-								className="hidden"
-								checked={mode === option.value}
-								onChange={() => setMode(option.value)}
-							/>
-						</label>
-					))}
-				</div>
+			<div className="mb-2 flex justify-end gap-2">
+				{compareYearsUrl ? (
+					<Link href={compareYearsUrl} className="btn btn-sm btn-text">
+						Compare years
+					</Link>
+				) : (
+					<div className="border-base-content/20 flex gap-0.5 rounded-field border p-0.5">
+						{MODE_OPTIONS.map((option) => (
+							<label
+								key={option.value}
+								htmlFor={`${toggleName}-${option.value}`}
+								className="btn btn-sm btn-text has-checked:btn-active"
+							>
+								<span>{option.label}</span>
+								<input
+									id={`${toggleName}-${option.value}`}
+									name={toggleName}
+									type="radio"
+									className="hidden"
+									checked={mode === option.value}
+									onChange={() => setMode(option.value)}
+								/>
+							</label>
+						))}
+					</div>
+				)}
+				{effortHistory ? (
+					<div className="flex items-center gap-1">
+						<span className="text-sm">Normalize</span>
+						<div className="border-base-content/20 flex gap-0.5 rounded-field border p-0.5">
+							{NORMALIZE_OPTIONS.map((option) => (
+								<label
+									key={String(option.value)}
+									htmlFor={`${toggleName}-normalize-${option.value}`}
+									className="btn btn-sm btn-text has-checked:btn-active"
+								>
+									<span>{option.label}</span>
+									<input
+										id={`${toggleName}-normalize-${option.value}`}
+										name={`${toggleName}-normalize`}
+										type="radio"
+										className="hidden"
+										checked={normalize === option.value}
+										onChange={() => setNormalize(option.value)}
+									/>
+								</label>
+							))}
+						</div>
+					</div>
+				) : null}
 			</div>
 			<div>
 				{mode === 'all-time' && (
 					<LineChart
 						min={min}
-						data={series}
+						data={effectiveSeries}
 						colors={allTimeColors}
 						xtitle={xtitle}
-						ytitle={ytitle}
+						ytitle={effectiveYtitle}
 						library={TREND_CHART_LIBRARY}
 					/>
 				)}
 				{mode === 'compare-years' && (
 					<PerMetricChartGrid
-						metrics={series}
-						ytitle={ytitle}
+						metrics={effectiveSeries}
+						ytitle={effectiveYtitle}
 						min={min}
 						buildChart={(metric, metricIndex) => {
 							const yearSeries = toYearOnYearSeries(metric);
@@ -372,8 +449,8 @@ export function YearComparisonTrendChart({
 				)}
 				{mode === 'this-year' && (
 					<PerMetricChartGrid
-						metrics={series}
-						ytitle={ytitle}
+						metrics={effectiveSeries}
+						ytitle={effectiveYtitle}
 						min={min}
 						buildChart={(metric, metricIndex) => ({
 							data: toThisYearSeries(metric, currentYear),
