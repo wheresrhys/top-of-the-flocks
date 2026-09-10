@@ -20,10 +20,19 @@ import { SpMonthTotalsTab } from '@/app/components/pages/species/SpMonthTotalsTa
 import { SpCombinedMonthTotalsTab } from '@/app/components/pages/species/SpCombinedMonthTotalsTab';
 import { SpSessionTotalsTab } from '@/app/components/pages/species/SpSessionTotalsTab';
 import { TabNav } from '@/app/components/TabNav';
+import { resolveInitialTabId } from '@/lib/tab-query-param';
 
 // `year`/`month` are only present on the period-scoped child routes
 // (`[year]`, `[year]/[month]`); the unscoped route supplies just `speciesName`.
-export type PageParams = { speciesName: string; year?: string; month?: string };
+// `tabId` (#803) is the optional `?tabId=` search param, threaded in from
+// each route depth's `page.tsx` — it never affects `getCacheKeys`, only which
+// tab `SpeciesData` focuses/loads first.
+export type PageParams = {
+	speciesName: string;
+	year?: string;
+	month?: string;
+	tabId?: string;
+};
 
 // A resolved period passed to `fetchSpeciesPageContentForPeriod`. `year`/`month`
 // drive the heading and the Highlights tab's Busiest sessions filtering;
@@ -169,10 +178,12 @@ function ConditionalTabPanel({
 
 function SpeciesData({
 	data,
-	viewedGroup
+	viewedGroup,
+	initialTabId
 }: {
 	data: FullFatPageData;
 	viewedGroup: ViewedGroup;
+	initialTabId?: string;
 }) {
 	// Cascading period tab, same convention `SummaryTotalsSection` uses: the
 	// all-time page gets "Year totals" (drilling into a year), the year-scoped
@@ -182,10 +193,32 @@ function SpeciesData({
 	const isYearScoped = data.year !== undefined && data.month === undefined;
 	const defaultTabId = getDefaultSpeciesTabId(isAllTime, isYearScoped);
 
-	const [loadedTabs, setLoadedTabs] = useState<Set<string>>(
-		new Set([defaultTabId])
+	const tabs = [
+		...(isAllTime ? [{ id: 'year-totals', label: 'Year totals' }] : []),
+		...(isAllTime
+			? [{ id: 'all-time-month-totals', label: 'Month totals' }]
+			: []),
+		...(isYearScoped ? [{ id: 'month-totals', label: 'Month totals' }] : []),
+		{ id: 'session-totals', label: 'Session totals' },
+		{ id: 'highlights', label: 'Highlights' },
+		{ id: 'biometrics', label: 'Biometrics' },
+		{ id: 'graphs', label: 'Population' },
+		{ id: 'bird-list', label: 'Bird list' }
+	];
+
+	// The `?tabId=` param (#803) wins over the route-depth default when it
+	// names one of this route depth's actual tabs; an unknown/garbage value or
+	// no param at all falls back to `defaultTabId` unchanged.
+	const initialTab = resolveInitialTabId(
+		initialTabId,
+		tabs.map((tab) => tab.id),
+		defaultTabId
 	);
-	const [activeTab, setActiveTab] = useState<string>(defaultTabId);
+
+	const [loadedTabs, setLoadedTabs] = useState<Set<string>>(
+		new Set([initialTab])
+	);
+	const [activeTab, setActiveTab] = useState<string>(initialTab);
 
 	function handleTabChange(tab: string) {
 		setLoadedTabs((prev) => new Set([...prev, tab]));
@@ -194,24 +227,7 @@ function SpeciesData({
 
 	return (
 		<>
-			<TabNav
-				tabs={[
-					...(isAllTime ? [{ id: 'year-totals', label: 'Year totals' }] : []),
-					...(isAllTime
-						? [{ id: 'all-time-month-totals', label: 'Month totals' }]
-						: []),
-					...(isYearScoped
-						? [{ id: 'month-totals', label: 'Month totals' }]
-						: []),
-					{ id: 'session-totals', label: 'Session totals' },
-					{ id: 'highlights', label: 'Highlights' },
-					{ id: 'biometrics', label: 'Biometrics' },
-					{ id: 'graphs', label: 'Population' },
-					{ id: 'bird-list', label: 'Bird list' }
-				]}
-				activeTab={activeTab}
-				onTabChange={handleTabChange}
-			/>
+			<TabNav tabs={tabs} activeTab={activeTab} onTabChange={handleTabChange} />
 			{isAllTime && (
 				<ConditionalTabPanel
 					loadedTabs={loadedTabs}
@@ -333,7 +349,7 @@ function fullFatTypeGuard(data: PageData): data is FullFatPageData {
 }
 
 export function SpeciesPageContent({
-	params: { speciesName, year, month },
+	params: { speciesName, year, month, tabId },
 	data,
 	viewedGroup
 }: {
@@ -358,7 +374,11 @@ export function SpeciesPageContent({
 				}
 			/>
 			{fullFatTypeGuard(data) ? (
-				<SpeciesData data={data} viewedGroup={viewedGroup} />
+				<SpeciesData
+					data={data}
+					viewedGroup={viewedGroup}
+					initialTabId={tabId}
+				/>
 			) : (
 				<p>Not authorised to view any encounter data for this species</p>
 			)}

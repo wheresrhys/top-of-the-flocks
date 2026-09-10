@@ -1,11 +1,37 @@
 import { startOfMonth, endOfMonth, format } from 'date-fns';
-import { BootstrapPage } from '@/app/components/layout/BootstrapPage';
+import {
+	BootstrapPage,
+	defaultGetParams
+} from '@/app/components/layout/BootstrapPage';
 import { SpeciesPageContent, type PageData } from '../../PageContent';
 import { fetchSpeciesPageContentForPeriod } from '@/app/(routes)/species/[speciesName]/page';
+import { readTabIdSearchParam } from '@/lib/tab-query-param';
 import type { ViewedGroup } from '@/lib/group-slug';
 
-export type PageParams = { speciesName: string; year: string; month: string };
-type PageProps = { params: Promise<PageParams> };
+export type PageParams = {
+	speciesName: string;
+	year: string;
+	month: string;
+	tabId?: string;
+};
+type PageProps = {
+	params: Promise<{ speciesName: string; year: string; month: string }>;
+	searchParams?: Promise<{ tabId?: string }>;
+};
+
+// Merges the route's `speciesName`/`year`/`month` with the optional
+// `?tabId=` search param (#803) — see the bare species `page.tsx`'s
+// `getSpeciesPageParams` for the shared rationale.
+async function getSpeciesYearMonthPageParams(
+	pageProps: PageProps
+): Promise<PageParams> {
+	const { speciesName, year, month } = await defaultGetParams<
+		PageProps,
+		{ speciesName: string; year: string; month: string }
+	>(pageProps);
+	const tabId = await readTabIdSearchParam(pageProps.searchParams);
+	return { speciesName, year, month, ...(tabId ? { tabId } : {}) };
+}
 
 export async function fetchSpeciesYearMonthPageContent(
 	params: PageParams,
@@ -30,6 +56,7 @@ export default async function SpeciesYearMonthPage(
 		<BootstrapPage<PageData, PageProps, PageParams>
 			pageProps={props}
 			viewedGroup={props.viewedGroup}
+			getParams={getSpeciesYearMonthPageParams}
 			getCacheKeys={(params: PageParams) => [
 				'species',
 				params.speciesName,

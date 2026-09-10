@@ -1,7 +1,11 @@
-import { BootstrapPage } from '@/app/components/layout/BootstrapPage';
+import {
+	BootstrapPage,
+	defaultGetParams
+} from '@/app/components/layout/BootstrapPage';
 import { getAuthenticatedSupabaseClient } from '@/lib/group-auth';
 import { catchSupabaseErrors } from '@/lib/supabase';
 import { fetchPageOfBirds } from '@/app/actions/sp-data';
+import { readTabIdSearchParam } from '@/lib/tab-query-param';
 import {
 	SpeciesPageContent,
 	type PageParams,
@@ -12,7 +16,23 @@ import {
 import type { AggregateStatsResult } from '@/app/models/db';
 import type { ViewedGroup } from '@/lib/group-slug';
 
-type PageProps = { params: Promise<PageParams> };
+type PageProps = {
+	params: Promise<{ speciesName: string }>;
+	searchParams?: Promise<{ tabId?: string }>;
+};
+
+// Merges the route's `speciesName` with the optional `?tabId=` search param
+// (#803) into the shared `PageParams` shape, so the requested tab is known
+// before first paint (see PageContent.tsx's `SpeciesData` for how it's
+// resolved against the page's known tab ids and seeded as the initial tab).
+async function getSpeciesPageParams(pageProps: PageProps): Promise<PageParams> {
+	const { speciesName } = await defaultGetParams<
+		PageProps,
+		{ speciesName: string }
+	>(pageProps);
+	const tabId = await readTabIdSearchParam(pageProps.searchParams);
+	return { speciesName, ...(tabId ? { tabId } : {}) };
+}
 
 async function getSpeciesStats(
 	species: string,
@@ -93,6 +113,7 @@ export default async function SpeciesPage(
 		<BootstrapPage<PageData, PageProps, PageParams>
 			pageProps={props}
 			viewedGroup={props.viewedGroup}
+			getParams={getSpeciesPageParams}
 			getCacheKeys={(params: PageParams) => ['species', params.speciesName]}
 			dataFetcher={fetchSpeciesPageContent}
 			PageComponent={SpeciesPageContent}

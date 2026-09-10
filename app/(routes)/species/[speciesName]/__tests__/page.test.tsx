@@ -82,9 +82,10 @@ function makeSpeciesClient() {
 	};
 }
 
-function renderSpeciesPage(speciesName = 'Robin') {
+function renderSpeciesPage(speciesName = 'Robin', tabId?: string) {
 	return Page({
-		params: Promise.resolve({ speciesName })
+		params: Promise.resolve({ speciesName }),
+		...(tabId === undefined ? {} : { searchParams: Promise.resolve({ tabId }) })
 	});
 }
 
@@ -223,6 +224,74 @@ describe('species detail page', () => {
 				expect(screen.queryByRole('button', { name: 'Graphs' })).toBeNull();
 				fireEvent.click(screen.getByRole('button', { name: 'Population' }));
 				await screen.findByTestId('sp-graphs-tab');
+			});
+		});
+
+		describe('?tabId= query param (#803)', () => {
+			it('with no tabId search param, the existing route-depth default tab renders and loads unchanged', async () => {
+				render(await renderSpeciesPage('Robin'));
+				await screen.findByTestId('sp-year-totals-tab');
+				expect(
+					screen
+						.getByRole('button', { name: 'Year totals' })
+						.getAttribute('aria-current')
+				).toBe('true');
+			});
+
+			it('?tabId=biometrics focuses the Biometrics tab and renders SpBiometricsTab without a click', async () => {
+				render(await renderSpeciesPage('Robin', 'biometrics'));
+				await screen.findByTestId('sp-biometrics-tab');
+				expect(
+					screen
+						.getByRole('button', { name: 'Biometrics' })
+						.getAttribute('aria-current')
+				).toBe('true');
+			});
+
+			it.each([
+				['year-totals', 'Year totals', 'sp-year-totals-tab'],
+				[
+					'all-time-month-totals',
+					'Month totals',
+					'sp-combined-month-totals-tab'
+				],
+				['session-totals', 'Session totals', 'sp-session-totals-tab'],
+				['highlights', 'Highlights', 'sp-busiest-sessions-tab'],
+				['biometrics', 'Biometrics', 'sp-biometrics-tab'],
+				['graphs', 'Population', 'sp-graphs-tab'],
+				['bird-list', 'Bird list', 'sp-individuals-tab']
+			])(
+				'?tabId=%s selects the %s tab and loads its data without a click',
+				async (tabId, buttonName, testId) => {
+					render(await renderSpeciesPage('Robin', tabId));
+					await screen.findByTestId(testId);
+					expect(
+						screen
+							.getByRole('button', { name: buttonName })
+							.getAttribute('aria-current')
+					).toBe('true');
+				}
+			);
+
+			it('?tabId=not-a-real-tab falls back to the route-depth default, with no crash and no blank pane', async () => {
+				render(await renderSpeciesPage('Robin', 'not-a-real-tab'));
+				await screen.findByTestId('sp-year-totals-tab');
+				expect(
+					screen
+						.getByRole('button', { name: 'Year totals' })
+						.getAttribute('aria-current')
+				).toBe('true');
+			});
+
+			it("?tabId=bird-list wins over the all-time route's Year totals default", async () => {
+				render(await renderSpeciesPage('Robin', 'bird-list'));
+				await screen.findByTestId('sp-individuals-tab');
+				expect(screen.queryByTestId('sp-year-totals-tab')).toBeNull();
+				expect(
+					screen
+						.getByRole('button', { name: 'Bird list' })
+						.getAttribute('aria-current')
+				).toBe('true');
 			});
 		});
 	});
