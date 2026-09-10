@@ -6,28 +6,33 @@ import {
 	toThisYearSeries,
 	yearColors,
 	thisYearColors,
+	normalizeSeriesByEffort,
 	YearComparisonTrendChart
 } from '../YearComparisonTrendChart';
 
 // chartkick registers Chart.js as a side effect; the chart itself is mocked so
-// no real canvas renders. The mock surfaces its `data`/`xtitle`/`colors` props so
-// tests can assert what each chart was handed.
+// no real canvas renders. The mock surfaces its `data`/`xtitle`/`ytitle`/`colors`
+// props so tests can assert what each chart was handed.
 vi.mock('chartkick/chart.js', () => ({}));
 vi.mock('react-chartkick', () => ({
 	LineChart: ({
 		data,
 		xtitle,
+		ytitle,
 		colors
 	}: {
 		data: LineChartData[];
 		xtitle: string;
+		ytitle: string;
 		colors?: string[];
 	}) => (
 		<div
 			data-testid="line-chart"
 			data-xtitle={xtitle}
+			data-ytitle={ytitle}
 			data-colors={JSON.stringify(colors)}
 			data-series={JSON.stringify(data.map((series) => series.name))}
+			data-values={JSON.stringify(data.map((series) => series.data))}
 		/>
 	)
 }));
@@ -317,6 +322,54 @@ describe('thisYearColors', () => {
 	});
 });
 
+describe('normalizeSeriesByEffort', () => {
+	const effortHistory: LineChartData = {
+		name: 'effort',
+		data: [
+			['2023-01-01', 4],
+			['2024-01-01', 0]
+		]
+	};
+
+	describe('Usual: dividing metric values by effort hours', () => {
+		it("divides each metric's values by the matching date's effort hours", () => {
+			const series: LineChartData[] = [
+				{ name: 'encounters', data: [['2023-01-01', 8]] }
+			];
+			const [result] = normalizeSeriesByEffort(series, effortHistory);
+			expect(result.data).toEqual([['2023-01-01', 2]]);
+		});
+	});
+
+	describe('Structure: gaps stay gaps', () => {
+		it('leaves null values as null rather than dividing them into 0', () => {
+			const series: LineChartData[] = [
+				{ name: 'encounters', data: [['2023-01-01', null]] }
+			];
+			const [result] = normalizeSeriesByEffort(series, effortHistory);
+			expect(result.data).toEqual([['2023-01-01', null]]);
+		});
+	});
+
+	describe('Edge: zero or missing effort hours', () => {
+		it('maps a date with 0 effort hours to 0, not NaN/Infinity', () => {
+			const series: LineChartData[] = [
+				{ name: 'encounters', data: [['2024-01-01', 8]] }
+			];
+			const [result] = normalizeSeriesByEffort(series, effortHistory);
+			expect(result.data).toEqual([['2024-01-01', 0]]);
+		});
+
+		it('maps a date absent from effortHistory to 0, not NaN/undefined', () => {
+			const series: LineChartData[] = [
+				{ name: 'encounters', data: [['2025-06-01', 8]] }
+			];
+			const [result] = normalizeSeriesByEffort(series, effortHistory);
+			expect(result.data).toEqual([['2025-06-01', 0]]);
+		});
+	});
+});
+
 describe('YearComparisonTrendChart', () => {
 	afterEach(cleanup);
 
@@ -336,6 +389,25 @@ describe('YearComparisonTrendChart', () => {
 			]
 		}
 	];
+
+	// A single metric with known effort hours per date, so the divided value
+	// is easy to compute by hand: 2023 → 4/2=2, 2024 → 8/4=2.
+	const normSeries: LineChartData[] = [
+		{
+			name: 'encounters',
+			data: [
+				['2023-01-01', 4],
+				['2024-01-01', 8]
+			]
+		}
+	];
+	const normEffort: LineChartData = {
+		name: 'effort',
+		data: [
+			['2023-01-01', 2],
+			['2024-01-01', 4]
+		]
+	};
 
 	describe('Usual: default all-time view', () => {
 		it('renders a single chart of every metric across the full timeline', () => {
@@ -385,6 +457,237 @@ describe('YearComparisonTrendChart', () => {
 			fireEvent.click(screen.getByRole('radio', { name: 'Compare years' }));
 			fireEvent.click(screen.getByRole('radio', { name: 'All time' }));
 			expect(screen.getAllByTestId('line-chart')).toHaveLength(1);
+		});
+	});
+
+	describe('Usual: normalize toggle visibility', () => {
+		it('renders no Normalize toggle when effortHistory is not passed', () => {
+			render(<YearComparisonTrendChart series={series} />);
+			expect(screen.queryByText('Normalize')).toBeNull();
+		});
+
+		it('renders the Normalize toggle, defaulting to No, when effortHistory is passed', () => {
+			render(
+				<YearComparisonTrendChart series={series} effortHistory={normEffort} />
+			);
+			expect(screen.getByText('Normalize')).toBeTruthy();
+			const no = screen.getByRole('radio', {
+				name: 'No'
+			}) as HTMLInputElement;
+			const yes = screen.getByRole('radio', {
+				name: 'Yes'
+			}) as HTMLInputElement;
+			expect(no.checked).toBe(true);
+			expect(yes.checked).toBe(false);
+		});
+	});
+
+	describe('Usual: compareYearsUrl swaps the switcher', () => {
+		it('renders a Compare years link with the correct href and hides the mode radios', () => {
+			render(
+				<YearComparisonTrendChart
+					series={series}
+					compareYearsUrl="/group/alpha/species/robin/compare-years"
+				/>
+			);
+			const link = screen.getByRole('link', { name: 'Compare years' });
+			expect(link.getAttribute('href')).toBe(
+				'/group/alpha/species/robin/compare-years'
+			);
+			expect(screen.queryByRole('radio', { name: 'All time' })).toBeNull();
+			expect(screen.queryByRole('radio', { name: 'Compare years' })).toBeNull();
+			expect(screen.queryByRole('radio', { name: 'This year' })).toBeNull();
+		});
+
+		it('still renders exactly one all-time chart when compareYearsUrl is passed', () => {
+			render(
+				<YearComparisonTrendChart series={series} compareYearsUrl="/compare" />
+			);
+			const charts = screen.getAllByTestId('line-chart');
+			expect(charts).toHaveLength(1);
+			expect(charts[0].dataset.xtitle).toBe('Year');
+		});
+	});
+
+	describe('Structure: mode x normalize combinations', () => {
+		it('all-time mode, normalize off: chart values match raw series, ytitle unchanged', () => {
+			render(
+				<YearComparisonTrendChart
+					series={normSeries}
+					ytitle="Count"
+					effortHistory={normEffort}
+				/>
+			);
+			const [chart] = screen.getAllByTestId('line-chart');
+			expect(JSON.parse(chart.dataset.values!)).toEqual([normSeries[0].data]);
+			expect(chart.dataset.ytitle).toBe('Count');
+		});
+
+		it('all-time mode, normalize on: chart values match value/effortHours per date; ytitle updated', () => {
+			render(
+				<YearComparisonTrendChart
+					series={normSeries}
+					ytitle="Count"
+					effortHistory={normEffort}
+				/>
+			);
+			fireEvent.click(screen.getByRole('radio', { name: 'Yes' }));
+			const [chart] = screen.getAllByTestId('line-chart');
+			expect(JSON.parse(chart.dataset.values!)).toEqual([
+				[
+					['2023-01-01', 2],
+					['2024-01-01', 2]
+				]
+			]);
+			expect(chart.dataset.ytitle).toBe('Count per hour');
+		});
+
+		it('compare-years mode, normalize off: per-year series values match raw series', () => {
+			render(
+				<YearComparisonTrendChart
+					series={normSeries}
+					effortHistory={normEffort}
+				/>
+			);
+			fireEvent.click(screen.getByRole('radio', { name: 'Compare years' }));
+			const [chart] = screen.getAllByTestId('line-chart');
+			const [year2023] = JSON.parse(chart.dataset.values!);
+			expect(year2023[0]).toEqual(['Jan', 4]);
+		});
+
+		it('compare-years mode, normalize on: per-year series values reflect normalized series; ytitle updated on each per-metric chart', () => {
+			render(
+				<YearComparisonTrendChart
+					series={normSeries}
+					ytitle="Count"
+					effortHistory={normEffort}
+				/>
+			);
+			fireEvent.click(screen.getByRole('radio', { name: 'Compare years' }));
+			fireEvent.click(screen.getByRole('radio', { name: 'Yes' }));
+			const [chart] = screen.getAllByTestId('line-chart');
+			const [year2023] = JSON.parse(chart.dataset.values!);
+			expect(year2023[0]).toEqual(['Jan', 2]);
+			expect(chart.dataset.ytitle).toBe('Count per hour');
+		});
+
+		it('this-year mode, normalize off: current-year/median/band values match raw series', () => {
+			render(
+				<YearComparisonTrendChart
+					series={normSeries}
+					effortHistory={normEffort}
+				/>
+			);
+			fireEvent.click(screen.getByRole('radio', { name: 'This year' }));
+			const [chart] = screen.getAllByTestId('line-chart');
+			const [max, min, median] = JSON.parse(chart.dataset.values!);
+			expect(max[0]).toEqual(['Jan', 8]);
+			expect(min[0]).toEqual(['Jan', 4]);
+			expect(median[0]).toEqual(['Jan', 6]);
+		});
+
+		it('this-year mode, normalize on: current-year/median/band values reflect normalized series; ytitle updated', () => {
+			render(
+				<YearComparisonTrendChart
+					series={normSeries}
+					ytitle="Count"
+					effortHistory={normEffort}
+				/>
+			);
+			fireEvent.click(screen.getByRole('radio', { name: 'This year' }));
+			fireEvent.click(screen.getByRole('radio', { name: 'Yes' }));
+			const [chart] = screen.getAllByTestId('line-chart');
+			const [max, min, median] = JSON.parse(chart.dataset.values!);
+			expect(max[0]).toEqual(['Jan', 2]);
+			expect(min[0]).toEqual(['Jan', 2]);
+			expect(median[0]).toEqual(['Jan', 2]);
+			expect(chart.dataset.ytitle).toBe('Count per hour');
+		});
+	});
+
+	describe('Edge: division correctness across periods', () => {
+		it('renders 0 (not NaN/blank) for a period with 0 effort hours', () => {
+			const zeroEffortSeries: LineChartData[] = [
+				{ name: 'encounters', data: [['2024-01-01', 8]] }
+			];
+			const zeroEffortHistory: LineChartData = {
+				name: 'effort',
+				data: [['2024-01-01', 0]]
+			};
+			render(
+				<YearComparisonTrendChart
+					series={zeroEffortSeries}
+					effortHistory={zeroEffortHistory}
+				/>
+			);
+			fireEvent.click(screen.getByRole('radio', { name: 'Yes' }));
+			const [chart] = screen.getAllByTestId('line-chart');
+			expect(JSON.parse(chart.dataset.values!)).toEqual([[['2024-01-01', 0]]]);
+		});
+
+		it('renders 0 for a date in series missing from effortHistory, without throwing/NaN elsewhere', () => {
+			const partialSeries: LineChartData[] = [
+				{
+					name: 'encounters',
+					data: [
+						['2023-01-01', 4],
+						['2025-01-01', 8]
+					]
+				}
+			];
+			const partialEffort: LineChartData = {
+				name: 'effort',
+				data: [['2023-01-01', 2]]
+			};
+			render(
+				<YearComparisonTrendChart
+					series={partialSeries}
+					effortHistory={partialEffort}
+				/>
+			);
+			fireEvent.click(screen.getByRole('radio', { name: 'Yes' }));
+			const [chart] = screen.getAllByTestId('line-chart');
+			expect(JSON.parse(chart.dataset.values!)).toEqual([
+				[
+					['2023-01-01', 2],
+					['2025-01-01', 0]
+				]
+			]);
+		});
+	});
+
+	describe('Edge: both/neither props present', () => {
+		it('neither effortHistory nor compareYearsUrl passed: existing three-way toggle renders, no Normalize toggle, no Compare years link', () => {
+			render(<YearComparisonTrendChart series={series} />);
+			expect(screen.getByRole('radio', { name: 'All time' })).toBeTruthy();
+			expect(screen.getByRole('radio', { name: 'Compare years' })).toBeTruthy();
+			expect(screen.getByRole('radio', { name: 'This year' })).toBeTruthy();
+			expect(screen.queryByText('Normalize')).toBeNull();
+			expect(screen.queryByRole('link', { name: 'Compare years' })).toBeNull();
+		});
+
+		it('both effortHistory and compareYearsUrl passed: the Compare years link and Normalize toggle both render; toggling Normalize divides the single all-time chart, ytitle updates, and mode stays fixed at all-time', () => {
+			render(
+				<YearComparisonTrendChart
+					series={normSeries}
+					ytitle="Count"
+					effortHistory={normEffort}
+					compareYearsUrl="/compare"
+				/>
+			);
+			expect(screen.getByRole('link', { name: 'Compare years' })).toBeTruthy();
+			expect(screen.getByText('Normalize')).toBeTruthy();
+			fireEvent.click(screen.getByRole('radio', { name: 'Yes' }));
+			const charts = screen.getAllByTestId('line-chart');
+			expect(charts).toHaveLength(1);
+			expect(charts[0].dataset.xtitle).toBe('Year');
+			expect(JSON.parse(charts[0].dataset.values!)).toEqual([
+				[
+					['2023-01-01', 2],
+					['2024-01-01', 2]
+				]
+			]);
+			expect(charts[0].dataset.ytitle).toBe('Count per hour');
 		});
 	});
 });
