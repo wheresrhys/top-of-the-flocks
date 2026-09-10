@@ -1,10 +1,31 @@
-import { BootstrapPage } from '@/app/components/layout/BootstrapPage';
+import {
+	BootstrapPage,
+	defaultGetParams
+} from '@/app/components/layout/BootstrapPage';
 import { SpeciesPageContent, type PageData } from '../PageContent';
 import { fetchSpeciesPageContentForPeriod } from '@/app/(routes)/species/[speciesName]/page';
+import { readTabIdSearchParam } from '@/lib/tab-query-param';
 import type { ViewedGroup } from '@/lib/group-slug';
 
-export type PageParams = { speciesName: string; year: string };
-type PageProps = { params: Promise<PageParams> };
+export type PageParams = { speciesName: string; year: string; tabId?: string };
+type PageProps = {
+	params: Promise<{ speciesName: string; year: string }>;
+	searchParams?: Promise<{ tabId?: string }>;
+};
+
+// Merges the route's `speciesName`/`year` with the optional `?tabId=` search
+// param (#803) — see the bare species `page.tsx`'s `getSpeciesPageParams` for
+// the shared rationale.
+async function getSpeciesYearPageParams(
+	pageProps: PageProps
+): Promise<PageParams> {
+	const { speciesName, year } = await defaultGetParams<
+		PageProps,
+		{ speciesName: string; year: string }
+	>(pageProps);
+	const tabId = await readTabIdSearchParam(pageProps.searchParams);
+	return { speciesName, year, ...(tabId ? { tabId } : {}) };
+}
 
 export async function fetchSpeciesYearPageContent(
 	params: PageParams,
@@ -25,6 +46,7 @@ export default async function SpeciesYearPage(
 		<BootstrapPage<PageData, PageProps, PageParams>
 			pageProps={props}
 			viewedGroup={props.viewedGroup}
+			getParams={getSpeciesYearPageParams}
 			getCacheKeys={(params: PageParams) => [
 				'species',
 				params.speciesName,

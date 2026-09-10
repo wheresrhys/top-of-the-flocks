@@ -85,8 +85,11 @@ function makeSpeciesClient(
 	};
 }
 
-function renderYearPage(speciesName = 'Robin', year = '2026') {
-	return Page({ params: Promise.resolve({ speciesName, year }) });
+function renderYearPage(speciesName = 'Robin', year = '2026', tabId?: string) {
+	return Page({
+		params: Promise.resolve({ speciesName, year }),
+		...(tabId === undefined ? {} : { searchParams: Promise.resolve({ tabId }) })
+	});
 }
 
 describe('/species/[speciesName]/[year]', () => {
@@ -177,6 +180,49 @@ describe('/species/[speciesName]/[year]', () => {
 			expect(screen.queryByTestId('sp-session-totals-tab')).toBeNull();
 			fireEvent.click(screen.getByRole('button', { name: 'Session totals' }));
 			await screen.findByTestId('sp-session-totals-tab');
+		});
+	});
+
+	describe('?tabId= query param (#803)', () => {
+		beforeEach(() => {
+			mockGetAuthenticatedSupabaseClient.mockResolvedValue(makeSpeciesClient());
+			mockFetchPageOfBirds.mockResolvedValue(birds);
+		});
+
+		it('with no tabId search param, the year-scoped default (Month totals) renders unchanged', async () => {
+			render(await renderYearPage());
+			await screen.findByTestId('sp-month-totals-tab');
+			expect(
+				screen
+					.getByRole('button', { name: 'Month totals' })
+					.getAttribute('aria-current')
+			).toBe('true');
+		});
+
+		it('?tabId=month-totals selects the year-scoped Month totals tab', async () => {
+			render(await renderYearPage('Robin', '2026', 'month-totals'));
+			await screen.findByTestId('sp-month-totals-tab');
+			expect(
+				screen
+					.getByRole('button', { name: 'Month totals' })
+					.getAttribute('aria-current')
+			).toBe('true');
+		});
+
+		it('?tabId=bird-list wins over the year-scoped route’s Month totals default', async () => {
+			render(await renderYearPage('Robin', '2026', 'bird-list'));
+			await screen.findByTestId('sp-individuals-tab');
+			expect(screen.queryByTestId('sp-month-totals-tab')).toBeNull();
+		});
+
+		it('?tabId=not-a-real-tab falls back to the year-scoped default, with no crash and no blank pane', async () => {
+			render(await renderYearPage('Robin', '2026', 'not-a-real-tab'));
+			await screen.findByTestId('sp-month-totals-tab');
+			expect(
+				screen
+					.getByRole('button', { name: 'Month totals' })
+					.getAttribute('aria-current')
+			).toBe('true');
 		});
 	});
 

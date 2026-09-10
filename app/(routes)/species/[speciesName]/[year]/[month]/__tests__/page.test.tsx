@@ -75,8 +75,16 @@ function makeSpeciesClient(
 	};
 }
 
-function renderMonthPage(speciesName = 'Robin', year = '2026', month = '08') {
-	return Page({ params: Promise.resolve({ speciesName, year, month }) });
+function renderMonthPage(
+	speciesName = 'Robin',
+	year = '2026',
+	month = '08',
+	tabId?: string
+) {
+	return Page({
+		params: Promise.resolve({ speciesName, year, month }),
+		...(tabId === undefined ? {} : { searchParams: Promise.resolve({ tabId }) })
+	});
 }
 
 describe('/species/[speciesName]/[year]/[month]', () => {
@@ -166,6 +174,44 @@ describe('/species/[speciesName]/[year]/[month]', () => {
 				fireEvent.click(screen.getByRole('button', { name: 'Bird list' }));
 				await screen.findByTestId('sp-individuals-tab');
 			});
+		});
+	});
+
+	describe('?tabId= query param (#803)', () => {
+		beforeEach(() => {
+			mockGetAuthenticatedSupabaseClient.mockResolvedValue(makeSpeciesClient());
+			mockFetchPageOfBirds.mockResolvedValue(birds);
+		});
+
+		it('with no tabId search param, the month-scoped default (Session totals) renders unchanged', async () => {
+			render(await renderMonthPage());
+			await screen.findByTestId('sp-session-totals-tab');
+			expect(
+				screen
+					.getByRole('button', { name: 'Session totals' })
+					.getAttribute('aria-current')
+			).toBe('true');
+		});
+
+		it('?tabId=bird-list wins over the month-scoped route’s Session totals default', async () => {
+			render(await renderMonthPage('Robin', '2026', '08', 'bird-list'));
+			await screen.findByTestId('sp-individuals-tab');
+			expect(screen.queryByTestId('sp-session-totals-tab')).toBeNull();
+			expect(
+				screen
+					.getByRole('button', { name: 'Bird list' })
+					.getAttribute('aria-current')
+			).toBe('true');
+		});
+
+		it('?tabId=not-a-real-tab falls back to the month-scoped default, with no crash and no blank pane', async () => {
+			render(await renderMonthPage('Robin', '2026', '08', 'not-a-real-tab'));
+			await screen.findByTestId('sp-session-totals-tab');
+			expect(
+				screen
+					.getByRole('button', { name: 'Session totals' })
+					.getAttribute('aria-current')
+			).toBe('true');
 		});
 	});
 
