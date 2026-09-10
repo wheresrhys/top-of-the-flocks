@@ -632,6 +632,12 @@ export type Database = {
         avg_wing: number | null
         min_wing: number | null
         median_wing: number | null
+        first_summer_bird_count: number | null
+        new_adult_bird_count: number | null
+        new_postjuv_enc_count: number | null
+        new_postjuv_juv_enc_count: number | null
+        oldies_bird_count: number | null
+        postjuv_juv_enc_count: number | null
       }
       top_metrics_filter_params: {
         month_filter: number | null
